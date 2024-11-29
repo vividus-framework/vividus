@@ -18,8 +18,6 @@ package org.vividus.reporter.model;
 
 import java.net.URLConnection;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 public class Attachment
 {
     private final byte[] content;
@@ -28,7 +26,7 @@ public class Attachment
 
     public Attachment(byte[] content, String title, String contentType)
     {
-        this.content = ArrayUtils.clone(content);
+        this.content = content;
         this.title = title;
         this.contentType = contentType;
     }
@@ -45,7 +43,7 @@ public class Attachment
 
     public byte[] getContent()
     {
-        return ArrayUtils.clone(content);
+        return content;
     }
 
     public String getTitle()

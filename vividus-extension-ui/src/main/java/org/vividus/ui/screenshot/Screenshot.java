@@ -23,7 +23,7 @@ public class Screenshot
 
     public Screenshot(String fileName, byte[] data)
     {
-        this.data = data.clone();
+        this.data = data;
         this.fileName = fileName;
     }
 
@@ -34,6 +34,6 @@ public class Screenshot
 
     public byte[] getData()
     {
-        return data.clone();
+        return data;
     }
 }
