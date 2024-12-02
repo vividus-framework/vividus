@@ -606,7 +606,7 @@ jobs:
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="BrowserStack iOS System tests report" \
-                                                  -Pvividus.variables.app-url=bs://444bd0308813ae0dc236f8cd461c02d3afa7901d \
+                                                  -Pvividus.variables.app-url=bs://0a9c4e8ad122abb9951dc5cf4f735eecbd4b1264 \
                                                   -Pvividus.notifications.base.comment="VIVIDUS CI - BrowserStack iOS System Tests" \
                                                   -Pvividus.notifications.base.report-link=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.notifications.base.project=vividus-tests \
