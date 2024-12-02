@@ -223,6 +223,7 @@ class ResourceCheckStepsTests
     @Test
     void shouldCheckDesiredResourcesAndPostAttachment() throws InterruptedException, ExecutionException
     {
+        mockValidator();
         runExecutor();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
@@ -333,6 +334,7 @@ class ResourceCheckStepsTests
     @Test
     void shouldCheckResourcesFromPages() throws IOException, InterruptedException, ExecutionException
     {
+        mockValidator();
         runExecutor();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
@@ -382,6 +384,7 @@ class ResourceCheckStepsTests
     @Test
     void shouldCheckResourcesFromPagesWithEmptyResource() throws IOException, InterruptedException, ExecutionException
     {
+        mockValidator();
         runExecutor();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
@@ -541,6 +544,7 @@ class ResourceCheckStepsTests
     void shouldFilterResourceByRegExpCheckDesiredResourcesAnPostAttachment()
             throws InterruptedException, ExecutionException
     {
+        mockValidator();
         runExecutor();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.of("(?!https).*"));
         resourceCheckSteps.init();
@@ -607,6 +611,16 @@ class ResourceCheckStepsTests
             r.run();
             return true;
         }), any());
+    }
+
+    private void mockValidator()
+    {
+        doAnswer(a ->
+        {
+            WebPageResourceValidation r = a.getArgument(0);
+            r.setCheckStatus(CheckStatus.PASSED);
+            return r;
+        }).when(resourceValidator).perform(any());
     }
 
     private void validate(Iterator<WebPageResourceValidation> toValidate, URI uri, String selector,

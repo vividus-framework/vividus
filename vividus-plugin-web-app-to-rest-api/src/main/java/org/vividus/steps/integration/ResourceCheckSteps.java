@@ -200,7 +200,7 @@ public class ResourceCheckSteps
             }
 
             URI encodedUri = UriUtils.createUri(uriToValidate.toString());
-            return createValidation(encodedUri, elementCssSelector, CheckStatus.PASSED);
+            return createValidation(encodedUri, elementCssSelector, null);
         }
         catch (URISyntaxException e)
         {
