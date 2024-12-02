@@ -27,3 +27,6 @@ When the condition `true` is true I do
 
 Composite: When I execute failing composite step
 Then `true` is equal to `false`
+
+Composite: Given I initialize $scopes variable `$variableName` with value `$variableValue` inside composite step
+Given I initialize <scopes> variable `<variableName>` with value `<variableValue>`

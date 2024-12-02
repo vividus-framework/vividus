@@ -104,5 +104,12 @@
     "scenarioPattern": "Verify step: 'Then element located by `.+` appears in `.+`'",
     "storyPattern": "WaitStepsTests",
     "stepPattern": "Then element located by `.+` appears in `.+`"
+  },
+  "VVD-16": {
+    "type": "Internal",
+    "assertionPattern": ".*\\[Expected: \"failure\" Actual: was \"invoke\"\\]",
+    "scenarioPattern": "Verify that composite step works correctly.*",
+    "storyPattern": "LifecycleAfterStoryCompositeSteps",
+    "stepPattern": "Then `invoke` is equal to `failure`"
   }
 }
