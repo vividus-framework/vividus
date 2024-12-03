@@ -52,7 +52,7 @@ public class HttpRequestSteps
     /**
      * Step implemented to reuse browser cookies for HTTP client executed requests.
      * Steps performed:
-     *   - Set's browser cookies into API context
+     *   - Set's browser cookies into HTTP context
      */
     @When("I set browser cookies to HTTP context")
     public void executeRequestUsingBrowserCookies()
@@ -67,14 +67,14 @@ public class HttpRequestSteps
      * Step implemented to reuse HTTP client requests cookies in the browser.
      * <p>The actions performed by the step:</p>
      * <ul>
-     * <li>set's API context cookies into browser;</li>
+     * <li>sets HTTP context cookies into browser;</li>
      * <li>refresh the current page (this action is required to apply the changes in cookies).</li>
      * </ul>
      */
     @When("I set HTTP context cookies to browser")
-    public void setApiCookiesToBrowser()
+    public void setHttpCookiesToBrowser()
     {
-        setApiCookiesToBrowserWithoutApply();
+        setHttpCookiesToBrowserWithoutApply();
         navigateActions.refresh();
     }
 
@@ -83,7 +83,7 @@ public class HttpRequestSteps
      * The current page must be refreshed or the navigation must be performed to apply the cookie changes.
      */
     @When("I set HTTP context cookies to browser without applying changes")
-    public void setApiCookiesToBrowserWithoutApply()
+    public void setHttpCookiesToBrowserWithoutApply()
     {
         List<org.apache.hc.client5.http.cookie.Cookie> cookies = cookieStoreProvider.getCookieStore().getCookies();
         attachmentPublisher.publishAttachment(ATTACHMENT_TEMPLATE_PATH,

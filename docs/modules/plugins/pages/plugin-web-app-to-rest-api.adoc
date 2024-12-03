@@ -496,8 +496,8 @@ When I execute HTTP GET request for resource with relative URL `/get`
 
 ==== Set HTTP cookies to the browser
 
-Set current cookies from the previous API calls to the browser.
-Make sure that expected cookies from API calls matches with web browser opened page domain.
+Set current cookies from the previous HTTP calls to the browser.
+Make sure that expected cookies from HTTP calls matches with web browser opened page domain.
 The actions performed by the step:
 
 * add the cookies;
@@ -518,9 +518,9 @@ When I set HTTP context cookies to browser
 
 ==== Set HTTP cookies to the browser without applying changes
 
-Set current cookies from the previous API calls to the browser, but does not apply the changes in cookies instantly.
+Set current cookies from the previous HTTP calls to the browser, but does not apply the changes in cookies instantly.
 The current page must be refreshed or the navigation must be performed to apply the cookie changes.
-Make sure that expected cookies from API calls matches with web browser opened page domain.
+Make sure that expected cookies from HTTP calls matches with web browser opened page domain.
 
 [source,gherkin]
 ----

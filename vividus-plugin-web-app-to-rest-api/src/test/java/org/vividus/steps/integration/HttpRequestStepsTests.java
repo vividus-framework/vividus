@@ -93,7 +93,7 @@ class HttpRequestStepsTests
         BasicClientCookie cookie1 = new BasicClientCookie("api_key", "api_value");
         BasicClientCookie cookie2 = new BasicClientCookie("api_key1", "api_value1");
         when(cookieStore.getCookies()).thenReturn(List.of(cookie1, cookie2));
-        httpRequestSteps.setApiCookiesToBrowser();
+        httpRequestSteps.setHttpCookiesToBrowser();
         verify(cookieManager).addHttpClientCookie(cookie1);
         verify(cookieManager).addHttpClientCookie(cookie2);
         var cookiesCaptor = ArgumentCaptor.forClass(Map.class);
