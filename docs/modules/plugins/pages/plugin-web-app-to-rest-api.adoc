@@ -479,7 +479,7 @@ Then SSL rating for URL `https://www.google.com` is equal to `B`
 
 ==== Set browser cookies to the HTTP context
 
-Set current browser cookies to the HTTP client for future executing API requests
+Set current browser cookies to the HTTP client for future executing HTTP requests.
 
 [source,gherkin]
 ----
