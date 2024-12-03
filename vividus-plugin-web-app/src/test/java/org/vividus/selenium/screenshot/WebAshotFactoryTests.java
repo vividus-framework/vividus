@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,8 +94,10 @@ class WebAshotFactoryTests
         var aShot = factory.create(Optional.of(screenshotParameters));
         validateCoordsProvider(aShot);
         var baseStrategy = (ShootingStrategy) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
-        var shootingStrategy = (ShootingStrategy) FieldUtils.readField(baseStrategy, SHOOTING_STRATEGY, true);
-        assertThat(baseStrategy, instanceOf(ElementCroppingDecorator.class));
+        assertThat(baseStrategy, instanceOf(ScalingDecorator.class));
+        var croppingDecorator = (ShootingStrategy) FieldUtils.readField(baseStrategy, SHOOTING_STRATEGY, true);
+        assertThat(croppingDecorator, instanceOf(ElementCroppingDecorator.class));
+        var shootingStrategy = (ShootingStrategy) FieldUtils.readField(croppingDecorator, SHOOTING_STRATEGY, true);
         assertThat(shootingStrategy, instanceOf(ScrollbarHidingDecorator.class));
         assertThat(FieldUtils.readField(shootingStrategy, SHOOTING_STRATEGY, true),
                 instanceOf(DebuggingViewportPastingDecorator.class));
@@ -116,7 +118,9 @@ class WebAshotFactoryTests
     @Test
     void shouldCreateAshotWithCuttingStrategiesForNativeWebHeadersFooters() throws IllegalAccessException
     {
+        var scalingFactor = 1.25F;
         var screenshotParameters = new WebScreenshotParameters();
+        screenshotParameters.setScaleFactor(scalingFactor);
         screenshotParameters.setNativeFooterToCut(TEN);
         var webCutOptions = new WebCutOptions(TEN, TEN);
         screenshotParameters.setWebCutOptions(webCutOptions);
@@ -130,9 +134,13 @@ class WebAshotFactoryTests
 
         validateCoordsProvider(aShot);
         var baseStrategy = getShootingStrategy(aShot);
-        assertThat(baseStrategy, is(instanceOf(ElementCroppingDecorator.class)));
+        assertThat(baseStrategy, is(instanceOf(ScalingDecorator.class)));
+        verifyDPR(scalingFactor, baseStrategy);
 
-        var scrollbarHidingDecorator = (ShootingStrategy) FieldUtils.readField(baseStrategy,
+        var croppingDecorator = getShootingStrategy(baseStrategy);
+        assertThat(croppingDecorator, is(instanceOf(ElementCroppingDecorator.class)));
+
+        var scrollbarHidingDecorator = (ShootingStrategy) FieldUtils.readField(croppingDecorator,
                 SHOOTING_STRATEGY, true);
         assertThat(scrollbarHidingDecorator, is(instanceOf(ScrollbarHidingDecorator.class)));
 
@@ -149,13 +157,13 @@ class WebAshotFactoryTests
 
         var scalingDecorator = getShootingStrategy(nativeCuttingDecorator);
         assertThat(scalingDecorator, is(instanceOf(ScalingDecorator.class)));
-        verifyDPR(scalingDecorator);
+        verifyDPR(2f, scalingDecorator);
     }
 
-    private void verifyDPR(ShootingStrategy scalingDecorator) throws IllegalAccessException
+    private void verifyDPR(float dpr, ShootingStrategy scalingDecorator) throws IllegalAccessException
     {
-        assertEquals(2f, (float) FieldUtils.readField(scalingDecorator, "dprX", true));
-        assertEquals(2f, (float) FieldUtils.readField(scalingDecorator, "dprY", true));
+        assertEquals(dpr, (float) FieldUtils.readField(scalingDecorator, "dprX", true));
+        assertEquals(dpr, (float) FieldUtils.readField(scalingDecorator, "dprY", true));
     }
 
     @Test
@@ -174,9 +182,13 @@ class WebAshotFactoryTests
 
         validateCoordsProvider(aShot);
         var decorator = getShootingStrategy(aShot);
-        assertThat(decorator, is(instanceOf(ElementCroppingDecorator.class)));
+        assertThat(decorator, is(instanceOf(ScalingDecorator.class)));
 
-        var scrollbarHidingDecorator = (ShootingStrategy) FieldUtils.readField(decorator,
+        var croppingDecorator = (ShootingStrategy) FieldUtils.readField(decorator,
+                SHOOTING_STRATEGY, true);
+        assertThat(croppingDecorator, is(instanceOf(ElementCroppingDecorator.class)));
+
+        var scrollbarHidingDecorator = (ShootingStrategy) FieldUtils.readField(croppingDecorator,
                 SHOOTING_STRATEGY, true);
         assertThat(scrollbarHidingDecorator, is(instanceOf(ScrollbarHidingDecorator.class)));
 
@@ -189,7 +201,7 @@ class WebAshotFactoryTests
 
         var scalingDecorator = getShootingStrategy(scrollableElementAwareDecorator);
         assertThat(scalingDecorator, is(instanceOf(ScalingDecorator.class)));
-        verifyDPR(scalingDecorator);
+        verifyDPR(2f, scalingDecorator);
     }
 
     private void validateCoordsProvider(AShot aShot) throws IllegalAccessException

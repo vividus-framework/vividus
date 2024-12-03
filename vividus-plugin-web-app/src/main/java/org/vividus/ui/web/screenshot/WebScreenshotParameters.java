@@ -32,6 +32,8 @@ public class WebScreenshotParameters extends ScreenshotParameters
     private Optional<WebElement> scrollableElement = Optional.empty();
     private CoordsProviderType coordsProvider;
     private Duration scrollTimeout;
+    // Scaling factor of 1 means no scaling of the image
+    private float scaleFactor = 1F;
 
     public int getMaxHeight()
     {
@@ -101,5 +103,15 @@ public class WebScreenshotParameters extends ScreenshotParameters
     public void setNativeFooterToCut(int nativeFooterToCut)
     {
         this.nativeFooterToCut = nativeFooterToCut;
+    }
+
+    public float getScaleFactor()
+    {
+        return scaleFactor;
+    }
+
+    public void setScaleFactor(float scaleFactor)
+    {
+        this.scaleFactor = scaleFactor;
     }
 }
