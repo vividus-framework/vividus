@@ -61,7 +61,8 @@ public class SourceCodePublishingOnFailureListener
     private void publishSource(String title, String source)
     {
         attachmentPublisher.publishAttachment("/templates/source-code.ftl",
-            Map.of("sourceCode", source, "format", sourceCodeAttachmentFormat), title);
+                Map.of("sourceCode", source, "format", sourceCodeAttachmentFormat),
+                title + "." + sourceCodeAttachmentFormat);
     }
 
     public void setSourceCodeAttachmentFormat(String sourceCodeAttachmentFormat)

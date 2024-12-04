@@ -15,7 +15,7 @@
     </style>
 
     <div id="pretty" class="tab-pane">
-    <#if format == "HTML">
+    <#if format == "html">
         <pre><code id = "pretty-code" class="html"><#outputformat "HTML">${sourceCode}</#outputformat></code></pre>
     <#else>
         <pre><code id = "pretty-code" class="xml"><#outputformat "XML">${sourceCode}</#outputformat></code></pre>
@@ -27,7 +27,7 @@
     <script type="text/javascript">
         (function() {
             let code = document.querySelector('#pretty-code');
-            let format = "HTML" === "${format}"
+            let format = "html" === "${format}"
             if (format) {
                 <#include "html-formatter-fragment.ftl">
             }
