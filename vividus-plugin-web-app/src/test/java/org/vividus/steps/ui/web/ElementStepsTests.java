@@ -17,8 +17,6 @@
 package org.vividus.steps.ui.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
@@ -36,10 +34,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,11 +47,9 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
-import org.vividus.context.VariableContext;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.manager.WebDriverManager;
-import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.steps.ui.web.validation.IElementValidations;
@@ -64,25 +58,16 @@ import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.ResourceFileLoader;
-import org.vividus.ui.web.action.WebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.validation.ScrollValidations;
-import org.vividus.variable.VariableScope;
 
-@SuppressWarnings({ "checkstyle:MethodCount", "PMD.UnnecessaryBooleanAssertion", "PMD.CouplingBetweenObjects" })
+@SuppressWarnings({ "PMD.UnnecessaryBooleanAssertion", "PMD.CouplingBetweenObjects" })
 @ExtendWith(MockitoExtension.class)
 class ElementStepsTests
 {
     private static final String PARENT_ELEMENT_HAS_CHILD = "Parent element has number of child elements which";
     private static final String AN_ELEMENT = "An element";
     private static final String FILE_FILE_PATH_EXISTS = "File filePath exists";
-    private static final String ELEMENT_HAS_CORRECT_CSS_PROPERTY_VALUE = "Element has correct css property value";
-    private static final String CSS_PROPERTY_VALUE_PART_IS_CORRECT = "Css property value part is correct";
-    private static final String CSS_PART_VALUE = "Value";
-    private static final String CSS_VALUE = "cssValue";
-    private static final String CSS_NAME = "cssName";
-    private static final String ELEMENT_HAS_CSS_PROPERTY_CONTAINING_VALUE =
-            "Element has CSS property '" + CSS_NAME + "' containing value '" + CSS_PART_VALUE + "'";
     private static final String XPATH = ".//xpath";
     private static final String TEXT = "text";
     private static final String FILE_PATH = "filePath";
@@ -97,22 +82,15 @@ class ElementStepsTests
     private static final String PARENT_ELEMENT_XPATH = "./..";
     private static final String JAR_ARCHIVE_FILE_TXT = "jar:file:/D:/archive.jar!/file.txt";
     private static final String FILE_INPUT_ELEMENT = "A file input element";
-    private static final String VARIABLE_NAME = "variableName";
-    private static final String ELEMENT_WITH_CSS_PROPERTY = "The element to get the CSS property value";
-    private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
     private static final String ELEMENT_TO_CHECK = "Element to check";
-    private static final String ELEMENT_IN_VIEWPORT = "Element is in viewport";
-    private static final String ELEMENT_NOT_IN_VIEWPORT = "Element is not in viewport";
 
     @Mock private IBaseValidations baseValidations;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private WebDriverManager webDriverManager;
     @Mock private IElementValidations elementValidations;
     @Mock private IUiContext uiContext;
-    @Mock private WebElementActions webElementActions;
     @Mock private WebElement webElement;
     @Mock private IDescriptiveSoftAssert softAssert;
-    @Mock private VariableContext variableContext;
     @Mock private ResourceFileLoader resourceFileLoader;
     @Mock private ScrollValidations<WebElement> scrollValidations;
     @InjectMocks private ElementSteps elementSteps;
@@ -152,41 +130,6 @@ class ElementStepsTests
                 PARENT_ELEMENT_XPATH))).thenReturn(Optional.of(webElement));
         elementSteps.elementHasWidthRelativeToParentElement(width);
         verify(elementValidations).assertIfElementHasWidthInPerc(webElement, webElement, width);
-    }
-
-    @Test
-    void testIsElementHasRightCss()
-    {
-        mockWebElementCssValue();
-        elementSteps.doesElementHaveRightCss(CSS_NAME, CSS_VALUE);
-        verify(softAssert).assertEquals(ELEMENT_HAS_CORRECT_CSS_PROPERTY_VALUE, CSS_VALUE, CSS_VALUE);
-    }
-
-    @Test
-    void testIsNullElementHasRightCss()
-    {
-        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.empty());
-        elementSteps.doesElementHaveRightCss(CSS_NAME, CSS_VALUE);
-        verifyNoInteractions(webElementActions, softAssert);
-    }
-
-    @Test
-    void testIsElementHasRightCssPart()
-    {
-        mockWebElementCssValue();
-        elementSteps.doesElementHaveRightPartOfCssValue(CSS_NAME, CSS_PART_VALUE);
-        verify(softAssert).assertThat(eq(CSS_PROPERTY_VALUE_PART_IS_CORRECT),
-                eq(ELEMENT_HAS_CSS_PROPERTY_CONTAINING_VALUE), eq(CSS_VALUE),
-                argThat(matcher -> matcher.toString().contains(CSS_PART_VALUE)));
-    }
-
-    @Test
-    void testDoesElementHasRightCss()
-    {
-        mockWebElementCssValue();
-        elementSteps.doesElementHaveRightCss(CSS_NAME, StringComparisonRule.CONTAINS, CSS_PART_VALUE);
-        verify(softAssert).assertThat(eq("Element css property value is"), eq(CSS_VALUE),
-                argThat(matcher -> matcher.toString().contains(CSS_PART_VALUE)));
     }
 
     @Test
@@ -381,44 +324,6 @@ class ElementStepsTests
     }
 
     @Test
-    void shouldSaveCssPropertyValue()
-    {
-        var locator = mock(Locator.class);
-        var webElement = mock(WebElement.class);
-        when(baseValidations.assertElementExists(ELEMENT_WITH_CSS_PROPERTY, locator))
-                .thenReturn(Optional.of(webElement));
-        when(webElementActions.getCssValue(webElement, CSS_NAME)).thenReturn(CSS_VALUE);
-
-        elementSteps.saveCssPropertyValue(CSS_NAME, locator, VARIABLE_SCOPE, VARIABLE_NAME);
-        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, CSS_VALUE);
-        verifyNoInteractions(softAssert);
-    }
-
-    @Test
-    void shouldNotSaveCssPropertyValueIfTheValueIsNotFound()
-    {
-        var locator = mock(Locator.class);
-        var webElement = mock(WebElement.class);
-        when(baseValidations.assertElementExists(ELEMENT_WITH_CSS_PROPERTY, locator))
-                .thenReturn(Optional.of(webElement));
-        when(webElementActions.getCssValue(webElement, CSS_NAME)).thenReturn(StringUtils.EMPTY);
-
-        elementSteps.saveCssPropertyValue(CSS_NAME, locator, VARIABLE_SCOPE, VARIABLE_NAME);
-        verify(softAssert).recordFailedAssertion(String.format("The '%s' CSS property does not exist", CSS_NAME));
-        verifyNoInteractions(variableContext);
-    }
-
-    @Test
-    void shouldNotSaveCssPropertyValueIfTheElementIsNotFound()
-    {
-        var locator = mock(Locator.class);
-        when(baseValidations.assertElementExists(ELEMENT_WITH_CSS_PROPERTY, locator)).thenReturn(Optional.empty());
-
-        elementSteps.saveCssPropertyValue(CSS_NAME, locator, VARIABLE_SCOPE, VARIABLE_NAME);
-        verifyNoInteractions(softAssert, variableContext);
-    }
-
-    @Test
     void testUploadFileNoElement() throws IOException
     {
         File file = mock();
@@ -452,12 +357,6 @@ class ElementStepsTests
         elementSteps.checkElementViewportPresence(locator, ViewportPresence.IS);
 
         verifyNoInteractions(scrollValidations, softAssert);
-    }
-
-    private void mockWebElementCssValue()
-    {
-        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(webElement));
-        when(webElementActions.getCssValue(webElement, CSS_NAME)).thenReturn(CSS_VALUE);
     }
 
     private ResourceLoader mockResourceLoader(Resource resource)

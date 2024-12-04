@@ -16,15 +16,11 @@
 
 package org.vividus.steps.ui.web;
 
-import static org.hamcrest.Matchers.containsString;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
@@ -35,11 +31,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
 import org.vividus.annotation.Replacement;
-import org.vividus.context.VariableContext;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.manager.WebDriverManager;
-import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.steps.ui.web.validation.IElementValidations;
@@ -48,47 +42,40 @@ import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.util.XpathLocatorUtils;
-import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.ResourceFileLoader;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.validation.ScrollValidations;
-import org.vividus.variable.VariableScope;
 
-@SuppressWarnings({"PMD.ExcessiveImports", "PMD.AvoidDuplicateLiterals", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 @TakeScreenshotOnFailure
 public class ElementSteps implements ResourceLoaderAware
 {
     private static final String THE_NUMBER_OF_FOUND_ELEMENTS = "The number of found elements";
     private static final String FILE_EXISTS_MESSAGE_FORMAT = "File %s exists";
-    private static final String ELEMENT_CSS_CONTAINING_VALUE = "Element has CSS property '%s' containing value '%s'";
     private static final String PARENT_ELEMENT_XPATH = "./..";
 
-    private final IWebElementActions webElementActions;
     private final IWebDriverProvider webDriverProvider;
     private final WebDriverManager webDriverManager;
     private final IUiContext uiContext;
     private final IDescriptiveSoftAssert descriptiveSoftAssert;
     private final IBaseValidations baseValidations;
     private final IElementValidations elementValidations;
-    private final VariableContext variableContext;
     private final ResourceFileLoader resourceFileLoader;
     private final ScrollValidations<WebElement> scrollValidations;
     private ResourceLoader resourceLoader;
 
     @SuppressWarnings("checkstyle:paramNum")
-    public ElementSteps(IWebElementActions webElementActions, IWebDriverProvider webDriverProvider,
-            WebDriverManager webDriverManager, IUiContext uiContext, IDescriptiveSoftAssert descriptiveSoftAssert,
-            IBaseValidations baseValidations, IElementValidations elementValidations, VariableContext variableContext,
-            ResourceFileLoader resourceFileLoader, ScrollValidations<WebElement> scrollValidations)
+    public ElementSteps(IWebDriverProvider webDriverProvider, WebDriverManager webDriverManager, IUiContext uiContext,
+                        IDescriptiveSoftAssert descriptiveSoftAssert, IBaseValidations baseValidations,
+                        IElementValidations elementValidations, ResourceFileLoader resourceFileLoader,
+                        ScrollValidations<WebElement> scrollValidations)
     {
-        this.webElementActions = webElementActions;
         this.webDriverProvider = webDriverProvider;
         this.webDriverManager = webDriverManager;
         this.uiContext = uiContext;
         this.descriptiveSoftAssert = descriptiveSoftAssert;
         this.baseValidations = baseValidations;
         this.elementValidations = elementValidations;
-        this.variableContext = variableContext;
         this.resourceFileLoader = resourceFileLoader;
         this.scrollValidations = scrollValidations;
     }
@@ -193,106 +180,6 @@ public class ElementSteps implements ResourceLoaderAware
             baseValidations.assertIfExactNumberOfElementsFound("Parent element has number of child elements which",
                     element, childLocator, number);
         }
-    }
-
-    /**
-     * Checks that the context <b>element</b> has an expected <b>CSS property</b>
-     * @param cssName A name of the <b>CSS property</b>
-     * @param cssValue An expected value of <b>CSS property</b>
-     * @deprecated Use step:
-     * "Then context element has CSS property `$cssName` with value that is equal to `$cssValue`" instead
-    */
-    @Deprecated(since = "0.6.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.7.0",
-            replacementFormatPattern =
-                    "Then context element has CSS property `%1$s` with value that is equal to `%2$s`")
-    @Then("the context element has the CSS property '$cssName'='$cssValue'")
-    public void doesElementHaveRightCss(String cssName, String cssValue)
-    {
-        uiContext.getSearchContext(WebElement.class).ifPresent(element -> {
-            String actualCssValue = webElementActions.getCssValue(element, cssName);
-            descriptiveSoftAssert.assertEquals("Element has correct css property value", cssValue, actualCssValue);
-        });
-    }
-
-    /**
-     * Checks that the context <b>element</b> has an expected <b>CSS property</b>
-     * @param cssName A name of the <b>CSS property</b>
-     * @param comparisonRule is equal to, contains, does not contain
-     * @param cssValue An expected value of <b>CSS property</b>
-     */
-    @Then("context element has CSS property `$cssName` with value that $comparisonRule `$cssValue`")
-    public void doesElementHaveRightCss(String cssName, StringComparisonRule comparisonRule, String cssValue)
-    {
-        uiContext.getSearchContext(WebElement.class).ifPresent(element -> {
-            Matcher<String> matcher = comparisonRule.createMatcher(cssValue);
-            String actualCssValue = webElementActions.getCssValue(element, cssName);
-            descriptiveSoftAssert.assertThat("Element css property value is", actualCssValue, matcher);
-        });
-    }
-
-    /**
-     * Gets the value of <b>CSS property</b> from element located by <b>locator</b> and saves it to the <b>variable</b>
-     * with the specified <b>variableName</b>
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li>Finds element using <i>locator</i>
-     * <li>Extracts from the element value of the <i>cssProperty</i> and saves it to the <i>variableName</i>
-     * </ul>
-     * @param cssProperty    The name of the CSS property (for ex. 'color', 'flex')
-     * @param locator        The locator to find an element
-     * @param scopes         The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     *                       <i>Available scopes:</i>
-     *                       <ul>
-     *                       <li><b>STEP</b> - the variable will be available only within the step,
-     *                       <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     *                       <li><b>STORY</b> - the variable will be available within the whole story,
-     *                       <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     *                       </ul>
-     * @param variableName   The name of the variable to save the CSS property value
-     */
-    @When("I save `$cssProperty` CSS property value of element located by `$locator` to $scopes"
-            + " variable `$variableName`")
-    public void saveCssPropertyValue(String cssProperty, Locator locator, Set<VariableScope> scopes,
-                                     String variableName)
-    {
-        baseValidations.assertElementExists("The element to get the CSS property value", locator).ifPresent(e ->
-        {
-            String cssValue = webElementActions.getCssValue(e, cssProperty);
-            if (!cssValue.isEmpty())
-            {
-                variableContext.putVariable(scopes, variableName, cssValue);
-            }
-            else
-            {
-                descriptiveSoftAssert
-                        .recordFailedAssertion(String.format("The '%s' CSS property does not exist", cssProperty));
-            }
-        });
-    }
-
-    /**
-     * Checks that the context <b>element</b> has an expected <b>CSS property</b> part
-     * @param cssName A name of the <b>CSS property</b>
-     * @param cssValue An expected value part of <b>CSS property</b>
-     * @deprecated Use step:
-     * "Then context element has CSS property `$cssName` with value that contains `$cssValue`" instead
-    */
-    @Deprecated(since = "0.6.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.7.0",
-            replacementFormatPattern = "Then context element has CSS property `%1$s` with value that contains `%2$s`")
-    @Then("the context element has the CSS property '$cssName' containing '$cssValue'")
-    public void doesElementHaveRightPartOfCssValue(String cssName, String cssValue)
-    {
-        uiContext.getSearchContext(WebElement.class).ifPresent(element -> {
-            String actualCssValue = webElementActions.getCssValue(element, cssName);
-
-            descriptiveSoftAssert.assertThat("Css property value part is correct",
-                    String.format(ELEMENT_CSS_CONTAINING_VALUE, cssName, cssValue),
-                    actualCssValue, containsString(cssValue));
-        });
     }
 
     /**
