@@ -34,6 +34,7 @@ import org.vividus.ui.web.util.WebXpathLocatorUtils;
 public enum WebLocatorType implements LocatorType
 {
     LINK_TEXT("Link text", LinkTextSearch.class),
+    RELATIVE("Relative", RelativeElementSearch.class),
     LINK_URL("URL", LinkUrlSearch.class),
     LINK_URL_PART("URL part", LinkUrlPartSearch.class),
     CASE_SENSITIVE_TEXT("Case sensitive text", CaseSensitiveTextSearch.class),
