@@ -225,7 +225,7 @@
     <bean class="org.vividus.selenium.WebContextSourceCodeProvider" />
 
     <bean id="sourceCodeAttachmentFormat" class="java.lang.String">
-        <constructor-arg value="HTML" />
+        <constructor-arg value="html" />
     </bean>
 
     <bean class="org.vividus.selenium.BrowserWindowSizeListener" lazy-init="false">

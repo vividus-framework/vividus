@@ -37,7 +37,6 @@ import org.vividus.ui.ContextSourceCodeProvider;
 class SourceCodePublishingOnFailureListenerTests
 {
     private static final String SOURCES = "<html/>";
-    private static final String HTML = "HTML";
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private ContextSourceCodeProvider contextSourceCodeProvider;
@@ -59,11 +58,12 @@ class SourceCodePublishingOnFailureListenerTests
     {
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(contextSourceCodeProvider.getSourceCode()).thenReturn(Map.of(APPLICATION_SOURCE_CODE, SOURCES));
-        listener.setSourceCodeAttachmentFormat(HTML);
+        String html = "html";
+        listener.setSourceCodeAttachmentFormat(html);
         listener.onAssertionFailure(null);
         verify(webDriverProvider).isWebDriverInitialized();
         verify(attachmentPublisher).publishAttachment("/templates/source-code.ftl",
-                Map.of("sourceCode", SOURCES, "format", HTML), "Application source code");
+                Map.of("sourceCode", SOURCES, "format", html), "Application source code.html");
         verifyNoMoreInteractions(webDriverProvider, contextSourceCodeProvider, attachmentPublisher);
     }
 
