@@ -2,7 +2,10 @@ Composite: Then all resources by selector `$cssSelector` from $html are valid
 !-- DEPRECATED: 0.7.0, Then all resources found by CSS selector `%1$s` in %2$s are valid
 Then all resources found by CSS selector `<cssSelector>` in <html> are valid
 
-
 Composite: Then all resources by selector `$cssSelector` are valid on:$pages
 !-- DEPRECATED: 0.7.0, Then all resources found by CSS selector `%1$s` are valid on:%2$s
 Then all resources found by CSS selector `<cssSelector>` are valid on:<pages>
+
+Composite: When I set browser cookies to the API context
+!-- DEPRECATED: 0.8.0, When I set browser cookies to HTTP context
+When I set browser cookies to HTTP context

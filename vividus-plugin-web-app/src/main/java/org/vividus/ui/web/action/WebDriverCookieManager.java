@@ -41,6 +41,18 @@ public class WebDriverCookieManager implements CookieManager<Cookie>
     public void addCookie(String cookieName, String cookieValue, String path, String urlAsString)
     {
         String domain = InetAddressUtils.getDomain(urlAsString);
+        addCookieToBrowserContext(cookieName, cookieValue, path, domain);
+    }
+
+    @Override
+    public void addHttpClientCookie(org.apache.hc.client5.http.cookie.Cookie httpCookie)
+    {
+        addCookieToBrowserContext(httpCookie.getName(), httpCookie.getValue(), httpCookie.getPath(),
+                httpCookie.getDomain());
+    }
+
+    private void addCookieToBrowserContext(String cookieName, String cookieValue, String path, String domain)
+    {
         Cookie cookie = new Cookie.Builder(cookieName, cookieValue)
                 .domain(domain)
                 .path(path)

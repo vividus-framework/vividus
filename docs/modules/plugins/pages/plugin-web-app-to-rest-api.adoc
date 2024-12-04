@@ -474,3 +474,63 @@ Then SSL rating for URL `$url` is $comparisonRule `$gradeName`
 ----
 Then SSL rating for URL `https://www.google.com` is equal to `B`
 ----
+
+=== Cookie Steps
+
+==== Set browser cookies to the HTTP context
+
+Set current browser cookies to the HTTP client for future executing HTTP requests.
+
+[source,gherkin]
+----
+When I set browser cookies to HTTP context
+----
+
+.Open web page and send GET request with cookies from the opened page
+[source,gherkin]
+----
+Given I am on main application page
+When I set browser cookies to HTTP context
+When I execute HTTP GET request for resource with relative URL `/get`
+----
+
+==== Set HTTP cookies to the browser
+
+Set current cookies from the previous HTTP calls to the browser.
+Make sure that expected cookies from HTTP calls matches with web browser opened page domain.
+The actions performed by the step:
+
+* add the cookies;
+* refresh the current page (this action is required to apply the changes in cookies).
+
+[source,gherkin]
+----
+When I set HTTP context cookies to browser
+----
+
+.Send GET request and then put received cookies to the browser
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with relative URL `/get`
+Given I am on main application page
+When I set HTTP context cookies to browser
+----
+
+==== Set HTTP cookies to the browser without applying changes
+
+Set current cookies from the previous HTTP calls to the browser, but does not apply the changes in cookies instantly.
+The current page must be refreshed or the navigation must be performed to apply the cookie changes.
+Make sure that expected cookies from HTTP calls matches with web browser opened page domain.
+
+[source,gherkin]
+----
+When I set HTTP context cookies to browser without applying changes
+----
+
+.Send GET request and then put received cookies to the browser but without refreshing the page
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with relative URL `/get`
+Given I am on main application page
+When I set HTTP context cookies to browser without applying changes
+----
