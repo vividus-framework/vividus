@@ -18,6 +18,7 @@ package org.vividus.ui.web.playwright.steps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -33,25 +34,33 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.microsoft.playwright.ElementHandle;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.assertions.LocatorAssertions;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import com.microsoft.playwright.options.BoundingBox;
 
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
+import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.StringComparisonRule;
+import org.vividus.steps.ui.web.CssValidationResult;
+import org.vividus.ui.web.action.JavascriptActions;
 import org.vividus.ui.web.action.ResourceFileLoader;
 import org.vividus.ui.web.playwright.UiContext;
 import org.vividus.ui.web.playwright.action.ElementActions;
@@ -59,6 +68,7 @@ import org.vividus.ui.web.playwright.assertions.PlaywrightLocatorAssertions;
 import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 import org.vividus.ui.web.playwright.locator.Visibility;
+import org.vividus.util.ResourceUtils;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,6 +90,8 @@ class ElementStepsTests
     @Mock private ElementActions elementActions;
     @Mock private PlaywrightSoftAssert playwrightSoftAssert;
     @Mock private ResourceFileLoader resourceFileLoader;
+    @Mock private JavascriptActions javascriptActions;
+    @Mock private IAttachmentPublisher attachmentPublisher;
     @InjectMocks private ElementSteps steps;
 
     @ParameterizedTest
@@ -287,6 +299,63 @@ class ElementStepsTests
                 () -> steps.assertElementsNumberInState(state, locator, ComparisonRule.EQUAL_TO, 0));
         assertEquals(String.format("Contradictory input parameters. Locator visibility: '%s', the state: '%s'.",
                 visibility, state), illegalArgumentException.getMessage());
+    }
+
+    @SuppressWarnings("PMD.NcssCount")
+    @Test
+    void testDoesElementHasCssProperties()
+    {
+        final String examplesTableAsString = """
+                |cssName   |comparisonRule |expectedValue |
+                |cssKey1   |IS_EQUAL_TO    |cssValue1     |
+                |-css-key2 |IS_EQUAL_TO    |cssValue2     |
+                |css-key3  |IS_EQUAL_TO    |cssValue3     |
+                """;
+        final ExamplesTable examplesTable = new ExamplesTable(examplesTableAsString);
+        final String cssKey1 = "cssKey1";
+        final String cssValue1 = "cssValue1";
+        final String cssKey2 = "-css-key2";
+        final String cssValue2 = "cssValue2";
+        final String cssValue3 = "cssValue3";
+        Locator locator = mock();
+        ElementHandle elementHandle = mock();
+        when(locator.elementHandle()).thenReturn(elementHandle);
+
+        when(uiContext.getCurrentContexOrPageRoot()).thenReturn(locator);
+        try (MockedStatic<ResourceUtils> resourceUtils =
+                     mockStatic(org.vividus.util.ResourceUtils.class))
+        {
+            resourceUtils.when(() -> org.vividus.util.ResourceUtils
+                    .loadResource("org/vividus/ui/web/get-element-computed-css-func.js")).thenReturn("script");
+            String getAllCssScript = "([el]) => {scriptreturn getComputedStyleAsMap(el)}";
+            Map<String, String> elementCss = Map.of(cssKey1, cssValue1, "cssKey2", cssValue2);
+            when(javascriptActions.executeScript(getAllCssScript, elementHandle)).thenReturn(elementCss);
+
+            when(softAssert.assertThat(eq("Element has CSS property 'cssKey1' containing value 'cssValue1'"),
+                    eq(cssValue1), argThat(matcher -> matcher.toString().contains(cssValue1))))
+                    .thenReturn(true);
+            when(softAssert.assertThat(eq("Element has CSS property '-css-key2' containing value 'cssValue2'"),
+                    eq(cssValue2), argThat(matcher -> matcher.toString().contains(cssValue2))))
+                    .thenReturn(true);
+            when(softAssert.assertThat(eq("Element has CSS property 'css-key3' containing value 'cssValue3'"),
+                    eq(null), argThat(matcher -> matcher.toString().contains(cssValue3))))
+                    .thenReturn(false);
+
+            steps.doesElementHasCssProperties(examplesTable);
+        }
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, List<CssValidationResult>>> argumentCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(attachmentPublisher).publishAttachment(eq("templates/css_validation_result.ftl"),
+                argumentCaptor.capture(), eq("Css validation results"));
+        List<CssValidationResult> actualCssValidationResults = argumentCaptor.getValue().get("cssResults");
+        assertEquals(3, actualCssValidationResults.size());
+
+        CssValidationResult result2 = actualCssValidationResults.get(1);
+        assertEquals(cssKey2, result2.getCssName());
+        assertEquals(cssValue2, result2.getCssActualValue());
+        assertEquals(StringComparisonRule.IS_EQUAL_TO, result2.getComparisonRule());
+        assertEquals(cssValue2, result2.getCssExpectedValue());
+        assertTrue(result2.isPassed());
     }
 
     private static PlaywrightLocator getLocatorWithVisibility(Visibility visibility)

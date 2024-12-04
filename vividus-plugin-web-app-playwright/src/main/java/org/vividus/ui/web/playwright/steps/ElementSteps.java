@@ -18,6 +18,8 @@ package org.vividus.ui.web.playwright.steps;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -26,13 +28,20 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import com.microsoft.playwright.options.BoundingBox;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.CaseUtils;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.steps.Parameters;
 import org.vividus.context.VariableContext;
+import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.StringComparisonRule;
+import org.vividus.steps.ui.web.CssValidationResult;
+import org.vividus.ui.web.action.JavascriptActions;
 import org.vividus.ui.web.action.ResourceFileLoader;
 import org.vividus.ui.web.playwright.UiContext;
 import org.vividus.ui.web.playwright.action.ElementActions;
@@ -43,16 +52,21 @@ import org.vividus.variable.VariableScope;
 
 public class ElementSteps
 {
+    private static final String ELEMENT_CSS_CONTAINING_VALUE = "Element has CSS property '%s' containing value '%s'";
+
     private final UiContext uiContext;
     private final ISoftAssert softAssert;
     private final VariableContext variableContext;
     private final ElementActions elementActions;
     private final PlaywrightSoftAssert playwrightSoftAssert;
     private final ResourceFileLoader resourceFileLoader;
+    private final JavascriptActions javascriptActions;
+    private final IAttachmentPublisher attachmentPublisher;
 
     public ElementSteps(UiContext uiContext, ISoftAssert softAssert, VariableContext variableContext,
             ElementActions elementActions, PlaywrightSoftAssert playwrightSoftAssert,
-            ResourceFileLoader resourceFileLoader)
+            ResourceFileLoader resourceFileLoader, JavascriptActions javascriptActions,
+            IAttachmentPublisher attachmentPublisher)
     {
         this.uiContext = uiContext;
         this.softAssert = softAssert;
@@ -60,6 +74,8 @@ public class ElementSteps
         this.elementActions = elementActions;
         this.playwrightSoftAssert = playwrightSoftAssert;
         this.resourceFileLoader = resourceFileLoader;
+        this.javascriptActions = javascriptActions;
+        this.attachmentPublisher = attachmentPublisher;
     }
 
     /**
@@ -326,5 +342,64 @@ public class ElementSteps
                 .ifPresentOrElse(value -> variableContext.putVariable(scopes, variableName, value),
                         () -> softAssert.recordFailedAssertion(
                                 String.format("The '%s' attribute does not exist", attributeName)));
+    }
+
+    /**
+     * Checks that the context <b>element</b> has an expected <b>CSS properties</b>
+     * <p>The expected CSS parameters to be defined in the ExamplesTable:</p>
+     * <ul>
+     * <li><b>cssName</b> - the name of the CSS property</li>
+     * <li><b>comparisonRule</b> - String comparison rule: "is equal to", "contains", "does not contain",
+     * "matches".</li>
+     * <li><b>expectedValue</b> - expected CSS property value</li>
+     * </ul>
+     * <p>Usage example:</p>
+     * <code>
+     * <br>Then context element has CSS properties:
+     * <br>|cssName |comparisonRule |expectedValue |
+     * <br>|border  |contains       |solid         |
+     * </code>
+     *
+     * @param parameters The parameters of the expected CSS properties to set as ExamplesTable
+     */
+    @Then("context element has CSS properties:$parameters")
+    public void doesElementHasCssProperties(ExamplesTable parameters)
+    {
+        String getAllCssScript =
+                org.vividus.util.ResourceUtils.loadResource("org/vividus/ui/web/get-element-computed-css-func.js");
+        String script = "([el]) => {" + getAllCssScript + "return getComputedStyleAsMap(el)}";
+        Locator element = uiContext.getCurrentContexOrPageRoot();
+        Map<String, String> elementCss = javascriptActions.executeScript(script, element.elementHandle());
+
+        List<CssValidationResult> cssResults = validateElementCss(parameters, elementCss);
+        attachmentPublisher.publishAttachment("templates/css_validation_result.ftl",
+                Map.of("cssResults", cssResults), "Css validation results");
+    }
+
+    private List<CssValidationResult> validateElementCss(ExamplesTable parameters, Map<String, String> elementCss)
+    {
+        List<Parameters> rowsAsParameters = parameters.getRowsAsParameters();
+        List<CssValidationResult> cssResults = new ArrayList<>();
+        rowsAsParameters.forEach(params ->
+        {
+            Map<String, String> values = params.values();
+            String cssName = values.get("cssName");
+            String expectedValue = values.get("expectedValue");
+            StringComparisonRule comparisonRule = params.valueAs("comparisonRule", StringComparisonRule.class);
+
+            String actualCssValue = getCssValue(elementCss, cssName);
+            boolean passed = softAssert.assertThat(String.format(ELEMENT_CSS_CONTAINING_VALUE, cssName, expectedValue),
+                    actualCssValue, comparisonRule.createMatcher(expectedValue));
+            cssResults.add(new CssValidationResult(cssName, actualCssValue, comparisonRule, expectedValue, passed));
+        });
+        return cssResults;
+    }
+
+    private String getCssValue(Map<String, String> cssMap, String cssName)
+    {
+        return Optional.ofNullable(cssMap.get(cssName)).orElseGet(() -> {
+            String cssValueAsCamelCase = CaseUtils.toCamelCase(StringUtils.removeStart(cssName, '-'), false, '-');
+            return cssMap.get(cssValueAsCamelCase);
+        });
     }
 }
