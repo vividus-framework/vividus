@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.vividus.http.client.HttpResponse;
@@ -103,11 +102,6 @@ public class HttpTestContext implements JsonContext
         return getData().jsonElement.orElse(getResponse() == null ? null : getResponse().getResponseBodyAsString());
     }
 
-    public Optional<CookieStore> getCookieStore()
-    {
-        return Optional.ofNullable(getData().cookieStore);
-    }
-
     public Optional<RequestConfig> getRequestConfig()
     {
         return Optional.ofNullable(getData().requestConfig);
@@ -128,7 +122,6 @@ public class HttpTestContext implements JsonContext
     {
         private HttpEntity requestEntity;
         private List<Header> requestHeaders = new ArrayList<>();
-        private CookieStore cookieStore;
         private ConnectionDetails connectionDetails;
 
         private HttpResponse response;
