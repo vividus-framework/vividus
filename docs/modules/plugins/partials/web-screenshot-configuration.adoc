@@ -15,6 +15,7 @@ Web screenshot configuration fields:
 ** `WEB_DRIVER` - Based on WebDriver API.
 * `scrollableElement` - The element to scroll.
 * `scrollTimeout` - The scroll timeout.
+* `hideScrollbars` - Hide the scrollbar before capturing the screenshot, defaults to `true`.
 
 Mobile app screenshot configuration fields:
 

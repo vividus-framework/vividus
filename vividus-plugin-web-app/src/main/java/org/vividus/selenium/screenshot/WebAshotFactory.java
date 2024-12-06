@@ -18,7 +18,6 @@ package org.vividus.selenium.screenshot;
 
 import java.util.Optional;
 
-import org.openqa.selenium.WebElement;
 import org.vividus.selenium.screenshot.strategies.AdjustingScrollableElementAwareViewportPastingDecorator;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.screenshot.WebCutOptions;
@@ -69,7 +68,7 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
                 .withDebugger(screenshotDebugger)
                 .withScrollTimeout(((Long) screenshotParameters.getScrollTimeout().toMillis()).intValue());
 
-        decorated = decorateWithScrollbarHiding(decorated, screenshotParameters.getScrollableElement());
+        decorated = decorateWithScrollbarHiding(decorated, screenshotParameters);
 
         decorated = decorateWithCropping(decorated, screenshotParameters);
 
@@ -95,10 +94,15 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
         );
     }
 
-    private ShootingStrategy decorateWithScrollbarHiding(ShootingStrategy strategy,
-            Optional<WebElement> scrollableElement)
+    private ShootingStrategy decorateWithScrollbarHiding(ShootingStrategy strategy, WebScreenshotParameters params)
     {
-        return new ScrollbarHidingDecorator(strategy, scrollableElement, scrollbarHandler);
+        if (params == null)
+        {
+            return new ScrollbarHidingDecorator(strategy, Optional.empty(), scrollbarHandler);
+        }
+        return params.isHideScrollbars()
+                ? new ScrollbarHidingDecorator(strategy, params.getScrollableElement(), scrollbarHandler)
+                : strategy;
     }
 
     private AShot createAShot(String strategyName, WebScreenshotParameters screenshotParameters)
@@ -123,7 +127,7 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
             default -> throw new IllegalArgumentException(
                     String.format("Unknown shooting strategy with the name: %s", strategyName));
         };
-        shootingStrategy = decorateWithScrollbarHiding(shootingStrategy, Optional.empty());
+        shootingStrategy = decorateWithScrollbarHiding(shootingStrategy, screenshotParameters);
         shootingStrategy = screenshotParameters == null
                 ? shootingStrategy
                 : decorateWithCropping(shootingStrategy, screenshotParameters);

@@ -13,3 +13,4 @@
 *** `WEB_DRIVER` - Based on WebDriver API. *(Web only)*
 ** `scrollableElement` - The element to scroll. *(Web only)*
 ** `scrollTimeout` - The scroll timeout. *(Web only)*
+** `hideScrollbars` - Hide the scrollbar before capturing the screenshot, defaults to `true`. *(Web only)*
