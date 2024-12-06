@@ -12,6 +12,12 @@ Examples:
 |COMPARE_AGAINST|xpath((.//p)[1])|
 
 
+Scenario: Scrollbars hiding validation
+When I <action> baseline with name `full-page-do-not-hide-scrollbars` using screenshot configuration:
+|hideScrollbars|
+|false         |
+
+
 Scenario: Validation of step When I $actionType baseline with name `$name` for full page
 When I <action> baseline with name `full-page`
 When I <action> baseline with name `full-page` using storage `filesystem`

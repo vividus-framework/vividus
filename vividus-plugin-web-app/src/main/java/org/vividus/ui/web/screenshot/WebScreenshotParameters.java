@@ -32,6 +32,7 @@ public class WebScreenshotParameters extends ScreenshotParameters
     private Optional<WebElement> scrollableElement = Optional.empty();
     private CoordsProviderType coordsProvider;
     private Duration scrollTimeout;
+    private boolean hideScrollbars;
 
     public int getMaxHeight()
     {
@@ -101,5 +102,15 @@ public class WebScreenshotParameters extends ScreenshotParameters
     public void setNativeFooterToCut(int nativeFooterToCut)
     {
         this.nativeFooterToCut = nativeFooterToCut;
+    }
+
+    public boolean isHideScrollbars()
+    {
+        return hideScrollbars;
+    }
+
+    public void setHideScrollbars(boolean hideScrollbars)
+    {
+        this.hideScrollbars = hideScrollbars;
     }
 }

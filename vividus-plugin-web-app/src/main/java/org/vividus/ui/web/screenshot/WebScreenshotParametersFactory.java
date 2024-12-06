@@ -64,6 +64,7 @@ public class WebScreenshotParametersFactory
                 ensureValidCutSize(config.getWebFooterToCut(), "web footer")
         );
         parameters.setWebCutOptions(webCutOptions);
+        parameters.setHideScrollbars(config.isHideScrollbars());
 
         config.getScrollableElement().ifPresent(locator ->
         {

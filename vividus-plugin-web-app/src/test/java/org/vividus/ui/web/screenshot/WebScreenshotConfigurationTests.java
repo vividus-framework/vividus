@@ -17,6 +17,7 @@
 package org.vividus.ui.web.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.vividus.selenium.screenshot.WebAshotFactory.DEFAULT_STICKY_FOOTER_HEIGHT;
 import static org.vividus.selenium.screenshot.WebAshotFactory.DEFAULT_STICKY_HEADER_HEIGHT;
 
@@ -48,5 +49,11 @@ class WebScreenshotConfigurationTests
         assertEquals(Duration.ofMillis(500), CONFIGURATION.getScrollTimeout());
         CONFIGURATION.setScrollTimeout("PT1S");
         assertEquals(Duration.ofMillis(1000), CONFIGURATION.getScrollTimeout());
+    }
+
+    @Test
+    void shouldHideScrollbarsByDefault()
+    {
+        assertTrue(CONFIGURATION.isHideScrollbars());
     }
 }

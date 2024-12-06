@@ -18,6 +18,16 @@ When I run visual test with Applitools using:
 |full-page-scaling|<batchName>|<action>|0.75      |
 
 
+Scenario: Scrollbars hiding validation
+Given I am on page with URL `${vividus-test-site-url}/stickyHeader.html`
+When I run visual test with Applitools using:
+|baselineName                    |batchName  |action  |
+|full-page-do-not-hide-scrollbars|<batchName>|<action>|
+ and screenshot config:
+|hideScrollbars|
+|false         |
+
+
 Scenario: Validation of step: 'When I $actionType baseline `$testName` in batch `$batchName` with Applitools' for full page
 When I <action> baseline `full-page` in batch `<batchName>` with Applitools
 

@@ -37,6 +37,7 @@ public class WebScreenshotConfiguration extends ScreenshotConfiguration
     private CoordsProviderType coordsProvider = CoordsProviderType.CEILING;
     @SuppressWarnings("MagicNumber")
     private Duration scrollTimeout = Duration.ofMillis(500);
+    private boolean hideScrollbars = true;
 
     public int getMaxHeight()
     {
@@ -116,5 +117,15 @@ public class WebScreenshotConfiguration extends ScreenshotConfiguration
     protected void setNativeHeaderToCut(int nativeHeaderToCut)
     {
         this.nativeHeaderToCut = nativeHeaderToCut;
+    }
+
+    public boolean isHideScrollbars()
+    {
+        return hideScrollbars;
+    }
+
+    public void setHideScrollbars(boolean hideScrollbars)
+    {
+        this.hideScrollbars = hideScrollbars;
     }
 }
