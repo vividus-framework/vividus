@@ -16,12 +16,20 @@
 
 package org.vividus.http.client;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import javax.net.ssl.HostnameVerifier;
@@ -44,17 +52,20 @@ import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.TlsSocketStrategy;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.util.Timeout;
 import org.vividus.http.keystore.IKeyStoreFactory;
+import org.vividus.util.UriUtils;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class HttpClientFactory implements IHttpClientFactory
 {
     private static final AuthScope ANY_AUTH_SCOPE = new AuthScope(null, -1);
+    private static final String ANY_ORIGIN = "*";
 
     private final SslContextFactory sslContextFactory;
     private final IKeyStoreFactory keyStoreFactory;
@@ -146,35 +157,103 @@ public class HttpClientFactory implements IHttpClientFactory
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH")
     private void configureAuth(HttpClientConfig config, HttpClientBuilder builder)
     {
-        AuthConfig authConfig = config.getAuthConfig();
-        String username = authConfig.getUsername();
-        String password = authConfig.getPassword();
-
-        if (username == null && password == null)
+        Map<String, BasicAuthConfig> auths = config.getBasicAuthConfig();
+        if (auths.isEmpty())
         {
-            isTrue(!authConfig.isPreemptiveAuthEnabled(),
-                    "Preemptive authentication requires username and password to be set");
             return;
         }
 
-        isTrue(username != null && password != null, "The %s is missing", username == null ? "username" : "password");
+        validateAuthConfiguration(auths);
 
-        Credentials credentials = new UsernamePasswordCredentials(username, password.toCharArray());
-        if (authConfig.isPreemptiveAuthEnabled())
+        Map<String, Credentials> preemptiveAuthConfigs = new HashMap<>();
+        Map<AuthScope, Credentials> scopeToCredentials = new HashMap<>();
+
+        auths.forEach((key, data) ->
+        {
+            Credentials credentials = new UsernamePasswordCredentials(data.getUsername(),
+                    data.getPassword().toCharArray());
+            if (data.isPreemptiveAuthEnabled())
+            {
+                preemptiveAuthConfigs.put(data.getOrigin(), credentials);
+                return;
+            }
+
+            String origin = data.getOrigin();
+            AuthScope scope = isAnyOrigin(origin) ? ANY_AUTH_SCOPE : new AuthScope(asHost(origin));
+            scopeToCredentials.put(scope, credentials);
+        });
+
+        if (!scopeToCredentials.isEmpty())
+        {
+            CredentialsStore credentialsStore = new BasicCredentialsProvider();
+            builder.setDefaultCredentialsProvider(credentialsStore);
+
+            scopeToCredentials.forEach(credentialsStore::setCredentials);
+        }
+
+        if (!preemptiveAuthConfigs.isEmpty())
         {
             builder.addRequestInterceptorFirst((req, entity, ctx) ->
             {
-                BasicScheme scheme = new BasicScheme();
-                scheme.initPreemptive(credentials);
-                String authResponse = scheme.generateAuthResponse(null, req, ctx);
-                req.addHeader(new BasicHeader(HttpHeaders.AUTHORIZATION, authResponse));
+                HttpHost requestOrigin = HttpHost.create(getRequestUri(req));
+
+                Entry<String, Credentials> authConfig = preemptiveAuthConfigs.entrySet().stream()
+                        .filter(bac -> !ANY_ORIGIN.equals(bac.getKey()))
+                        .filter(bac -> requestOrigin.equals(asHost(bac.getKey())))
+                        .findFirst()
+                        .orElseGet(() -> preemptiveAuthConfigs.entrySet().stream()
+                                .filter(bac -> isAnyOrigin(bac.getKey())).findFirst().orElse(null));
+
+                if (authConfig != null)
+                {
+                    BasicScheme scheme = new BasicScheme();
+                    scheme.initPreemptive(authConfig.getValue());
+                    String authResponse = scheme.generateAuthResponse(null, req, ctx);
+                    req.addHeader(new BasicHeader(HttpHeaders.AUTHORIZATION, authResponse));
+                }
             });
         }
-        else
+    }
+
+    private void validateAuthConfiguration(Map<String, BasicAuthConfig> auths)
+    {
+        String errorFormat = "The '%s' parameter is missing for '%s' authentication configuration";
+        auths.forEach((key, data) ->
         {
-            CredentialsStore credentialsStore = new BasicCredentialsProvider();
-            credentialsStore.setCredentials(ANY_AUTH_SCOPE, credentials);
-            builder.setDefaultCredentialsProvider(credentialsStore);
+            isTrue(isNotEmpty(data.getUsername()), errorFormat.formatted("username", key));
+            isTrue(isNotEmpty(data.getPassword()), errorFormat.formatted("password", key));
+            isTrue(isNotEmpty(data.getOrigin()), errorFormat.formatted("origin", key));
+        });
+
+        auths.entrySet().stream()
+                        .collect(groupingBy(e ->
+                        {
+                            String origin = e.getValue().getOrigin();
+                            return isAnyOrigin(origin) ? ANY_ORIGIN : asHost(origin).toHostString();
+                        }, mapping(Entry::getKey, toList())))
+                        .forEach((host, keys) -> isTrue(keys.size() == 1,
+                            "Found conflicting origin URLs in %s configurations", String.join(", ", keys)));
+    }
+
+    private boolean isAnyOrigin(String origin)
+    {
+        return ANY_ORIGIN.equals(origin);
+    }
+
+    private HttpHost asHost(String endpoint)
+    {
+        return HttpHost.create(UriUtils.createUri(endpoint));
+    }
+
+    private static URI getRequestUri(HttpRequest request)
+    {
+        try
+        {
+            return request.getUri();
+        }
+        catch (URISyntaxException e)
+        {
+            throw new IllegalStateException(e);
         }
     }
 

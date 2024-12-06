@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import org.vividus.http.handler.HttpResponseHandler;
 public class HttpClientConfig
 {
     private String baseUrl;
-    private AuthConfig authConfig;
     private Map<String, String> headers;
     private SslConfig sslConfig;
     private int maxTotalConnections;
@@ -57,6 +56,7 @@ public class HttpClientConfig
     private String cookieSpec;
     private HttpRequestRetryStrategy httpRequestRetryStrategy;
     private List<HttpResponseHandler> httpResponseHandlers;
+    private Map<String, BasicAuthConfig> basicAuthConfig;
 
     public boolean hasBaseUrl()
     {
@@ -93,17 +93,6 @@ public class HttpClientConfig
     public void setSslConfig(SslConfig sslConfig)
     {
         this.sslConfig = sslConfig;
-    }
-
-    public AuthConfig getAuthConfig()
-    {
-        return authConfig;
-    }
-
-    @JsonProperty("auth")
-    public void setAuthConfig(AuthConfig authConfig)
-    {
-        this.authConfig = authConfig;
     }
 
     public int getMaxTotalConnections()
@@ -269,5 +258,15 @@ public class HttpClientConfig
     public void setHttpResponseHandlers(List<HttpResponseHandler> httpResponseHandlers)
     {
         this.httpResponseHandlers = httpResponseHandlers;
+    }
+
+    public Map<String, BasicAuthConfig> getBasicAuthConfig()
+    {
+        return basicAuthConfig;
+    }
+
+    public void setBasicAuthConfig(Map<String, BasicAuthConfig> basicAuthConfig)
+    {
+        this.basicAuthConfig = basicAuthConfig;
     }
 }
