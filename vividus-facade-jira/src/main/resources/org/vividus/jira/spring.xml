@@ -18,4 +18,6 @@
     </bean>
 
     <bean class="org.vividus.jira.JiraClientProvider" />
+
+    <bean class="org.vividus.jira.databind.JiraConfigurationDeserializer"/>
 </beans>
