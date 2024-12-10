@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,6 @@ import org.junit.jupiter.api.Test;
 class HttpClientConfigTests
 {
     private static final String BASE_URL = "http://somewh.ere/";
-    private static final String USERNAME = "user";
-    private static final String PASSWORD = "pass";
     private final HttpClientConfig config = new HttpClientConfig();
 
     @Test
@@ -78,18 +76,6 @@ class HttpClientConfigTests
     void testHasBaseUrlNotExists()
     {
         assertFalse(config.hasBaseUrl());
-    }
-
-    @Test
-    void testGetAndSetAuthConfig()
-    {
-        AuthConfig authConfig = new AuthConfig();
-        authConfig.setPassword(PASSWORD);
-        authConfig.setUsername(USERNAME);
-        config.setAuthConfig(authConfig);
-        assertEquals(authConfig, config.getAuthConfig());
-        assertEquals(PASSWORD, config.getAuthConfig().getPassword());
-        assertEquals(USERNAME, config.getAuthConfig().getUsername());
     }
 
     @Test

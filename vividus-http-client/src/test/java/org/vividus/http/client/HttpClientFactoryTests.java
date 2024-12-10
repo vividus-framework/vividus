@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,9 +34,11 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.Collections;
@@ -43,6 +47,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -76,7 +81,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -92,6 +98,14 @@ class HttpClientFactoryTests
     private static final Map<String, String> HEADERS = Collections.singletonMap("header1", "value1");
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
+    private static final String ANOTHER_USERNAME = "another-username";
+    private static final String ANOTHER_PASSWORD = "another-password";
+    private static final String ORIGIN = "https://example.com";
+    private static final String ANOTHER_ORIGIN = "https://another.com";
+    private static final String CUSTOM_SCOPE = "custom-scope";
+    private static final String ANOTHER_SCOPE = "another-scope";
+    private static final String ANY_SCOPE = "any";
+    private static final String ANY_ORIGIN = "*";
 
     @Mock private SslContextFactory sslContextFactory;
     @Mock private IKeyStoreFactory keyStoreFactory;
@@ -115,13 +129,13 @@ class HttpClientFactoryTests
         config.setConnectionRequestTimeout(0);
         config.setConnectTimeout(0);
         config.setSocketTimeout(0);
+        config.setBasicAuthConfig(Map.of());
     }
 
     @Test
     void testBuildHttpClientWithHeadersAndInterceptors() throws GeneralSecurityException
     {
         config.setHeaders(HEADERS);
-        config.setAuthConfig(authConfig(null, null, false));
 
         HttpRequestInterceptor firstRequestInterceptor = mock();
         config.setFirstRequestInterceptor(firstRequestInterceptor);
@@ -151,11 +165,17 @@ class HttpClientFactoryTests
     }
 
     @Test
-    void testBuildHttpClientWithFullAuthenticationPreemptive() throws GeneralSecurityException
+    void testBuildHttpClientWithFullAuthenticationPreemptiveCustomOrigin()
+            throws GeneralSecurityException, URISyntaxException
     {
-        config.setAuthConfig(authConfig(USERNAME, PASSWORD, true));
+        config.setBasicAuthConfig(Map.of(
+            CUSTOM_SCOPE, authConfig(ORIGIN, USERNAME, PASSWORD, true),
+            ANOTHER_SCOPE, authConfig(ANOTHER_ORIGIN, ANOTHER_USERNAME, ANOTHER_PASSWORD, true),
+            ANY_SCOPE, authConfig(ANY_ORIGIN, ANY_SCOPE + USERNAME, ANY_SCOPE + PASSWORD, true)
+        ));
 
         HttpRequest request = mock();
+        when(request.getUri()).thenReturn(URI.create(ORIGIN));
         HttpContext context = mock();
         doAnswer(args -> {
             HttpRequestInterceptor interceptor = args.getArgument(0);
@@ -163,6 +183,53 @@ class HttpClientFactoryTests
             return null;
         }).when(mockedHttpClientBuilder).addRequestInterceptorFirst(any(HttpRequestInterceptor.class));
 
+        runWithHeaderCheck(request);
+    }
+
+    @Test
+    void testBuildHttpClientWithFullAuthenticationPreemptiveAnyScope()
+            throws GeneralSecurityException, URISyntaxException
+    {
+        config.setBasicAuthConfig(Map.of(
+            CUSTOM_SCOPE, authConfig(ORIGIN, ANOTHER_USERNAME, ANOTHER_PASSWORD, true),
+            ANY_SCOPE, authConfig(ANY_ORIGIN, USERNAME, PASSWORD, true)
+        ));
+
+        HttpRequest request = mock();
+        when(request.getUri()).thenReturn(URI.create(ANOTHER_ORIGIN));
+        HttpContext context = mock();
+        doAnswer(args -> {
+            HttpRequestInterceptor interceptor = args.getArgument(0);
+            interceptor.process(request, null, context);
+            return null;
+        }).when(mockedHttpClientBuilder).addRequestInterceptorFirst(any(HttpRequestInterceptor.class));
+
+        runWithHeaderCheck(request);
+    }
+
+    @Test
+    void testBuildHttpClientWithFullAuthenticationPreemptiveNoMatch()
+            throws GeneralSecurityException, URISyntaxException
+    {
+        config.setBasicAuthConfig(Map.of(
+            CUSTOM_SCOPE, authConfig(ORIGIN, ANOTHER_USERNAME, ANOTHER_PASSWORD, true)
+        ));
+
+        HttpRequest request = mock();
+        when(request.getUri()).thenReturn(URI.create(ANOTHER_ORIGIN));
+        HttpContext context = mock();
+        doAnswer(args -> {
+            HttpRequestInterceptor interceptor = args.getArgument(0);
+            interceptor.process(request, null, context);
+            return null;
+        }).when(mockedHttpClientBuilder).addRequestInterceptorFirst(any(HttpRequestInterceptor.class));
+
+        testBuildHttpClientUsingConfig();
+        verifyNoMoreInteractions(request);
+    }
+
+    private void runWithHeaderCheck(HttpRequest request) throws GeneralSecurityException
+    {
         testHttpClientBuildWithDefaultSslConfig(() -> {
             PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = testBuildHttpClientUsingConfig();
 
@@ -175,9 +242,40 @@ class HttpClientFactoryTests
     }
 
     @Test
-    void testBuildHttpClientWithFullAuthenticationNoPreemptive() throws GeneralSecurityException
+    void testBuildHttpClientWithFullAuthenticationNoPreemptiveCustomOrigin() throws GeneralSecurityException
     {
-        config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
+        config.setBasicAuthConfig(Map.of(
+            CUSTOM_SCOPE, authConfig(ORIGIN, USERNAME, PASSWORD, false)
+        ));
+
+        try (var credentialsProviderConstruction = mockConstruction(BasicCredentialsProvider.class))
+        {
+            testHttpClientBuildWithDefaultSslConfig(this::testBuildHttpClientUsingConfig);
+
+            ArgumentCaptor<Credentials> credentialsCaptor = ArgumentCaptor.forClass(Credentials.class);
+            ArgumentCaptor<AuthScope> authScopeCaptor = ArgumentCaptor.forClass(AuthScope.class);
+
+            BasicCredentialsProvider credentialsProvider = credentialsProviderConstruction.constructed().get(0);
+            verify(credentialsProvider).setCredentials(authScopeCaptor.capture(), credentialsCaptor.capture());
+            verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
+
+            validateCredentials(credentialsCaptor);
+
+            AuthScope authScope = authScopeCaptor.getValue();
+            assertEquals(URI.create(ORIGIN).getHost(), authScope.getHost());
+        }
+
+        verify(mockedHttpClientBuilder, times(0)).addRequestInterceptorFirst(any());
+        verify(mockedHttpClientBuilder, times(0)).addRequestInterceptorLast(any());
+        verify(mockedHttpClientBuilder, times(0)).addResponseInterceptorLast(any());
+    }
+
+    @Test
+    void testBuildHttpClientWithFullAuthenticationNoPreemptiveAnyScope() throws GeneralSecurityException
+    {
+        config.setBasicAuthConfig(Map.of(
+            ANY_SCOPE, authConfig(ANY_ORIGIN, USERNAME, PASSWORD, false)
+        ));
 
         try (var credentialsProviderConstruction = mockConstruction(BasicCredentialsProvider.class))
         {
@@ -189,11 +287,7 @@ class HttpClientFactoryTests
             verify(credentialsProvider).setCredentials(eq(ANY_AUTH_SCOPE), credentialsCaptor.capture());
             verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
 
-            Credentials credentials = credentialsCaptor.getValue();
-            assertInstanceOf(UsernamePasswordCredentials.class, credentials);
-            assertEquals(USERNAME, credentials.getUserPrincipal().getName());
-            assertArrayEquals(PASSWORD.toCharArray(),
-                    ((UsernamePasswordCredentials) credentials).getUserPassword());
+            validateCredentials(credentialsCaptor);
         }
 
         verify(mockedHttpClientBuilder, times(0)).addRequestInterceptorFirst(any());
@@ -201,35 +295,71 @@ class HttpClientFactoryTests
         verify(mockedHttpClientBuilder, times(0)).addResponseInterceptorLast(any());
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "username,,The password is missing",
-        ",password,The username is missing"
-    })
-    void testBuildHttpClientWithAuthenticationInvalidUsernameAndPasswordParams(String username, String password,
-            String message)
+    @Test
+    void testBuildHttpClientWithDefaultConfigs() throws GeneralSecurityException
     {
-        config.setAuthConfig(authConfig(username, password, false));
+        config.setBasicAuthConfig(Map.of(
+            "003e952c9a", authConfig(ANY_ORIGIN, null, null, false)
+        ));
+
+        testHttpClientBuildWithDefaultSslConfig(this::testBuildHttpClientUsingConfig);
+
+        verify(mockedHttpClientBuilder, times(0)).setDefaultCredentialsProvider(any());
+        verify(mockedHttpClientBuilder, times(0)).addRequestInterceptorFirst(any());
+        verify(mockedHttpClientBuilder, times(0)).addRequestInterceptorLast(any());
+        verify(mockedHttpClientBuilder, times(0)).addResponseInterceptorLast(any());
+    }
+
+    private void validateCredentials(ArgumentCaptor<Credentials> captor)
+    {
+        Credentials credentials = captor.getValue();
+        assertInstanceOf(UsernamePasswordCredentials.class, credentials);
+        assertEquals(USERNAME, credentials.getUserPrincipal().getName());
+        assertArrayEquals(PASSWORD.toCharArray(),
+                ((UsernamePasswordCredentials) credentials).getUserPassword());
+    }
+
+    static Stream<Arguments> invalidArgsMatrix()
+    {
+        return Stream.of(
+            arguments(null, USERNAME, PASSWORD, "origin"),
+            arguments(ORIGIN, null, PASSWORD, USERNAME),
+            arguments(ORIGIN, USERNAME, null, PASSWORD),
+            arguments(ORIGIN, null, null, USERNAME)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidArgsMatrix")
+    void testBuildHttpClientWithAuthenticationInvalidParams(String origin, String username, String password,
+            String messageKey)
+    {
+        config.setBasicAuthConfig(Map.of(
+            CUSTOM_SCOPE, authConfig(origin, username, password, false)
+        ));
 
         var thrown = assertThrows(IllegalArgumentException.class, () -> httpClientFactory.buildHttpClient(config));
+        String message = "The '%s' parameter is missing for '%s' authentication configuration".formatted(messageKey,
+                CUSTOM_SCOPE);
         assertEquals(message, thrown.getMessage());
     }
 
     @Test
-    void testBuildHttpClientWithAuthenticationInvalidPreemptiveAuthParams()
+    void testBuildHttpClientWithAuthenticationConflictingScopes()
     {
-        config.setAuthConfig(authConfig(null, null, true));
+        config.setBasicAuthConfig(Map.of(
+            CUSTOM_SCOPE, authConfig(ORIGIN, USERNAME, PASSWORD, true),
+            ANOTHER_SCOPE, authConfig(ORIGIN, USERNAME, PASSWORD, true)
+        ));
 
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-            () -> httpClientFactory.buildHttpClient(config));
-        assertEquals("Preemptive authentication requires username and password to be set", thrown.getMessage());
+        var thrown = assertThrows(IllegalArgumentException.class, () -> httpClientFactory.buildHttpClient(config));
+        assertTrue(thrown.getMessage().matches("Found conflicting origin URLs in (custom-scope, another-scope|"
+                + "another-scope, custom-scope) configurations"));
     }
 
     @Test
     void testBuildHttpClientAuthenticationWithoutPass() throws GeneralSecurityException
     {
-        config.setAuthConfig(authConfig(null, null, false));
-
         testHttpClientBuildWithDefaultSslConfig(() -> {
             try (var credentialsProviderConstruction = mockConstruction(BasicCredentialsProvider.class))
             {
@@ -246,7 +376,6 @@ class HttpClientFactoryTests
     @Test
     void testBuildHttpClientTrustingAll() throws GeneralSecurityException
     {
-        config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
         config.getSslConfig().setSslHostnameVerificationEnabled(false);
         config.getSslConfig().setSslCertificateCheckEnabled(false);
 
@@ -262,7 +391,6 @@ class HttpClientFactoryTests
     {
         String baseUrl = "http://somewh.ere";
         config.setBaseUrl(baseUrl);
-        config.setAuthConfig(authConfig(null, null, false));
         config.getSslConfig().setSslHostnameVerificationEnabled(true);
         config.getSslConfig().setSslCertificateCheckEnabled(true);
 
@@ -392,9 +520,11 @@ class HttpClientFactoryTests
         }
     }
 
-    private static AuthConfig authConfig(String username, String password, boolean preemptiveAuthEnabled)
+    private static BasicAuthConfig authConfig(String origin, String username, String password,
+            boolean preemptiveAuthEnabled)
     {
-        AuthConfig authConfig = new AuthConfig();
+        BasicAuthConfig authConfig = new BasicAuthConfig();
+        authConfig.setOrigin(origin);
         authConfig.setUsername(username);
         authConfig.setPassword(password);
         authConfig.setPreemptiveAuthEnabled(preemptiveAuthEnabled);
