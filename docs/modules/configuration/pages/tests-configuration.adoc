@@ -653,17 +653,46 @@ https://en.wikipedia.org/wiki/Integrated_Windows_Authentication[Integrated Windo
 automatically whenever tests are run on Windows.
 ====
 
-|`http.auth.username`
+[NOTE]
+====
+The `<group id>` is a placeholder used to group up authentication configs which means that authentication properties related to the same
+origin should have the same `<group id>` value, please see the following example demonstrating configs for `https://securedomain.com` site:
+
+[source,properties]
+----
+http.auth.myapp.origin=https://securedomain.com
+http.auth.myapp.username=whoisthis
+http.auth.myapp.password=3db8a57ba925a522c8bf
+http.auth.myapp.preemptive-auth-enabled=false
+----
+====
+
+|`http.auth.<group id>.origin`
+|character sequence
+|`*`
+a|The URL identifying the origin to which configured basic authentication credentials will apply e.g. `https://securedomain.com`.
+All the URL components besides `scheme`, `domain` and `port` contained in the URL are ignored.
+
+To apply basic authentication credentials to all domains use `*` (asterisk) symbol as an origin value. Please note that more
+specific origin values take presendence over `*` value.
+
+IMPORTANT: Presence of this property requires `http.auth.<group id>.username` and `http.auth.<group id>.password` properties to be set as well
+
+|`http.auth.<group id>.username`
 |character sequence
 |`<empty>`
-|The username, presence of this property requires the `http.auth.password` to be also set
+a|The username
 
-|`http.auth.password`
+IMPORTANT: Presence of this property requires `http.auth.<group id>.origin` and `http.auth.<group id>.password` properties to be set as well
+
+|`http.auth.<group id>.password`
 |character sequence
 |`<empty>`
-|The password, presence of this property requires the `http.auth.username` to be also set
+a|The password
 
-|`http.auth.preemptive-auth-enabled`
+IMPORTANT: Presence of this property requires `http.auth.<group id>.username` and `http.auth.<group id>.origin` properties to be set as well
+
+|`http.auth.<group id>.preemptive-auth-enabled`
 |`boolean`
 |`false`
 |If enabled the HTTP client will send the basic authentication data even before the service gives an unauthorized response (401), useful when the service doesn't support unauthorized response (401) or to reduce the overhead of making the connection

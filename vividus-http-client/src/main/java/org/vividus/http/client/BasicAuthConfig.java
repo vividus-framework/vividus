@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,22 @@
 
 package org.vividus.http.client;
 
-public class AuthConfig
+public class BasicAuthConfig
 {
+    private String origin;
     private String username;
     private String password;
     private boolean preemptiveAuthEnabled;
+
+    public String getOrigin()
+    {
+        return origin;
+    }
+
+    public void setOrigin(String origin)
+    {
+        this.origin = origin;
+    }
 
     public String getUsername()
     {
