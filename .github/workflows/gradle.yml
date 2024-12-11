@@ -124,6 +124,7 @@ jobs:
          ./gradlew validateKnownIssues printSteps countSteps -x testVividusInitialization  -p vividus-tests --project-prop 'vividus.variables.iterationLimit=3' --project-prop 'vividus.variables.target-platform=ios'
 
     - name: Integration tests
+      shell: bash
       run: |
         ./gradlew :vividus-tests:debugStories -Pvividus.configuration-set.active=integration \
                                               -Pvividus.allure.history-directory=output/history/integration-tests \
