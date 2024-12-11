@@ -32,15 +32,15 @@ class CssValidationResultTests
         final String newExpected = "new_expected";
         CssValidationResult result = new CssValidationResult("key", "value", StringComparisonRule.CONTAINS,
                 "expected", true);
-        result.setCssName(newKey);
-        result.setCssActualValue(newValue);
+        result.setCssProperty(newKey);
+        result.setActualValue(newValue);
         result.setComparisonRule(StringComparisonRule.IS_EQUAL_TO);
-        result.setCssExpectedValue(newExpected);
+        result.setExpectedValue(newExpected);
         result.setPassed(false);
-        assertEquals(newKey, result.getCssName());
-        assertEquals(newValue, result.getCssActualValue());
+        assertEquals(newKey, result.getCssProperty());
+        assertEquals(newValue, result.getActualValue());
         assertEquals(StringComparisonRule.IS_EQUAL_TO, result.getComparisonRule());
-        assertEquals(newExpected, result.getCssExpectedValue());
+        assertEquals(newExpected, result.getExpectedValue());
         assertFalse(result.isPassed());
     }
 }

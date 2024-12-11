@@ -18,62 +18,27 @@ package org.vividus.steps.ui.web;
 
 import org.vividus.steps.StringComparisonRule;
 
-public class CssValidationResult
+public class CssValidationResult extends CssValidationParameters
 {
-    private String cssName;
-    private String cssActualValue;
-    private StringComparisonRule comparisonRule;
-    private String cssExpectedValue;
+    private String actualValue;
     private boolean passed;
 
-    public CssValidationResult(String cssName, String cssActualValue, StringComparisonRule comparisonRule,
+    public CssValidationResult(String cssName, String actualValue, StringComparisonRule comparisonRule,
                                String cssExpectedValue, boolean passed)
     {
-        this.cssName = cssName;
-        this.cssActualValue = cssActualValue;
-        this.comparisonRule = comparisonRule;
-        this.cssExpectedValue = cssExpectedValue;
+        super(cssName, comparisonRule, cssExpectedValue);
+        this.actualValue = actualValue;
         this.passed = passed;
     }
 
-    public String getCssName()
+    public String getActualValue()
     {
-        return cssName;
+        return actualValue;
     }
 
-    public void setCssName(String cssName)
+    public void setActualValue(String actualValue)
     {
-        this.cssName = cssName;
-    }
-
-    public String getCssActualValue()
-    {
-        return cssActualValue;
-    }
-
-    public void setCssActualValue(String cssActualValue)
-    {
-        this.cssActualValue = cssActualValue;
-    }
-
-    public StringComparisonRule getComparisonRule()
-    {
-        return comparisonRule;
-    }
-
-    public void setComparisonRule(StringComparisonRule comparisonRule)
-    {
-        this.comparisonRule = comparisonRule;
-    }
-
-    public String getCssExpectedValue()
-    {
-        return cssExpectedValue;
-    }
-
-    public void setCssExpectedValue(String cssExpectedValue)
-    {
-        this.cssExpectedValue = cssExpectedValue;
+        this.actualValue = actualValue;
     }
 
     public boolean isPassed()

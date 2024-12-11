@@ -32,7 +32,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -156,18 +155,21 @@ class ElementCssStepsTests
     @Test
     void testDoesElementHasCssProperties()
     {
-        final String examplesTableAsString = """
-                |cssName   |comparisonRule |expectedValue |
-                |cssKey1   |IS_EQUAL_TO    |cssValue1     |
-                |-css-key2 |IS_EQUAL_TO    |cssValue2     |
-                |css-key3  |IS_EQUAL_TO    |cssValue3     |
-                """;
-        final ExamplesTable examplesTable = new ExamplesTable(examplesTableAsString);
         final String cssKey1 = "cssKey1";
         final String cssValue1 = "cssValue1";
         final String cssKey2 = "-css-key2";
         final String cssValue2 = "cssValue2";
+        final String cssKey3 = "css-key3";
         final String cssValue3 = "cssValue3";
+
+        final CssValidationParameters cssValidationParameter1 = new CssValidationParameters(cssKey1,
+                StringComparisonRule.IS_EQUAL_TO, cssValue1);
+        final CssValidationParameters cssValidationParameter2 = new CssValidationParameters(cssKey2,
+                StringComparisonRule.IS_EQUAL_TO, cssValue2);
+        final CssValidationParameters cssValidationParameter3 = new CssValidationParameters(cssKey3,
+                StringComparisonRule.IS_EQUAL_TO, cssValue3);
+        final List<CssValidationParameters> cssValidationParameters = List.of(cssValidationParameter1,
+                cssValidationParameter2, cssValidationParameter3);
 
         when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(webElement));
         try (MockedStatic<org.vividus.util.ResourceUtils> resourceUtils =
@@ -189,7 +191,7 @@ class ElementCssStepsTests
                     eq(null), argThat(matcher -> matcher.toString().contains(cssValue3))))
                     .thenReturn(false);
 
-            elementCssSteps.doesElementHasCssProperties(examplesTable);
+            elementCssSteps.doesElementHasCssProperties(cssValidationParameters);
         }
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, List<CssValidationResult>>> argumentCaptor = ArgumentCaptor.forClass(Map.class);
@@ -199,19 +201,18 @@ class ElementCssStepsTests
         assertEquals(3, actualCssValidationResults.size());
 
         CssValidationResult result2 = actualCssValidationResults.get(1);
-        assertEquals(cssKey2, result2.getCssName());
-        assertEquals(cssValue2, result2.getCssActualValue());
+        assertEquals(cssKey2, result2.getCssProperty());
+        assertEquals(cssValue2, result2.getActualValue());
         assertEquals(StringComparisonRule.IS_EQUAL_TO, result2.getComparisonRule());
-        assertEquals(cssValue2, result2.getCssExpectedValue());
+        assertEquals(cssValue2, result2.getExpectedValue());
         assertTrue(result2.isPassed());
     }
 
     @Test
     void testDoesElementHasCssPropertiesNoElement()
     {
-        ExamplesTable examplesTable = new ExamplesTable("||");
         when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.empty());
-        elementCssSteps.doesElementHasCssProperties(examplesTable);
+        elementCssSteps.doesElementHasCssProperties(List.of());
         verifyNoInteractions(javascriptActions);
         verifyNoInteractions(softAssert);
         verifyNoInteractions(attachmentPublisher);

@@ -28,11 +28,11 @@ The context can be set by the <<_change_context,corresponding steps>>.
 
 [source,gherkin]
 ----
-Then context element has CSS properties:$parameters
+Then context element has CSS properties matching rules:$parameters
 ----
 
 * `$parameters` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] containing the following columns:
-** [subs=+quotes]`*cssName*` - A name of the CSS property.
+** [subs=+quotes]`*cssProperty*` - A name of the CSS property.
 ** [subs=+quotes]`*comparisonRule*` - CSS property xref:parameters:string-comparison-rule.adoc[comparison rule].
 ** [subs=+quotes]`*expectedValue*` - The expected value of the CSS property.
 
@@ -40,8 +40,8 @@ Then context element has CSS properties:$parameters
 [source,gherkin]
 ----
 When I change context to element located by `id(block)`
-Then context element has CSS properties:
-|cssName     |comparisonRule |expectedValue |
+Then context element has CSS properties matching rules:
+|cssProperty |comparisonRule |expectedValue |
 |align-items |is equal to    |center        |
 |border      |contains       |solid         |
 |font-size   |contains       |20            |

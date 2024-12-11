@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <title>CSS properties validation results table</title>
     <link rel="stylesheet" href="../../styles.css"/>
-    <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../../webjars/bootstrap/5.3.3/css/bootstrap.min.css"/>
 </head>
 <body>
     <style>
@@ -59,10 +59,10 @@
         <tbody>
             <#list cssResults as cssResult>
                 <tr class="${cssResult.passed?string('pass', 'fail')}">
-                    <td>${cssResult.cssName}</td>
-                    <td>${cssResult.cssActualValue!""}</td>
+                    <td>${cssResult.cssProperty}</td>
+                    <td>${cssResult.actualValue!""}</td>
                     <td>${cssResult.comparisonRule}</td>
-                    <td>${cssResult.cssExpectedValue}</td>
+                    <td>${cssResult.expectedValue}</td>
                     <td>
                         <span class="icon ${cssResult.passed?string('pass', 'fail')}">
                             ${cssResult.passed?string('✔', '✖')}
@@ -72,6 +72,6 @@
             </#list>
         </tbody>
     </table>
-    <script src="../../webjars/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="../../webjars/bootstrap/5.3.3/js/bootstrap.min.js"></script>
 </body>
 </html>

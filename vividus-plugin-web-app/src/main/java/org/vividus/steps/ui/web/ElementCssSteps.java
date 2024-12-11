@@ -29,8 +29,6 @@ import org.apache.commons.text.CaseUtils;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.steps.Parameters;
 import org.openqa.selenium.WebElement;
 import org.vividus.annotation.Replacement;
 import org.vividus.context.VariableContext;
@@ -179,22 +177,22 @@ public class ElementCssSteps
      * Checks that the context <b>element</b> has an expected <b>CSS properties</b>
      * <p>The expected CSS parameters to be defined in the ExamplesTable:</p>
      * <ul>
-     * <li><b>cssName</b> - the name of the CSS property</li>
+     * <li><b>cssProperty</b> - the name of the CSS property</li>
      * <li><b>comparisonRule</b> - String comparison rule: "is equal to", "contains", "does not contain",
      * "matches".</li>
      * <li><b>expectedValue</b> - expected CSS property value</li>
      * </ul>
      * <p>Usage example:</p>
      * <code>
-     * <br>Then context element has CSS properties:
-     * <br>|cssName |comparisonRule |expectedValue |
-     * <br>|border  |contains       |solid         |
+     * <br>Then context element has CSS properties matching rules:
+     * <br>|cssProperty |comparisonRule |expectedValue |
+     * <br>|border      |contains       |solid         |
      * </code>
      *
      * @param parameters The parameters of the expected CSS properties to set as ExamplesTable
      */
-    @Then("context element has CSS properties:$parameters")
-    public void doesElementHasCssProperties(ExamplesTable parameters)
+    @Then("context element has CSS properties matching rules:$parameters")
+    public void doesElementHasCssProperties(List<CssValidationParameters> parameters)
     {
         uiContext.getSearchContext(WebElement.class).ifPresent(element -> {
             String getAllCssScript =
@@ -208,16 +206,15 @@ public class ElementCssSteps
         });
     }
 
-    private List<CssValidationResult> validateElementCss(ExamplesTable parameters, Map<String, String> elementCss)
+    private List<CssValidationResult> validateElementCss(List<CssValidationParameters> parameters,
+                                                         Map<String, String> elementCss)
     {
-        List<Parameters> rowsAsParameters = parameters.getRowsAsParameters();
         List<CssValidationResult> cssResults = new ArrayList<>();
-        rowsAsParameters.forEach(params ->
+        parameters.forEach(param ->
         {
-            Map<String, String> values = params.values();
-            String cssName = values.get("cssName");
-            String expectedValue = values.get("expectedValue");
-            StringComparisonRule comparisonRule = params.valueAs("comparisonRule", StringComparisonRule.class);
+            String cssName = param.getCssProperty();
+            String expectedValue = param.getExpectedValue();
+            StringComparisonRule comparisonRule = param.getComparisonRule();
 
             String actualCssValue = getCssValue(elementCss, cssName);
             boolean passed = softAssert.assertThat(String.format(ELEMENT_CSS_CONTAINING_VALUE, cssName, expectedValue),
