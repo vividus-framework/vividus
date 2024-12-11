@@ -124,12 +124,6 @@ jobs:
          ./gradlew validateKnownIssues printSteps countSteps -x testVividusInitialization  -p vividus-tests --project-prop 'vividus.variables.iterationLimit=3' --project-prop 'vividus.variables.target-platform=ios'
 
     - name: Integration tests
-      if: (matrix.platform == 'ubuntu-latest' || matrix.platform == 'windows-latest')
-      run: |
-        ./gradlew :vividus-tests:debugStories --project-prop 'vividus.configuration-set.active=integration' --project-prop 'vividus.allure.history-directory=output/history/integration-tests' --project-prop 'vividus.allure.executor.name="Github Actions (Vividus)"' --project-prop 'vividus.allure.executor.type=github' --project-prop 'vividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions' --project-prop 'vividus.allure.executor.build-order=${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.build-name="Integration Tests ${GITHUB_RUN_ID}"' --project-prop 'vividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.report-name="Integration tests report"' --project-prop "fileToSaveExitCode=$(pwd)/exitCode.txt" --no-daemon
-
-    - name: Integration tests
-      if: matrix.platform == 'macos-latest'
       run: |
         ./gradlew :vividus-tests:debugStories -Pvividus.configuration-set.active=integration \
                                               -Pvividus.allure.history-directory=output/history/integration-tests \
