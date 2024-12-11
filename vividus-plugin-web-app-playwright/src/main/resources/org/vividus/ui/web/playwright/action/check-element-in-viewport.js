@@ -1,5 +1,6 @@
 (element) => {
-    var elementYCoordinate = element.getBoundingClientRect().y;
-    var windowScrollY = Math.floor(window.scrollY);
-    return windowScrollY <= elementYCoordinate && elementYCoordinate <= (windowScrollY + window.innerHeight);
+    const rect = element.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+
+    return (rect.top >= 0 && rect.top <= windowHeight) || (rect.bottom > 0 && rect.bottom <= windowHeight);
 }
