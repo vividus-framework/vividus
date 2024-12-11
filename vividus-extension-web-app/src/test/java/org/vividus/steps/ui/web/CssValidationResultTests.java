@@ -27,20 +27,23 @@ class CssValidationResultTests
     @Test
     void testToCoverage()
     {
-        final String newKey = "new_key";
-        final String newValue = "new_value";
-        final String newExpected = "new_expected";
-        CssValidationResult result = new CssValidationResult("key", "value", StringComparisonRule.CONTAINS,
-                "expected", true);
-        result.setCssProperty(newKey);
-        result.setActualValue(newValue);
-        result.setComparisonRule(StringComparisonRule.IS_EQUAL_TO);
-        result.setExpectedValue(newExpected);
+        final String key = "key";
+        final String value = "value";
+        final String expected = "expected";
+        CssValidationParameters parameters = new CssValidationParameters(key, StringComparisonRule.CONTAINS, expected);
+        CssValidationParameters newParameters = new CssValidationParameters();
+        newParameters.setCssProperty(parameters.getCssProperty());
+        newParameters.setComparisonRule(parameters.getComparisonRule());
+        newParameters.setExpectedValue(parameters.getExpectedValue());
+
+        CssValidationResult result = new CssValidationResult(newParameters, expected, true);
+        result.setActualValue(value);
         result.setPassed(false);
-        assertEquals(newKey, result.getCssProperty());
-        assertEquals(newValue, result.getActualValue());
-        assertEquals(StringComparisonRule.IS_EQUAL_TO, result.getComparisonRule());
-        assertEquals(newExpected, result.getExpectedValue());
+
+        assertEquals(key, result.getCssProperty());
+        assertEquals(value, result.getActualValue());
+        assertEquals(StringComparisonRule.CONTAINS, result.getComparisonRule());
+        assertEquals(expected, result.getExpectedValue());
         assertFalse(result.isPassed());
     }
 }

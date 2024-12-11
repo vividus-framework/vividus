@@ -82,14 +82,14 @@ public class ElementCssSteps
      * </ul>
      * <p>Usage example:</p>
      * <code>
-     * <br>Then context element has CSS properties matching rules:
+     * <br>Then context element does have CSS properties matching rules:
      * <br>|cssProperty |comparisonRule |expectedValue |
      * <br>|border      |contains       |solid         |
      * </code>
      *
      * @param parameters The parameters of the expected CSS properties to set as ExamplesTable
      */
-    @Then("context element has CSS properties matching rules:$parameters")
+    @Then("context element does have CSS properties matching rules:$parameters")
     public void doesElementHasCssProperties(List<CssValidationParameters> parameters)
     {
         String getAllCssScript =
@@ -114,9 +114,10 @@ public class ElementCssSteps
             StringComparisonRule comparisonRule = param.getComparisonRule();
 
             String actualCssValue = getCssValue(elementCss, cssName);
-            boolean passed = softAssert.assertThat(String.format(ELEMENT_CSS_CONTAINING_VALUE, cssName, expectedValue),
+            boolean passed = softAssert.assertThat(String.format("Element has CSS property '%s' %s value '%s'",
+                            cssName, comparisonRule, expectedValue),
                     actualCssValue, comparisonRule.createMatcher(expectedValue));
-            cssResults.add(new CssValidationResult(cssName, actualCssValue, comparisonRule, expectedValue, passed));
+            cssResults.add(new CssValidationResult(param, expectedValue, passed));
         });
         return cssResults;
     }

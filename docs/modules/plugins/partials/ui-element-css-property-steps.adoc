@@ -28,7 +28,7 @@ The context can be set by the <<_change_context,corresponding steps>>.
 
 [source,gherkin]
 ----
-Then context element has CSS properties matching rules:$parameters
+Then context element does have CSS properties matching rules:$parameters
 ----
 
 * `$parameters` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] containing the following columns:
@@ -40,7 +40,7 @@ Then context element has CSS properties matching rules:$parameters
 [source,gherkin]
 ----
 When I change context to element located by `id(block)`
-Then context element has CSS properties matching rules:
+Then context element does have CSS properties matching rules:
 |cssProperty |comparisonRule |expectedValue |
 |align-items |is equal to    |center        |
 |border      |contains       |solid         |

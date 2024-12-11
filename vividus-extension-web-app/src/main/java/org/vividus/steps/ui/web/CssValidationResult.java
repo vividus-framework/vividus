@@ -18,17 +18,32 @@ package org.vividus.steps.ui.web;
 
 import org.vividus.steps.StringComparisonRule;
 
-public class CssValidationResult extends CssValidationParameters
+public class CssValidationResult
 {
+    private CssValidationParameters cssValidationParameters;
     private String actualValue;
     private boolean passed;
 
-    public CssValidationResult(String cssName, String actualValue, StringComparisonRule comparisonRule,
-                               String cssExpectedValue, boolean passed)
+    public CssValidationResult(CssValidationParameters cssValidationParameters, String actualValue, boolean passed)
     {
-        super(cssName, comparisonRule, cssExpectedValue);
+        this.cssValidationParameters = cssValidationParameters;
         this.actualValue = actualValue;
         this.passed = passed;
+    }
+
+    public String getCssProperty()
+    {
+        return cssValidationParameters.getCssProperty();
+    }
+
+    public StringComparisonRule getComparisonRule()
+    {
+        return cssValidationParameters.getComparisonRule();
+    }
+
+    public String getExpectedValue()
+    {
+        return cssValidationParameters.getExpectedValue();
     }
 
     public String getActualValue()

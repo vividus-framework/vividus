@@ -26,7 +26,7 @@ Then `${cssPropertyValue}` is = `none`
 Scenario: Step verification Then context element has CSS properties
 Given I am on page with URL `${vividus-test-site-url}/relativeLocator.html`
 When I change context to element located by `id(block1)`
-Then context element has CSS properties matching rules:
+Then context element does have CSS properties matching rules:
 |cssProperty |comparisonRule |expectedValue |
 |align-items |is equal to    |center        |
 |border      |contains       |solid         |

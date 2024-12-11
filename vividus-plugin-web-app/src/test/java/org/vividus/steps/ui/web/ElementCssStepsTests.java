@@ -167,7 +167,7 @@ class ElementCssStepsTests
         final CssValidationParameters cssValidationParameter2 = new CssValidationParameters(cssKey2,
                 StringComparisonRule.IS_EQUAL_TO, cssValue2);
         final CssValidationParameters cssValidationParameter3 = new CssValidationParameters(cssKey3,
-                StringComparisonRule.IS_EQUAL_TO, cssValue3);
+                StringComparisonRule.CONTAINS, cssValue3);
         final List<CssValidationParameters> cssValidationParameters = List.of(cssValidationParameter1,
                 cssValidationParameter2, cssValidationParameter3);
 
@@ -181,13 +181,13 @@ class ElementCssStepsTests
             Map<String, String> elementCss = Map.of(cssKey1, cssValue1, "cssKey2", cssValue2);
             when(javascriptActions.executeScript(getAllCssScript, webElement)).thenReturn(elementCss);
 
-            when(softAssert.assertThat(eq("Element has CSS property 'cssKey1' containing value 'cssValue1'"),
+            when(softAssert.assertThat(eq("Element has CSS property 'cssKey1' is equal to value 'cssValue1'"),
                     eq(cssValue1), argThat(matcher -> matcher.toString().contains(cssValue1))))
                     .thenReturn(true);
-            when(softAssert.assertThat(eq("Element has CSS property '-css-key2' containing value 'cssValue2'"),
+            when(softAssert.assertThat(eq("Element has CSS property '-css-key2' is equal to value 'cssValue2'"),
                     eq(cssValue2), argThat(matcher -> matcher.toString().contains(cssValue2))))
                     .thenReturn(true);
-            when(softAssert.assertThat(eq("Element has CSS property 'css-key3' containing value 'cssValue3'"),
+            when(softAssert.assertThat(eq("Element has CSS property 'css-key3' contains value 'cssValue3'"),
                     eq(null), argThat(matcher -> matcher.toString().contains(cssValue3))))
                     .thenReturn(false);
 
