@@ -6,7 +6,7 @@ project.description = 'VIVIDUS extension for web application testing plugins'
      implementation project(':vividus-http-client')
      implementation project(':vividus-util')
      implementation(group: 'com.google.guava', name: 'guava', version: '33.3.1-jre')
-     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.0')
+     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.1')
      implementation(group: 'org.springframework', name: 'spring-context')
      implementation(group: 'org.springframework', name: 'spring-core')
      implementation(group: 'commons-io', name: 'commons-io', version: '2.18.0')
