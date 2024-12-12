@@ -19,11 +19,13 @@ package org.vividus.ui.web.playwright.action;
 import com.microsoft.playwright.Locator;
 
 import org.vividus.ui.web.action.JavascriptActions;
+import org.vividus.ui.web.action.ScrollActions;
 import org.vividus.util.ResourceUtils;
 
-public class ScrollActions
+public class PlaywrightScrollActions implements ScrollActions<Locator>
 {
-    private static final String IS_ELEMENT_IN_VIEWPORT = loadScript("check-element-in-viewport.js");
+    private static final String IS_ELEMENT_IN_VIEWPORT = "(element) => {const arguments = [element];%s}"
+            .formatted(ResourceUtils.loadResource("check-element-in-viewport.js").trim());
     private static final String SCROLL_ELEMENT_INTO_VIEWPORT_CENTER =
             loadScript("scroll-element-into-viewport-center.js");
     private static final String SCROLL_TO_END_OF_PAGE = loadScript("scroll-to-end-of-page.js");
@@ -32,7 +34,7 @@ public class ScrollActions
 
     private int stickyHeaderSizePercentage;
 
-    public ScrollActions(JavascriptActions javascriptActions)
+    public PlaywrightScrollActions(JavascriptActions javascriptActions)
     {
         this.javascriptActions = javascriptActions;
     }
@@ -79,14 +81,15 @@ public class ScrollActions
         element.evaluate(SCROLL_ELEMENT_INTO_VIEWPORT_CENTER, stickyHeaderSizePercentage);
     }
 
-    public boolean isScrolledToElement(Locator element)
+    @Override
+    public boolean isElementInViewport(Locator element)
     {
         return (boolean) element.evaluate(IS_ELEMENT_IN_VIEWPORT);
     }
 
     private static String loadScript(String jsResourceName)
     {
-        return ResourceUtils.loadResource(ScrollActions.class, jsResourceName);
+        return ResourceUtils.loadResource(PlaywrightScrollActions.class, jsResourceName);
     }
 
     public void setStickyHeaderSizePercentage(int stickyHeaderSizePercentage)

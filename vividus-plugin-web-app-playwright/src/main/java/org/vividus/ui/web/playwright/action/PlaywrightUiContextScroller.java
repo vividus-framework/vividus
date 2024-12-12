@@ -27,9 +27,9 @@ import org.vividus.ui.web.playwright.UiContext;
 public class PlaywrightUiContextScroller implements DirectionScroller
 {
     private final UiContext uiContext;
-    private final ScrollActions scrollActions;
+    private final PlaywrightScrollActions scrollActions;
 
-    public PlaywrightUiContextScroller(UiContext uiContext, ScrollActions scrollActions)
+    public PlaywrightUiContextScroller(UiContext uiContext, PlaywrightScrollActions scrollActions)
     {
         this.uiContext = uiContext;
         this.scrollActions = scrollActions;

@@ -31,12 +31,12 @@ import org.vividus.ui.web.action.JavascriptActions;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
-class ScrollActionsTests
+class PlaywrightScrollActionsTests
 {
     @Mock private Locator locator;
     @Mock private JavascriptActions javascriptActions;
 
-    @InjectMocks private ScrollActions scrollActions;
+    @InjectMocks private PlaywrightScrollActions scrollActions;
 
     @Test
     void shouldScrollToStartOfPage()
@@ -58,7 +58,7 @@ class ScrollActionsTests
     {
         scrollActions.scrollToEndOfPage();
         verify(javascriptActions).executeScript(
-                ResourceUtils.loadResource(ScrollActionsTests.class, "scroll-to-end-of-page.js"));
+                ResourceUtils.loadResource(PlaywrightScrollActionsTests.class, "scroll-to-end-of-page.js"));
     }
 
     @Test
@@ -88,17 +88,20 @@ class ScrollActionsTests
         var stickyHeaderSize = 25;
         scrollActions.setStickyHeaderSizePercentage(stickyHeaderSize);
         scrollActions.scrollElementIntoViewportCenter(locator);
-        verify(locator).evaluate(
-                ResourceUtils.loadResource(ScrollActionsTests.class, "scroll-element-into-viewport-center.js"),
-                stickyHeaderSize);
+        verify(locator).evaluate(ResourceUtils.loadResource(PlaywrightScrollActionsTests.class,
+                "scroll-element-into-viewport-center.js"), stickyHeaderSize);
     }
 
     @Test
-    void shouldCheckIfScrolledToElement()
+    void shouldCheckIfElementIsInViewport()
     {
-        when(locator.evaluate(
-                ResourceUtils.loadResource(ScrollActionsTests.class, "check-element-in-viewport.js"))).thenReturn(true);
-        boolean actualValue = scrollActions.isScrolledToElement(locator);
+        String script = """
+            (element) => {const arguments = [element];const rect = arguments[0].getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+
+            return (rect.top >= 0 && rect.top <= windowHeight) || (rect.bottom > 0 && rect.bottom <= windowHeight);}""";
+        when(locator.evaluate(script)).thenReturn(true);
+        boolean actualValue = scrollActions.isElementInViewport(locator);
         Assertions.assertTrue(actualValue);
     }
 

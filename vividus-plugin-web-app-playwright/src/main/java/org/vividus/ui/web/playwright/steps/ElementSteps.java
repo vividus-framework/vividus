@@ -33,12 +33,14 @@ import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.StringComparisonRule;
+import org.vividus.steps.ui.web.ViewportPresence;
 import org.vividus.ui.web.action.ResourceFileLoader;
 import org.vividus.ui.web.playwright.UiContext;
 import org.vividus.ui.web.playwright.action.ElementActions;
 import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 import org.vividus.ui.web.playwright.locator.Visibility;
+import org.vividus.ui.web.validation.ScrollValidations;
 import org.vividus.variable.VariableScope;
 
 public class ElementSteps
@@ -48,17 +50,19 @@ public class ElementSteps
     private final VariableContext variableContext;
     private final ElementActions elementActions;
     private final PlaywrightSoftAssert playwrightSoftAssert;
+    private final ScrollValidations<Locator> scrollValidations;
     private final ResourceFileLoader resourceFileLoader;
 
     public ElementSteps(UiContext uiContext, ISoftAssert softAssert, VariableContext variableContext,
             ElementActions elementActions, PlaywrightSoftAssert playwrightSoftAssert,
-            ResourceFileLoader resourceFileLoader)
+            ScrollValidations<Locator> scrollValidations, ResourceFileLoader resourceFileLoader)
     {
         this.uiContext = uiContext;
         this.softAssert = softAssert;
         this.variableContext = variableContext;
         this.elementActions = elementActions;
         this.playwrightSoftAssert = playwrightSoftAssert;
+        this.scrollValidations = scrollValidations;
         this.resourceFileLoader = resourceFileLoader;
     }
 
@@ -317,6 +321,19 @@ public class ElementSteps
         String description = "Element state is not " + state;
         assertElementsNumber(locator, comparisonRule, number).all().forEach(
                 element -> playwrightSoftAssert.runAssertion(description, () -> state.assertElementState(element)));
+    }
+
+    /**
+     * Checks if the element located by the specified locater is or is not presented in the browser viewport
+     *
+     * @param locator The locator of the element to check presence in viewport
+     * @param presence The presence state of the element, either <b>is</b> or <b>is not</b>
+     */
+    @Then("element located by `$locator` $presence visible in viewport")
+    public void checkElementViewportPresence(PlaywrightLocator locator, ViewportPresence presence)
+    {
+        Locator element = uiContext.locateElement(locator);
+        scrollValidations.assertElementPositionAgainstViewport(element, presence);
     }
 
     private void saveAttributeValueOfElement(Locator element, String attributeName, Set<VariableScope> scopes,

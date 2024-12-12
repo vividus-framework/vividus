@@ -20,21 +20,22 @@ import com.microsoft.playwright.Locator;
 
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.vividus.annotation.Replacement;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.web.ScrollDirection;
 import org.vividus.ui.web.action.DirectionScroller;
 import org.vividus.ui.web.playwright.UiContext;
+import org.vividus.ui.web.playwright.action.PlaywrightScrollActions;
 import org.vividus.ui.web.playwright.action.PlaywrightUiContextScroller;
-import org.vividus.ui.web.playwright.action.ScrollActions;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 
 public class ScrollSteps
 {
     private final ISoftAssert softAssert;
     private final UiContext uiContext;
-    private final ScrollActions scrollActions;
+    private final PlaywrightScrollActions scrollActions;
 
-    public ScrollSteps(ISoftAssert softAssert, UiContext uiContext, ScrollActions scrollActions)
+    public ScrollSteps(ISoftAssert softAssert, UiContext uiContext, PlaywrightScrollActions scrollActions)
     {
         this.softAssert = softAssert;
         this.uiContext = uiContext;
@@ -87,12 +88,16 @@ public class ScrollSteps
      * get element's Y coordinate and verify that it's close to 0 which means that element is an the very top
      * </ul>
      * @param locator A locator to locate element
+     * @deprecated Use step: "Then element located by `$locator` $presence visible in viewport" instead
      */
+    @Deprecated(since = "0.6.15", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.8.0",
+            replacementFormatPattern = "Then element located by `%1$s` is visible in viewport")
     @Then("page is scrolled to element located by `$locator`")
     public void isPageScrolledToElement(PlaywrightLocator locator)
     {
         Locator element = uiContext.locateElement(locator);
         softAssert.assertTrue(String.format("The page is scrolled to an element with located by %s", locator),
-                scrollActions.isScrolledToElement(element));
+                scrollActions.isElementInViewport(element));
     }
 }

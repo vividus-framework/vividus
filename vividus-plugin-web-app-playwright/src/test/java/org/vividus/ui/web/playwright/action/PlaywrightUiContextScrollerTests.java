@@ -35,7 +35,7 @@ import org.vividus.ui.web.playwright.UiContext;
 class PlaywrightUiContextScrollerTests
 {
     @Mock private UiContext uiContext;
-    @Mock private ScrollActions scrollActions;
+    @Mock private PlaywrightScrollActions scrollActions;
     @Mock private Locator locator;
     @InjectMocks private PlaywrightUiContextScroller scroller;
 

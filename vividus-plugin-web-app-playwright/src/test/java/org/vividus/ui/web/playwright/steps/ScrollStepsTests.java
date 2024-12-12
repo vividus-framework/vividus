@@ -29,7 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.web.ScrollDirection;
 import org.vividus.ui.web.playwright.UiContext;
-import org.vividus.ui.web.playwright.action.ScrollActions;
+import org.vividus.ui.web.playwright.action.PlaywrightScrollActions;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,7 +44,7 @@ class ScrollStepsTests
     private UiContext uiContext;
 
     @Mock
-    private ScrollActions scrollActions;
+    private PlaywrightScrollActions scrollActions;
 
     @Mock
     private Locator locator;
@@ -112,7 +112,7 @@ class ScrollStepsTests
     void shouldCheckIfPageIsScrolledToElement()
     {
         when(uiContext.locateElement(PLAYWRIGHT_LOCATOR)).thenReturn(locator);
-        when(scrollActions.isScrolledToElement(locator)).thenReturn(true);
+        when(scrollActions.isElementInViewport(locator)).thenReturn(true);
         scrollSteps.isPageScrolledToElement(PLAYWRIGHT_LOCATOR);
         verify(softAssert).assertTrue(
                 "The page is scrolled to an element with located by css(.example) with visibility: visible", true);
