@@ -66,9 +66,10 @@ import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.ResourceFileLoader;
 import org.vividus.ui.web.action.WebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
+import org.vividus.ui.web.validation.ScrollValidations;
 import org.vividus.variable.VariableScope;
 
-@SuppressWarnings({ "checkstyle:MethodCount", "PMD.UnnecessaryBooleanAssertion" })
+@SuppressWarnings({ "checkstyle:MethodCount", "PMD.UnnecessaryBooleanAssertion", "PMD.CouplingBetweenObjects" })
 @ExtendWith(MockitoExtension.class)
 class ElementStepsTests
 {
@@ -99,6 +100,9 @@ class ElementStepsTests
     private static final String VARIABLE_NAME = "variableName";
     private static final String ELEMENT_WITH_CSS_PROPERTY = "The element to get the CSS property value";
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
+    private static final String ELEMENT_TO_CHECK = "Element to check";
+    private static final String ELEMENT_IN_VIEWPORT = "Element is in viewport";
+    private static final String ELEMENT_NOT_IN_VIEWPORT = "Element is not in viewport";
 
     @Mock private IBaseValidations baseValidations;
     @Mock private IWebDriverProvider webDriverProvider;
@@ -110,6 +114,7 @@ class ElementStepsTests
     @Mock private IDescriptiveSoftAssert softAssert;
     @Mock private VariableContext variableContext;
     @Mock private ResourceFileLoader resourceFileLoader;
+    @Mock private ScrollValidations<WebElement> scrollValidations;
     @InjectMocks private ElementSteps elementSteps;
 
     @Test
@@ -424,6 +429,29 @@ class ElementStepsTests
         when(baseValidations.assertElementExists(FILE_INPUT_ELEMENT, locator)).thenReturn(Optional.ofNullable(null));
         elementSteps.uploadFile(locator, FILE_PATH);
         verify(webElement, never()).sendKeys(ABSOLUTE_PATH);
+    }
+
+    @Test
+    void shouldCheckElementViewportPresence()
+    {
+        WebElement element = mock();
+        Locator locator = mock();
+        when(baseValidations.assertElementExists(ELEMENT_TO_CHECK, locator)).thenReturn(Optional.of(element));
+
+        elementSteps.checkElementViewportPresence(locator, ViewportPresence.IS);
+
+        verify(scrollValidations).assertElementPositionAgainstViewport(element, ViewportPresence.IS);
+    }
+
+    @Test
+    void shouldCheckElementViewportPresenceNoElementsFound()
+    {
+        Locator locator = mock();
+        when(baseValidations.assertElementExists(ELEMENT_TO_CHECK, locator)).thenReturn(Optional.empty());
+
+        elementSteps.checkElementViewportPresence(locator, ViewportPresence.IS);
+
+        verifyNoInteractions(scrollValidations, softAssert);
     }
 
     private void mockWebElementCssValue()

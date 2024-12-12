@@ -52,6 +52,16 @@ When I scroll element located by `id(way_down_button)` into view
 
 Checks if the page is scrolled to the specific element
 
+[WARNING]
+====
+This step is deprecated and will be removed in VIVIDUS 0.8.0.
+Please see the replacement pattern below:
+[source,gherkin]
+----
+Then element located by `$locator` is visible in viewport
+----
+====
+
 [source,gherkin]
 ----
 Then page is scrolled to element located by `$locator`
@@ -62,4 +72,24 @@ Then page is scrolled to element located by `$locator`
 [source,gherkin]
 ----
 Then page is scrolled to element located by `xpath(//a[text()="Contact"])`
+----
+
+==== Validate element presence in viewport
+
+Checks if the element located by the specified locater is or is not presented in the browser viewport
+
+[source,gherkin]
+----
+Then element located by `$locator` $presence visible in viewport
+----
+* `$locator` - The <<_locator,locator>> used to find element.
+* `$presence` - The presence state of the element, either `is` or `is not`.
+
+.Validate element presence in viewport
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://ui.com/long-page-with-image'
+Then element located by `tagName(img)` is not visible in viewport
+When I scroll element located `tagName(img)` into view
+Then element located by `tagName(img)` is visible in viewport
 ----

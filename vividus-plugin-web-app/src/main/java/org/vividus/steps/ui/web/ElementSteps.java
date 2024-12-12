@@ -51,9 +51,10 @@ import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.ResourceFileLoader;
 import org.vividus.ui.web.action.search.WebLocatorType;
+import org.vividus.ui.web.validation.ScrollValidations;
 import org.vividus.variable.VariableScope;
 
-@SuppressWarnings({"PMD.ExcessiveImports", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({"PMD.ExcessiveImports", "PMD.AvoidDuplicateLiterals", "PMD.CouplingBetweenObjects"})
 @TakeScreenshotOnFailure
 public class ElementSteps implements ResourceLoaderAware
 {
@@ -71,12 +72,14 @@ public class ElementSteps implements ResourceLoaderAware
     private final IElementValidations elementValidations;
     private final VariableContext variableContext;
     private final ResourceFileLoader resourceFileLoader;
+    private final ScrollValidations<WebElement> scrollValidations;
     private ResourceLoader resourceLoader;
 
+    @SuppressWarnings("checkstyle:paramNum")
     public ElementSteps(IWebElementActions webElementActions, IWebDriverProvider webDriverProvider,
             WebDriverManager webDriverManager, IUiContext uiContext, IDescriptiveSoftAssert descriptiveSoftAssert,
             IBaseValidations baseValidations, IElementValidations elementValidations, VariableContext variableContext,
-            ResourceFileLoader resourceFileLoader)
+            ResourceFileLoader resourceFileLoader, ScrollValidations<WebElement> scrollValidations)
     {
         this.webElementActions = webElementActions;
         this.webDriverProvider = webDriverProvider;
@@ -87,6 +90,7 @@ public class ElementSteps implements ResourceLoaderAware
         this.elementValidations = elementValidations;
         this.variableContext = variableContext;
         this.resourceFileLoader = resourceFileLoader;
+        this.scrollValidations = scrollValidations;
     }
 
     /**
@@ -371,6 +375,19 @@ public class ElementSteps implements ResourceLoaderAware
                     .ifPresent(elementParent -> elementValidations
                             .assertIfElementHasWidthInPerc(elementParent, elementChild, width));
         });
+    }
+
+    /**
+     * Checks if the element located by the specified locater is or is not presented in the browser viewport
+     *
+     * @param locator The locator of the element to check presence in viewport
+     * @param presence The presence state of the element, either <b>is</b> or <b>is not</b>
+     */
+    @Then("element located by `$locator` $presence visible in viewport")
+    public void checkElementViewportPresence(Locator locator, ViewportPresence presence)
+    {
+        baseValidations.assertElementExists("Element to check", locator)
+                .ifPresent(e -> scrollValidations.assertElementPositionAgainstViewport(e, presence));
     }
 
     @Override

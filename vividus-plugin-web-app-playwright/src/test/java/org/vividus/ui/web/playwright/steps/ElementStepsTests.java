@@ -52,6 +52,7 @@ import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.StringComparisonRule;
+import org.vividus.steps.ui.web.ViewportPresence;
 import org.vividus.ui.web.action.ResourceFileLoader;
 import org.vividus.ui.web.playwright.UiContext;
 import org.vividus.ui.web.playwright.action.ElementActions;
@@ -59,6 +60,7 @@ import org.vividus.ui.web.playwright.assertions.PlaywrightLocatorAssertions;
 import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 import org.vividus.ui.web.playwright.locator.Visibility;
+import org.vividus.ui.web.validation.ScrollValidations;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
@@ -79,6 +81,7 @@ class ElementStepsTests
     @Mock private VariableContext variableContext;
     @Mock private ElementActions elementActions;
     @Mock private PlaywrightSoftAssert playwrightSoftAssert;
+    @Mock private ScrollValidations<Locator> scrollValidations;
     @Mock private ResourceFileLoader resourceFileLoader;
     @InjectMocks private ElementSteps steps;
 
@@ -287,6 +290,18 @@ class ElementStepsTests
                 () -> steps.assertElementsNumberInState(state, locator, ComparisonRule.EQUAL_TO, 0));
         assertEquals(String.format("Contradictory input parameters. Locator visibility: '%s', the state: '%s'.",
                 visibility, state), illegalArgumentException.getMessage());
+    }
+
+    @Test
+    void shouldCheckElementViewportPresence()
+    {
+        var playwrightLocator = new PlaywrightLocator(XPATH, LOCATOR_VALUE);
+        Locator locator = mock();
+        when(uiContext.locateElement(playwrightLocator)).thenReturn(locator);
+
+        steps.checkElementViewportPresence(playwrightLocator, ViewportPresence.IS);
+
+        verify(scrollValidations).assertElementPositionAgainstViewport(locator, ViewportPresence.IS);
     }
 
     private static PlaywrightLocator getLocatorWithVisibility(Visibility visibility)

@@ -21,6 +21,7 @@ import java.util.List;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
+import org.vividus.annotation.Replacement;
 import org.vividus.selenium.locator.Locator;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.validation.IBaseValidations;
@@ -97,7 +98,11 @@ public class ScrollSteps
      * get element's Y coordinate and verify that it's close to 0 which means that element is an the very top
      * </ul>
      * @param locator A locator to locate element
+     * @deprecated Use step: "Then element located by `$locator` $presence visible in viewport" instead
      */
+    @Deprecated(since = "0.6.15", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.8.0",
+            replacementFormatPattern = "Then element located by `%1$s` is visible in viewport")
     @Then("page is scrolled to element located by `$locator`")
     public void isPageScrolledToElement(Locator locator)
     {

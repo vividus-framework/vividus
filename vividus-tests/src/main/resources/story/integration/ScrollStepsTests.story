@@ -27,12 +27,13 @@ When I scroll context to TOP edge
 When I reset context
 When I wait until element located by `id(current-vertical):a` contains text `0`
 
-Scenario: Verify steps: "When I scroll element located by `$locator` into view", "Then page is scrolled to element located by `$locator`"
+Scenario: Verify steps: "When I scroll element located by `$locator` into view", "Then element located by `$locator` $presence visible in viewport"
 Meta:
     @requirementId 436
 When I refresh page
+Then element located by `xpath(//a[text()="Contact"])` is not visible in viewport
 When I scroll element located by `xpath(//a[text()="Contact"])` into view
-Then page is scrolled to element located by `xpath(//a[text()="Contact"])`
+Then element located by `xpath(//a[text()="Contact"])` is visible in viewport
 When I wait until element located by `id(current-vertical):a` has text matching `\d+`
 
 Scenario: Verify deprecated steps: "When I scroll element located `$locator` into view", "Then page is scrolled to element located `$locator`"
