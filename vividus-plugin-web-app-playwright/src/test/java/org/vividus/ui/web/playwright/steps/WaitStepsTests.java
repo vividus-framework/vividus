@@ -32,6 +32,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import com.microsoft.playwright.BrowserContext;
@@ -181,6 +182,33 @@ class WaitStepsTests
         var assertionDescription = String.format("The element located by `%s` has become VISIBLE", playwrightLocator);
         verify(softAssert).assertTrue(eq(assertionDescription),
                 eq(finalStateResult));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void shouldWaitUntilElementHasTextMatchingRegex()
+    {
+        Pattern pattern = Pattern.compile("\\d+");
+        doNothing().when(waitActions).runWithTimeoutAssertion((Supplier<String>) argThat(s ->
+        {
+            String value = ((Supplier<String>) s).get();
+            return "The element located by `css(div) with visibility: visible` has text matching regex '\\d+'"
+                    .equals(value);
+        }), argThat(runnable ->
+        {
+            runnable.run();
+            return true;
+        }));
+        Locator locator = mock();
+        when(uiContext.locateElement(playwrightLocator)).thenReturn(locator);
+
+        try (var playwrightLocatorAssertions = mockStatic(PlaywrightLocatorAssertions.class))
+        {
+            waitSteps.waitUntilElementHasTextMatchingRegex(playwrightLocator, pattern);
+
+            playwrightLocatorAssertions.verify(
+                () -> PlaywrightLocatorAssertions.assertElementHasTextMatchingRegex(locator, pattern, true));
+        }
     }
 
     private void shouldWaitForElementState(ElementState state, Consumer<WaitSteps> test,
