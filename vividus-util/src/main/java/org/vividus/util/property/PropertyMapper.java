@@ -42,6 +42,9 @@ import org.apache.commons.lang3.StringUtils;
 
 public class PropertyMapper implements IPropertyMapper
 {
+    private static final String VARIABLES_PROPERTY_PREFIX = "variables.";
+    private static final String VARIABLES_PATH_SEPARATOR_REGEX = "(?<!variables)\\.";
+
     private final String propertyPrefixSeparator;
     private final JavaPropsMapper javaPropsMapper;
     private final PropertyParser propertyParser;
@@ -155,7 +158,15 @@ public class PropertyMapper implements IPropertyMapper
     {
         return properties.entrySet().stream()
                 .filter(e -> e.getKey().startsWith(propertyFamily))
-                .collect(toMap(e -> StringUtils.removeStart(e.getKey(), propertyFamily), Entry::getValue));
+                .collect(toMap(e -> escapePathSeparatorForVariableKey(
+                        StringUtils.removeStart(e.getKey(), propertyFamily)), Entry::getValue));
+    }
+
+    private String escapePathSeparatorForVariableKey(String property)
+    {
+        return property.startsWith(VARIABLES_PROPERTY_PREFIX)
+                ? property.replaceAll(VARIABLES_PATH_SEPARATOR_REGEX, "\0.")
+                : property;
     }
 
     protected String getPropertyPrefixSeparator()
