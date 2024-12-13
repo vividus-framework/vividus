@@ -18,6 +18,8 @@ package org.vividus.ui.web.playwright.assertions;
 
 import static org.vividus.ui.web.playwright.PlaywrightAssertionConfiguration.ASSERTION_NO_WAIT_TIMEOUT;
 
+import java.util.regex.Pattern;
+
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.assertions.LocatorAssertions;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
@@ -26,6 +28,13 @@ public final class PlaywrightLocatorAssertions
 {
     private PlaywrightLocatorAssertions()
     {
+    }
+
+    public static void assertElementHasTextMatchingRegex(Locator locator, Pattern pattern, boolean waitForState)
+    {
+        LocatorAssertions.ContainsTextOptions options = waitForState ? null
+                : new LocatorAssertions.ContainsTextOptions().setTimeout(ASSERTION_NO_WAIT_TIMEOUT);
+        getLocatorAssertions(locator).containsText(pattern, options);
     }
 
     public static void assertElementVisible(Locator locator, boolean waitForState)

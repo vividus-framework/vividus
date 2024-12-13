@@ -19,6 +19,7 @@ package org.vividus.ui.web.playwright.steps;
 import java.time.Duration;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
@@ -32,6 +33,7 @@ import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.web.playwright.BrowserContextProvider;
 import org.vividus.ui.web.playwright.UiContext;
 import org.vividus.ui.web.playwright.action.WaitActions;
+import org.vividus.ui.web.playwright.assertions.PlaywrightLocatorAssertions;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 import org.vividus.ui.web.playwright.locator.Visibility;
 import org.vividus.util.wait.DurationBasedWaiter;
@@ -158,6 +160,24 @@ public class WaitSteps
                 () -> state.isElementState(element), result -> result);
         softAssert.assertTrue(String.format("The element located by `%s` has become %s", locator, state),
                 isElementInState);
+    }
+
+    /**
+     * Waits until an element with the specified locator has text that matches the provided regular expression.
+     *
+     * @param locator The locator of the element which text to check
+     * @param regex   The regular expression used to validate the text of the element
+     */
+    @When("I wait until element located by `$locator` has text matching `$regex`")
+    public void waitUntilElementHasTextMatchingRegex(PlaywrightLocator locator, Pattern regex)
+    {
+        Supplier<String> conditionDescription = () -> "The element located by `%s` has text matching regex '%s'"
+                .formatted(locator, regex);
+        waitActions.runWithTimeoutAssertion(conditionDescription, () ->
+        {
+            Locator element = uiContext.locateElement(locator);
+            PlaywrightLocatorAssertions.assertElementHasTextMatchingRegex(element, regex, true);
+        });
     }
 
     private void waitForElementStateValidatingVisibility(PlaywrightLocator locator,

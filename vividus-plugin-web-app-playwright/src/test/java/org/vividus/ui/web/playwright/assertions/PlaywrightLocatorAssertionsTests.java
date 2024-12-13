@@ -19,11 +19,13 @@ package org.vividus.ui.web.playwright.assertions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.assertions.LocatorAssertions;
@@ -40,8 +42,32 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class PlaywrightLocatorAssertionsTests
 {
     private static final double ASSERTION_NO_WAIT_TIMEOUT = 0.1;
+    private static final Pattern PATTERN = Pattern.compile("\\d+");
 
     @Mock private Locator locator;
+
+    @Test
+    void shouldAssertElementHasTextMatchingRegex()
+    {
+        shouldAssertElement(locatorAssertions ->
+        {
+            PlaywrightLocatorAssertions.assertElementHasTextMatchingRegex(locator, PATTERN, false);
+            ArgumentCaptor<LocatorAssertions.ContainsTextOptions> captor = ArgumentCaptor
+                    .forClass(LocatorAssertions.ContainsTextOptions.class);
+            verify(locatorAssertions).containsText(eq(PATTERN), captor.capture());
+            assertEquals(ASSERTION_NO_WAIT_TIMEOUT, captor.getValue().timeout);
+        });
+    }
+
+    @Test
+    void shouldAssertElementHasTextMatchingRegexWaitForState()
+    {
+        shouldAssertElement(locatorAssertions ->
+        {
+            PlaywrightLocatorAssertions.assertElementHasTextMatchingRegex(locator, PATTERN, true);
+            verify(locatorAssertions).containsText(PATTERN, null);
+        });
+    }
 
     @Test
     void shouldAssertElementVisibleWithWaitForState()

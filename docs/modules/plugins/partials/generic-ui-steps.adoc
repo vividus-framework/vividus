@@ -165,24 +165,6 @@ Then element located by `$locator` exists for `$duration` duration
 Then element located by `id(banner)` exists for `PT5S` duration
 ----
 
-=== Wait until element has text matching regular expression
-
-Waits until an element with the specified locator has text that matches the provided https://www.regular-expressions.info/[regular expression].
-
-[source,gherkin]
-----
-When I wait until element located by `$locator` has text matching `$regex`
-----
-
-* `$locator` - The <<_locator>> of the element which text to check.
-* `$regex` - The https://www.regular-expressions.info/[regular expression] used to validate the text of the element.
-
-.The element should have text consisting of numbers only
-[source,gherkin]
-----
-When I wait until element located by `id(indicator)` has text matching `\d+`
-----
-
 === Verify elements order
 
 Gets a collection of elements by locator and checks that they are sorted by
