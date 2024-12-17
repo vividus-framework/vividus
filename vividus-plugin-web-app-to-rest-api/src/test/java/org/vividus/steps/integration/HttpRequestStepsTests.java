@@ -94,8 +94,7 @@ class HttpRequestStepsTests
         BasicClientCookie cookie2 = new BasicClientCookie("api_key1", "api_value1");
         when(cookieStore.getCookies()).thenReturn(List.of(cookie1, cookie2));
         httpRequestSteps.setHttpCookiesToBrowser();
-        verify(cookieManager).addHttpClientCookie(cookie1);
-        verify(cookieManager).addHttpClientCookie(cookie2);
+        verify(cookieManager).addHttpClientCookies(List.of(cookie1, cookie2));
         var cookiesCaptor = ArgumentCaptor.forClass(Map.class);
         verify(attachmentPublisher).publishAttachment(eq(ATTACHMENT_TEMPLATE_PATH),
                 cookiesCaptor.capture(), eq("HTTP cookies"));

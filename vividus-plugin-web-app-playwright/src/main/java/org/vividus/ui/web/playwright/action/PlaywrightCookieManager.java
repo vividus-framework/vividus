@@ -47,23 +47,32 @@ public class PlaywrightCookieManager implements CookieManager<Cookie>
     public void addCookie(String cookieName, String cookieValue, String path, String urlAsString)
     {
         String domain = InetAddressUtils.getDomain(urlAsString);
-        addCookieToBrowserContext(cookieName, cookieValue, path, domain);
+        Cookie cookie = createCookie(cookieName, cookieValue, path, domain);
+        addCookiesToBrowserContext(List.of(cookie));
     }
 
     @Override
-    public void addHttpClientCookie(org.apache.hc.client5.http.cookie.Cookie httpCookie)
+    public void addHttpClientCookies(List<org.apache.hc.client5.http.cookie.Cookie> httpCookies)
     {
-        addCookieToBrowserContext(httpCookie.getName(), httpCookie.getValue(), httpCookie.getPath(),
-                httpCookie.getDomain());
+        List<Cookie> cookies = httpCookies.stream()
+                .map(
+                        httpCookie -> createCookie(httpCookie.getName(), httpCookie.getValue(), httpCookie.getPath(),
+                                httpCookie.getDomain()))
+                .toList();
+        addCookiesToBrowserContext(cookies);
     }
 
-    private void addCookieToBrowserContext(String cookieName, String cookieValue, String path, String domain)
+    private void addCookiesToBrowserContext(List<Cookie> cookies)
     {
-        Cookie cookie = new Cookie(cookieName, cookieValue)
+        cookies.forEach(cookie -> LOGGER.debug("Adding cookie: {}", cookie));
+        getBrowserContext().addCookies(cookies);
+    }
+
+    private static Cookie createCookie(String cookieName, String cookieValue, String path, String domain)
+    {
+        return new Cookie(cookieName, cookieValue)
                 .setPath(path)
                 .setDomain(domain);
-        LOGGER.debug("Adding cookie: {}", cookie);
-        getBrowserContext().addCookies(List.of(cookie));
     }
 
     @Override

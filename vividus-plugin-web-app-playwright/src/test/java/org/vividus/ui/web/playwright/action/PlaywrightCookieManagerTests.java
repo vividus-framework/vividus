@@ -107,7 +107,7 @@ class PlaywrightCookieManagerTests
 
         ArgumentCaptor<List<Cookie>> cookieCaptor = ArgumentCaptor.captor();
         when(browserContextProvider.get()).thenReturn(browserContext);
-        cookieManager.addHttpClientCookie(httpCookie);
+        cookieManager.addHttpClientCookies(List.of(httpCookie));
         verify(browserContext).addCookies(cookieCaptor.capture());
 
         Cookie cookie = cookieCaptor.getValue().get(0);

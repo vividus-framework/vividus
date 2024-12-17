@@ -17,6 +17,7 @@
 package org.vividus.ui.web.action;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -45,10 +46,12 @@ public class WebDriverCookieManager implements CookieManager<Cookie>
     }
 
     @Override
-    public void addHttpClientCookie(org.apache.hc.client5.http.cookie.Cookie httpCookie)
+    public void addHttpClientCookies(List<org.apache.hc.client5.http.cookie.Cookie> httpCookies)
     {
-        addCookieToBrowserContext(httpCookie.getName(), httpCookie.getValue(), httpCookie.getPath(),
-                httpCookie.getDomain());
+        httpCookies.forEach(
+                httpCookie -> addCookieToBrowserContext(httpCookie.getName(), httpCookie.getValue(),
+                httpCookie.getPath(), httpCookie.getDomain())
+        );
     }
 
     private void addCookieToBrowserContext(String cookieName, String cookieValue, String path, String domain)

@@ -88,6 +88,6 @@ public class HttpRequestSteps
         List<org.apache.hc.client5.http.cookie.Cookie> cookies = cookieStoreProvider.getCookieStore().getCookies();
         attachmentPublisher.publishAttachment(ATTACHMENT_TEMPLATE_PATH,
                     Map.of(TEMPLATE_COOKIES_KEY, cookies), "HTTP cookies");
-        cookies.forEach(cookieManager::addHttpClientCookie);
+        cookieManager.addHttpClientCookies(cookies);
     }
 }
