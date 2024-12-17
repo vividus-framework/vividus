@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,9 +106,13 @@ class PropertyMapperTests
         String addressPrefix = "address.";
         String streetNameKey = "street-name";
         String streetName = "Stakanalievo";
+        String variablesPrefix = "variables.";
+        String variablesKey = "compo.site.key";
+        String variablesValue = "value";
 
         Map<String, String> properties = new HashMap<>(createObjectProperties(PROPERTY_PREFIX + ADMIN + '.'));
         properties.put(PROPERTY_PREFIX + ADMIN + '.' + addressPrefix + streetNameKey, streetName);
+        properties.put(PROPERTY_PREFIX + ADMIN + '.' + variablesPrefix + variablesKey, variablesValue);
         when(propertyParser.getPropertiesByPrefix(PROPERTY_PREFIX)).thenReturn(properties);
 
         Map<String, String> baseProperties = Map.of(
@@ -120,6 +124,7 @@ class PropertyMapperTests
         PropertyMappedCollection<User> result = propertyMapper.readValues(PROPERTY_PREFIX, addressPrefix,
                 User.class);
         assertCollection(result, ADMIN);
+        assertEquals(variablesValue, result.getData().get(ADMIN).getVariables().get(variablesKey));
         Address address = result.getData().get(ADMIN).getAddress();
         assertNotNull(address);
         assertEquals(streetName, address.getStreetName());
@@ -224,6 +229,7 @@ class PropertyMapperTests
         private Pattern pattern;
         private Supplier<String> dob;
         private Address address;
+        private Map<String, String> variables;
 
         public String getFirstName()
         {
@@ -253,6 +259,11 @@ class PropertyMapperTests
         public Address getAddress()
         {
             return address;
+        }
+
+        public Map<String, String> getVariables()
+        {
+            return variables;
         }
     }
 
