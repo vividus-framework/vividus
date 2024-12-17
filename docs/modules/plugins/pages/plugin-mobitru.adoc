@@ -18,7 +18,7 @@ IMPORTANT: For the device search plugin relies on the capabilities specified in 
 |===
 
 |`mobitru/web`
-|Use in conjunction with xref:plugins:plugin-web-app.adoc#_phone[web application phone profiles].
+|Use in conjunction with xref:plugins:plugin-web-app.adoc#_mobile_web[mobile web application profiles].
 
 |`mobitru/mobile_app`
 |Use in conjunction with xref:plugins:plugin-mobile-app.adoc#_profiles[native mobile application profiles].

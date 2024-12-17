@@ -67,4 +67,4 @@ dependencies {
 
 It is recommended to update the BOM regularly to its latest version to take advantage of the latest bug fixes and
 improvements. This can be done by updating the version number in the BOM dependency in the `build.gradle` file. Then it
-is necessary to <<refresh-the-project,refresh the project>>.
+is necessary to <<_refresh-the-project,refresh the project>>.
