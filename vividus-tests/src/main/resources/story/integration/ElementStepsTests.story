@@ -68,21 +68,6 @@ When I perform right-click on element located by `id(context-menu)`
 Then number of elements found by `name(Foo)` is = `0`
 Then number of elements found by `name(Bar)` is = `1`
 
-Scenario: Deprecated step verification Then the context element has the CSS property '$cssName'='$cssValue'
-Given I am on page with URL `${vividus-test-site-url}/inputs.html`
-When I change context to element located by `xpath(.//*[@title='Text input section'])`
-Then the context element has the CSS property 'color'='rgba(0, 0, 0, 1)'
-
-Scenario: Step verification context element has CSS property `$cssName` with value that $comparisonRule `$cssValue`
-Given I am on page with URL `${vividus-test-site-url}/inputs.html`
-When I change context to element located by `xpath(.//*[@title='Text input section'])`
-Then context element has CSS property `color` with value that is equal to `rgba(0, 0, 0, 1)`
-
-Scenario: Deprecated step verification Then the context element has the CSS property '$cssName' containing '$cssValue'
-Given I am on page with URL `${vividus-test-site-url}/inputs.html`
-When I change context to element located by `xpath(.//*[@title='Text input section'])`
-Then the context element has the CSS property 'color' containing '(0, 0, 0, 1)'
-
 Scenario: Deprecated step verification When I select element `$locator` and upload file `$filePath`
 Given I am on page with URL `${vividus-test-site-url}/upload.html`
 When I select element located `By.id(uploadInput)` and upload file `/data/file_for_upload_step.png`
@@ -208,10 +193,6 @@ When I wait until element located by `id(element-to-hide)` disappears
 Scenario: Step verification 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`'
 Given I am on page with URL `${vividus-test-site-url}`
 Then number of VISIBLE elements found by `tagName(img):a` is = `1`
-
-Scenario: Verify step: "When I save `$cssProperty` CSS property value of element located by `$locator` to $scopes variable `$variableName`"
-When I save `background-image` CSS property value of element located by `xpath(//body)` to scenario variable `cssPropertyValue`
-Then `${cssPropertyValue}` is = `none`
 
 Scenario: Step verification Then elements located by `$locator` are sorted by text in $sortingOrder order
 Given I am on page with URL `${vividus-test-site-url}/sortedListOfElement.html`
