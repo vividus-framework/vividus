@@ -16,8 +16,6 @@
 
 package org.vividus.ui.web.playwright.steps;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -25,10 +23,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
+import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.Cookie;
 
 import org.apache.commons.lang3.StringUtils;
@@ -41,50 +39,70 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.StringComparisonRule;
-import org.vividus.ui.web.configuration.WebApplicationConfiguration;
+import org.vividus.ui.web.playwright.UiContext;
 import org.vividus.ui.web.playwright.action.PlaywrightCookieManager;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
-class CookieStepsTests
+class PlaywrightCookieStepsTests
 {
-    private static final String NAME = "name";
     private static final String COOKIE_WITH_NAME_TEXT = "Cookie with the name that is equal to '";
-    private static final String DYNAMIC_COOKIE_NAME = "SSESSf4342sds23e3t5fs";
-    @Mock private Cookie cookie;
+    private static final String COOKIE_NAME = "SSESSf4342sds23e3t5fs";
+    private static final String VARIABLE_NAME = "var";
+
     @Mock private PlaywrightCookieManager cookieManager;
     @Mock private VariableContext variableContext;
     @Mock private ISoftAssert softAssert;
-    @Mock private WebApplicationConfiguration webApplicationConfiguration;
+    @Mock private UiContext uiContext;
     @Mock private JsonUtils jsonUtils;
-    @InjectMocks private CookieSteps cookieSteps;
+    @InjectMocks private PlaywrightCookieSteps cookieSteps;
 
     @Test
-    void shouldValidateThatCookieWithNameMatchingComparisonRuleIsSet()
+    void shouldAssertThatCookieWithNameMatchingComparisonRuleIsSet()
     {
-        Cookie pwCookie = new Cookie(DYNAMIC_COOKIE_NAME, StringUtils.EMPTY);
-        when(cookieManager.getCookies()).thenReturn(List.of(pwCookie));
-        cookieSteps.thenCookieWithMatchingNameIsSet(StringComparisonRule.MATCHES, "SSESS.*");
+        var cookie = new Cookie(COOKIE_NAME, StringUtils.EMPTY);
+        when(cookieManager.getCookies()).thenReturn(List.of(cookie));
+        cookieSteps.assertCookieIsSet(StringComparisonRule.MATCHES, "SSESS.*");
         verify(softAssert).assertTrue("Cookie with the name that matches 'SSESS.*' is set", true);
     }
 
     @Test
-    void shouldValidateThatCookieWithNameMatchingComparisonRuleIsNotSet()
+    void shouldAssertThatCookieWithNameMatchingComparisonRuleIsNotSet()
     {
-        Cookie pwCookie = new Cookie(DYNAMIC_COOKIE_NAME, StringUtils.EMPTY);
-        when(cookieManager.getCookies()).thenReturn(List.of(pwCookie));
-        cookieSteps.thenCookieWithMatchingNameIsNotSet(StringComparisonRule.CONTAINS, "_ga");
+        var cookie = new Cookie(COOKIE_NAME, StringUtils.EMPTY);
+        when(cookieManager.getCookies()).thenReturn(List.of(cookie));
+        cookieSteps.assertCookieIsNotSet(StringComparisonRule.CONTAINS, "_ga");
         verify(softAssert).assertTrue("Cookie with the name that contains '_ga' is not set", true);
+    }
+
+    @Test
+    void shouldConvertCookieToJsonAndSaveItToContext()
+    {
+        Cookie cookie = mock();
+        when(cookieManager.getCookie(COOKIE_NAME)).thenReturn(cookie);
+        String cookieAsJson = "{\"path\": \"/index\"}";
+        when(jsonUtils.toJson(cookie)).thenReturn(cookieAsJson);
+        Set<VariableScope> scopes = Set.of(VariableScope.STEP);
+
+        cookieSteps.saveCookieAsJson(COOKIE_NAME, scopes, VARIABLE_NAME);
+        verify(variableContext).putVariable(scopes, VARIABLE_NAME, cookieAsJson);
+    }
+
+    @Test
+    void shouldNotConvertNorSaveIfNoCookieReturnedByCookieHelper()
+    {
+        cookieSteps.saveCookieAsJson(COOKIE_NAME, Set.of(VariableScope.STEP), VARIABLE_NAME);
+        verifyNoInteractions(jsonUtils, variableContext);
     }
 
     @Test
     void testSetAllCookies()
     {
         String testUrl = "https://www.vividus.org";
-        URI uri = mock();
-        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(uri);
-        when(uri.toString()).thenReturn(testUrl);
+        Page page = mock();
+        when(page.url()).thenReturn(testUrl);
+        when(uiContext.getCurrentPage()).thenReturn(page);
 
         String tableAsString = "|cookieName|cookieValue|path|\n|hcpsid|1|/|\n|hcpsid|1|/|";
         ExamplesTable table = new ExamplesTable(tableAsString);
@@ -96,25 +114,13 @@ class CookieStepsTests
     void shouldSaveCookieValueIntoVariableContext()
     {
         String value = "value";
-        Cookie newCookie = new Cookie(NAME, value);
+        Cookie newCookie = new Cookie(COOKIE_NAME, value);
         when(cookieManager.getCookies()).thenReturn(List.of(newCookie));
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
 
-        cookieSteps.saveCookieIntoVariable(NAME, scopes, NAME);
-        verify(variableContext).putVariable(scopes, NAME, value);
+        cookieSteps.saveCookieIntoVariable(COOKIE_NAME, scopes, VARIABLE_NAME);
+        verify(variableContext).putVariable(scopes, VARIABLE_NAME, value);
         verifyCookieAssertion(true);
-    }
-
-    @Test
-    void shouldConvertCookieToJsonAndSaveItToContext()
-    {
-        when(cookieManager.getCookie(NAME)).thenReturn(cookie);
-        String cookieAsJson = "{\"path\": \"/index\"}";
-        when(jsonUtils.toJson(cookie)).thenReturn(cookieAsJson);
-        Set<VariableScope> scopes = Set.of(VariableScope.STEP);
-
-        cookieSteps.saveCookieAsJson(NAME, scopes, NAME);
-        verify(variableContext).putVariable(scopes, NAME, cookieAsJson);
     }
 
     @Test
@@ -129,41 +135,22 @@ class CookieStepsTests
     @Test
     void shouldRemoveCookie()
     {
-        cookieSteps.removeCookie(NAME);
+        cookieSteps.removeCookie(COOKIE_NAME);
         var ordered = inOrder(cookieManager);
-        ordered.verify(cookieManager).deleteCookie(NAME);
+        ordered.verify(cookieManager).deleteCookie(COOKIE_NAME);
         ordered.verifyNoMoreInteractions();
-    }
-
-    @Test
-    void shouldThrowAnExceptionIfCurrentURLIsNotDefined()
-    {
-        ExamplesTable table = mock();
-        URI uri = mock();
-        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(uri);
-        when(uri.toString()).thenReturn(null);
-        IllegalArgumentException iae =
-                assertThrows(IllegalArgumentException.class, () -> cookieSteps.setAllCookies(table));
-        assertEquals("Unable to get current URL. Please make sure you've navigated to the right URL", iae.getMessage());
     }
 
     @Test
     void shouldNotSaveNotExistingCookieAndRecordAssertion()
     {
-        cookieSteps.saveCookieIntoVariable(NAME, Set.of(VariableScope.SCENARIO), NAME);
+        cookieSteps.saveCookieIntoVariable(COOKIE_NAME, Set.of(VariableScope.SCENARIO), VARIABLE_NAME);
         verifyNoInteractions(variableContext);
         verifyCookieAssertion(false);
     }
 
-    @Test
-    void shouldNotConvertNorSaveIfNoCookieReturnedByCookieHelper()
-    {
-        cookieSteps.saveCookieAsJson(NAME, Set.of(VariableScope.STEP), NAME);
-        verifyNoInteractions(jsonUtils, variableContext);
-    }
-
     private void verifyCookieAssertion(boolean assertionPass)
     {
-        verify(softAssert).assertTrue(COOKIE_WITH_NAME_TEXT + NAME + "' is set", assertionPass);
+        verify(softAssert).assertTrue(COOKIE_WITH_NAME_TEXT + COOKIE_NAME + "' is set", assertionPass);
     }
 }

@@ -179,7 +179,7 @@
     <bean id="alertSteps" class="org.vividus.steps.ui.web.AlertSteps" />
     <bean id="buttonSteps" class="org.vividus.steps.ui.web.RadioButtonSteps" />
     <bean id="codeSteps" class="org.vividus.steps.ui.web.CodeSteps" />
-    <bean id="cookieSteps" class="org.vividus.steps.ui.web.CookieSteps" />
+    <bean id="cookieSteps" class="org.vividus.steps.ui.web.SeleniumCookieSteps" />
     <bean id="checkboxSteps" class="org.vividus.steps.ui.web.CheckboxSteps" />
     <bean id="dropdownSteps" class="org.vividus.steps.ui.web.DropdownSteps" />
     <bean id="elementSteps" class="org.vividus.steps.ui.web.ElementSteps" />
