@@ -4,7 +4,7 @@ dependencies {
     implementation project(':vividus-http-client')
     implementation project(':vividus-util')
 
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.3.1-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.0-jre')
 
     testImplementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties')
 
