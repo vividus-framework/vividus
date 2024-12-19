@@ -19,11 +19,8 @@ package org.vividus.steps.ui.web;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
-import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.lang3.Validate;
-import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
@@ -32,32 +29,32 @@ import org.vividus.annotation.Replacement;
 import org.vividus.context.VariableContext;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.steps.StringComparisonRule;
+import org.vividus.ui.web.CookieSteps;
 import org.vividus.ui.web.action.CookieManager;
 import org.vividus.ui.web.action.INavigateActions;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
-public class CookieSteps
+public class SeleniumCookieSteps extends CookieSteps<Cookie>
 {
     private static final String COOKIE_PRESENCE_PATTERN = "Cookie with the name '%s' is set";
 
-    private final ISoftAssert softAssert;
+    private final IWebDriverProvider webDriverProvider;
     private final CookieManager<Cookie> cookieManager;
     private final INavigateActions navigateActions;
-    private final IWebDriverProvider webDriverProvider;
     private final VariableContext variableContext;
-    private final JsonUtils jsonUtils;
+    private final ISoftAssert softAssert;
 
-    public CookieSteps(ISoftAssert softAssert, CookieManager<Cookie> cookieManager, INavigateActions navigateActions,
-                       IWebDriverProvider webDriverProvider, VariableContext variableContext, JsonUtils jsonUtils)
+    public SeleniumCookieSteps(IWebDriverProvider webDriverProvider, CookieManager<Cookie> cookieManager,
+            INavigateActions navigateActions, VariableContext variableContext, JsonUtils jsonUtils,
+            ISoftAssert softAssert)
     {
-        this.softAssert = softAssert;
+        super(cookieManager, Cookie::getName, Cookie::toJson, variableContext, jsonUtils, softAssert);
+        this.webDriverProvider = webDriverProvider;
         this.cookieManager = cookieManager;
         this.navigateActions = navigateActions;
-        this.webDriverProvider = webDriverProvider;
         this.variableContext = variableContext;
-        this.jsonUtils = jsonUtils;
+        this.softAssert = softAssert;
     }
 
     /**
@@ -115,21 +112,6 @@ public class CookieSteps
     }
 
     /**
-     * Checks if cookie with name <code>cookieName</code> according the <b>string validation rule</b> is set.
-     *
-     * @param stringComparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches".
-     * @param cookieName The name of the cookie to check presence.
-     */
-    @Then("cookie with name that $stringComparisonRule `$cookieName` is set")
-    public void thenCookieWithMatchingNameIsSet(StringComparisonRule stringComparisonRule, String cookieName)
-    {
-        Optional<Cookie> cookie = getCookieMatchingRule(stringComparisonRule, cookieName);
-        softAssert.assertTrue(
-                String.format("Cookie with the name that %s '%s' is set", stringComparisonRule, cookieName),
-                cookie.isPresent());
-    }
-
-    /**
      * Validates whether the certain cookie is set.
      *
      * @param cookieName The name of the cookie to check presence.
@@ -160,30 +142,17 @@ public class CookieSteps
      *                     </ul>
      * @param variableName The variable name to save the cookie value.
      */
+    @SuppressWarnings("checkstyle:TodoComment")
     @When("I save value of cookie with name `$cookieName` to $scopes variable `$variableName`")
     public void saveCookieIntoVariable(String cookieName, Set<VariableScope> scopes, String variableName)
     {
         Cookie cookie = cookieManager.getCookie(cookieName);
+        // TODO: need to change assertion message and move to common steps in 0.7.0
         softAssert.assertThat(String.format(COOKIE_PRESENCE_PATTERN, cookieName), cookie, notNullValue());
         if (cookie != null)
         {
             variableContext.putVariable(scopes, variableName, cookie.getValue());
         }
-    }
-
-    /**
-     * Checks if cookie with name <code>cookieName</code> according the <b>string validation rule</b> is not set.
-     *
-     * @param cookieName The name of the cookie to check absence.
-     * @param stringComparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches".
-     */
-    @Then("cookie with name that $stringComparisonRule `$cookieName` is not set")
-    public void thenCookieWithMatchingNameIsNotSet(StringComparisonRule stringComparisonRule, String cookieName)
-    {
-        Optional<Cookie> cookie = getCookieMatchingRule(stringComparisonRule, cookieName);
-        softAssert.assertTrue(
-                String.format("Cookie with the name that %s '%s' is not set", stringComparisonRule, cookieName),
-                cookie.isEmpty());
     }
 
     /**
@@ -254,41 +223,6 @@ public class CookieSteps
     @When("I set all cookies for current domain without applying changes:$parameters")
     public void setAllCookiesWithoutApply(ExamplesTable parameters)
     {
-        String currentUrl = webDriverProvider.get().getCurrentUrl();
-        Validate.isTrue(null != currentUrl,
-                "Unable to get current URL. Please make sure you've navigated to the right URL");
-        parameters.getRows().forEach(row ->
-        {
-            cookieManager.addCookie(row.get("cookieName"), row.get("cookieValue"), row.get("path"), currentUrl);
-        });
-    }
-
-    /**
-     * Finds the cookie by the name and saves all its parameters as JSON to a variable.
-     *
-     * @param cookieName   The name of the cookie to save.
-     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable
-     *                     scopes.<br>
-     *                     <i>Available scopes:</i>
-     *                     <ul>
-     *                     <li><b>STEP</b> - the variable will be available only within the step,
-     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     *                     <li><b>STORY</b> - the variable will be available within the whole story,
-     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     *                     </ul>
-     * @param variableName The variable name to save the cookie.
-     */
-    @When("I save cookie with name `$cookieName` as JSON to $scopes variable `$variableName`")
-    public void saveCookieAsJson(String cookieName, Set<VariableScope> scopes, String variableName)
-    {
-        Optional.ofNullable(cookieManager.getCookie(cookieName))
-                .map(Cookie::toJson)
-                .ifPresent(cam -> variableContext.putVariable(scopes, variableName, jsonUtils.toJson(cam)));
-    }
-
-    private Optional<Cookie> getCookieMatchingRule(StringComparisonRule validationRule, String cookieName)
-    {
-        Matcher<String> matcher = validationRule.createMatcher(cookieName);
-        return cookieManager.getCookies().stream().filter(cookie -> matcher.matches(cookie.getName())).findFirst();
+        setCookies(webDriverProvider.get().getCurrentUrl(), parameters);
     }
 }

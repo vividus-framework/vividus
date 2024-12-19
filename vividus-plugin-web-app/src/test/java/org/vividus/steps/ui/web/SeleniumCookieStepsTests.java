@@ -16,8 +16,6 @@
 
 package org.vividus.steps.ui.web;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -50,7 +48,7 @@ import org.vividus.variable.VariableScope;
 
 @SuppressWarnings("PMD.UnnecessaryBooleanAssertion")
 @ExtendWith(MockitoExtension.class)
-class CookieStepsTests
+class SeleniumCookieStepsTests
 {
     private static final String NAME = "name";
     private static final String DYNAMIC_COOKIE_NAME = "SSESSf4342sds23e3t5fs";
@@ -62,7 +60,7 @@ class CookieStepsTests
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private VariableContext variableContext;
     @Mock private JsonUtils jsonUtils;
-    @InjectMocks private CookieSteps cookieSteps;
+    @InjectMocks private SeleniumCookieSteps cookieSteps;
 
     @Test
     void shouldRemoveAllCookies()
@@ -131,12 +129,43 @@ class CookieStepsTests
     }
 
     @Test
-    void shouldValidateThatCookieWithNameMatchingComparisonRuleIsSet()
+    void shouldAssertThatCookieWithNameMatchingComparisonRuleIsSet()
     {
         when(cookie.getName()).thenReturn(DYNAMIC_COOKIE_NAME);
         when(cookieManager.getCookies()).thenReturn(Set.of(cookie));
-        cookieSteps.thenCookieWithMatchingNameIsSet(StringComparisonRule.MATCHES, "SSESS.*");
+        cookieSteps.assertCookieIsSet(StringComparisonRule.MATCHES, "SSESS.*");
         verify(softAssert).assertTrue("Cookie with the name that matches 'SSESS.*' is set", true);
+    }
+
+    @Test
+    void shouldAssertThatCookieWithNameMatchingComparisonRuleIsNotSet()
+    {
+        when(cookie.getName()).thenReturn(DYNAMIC_COOKIE_NAME);
+        when(cookieManager.getCookies()).thenReturn(Set.of(cookie));
+        cookieSteps.assertCookieIsNotSet(StringComparisonRule.CONTAINS, "_ga");
+        verify(softAssert).assertTrue("Cookie with the name that contains '_ga' is not set", true);
+    }
+
+    @Test
+    void shouldConvertCookieToJsonAndSaveItToContext()
+    {
+        when(cookieManager.getCookie(NAME)).thenReturn(cookie);
+        Map<String, Object> cookieAsMap = Map.of("path", "/index");
+        when(cookie.toJson()).thenReturn(cookieAsMap);
+        String cookieAsJson = "{\"path\": \"/index\"}";
+        when(jsonUtils.toJson(cookieAsMap)).thenReturn(cookieAsJson);
+        Set<VariableScope> scopes = Set.of(VariableScope.STEP);
+
+        cookieSteps.saveCookieAsJson(NAME, scopes, NAME);
+
+        verify(variableContext).putVariable(scopes, NAME, cookieAsJson);
+    }
+
+    @Test
+    void shouldNotConvertNorSaveIfNoCookieReturnedByCookieManager()
+    {
+        cookieSteps.saveCookieAsJson(NAME, Set.of(VariableScope.STEP), NAME);
+        verifyNoInteractions(jsonUtils, variableContext);
     }
 
     @Test
@@ -146,15 +175,6 @@ class CookieStepsTests
         cookieSteps.thenCookieWithNameIsNotSet(NAME);
         verify(softAssert).assertThat(eq("Cookie with the name '" + NAME + "' is not set"), eq(cookie),
                 argThat(matcher -> "null".equals(matcher.toString())));
-    }
-
-    @Test
-    void shouldValidateThatCookieWithNameMatchingComparisonRuleIsNotSet()
-    {
-        when(cookie.getName()).thenReturn(DYNAMIC_COOKIE_NAME);
-        when(cookieManager.getCookies()).thenReturn(Set.of(cookie));
-        cookieSteps.thenCookieWithMatchingNameIsNotSet(StringComparisonRule.CONTAINS, "_ga");
-        verify(softAssert).assertTrue("Cookie with the name that contains '_ga' is not set", true);
     }
 
     @Test
@@ -174,7 +194,9 @@ class CookieStepsTests
     private void testSetAllCookies(Consumer<ExamplesTable> test)
     {
         var testUrl = "https://www.vividus.org";
-        mockGetCurrentPageUrl(testUrl);
+        WebDriver webDriver = mock();
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        when(webDriver.getCurrentUrl()).thenReturn(testUrl);
         var tableAsString = """
                 |cookieName|cookieValue|path|
                 |hcpsid    |1          |/   |
@@ -183,45 +205,6 @@ class CookieStepsTests
         var table = new ExamplesTable(tableAsString);
         test.accept(table);
         verify(cookieManager, times(2)).addCookie("hcpsid", "1", "/", testUrl);
-    }
-
-    @Test
-    void shouldThrowAnExceptionIfCurrentURLIsNotDefined()
-    {
-        ExamplesTable table = mock(ExamplesTable.class);
-        when(webDriverProvider.get()).thenReturn(mock(WebDriver.class));
-        IllegalArgumentException iae =
-                assertThrows(IllegalArgumentException.class, () -> cookieSteps.setAllCookies(table));
-        assertEquals("Unable to get current URL. Please make sure you've navigated to the right URL", iae.getMessage());
-    }
-
-    @Test
-    void shouldNotConvertNorSaveIfNoCookieReturnedByCookieManager()
-    {
-        cookieSteps.saveCookieAsJson(NAME, Set.of(VariableScope.STEP), NAME);
-        verifyNoInteractions(jsonUtils, variableContext);
-    }
-
-    @Test
-    void shouldConvertCookieToJsonAndSaveItToContext()
-    {
-        when(cookieManager.getCookie(NAME)).thenReturn(cookie);
-        Map<String, Object> cookieAsMap = Map.of("path", "/index");
-        when(cookie.toJson()).thenReturn(cookieAsMap);
-        String cookieAsJson = "{\"path\": \"/index\"}";
-        when(jsonUtils.toJson(cookieAsMap)).thenReturn(cookieAsJson);
-        Set<VariableScope> scopes = Set.of(VariableScope.STEP);
-
-        cookieSteps.saveCookieAsJson(NAME, scopes, NAME);
-
-        verify(variableContext).putVariable(scopes, NAME, cookieAsJson);
-    }
-
-    private void mockGetCurrentPageUrl(String url)
-    {
-        WebDriver webDriver = mock(WebDriver.class);
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        when(webDriver.getCurrentUrl()).thenReturn(url);
     }
 
     private void verifyCookieAssertion(Cookie cookie)
