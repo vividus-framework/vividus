@@ -6,7 +6,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.45.0')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.3')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.4')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.14.2')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
