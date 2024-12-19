@@ -1,7 +1,7 @@
 project.description = 'Common module for all VIVIDUS exporters'
 
 ext {
-    springBootVersion = '3.4.0'
+    springBootVersion = '3.4.1'
 }
 
 configurations.all {
