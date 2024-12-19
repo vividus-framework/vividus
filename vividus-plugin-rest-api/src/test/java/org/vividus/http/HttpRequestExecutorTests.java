@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,7 +37,6 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ConnectionClosedException;
@@ -72,7 +70,6 @@ class HttpRequestExecutorTests
     @Test
     void testExecuteHttpRequestFirstTime() throws IOException
     {
-        when(httpTestContext.getCookieStore()).thenReturn(Optional.empty());
         when(httpTestContext.getRequestConfig()).thenReturn(Optional.empty());
         HttpResponse httpResponse = mockHttpResponse();
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty());
@@ -95,23 +92,6 @@ class HttpRequestExecutorTests
                         && "HTTP GET request can't include body".equals(((Exception) arg).getMessage()))
         );
         verify(httpTestContext).releaseRequestData();
-    }
-
-    @Test
-    void testExecuteShouldUseCookieStoreFromContext() throws IOException
-    {
-        CookieStore cookieStore = mock();
-        when(httpTestContext.getCookieStore()).thenReturn(Optional.of(cookieStore));
-        HttpResponse httpResponse = mockHttpResponse();
-        httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty());
-
-        verify(httpClient).execute(argThat(ClassicHttpRequest.class::isInstance),
-                argThat(e -> e != null && e.getCookieStore() == cookieStore));
-        InOrder orderedHttpTestContext = inOrder(httpTestContext);
-        verifyHttpTestContext(orderedHttpTestContext, httpResponse);
-        orderedHttpTestContext.verify(httpTestContext).releaseRequestData();
-        orderedHttpTestContext.verifyNoMoreInteractions();
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(createResponseTimeLogEvent(httpResponse))));
     }
 
     @Test

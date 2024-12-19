@@ -23,7 +23,6 @@ import org.apache.hc.client5.http.cookie.CookieStore;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.Cookie;
 import org.vividus.http.CookieStoreProvider;
-import org.vividus.http.HttpTestContext;
 import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.ui.web.action.CookieManager;
 import org.vividus.ui.web.action.NavigateActions;
@@ -33,17 +32,14 @@ public class HttpRequestSteps
     private static final String ATTACHMENT_TEMPLATE_PATH = "org/vividus/steps/integration/browser-cookies.ftl";
     private static final String TEMPLATE_COOKIES_KEY = "cookies";
     private final CookieManager<Cookie> cookieManager;
-    private final HttpTestContext httpTestContext;
     private final AttachmentPublisher attachmentPublisher;
     private final CookieStoreProvider cookieStoreProvider;
     private final NavigateActions navigateActions;
 
-    public HttpRequestSteps(CookieManager<Cookie> cookieManager, HttpTestContext httpTestContext,
-                            AttachmentPublisher attachmentPublisher, CookieStoreProvider cookieStoreProvider,
-                            NavigateActions navigateActions)
+    public HttpRequestSteps(CookieManager<Cookie> cookieManager, AttachmentPublisher attachmentPublisher,
+                            CookieStoreProvider cookieStoreProvider, NavigateActions navigateActions)
     {
         this.cookieManager = cookieManager;
-        this.httpTestContext = httpTestContext;
         this.attachmentPublisher = attachmentPublisher;
         this.cookieStoreProvider = cookieStoreProvider;
         this.navigateActions = navigateActions;
@@ -58,9 +54,11 @@ public class HttpRequestSteps
     public void executeRequestUsingBrowserCookies()
     {
         CookieStore cookieStore = cookieManager.getCookiesAsHttpCookieStore();
+        List<org.apache.hc.client5.http.cookie.Cookie> cookies = cookieStore.getCookies();
         attachmentPublisher.publishAttachment(ATTACHMENT_TEMPLATE_PATH,
-                Map.of(TEMPLATE_COOKIES_KEY, cookieStore.getCookies()), "Browser cookies");
-        httpTestContext.putCookieStore(cookieStore);
+                Map.of(TEMPLATE_COOKIES_KEY, cookies), "Browser cookies");
+        CookieStore httpCookieStore = cookieStoreProvider.getCookieStore();
+        cookies.forEach(httpCookieStore::addCookie);
     }
 
     /**

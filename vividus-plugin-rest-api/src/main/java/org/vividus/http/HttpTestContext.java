@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.vividus.http.client.HttpResponse;
@@ -52,11 +51,6 @@ public class HttpTestContext implements JsonContext
     public void addRequestHeaders(List<Header> requestHeaders)
     {
         getData().requestHeaders.addAll(requestHeaders);
-    }
-
-    public void putCookieStore(CookieStore cookieStore)
-    {
-        getData().cookieStore = cookieStore;
     }
 
     public void putConnectionDetails(ConnectionDetails connectionDetails)
@@ -108,11 +102,6 @@ public class HttpTestContext implements JsonContext
         return getData().jsonElement.orElse(getResponse() == null ? null : getResponse().getResponseBodyAsString());
     }
 
-    public Optional<CookieStore> getCookieStore()
-    {
-        return Optional.ofNullable(getData().cookieStore);
-    }
-
     public Optional<RequestConfig> getRequestConfig()
     {
         return Optional.ofNullable(getData().requestConfig);
@@ -133,7 +122,6 @@ public class HttpTestContext implements JsonContext
     {
         private HttpEntity requestEntity;
         private List<Header> requestHeaders = new ArrayList<>();
-        private CookieStore cookieStore;
         private ConnectionDetails connectionDetails;
 
         private HttpResponse response;
