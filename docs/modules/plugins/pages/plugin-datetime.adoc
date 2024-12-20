@@ -1,5 +1,6 @@
 = Date/Time Plugin
 :java-date-time-formatter-link: {java-api-docs-base-url}/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns[the date/time format]
+:java-chrono-unit-link: {java-api-docs-base-url}/docs/api/java.base/java/time/temporal/ChronoUnit.html[date periods units]
 
 The plugin provides functionality to generate, modify and validate date/time.
 
@@ -266,13 +267,15 @@ Calculates the difference between two dates with given formats and returns resul
 
 [source, subs="+quotes"]
 ----
-#{diffDate(*$inputDate1*, *$inputDate1Format*, *$inputDate2*, *$inputDate2Format*)}
+#{diffDate(*$inputDate1*, *$inputDate1Format*, *$inputDate2*, *$inputDate2Format*, _chronoUnit_)}
 ----
 
 * *`$inputDate1`* - the first input date, it can be in any format but this format should be described in the second parameter
 * *`$inputDate1Format`* - the first input date format based on {java-date-time-formatter-link}
 * *`$inputDate2`* - the second input date, it can be in any format but this format should be described in the second parameter
 * *`$inputDate2Format`* - the second input date format based on {java-date-time-formatter-link}
+* *`chronoUnit`* - *[optional]* the date period unit based on {java-chrono-unit-link}.
+Calculation of the amount of time between two dates will be done in terms of this unit.
 
 [cols="3,>1", options="header"]
 .Examples of the expressions calculating dates difference
@@ -292,6 +295,15 @@ Calculates the difference between two dates with given formats and returns resul
 
 |`#{diffDate(2019-03-19 03:40:00, yyyy-MM-dd HH:mm:ss, 3020-03-19 03:39:20, yyyy-MM-dd HH:mm:ss)}`
 |PT8774591H59M20S
+
+|`#{diffDate(2019-03-19 03:40:00, yyyy-MM-dd HH:mm:ss, 2019-03-19 04:40:00, yyyy-MM-dd HH:mm:ss, minutes)}`
+|60
+
+|`#{diffDate(2019-03-19 03:40:00, yyyy-MM-dd HH:mm:ss, 2019-03-19 04:40:00, yyyy-MM-dd HH:mm:ss, hours)}`
+|1
+
+|`#{diffDate(2019-03-19 03:00:00, yyyy-MM-dd HH:mm:ss, 2019-03-19 03:50:00, yyyy-MM-dd HH:mm:ss, hours)}`
+|0
 |===
 
 === `toEpochSecond`
