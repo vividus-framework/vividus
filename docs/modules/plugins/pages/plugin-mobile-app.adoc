@@ -278,10 +278,10 @@ activate it.
 
 [source,gherkin]
 ----
-When I activate application with bundle identifier `$bundleId`
+When I activate application with bundle identifier `$packageNameOrBundleId`
 ----
 
-* `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS
+* `$packageNameOrBundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS
 
 .Switch to Safari browser application
 [source,gherkin]
@@ -296,10 +296,10 @@ Removes the mobile application from device/emulator/simulator and installs it ag
 
 [source,gherkin]
 ----
-When I reinstall mobile application with bundle identifier `$bundleId`
+When I reinstall mobile application with bundle identifier `$packageNameOrBundleId`
 ----
 
-* `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS.
+* `$packageNameOrBundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS.
 
 The key benefit is that instead of the full remote session recreation (which
 includes device re-allocation in testing clouds, like SauceLabs, BrowserStack,
