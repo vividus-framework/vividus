@@ -2,7 +2,7 @@ project.description = 'VIVIDUS reporter'
 
 dependencies {
     implementation project(':vividus-util')
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.3.1-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.0-jre')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0')
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.16')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
