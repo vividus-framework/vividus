@@ -61,7 +61,6 @@ class WebContextSourceCodeProviderTests
             + "}\n"
             + "getShadowSource(%s);\n"
             + "return Object.fromEntries(sources)";
-    private static final String APPLICATION_SOURCE_CODE = "Application source code";
 
     @Mock private IUiContext uiContext;
     @Mock private WebJavascriptActions webJavascriptActions;
@@ -74,18 +73,18 @@ class WebContextSourceCodeProviderTests
     @Test
     void shouldReturnWholePageForDriverContext()
     {
-        var webDriver = mock(WebDriver.class);
+        WebDriver webDriver = mock();
         when(uiContext.getSearchContext()).thenReturn(webDriver);
         var pageSource = "<html/>";
         when(webDriver.getPageSource()).thenReturn(pageSource);
-        assertEquals(Map.of(APPLICATION_SOURCE_CODE, pageSource), sourceCodeProvider.getSourceCode());
+        assertEquals(Optional.of(pageSource), sourceCodeProvider.getSourceCode());
     }
 
     @SuppressFBWarnings("VA_FORMAT_STRING_USES_NEWLINE")
     @Test
     void shouldReturnWholePageForDriverContextShadowDom()
     {
-        var webDriver = mock(WebDriver.class);
+        WebDriver webDriver = mock();
         when(uiContext.getOptionalSearchContextSafely()).thenReturn(Optional.of(webDriver));
 
         var elementSource = "<div/>";
@@ -103,7 +102,7 @@ class WebContextSourceCodeProviderTests
     @Test
     void shouldReturnElementSourceForElementContextShadowDom()
     {
-        var webElement = mock(WebElement.class);
+        WebElement webElement = mock();
         when(uiContext.getOptionalSearchContextSafely()).thenReturn(Optional.of(webElement));
 
         var elementSource = "<table/>";
@@ -127,22 +126,21 @@ class WebContextSourceCodeProviderTests
     @Test
     void shouldReturnElementSourceForElementContext()
     {
-        var webElement = mock(WebElement.class);
+        WebElement webElement = mock();
         when(uiContext.getSearchContext()).thenReturn(webElement);
         var elementSource = "<h1/>";
         when(webJavascriptActions.executeScript(OUTER_HTML_SCRIPT, webElement)).thenReturn(elementSource);
-        assertEquals(Map.of(APPLICATION_SOURCE_CODE, elementSource),
-                sourceCodeProvider.getSourceCode());
+        assertEquals(Optional.of(elementSource), sourceCodeProvider.getSourceCode());
     }
 
     @Test
     void shouldHandleStaleElementsCorrectly()
     {
-        var webElement = mock(WebElement.class);
+        WebElement webElement = mock();
         when(uiContext.getSearchContext()).thenReturn(webElement);
         when(webJavascriptActions.executeScript(OUTER_HTML_SCRIPT, webElement)).thenThrow(
                 StaleElementReferenceException.class);
-        assertEquals(Map.of(), sourceCodeProvider.getSourceCode());
+        assertEquals(Optional.empty(), sourceCodeProvider.getSourceCode());
         assertEquals(logger.getLoggingEvents(), List.of(debug("Unable to get sources of the stale element")));
     }
 
@@ -150,6 +148,6 @@ class WebContextSourceCodeProviderTests
     void shouldReturnEmptyValueForNullSearchContext()
     {
         when(uiContext.getSearchContext()).thenReturn(null);
-        assertEquals(Map.of(), sourceCodeProvider.getSourceCode());
+        assertEquals(Optional.empty(), sourceCodeProvider.getSourceCode());
     }
 }
