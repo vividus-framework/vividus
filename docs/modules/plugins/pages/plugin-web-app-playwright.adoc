@@ -68,6 +68,10 @@ Playwright captures a set of complete DOM snapshots for each action.
 
 |===
 
+== xref:commons:variables.adoc[Dynamic variables]
+
+include::partial$dynamic-variable-context-source-code.adoc[]
+
 == Locator
 
 ----

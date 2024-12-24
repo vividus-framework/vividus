@@ -23,6 +23,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import com.microsoft.playwright.FrameLocator;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
@@ -38,6 +40,8 @@ import org.vividus.ui.web.playwright.locator.Visibility;
 @ExtendWith(MockitoExtension.class)
 class UiContextTests
 {
+    private static final String GET_OUTER_HTML_SCRIPT = "el => el.outerHTML";
+
     private static final PlaywrightLocator PLAYWRIGHT_LOCATOR = new PlaywrightLocator("xpath", "//div");
     private final SimpleTestContext testContext = new SimpleTestContext();
     private final UiContext uiContext = new UiContext(testContext);
@@ -103,6 +107,17 @@ class UiContextTests
     }
 
     @Test
+    void shouldLocateElementInFrame()
+    {
+        FrameLocator frameLocator = mock();
+        uiContext.setCurrentFrame(frameLocator);
+        Locator locator = mock();
+        when(frameLocator.locator(PLAYWRIGHT_LOCATOR.getLocator())).thenReturn(locator);
+        Locator actual = uiContext.locateElement(PLAYWRIGHT_LOCATOR);
+        assertSame(locator, actual);
+    }
+
+    @Test
     void shouldLocateElementWithinContext()
     {
         Page page = mock();
@@ -156,12 +171,50 @@ class UiContextTests
     @Test
     void shouldReturnFrameWhenNoContextIsSet()
     {
-        FrameLocator frame = mock();
-        uiContext.setCurrentFrame(frame);
+        FrameLocator frameLocator = mock();
+        uiContext.setCurrentFrame(frameLocator);
         Locator root = mock();
-        when(frame.owner()).thenReturn(root);
+        when(frameLocator.owner()).thenReturn(root);
         Locator actual = uiContext.getCurrentContexOrPageRoot();
         assertSame(root, actual);
+    }
+
+    @Test
+    void shouldReturnSourceCodeOfCurrentContext()
+    {
+        Page page = mock();
+        uiContext.setCurrentPage(page);
+        Locator context = mock();
+        var sourceCode = "<img/>";
+        when(context.evaluate(GET_OUTER_HTML_SCRIPT)).thenReturn(sourceCode);
+        uiContext.setContext(context);
+        var actual = uiContext.getSourceCode();
+        assertEquals(Optional.of(sourceCode), actual);
+        verifyNoInteractions(page);
+    }
+
+    @Test
+    void shouldReturnSourceCodeOfPageWhenNoContextIsSet()
+    {
+        Page page = mock();
+        var sourceCode = "<html/>";
+        when(page.content()).thenReturn(sourceCode);
+        uiContext.setCurrentPage(page);
+        var actual = uiContext.getSourceCode();
+        assertEquals(Optional.of(sourceCode), actual);
+    }
+
+    @Test
+    void shouldReturnSourceCodeOfFrameWhenNoContextIsSet()
+    {
+        FrameLocator frameLocator = mock();
+        uiContext.setCurrentFrame(frameLocator);
+        Locator frameRoot = mock();
+        when(frameLocator.locator("html")).thenReturn(frameRoot);
+        var sourceCode = "<iframe/>";
+        when(frameRoot.evaluate(GET_OUTER_HTML_SCRIPT)).thenReturn(sourceCode);
+        var actual = uiContext.getSourceCode();
+        assertEquals(Optional.of(sourceCode), actual);
     }
 
     @Test

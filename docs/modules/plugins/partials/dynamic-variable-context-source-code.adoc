@@ -1,0 +1,17 @@
+=== Context source code
+
+Variable provides source code of the current UI context of the application under test.
+
+[source,gherkin]
+----
+${context-source-code}
+----
+
+.Firstly check frames on the entire page, and then links in the specified context
+[source,gherkin]
+----
+Given I am on main application page
+Then all resources by selector `frame,iframe` from ${context-source-code} are valid
+When I change context to element located by `id(linksList)`
+Then all resources by selector `a` from ${context-source-code} are valid
+----
