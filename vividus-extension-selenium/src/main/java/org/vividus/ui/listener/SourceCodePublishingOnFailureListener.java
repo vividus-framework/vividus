@@ -54,15 +54,15 @@ public class SourceCodePublishingOnFailureListener
     {
         if (webDriverProvider.isWebDriverInitialized())
         {
-            contextSourceCodeProvider.getSourceCode().forEach(this::publishSource);
+            contextSourceCodeProvider.getSourceCode().ifPresent(this::publishSource);
         }
     }
 
-    private void publishSource(String title, String source)
+    private void publishSource(String source)
     {
         attachmentPublisher.publishAttachment("/templates/source-code.ftl",
                 Map.of("sourceCode", source, "format", sourceCodeAttachmentFormat),
-                title + "." + sourceCodeAttachmentFormat);
+                "Application source code." + sourceCodeAttachmentFormat);
     }
 
     public void setSourceCodeAttachmentFormat(String sourceCodeAttachmentFormat)

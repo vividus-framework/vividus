@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import java.util.function.Supplier;
  */
 public final class DynamicVariableCalculationResult
 {
-    private final Optional<Object> value;
+    private final Optional<?> value;
     private final Optional<String> error;
 
-    private DynamicVariableCalculationResult(Optional<Object> value, Optional<String> error)
+    private DynamicVariableCalculationResult(Optional<?> value, Optional<String> error)
     {
         this.value = value;
         this.error = error;
@@ -67,14 +67,14 @@ public final class DynamicVariableCalculationResult
      * @param errorSupplier The error supplier used to generate error message in case of missing value.
      * @return Created result object.
      */
-    public static DynamicVariableCalculationResult withValueOrError(Optional<Object> value,
+    public static DynamicVariableCalculationResult withValueOrError(Optional<?> value,
             Supplier<String> errorSupplier)
     {
         return new DynamicVariableCalculationResult(value,
                 value.isEmpty() ? Optional.of(errorSupplier.get()) : Optional.empty());
     }
 
-    public Optional<Object> getValueOrHandleError(Consumer<String> errorHandler)
+    public Optional<?> getValueOrHandleError(Consumer<String> errorHandler)
     {
         if (value.isEmpty())
         {

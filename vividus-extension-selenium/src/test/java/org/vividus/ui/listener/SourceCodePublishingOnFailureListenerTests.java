@@ -20,9 +20,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.vividus.ui.ContextSourceCodeProvider.APPLICATION_SOURCE_CODE;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,8 +36,6 @@ import org.vividus.ui.ContextSourceCodeProvider;
 @ExtendWith(MockitoExtension.class)
 class SourceCodePublishingOnFailureListenerTests
 {
-    private static final String SOURCES = "<html/>";
-
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private ContextSourceCodeProvider contextSourceCodeProvider;
     @Mock private IAttachmentPublisher attachmentPublisher;
@@ -56,14 +54,15 @@ class SourceCodePublishingOnFailureListenerTests
     @Test
     void shouldPublishSourceCode()
     {
+        var sourceCode = "<html/>";
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        when(contextSourceCodeProvider.getSourceCode()).thenReturn(Map.of(APPLICATION_SOURCE_CODE, SOURCES));
-        String html = "html";
+        when(contextSourceCodeProvider.getSourceCode()).thenReturn(Optional.of(sourceCode));
+        var html = "html";
         listener.setSourceCodeAttachmentFormat(html);
         listener.onAssertionFailure(null);
         verify(webDriverProvider).isWebDriverInitialized();
         verify(attachmentPublisher).publishAttachment("/templates/source-code.ftl",
-                Map.of("sourceCode", SOURCES, "format", html), "Application source code.html");
+                Map.of("sourceCode", sourceCode, "format", html), "Application source code.html");
         verifyNoMoreInteractions(webDriverProvider, contextSourceCodeProvider, attachmentPublisher);
     }
 
@@ -71,7 +70,7 @@ class SourceCodePublishingOnFailureListenerTests
     void shouldNotPublishMissingSource()
     {
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        when(contextSourceCodeProvider.getSourceCode()).thenReturn(Map.of());
+        when(contextSourceCodeProvider.getSourceCode()).thenReturn(Optional.empty());
         listener.onAssertionFailure(null);
         verify(webDriverProvider).isWebDriverInitialized();
         verifyNoInteractions(attachmentPublisher);

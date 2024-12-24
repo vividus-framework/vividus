@@ -19,10 +19,9 @@ package org.vividus.ui.variable;
 import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static org.vividus.ui.ContextSourceCodeProvider.APPLICATION_SOURCE_CODE;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -34,13 +33,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.ui.ContextSourceCodeProvider;
-import org.vividus.variable.DynamicVariableCalculationResult;
 
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
 class ContextSourceCodeDynamicVariableTests
 {
-    private static final String SOURCES = "<html/>";
-
     private final TestLogger logger = TestLoggerFactory.getTestLogger(ContextSourceCodeDynamicVariable.class);
 
     @Mock private ContextSourceCodeProvider contextSourceCodeProvider;
@@ -49,16 +45,17 @@ class ContextSourceCodeDynamicVariableTests
     @Test
     void shouldReturnSourceCodeAsResultIfApplicationStarted()
     {
-        when(contextSourceCodeProvider.getSourceCode()).thenReturn(Map.of(APPLICATION_SOURCE_CODE, SOURCES));
-        DynamicVariableCalculationResult actualResult = dynamicVariable.calculateValue();
-        assertEquals(SOURCES, actualResult.getValueOrHandleError(null).get());
+        var sourceCode = Optional.of("<html/>");
+        when(contextSourceCodeProvider.getSourceCode()).thenReturn(sourceCode);
+        var actualResult = dynamicVariable.calculateValue();
+        assertEquals(sourceCode, actualResult.getValueOrHandleError(null));
     }
 
     @Test
     void shouldReturnErrorAsResultIfApplicationNotStarted()
     {
-        when(contextSourceCodeProvider.getSourceCode()).thenReturn(Map.of());
-        DynamicVariableCalculationResult actualResult = dynamicVariable.calculateValue();
+        when(contextSourceCodeProvider.getSourceCode()).thenReturn(Optional.empty());
+        var actualResult = dynamicVariable.calculateValue();
         actualResult.getValueOrHandleError(logger::error);
         assertEquals(List.of(error("application is not started")), logger.getLoggingEvents());
     }

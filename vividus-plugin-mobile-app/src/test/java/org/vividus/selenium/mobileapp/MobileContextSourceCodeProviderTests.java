@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,10 +39,10 @@ class MobileContextSourceCodeProviderTests
     @Test
     void shouldReturnSourceCode()
     {
-        WebDriver webDriver = mock(WebDriver.class);
-        String source = "</beans>";
-        when(webDriver.getPageSource()).thenReturn(source);
+        var sourceCode = "<app/>";
+        WebDriver webDriver = mock();
+        when(webDriver.getPageSource()).thenReturn(sourceCode);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        assertEquals(Map.of("Application source code", source), sourceCodeProvider.getSourceCode());
+        assertEquals(Optional.of(sourceCode), sourceCodeProvider.getSourceCode());
     }
 }

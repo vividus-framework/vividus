@@ -16,8 +16,6 @@
 
 package org.vividus.ui.variable;
 
-import static org.vividus.ui.ContextSourceCodeProvider.APPLICATION_SOURCE_CODE;
-
 import org.vividus.ui.ContextSourceCodeProvider;
 import org.vividus.variable.DynamicVariable;
 import org.vividus.variable.DynamicVariableCalculationResult;
@@ -34,9 +32,7 @@ public class ContextSourceCodeDynamicVariable implements DynamicVariable
     @Override
     public DynamicVariableCalculationResult calculateValue()
     {
-        String contextSourceCode = contextSourceCodeProvider.getSourceCode().get(APPLICATION_SOURCE_CODE);
-        return contextSourceCode != null
-                ? DynamicVariableCalculationResult.withValue(contextSourceCode)
-                : DynamicVariableCalculationResult.withError("application is not started");
+        return DynamicVariableCalculationResult.withValueOrError(contextSourceCodeProvider.getSourceCode(),
+                () -> "application is not started");
     }
 }

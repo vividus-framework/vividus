@@ -16,7 +16,6 @@
 
 package org.vividus.selenium;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -44,7 +43,7 @@ public class WebContextSourceCodeProvider implements WebAppContextSourceCodeProv
     }
 
     @Override
-    public Map<String, String> getSourceCode()
+    public Optional<String> getSourceCode()
     {
         SearchContext searchContext = uiContext.getSearchContext();
         String sourceCode = null;
@@ -57,12 +56,7 @@ public class WebContextSourceCodeProvider implements WebAppContextSourceCodeProv
         {
             sourceCode = webDriver.getPageSource();
         }
-        Map<String, String> sources = new LinkedHashMap<>();
-        if (sourceCode != null)
-        {
-            sources.put(APPLICATION_SOURCE_CODE, sourceCode);
-        }
-        return sources;
+        return Optional.ofNullable(sourceCode);
     }
 
     @Override
