@@ -219,7 +219,6 @@
     <bean id="context-x-coordinate" class="org.vividus.ui.variable.SearchContextXCoordinateDynamicVariable"/>
     <bean id="context-y-coordinate" class="org.vividus.ui.variable.SearchContextYCoordinateDynamicVariable"/>
     <bean id="source-code" class="org.vividus.ui.variable.SourceCodeDynamicVariable"/>
-    <bean id="context-source-code" class="org.vividus.ui.variable.ContextSourceCodeDynamicVariable"/>
 
     <bean class="org.vividus.report.ui.ImageCompressor" >
         <property name="imageCompressionQuality" value="${ui.report.image-compression-quality}" />

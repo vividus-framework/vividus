@@ -26,10 +26,11 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 
 import org.vividus.testcontext.TestContext;
+import org.vividus.ui.ContextSourceCodeProvider;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 import org.vividus.ui.web.playwright.locator.Visibility;
 
-public class UiContext
+public class UiContext implements ContextSourceCodeProvider
 {
     private static final Class<PlaywrightContext> PLAYWRIGHT_CONTEXT_KEY = PlaywrightContext.class;
 
@@ -93,15 +94,22 @@ public class UiContext
     public Locator locateElement(PlaywrightLocator playwrightLocator)
     {
         String locator = playwrightLocator.getLocator();
-        Locator locatorInContext = getInCurrentContext(context -> context.locator(locator),
-                page -> page.locator(locator), frame -> frame.locator(locator));
+        Locator locatorInContext = getInCurrentContext(
+                context -> context.locator(locator),
+                frame -> frame.locator(locator),
+                page -> page.locator(locator)
+        );
         return (playwrightLocator.getVisibility() == Visibility.VISIBLE)
                 ? locatorInContext.locator("visible=true") : locatorInContext;
     }
 
     public Locator getCurrentContexOrPageRoot()
     {
-        return getInCurrentContext(context -> context, page -> page.locator("//html/body"), FrameLocator::owner);
+        return getInCurrentContext(
+                context -> context,
+                FrameLocator::owner,
+                page -> page.locator("//html/body")
+        );
     }
 
     public void removePlaywrightContext()
@@ -109,15 +117,38 @@ public class UiContext
         testContext.remove(PLAYWRIGHT_CONTEXT_KEY);
     }
 
-    private <R> R getInCurrentContext(Function<Locator, R> elementContextAction, Function<Page, R> pageContextAction,
-            Function<FrameLocator, R> frameContextAction)
+    @Override
+    public Optional<String> getSourceCode()
+    {
+        return Optional.ofNullable(
+                getInCurrentContext(
+                        UiContext::getOuterHtml,
+                        frame -> getOuterHtml(frame.locator("html")),
+                        page -> Optional.ofNullable(page).map(Page::content).orElse(null)
+                )
+        );
+    }
+
+    private <R> R getInCurrentContext(Function<Locator, R> elementContextAction,
+            Function<FrameLocator, R> frameContextAction, Function<Page, R> pageContextAction)
     {
         PlaywrightContext playwrightContext = getPlaywrightContext();
-        return Optional.ofNullable(playwrightContext.context)
-                .map(elementContextAction)
-                .orElseGet(() -> Optional.ofNullable(getCurrentFrame())
-                        .map(frameContextAction)
-                        .orElseGet(() -> pageContextAction.apply(playwrightContext.page)));
+        Locator context = playwrightContext.context;
+        if (context != null)
+        {
+            return elementContextAction.apply(context);
+        }
+        FrameLocator currentFrame = getCurrentFrame();
+        if (currentFrame != null)
+        {
+            return frameContextAction.apply(currentFrame);
+        }
+        return pageContextAction.apply(playwrightContext.page);
+    }
+
+    private static String getOuterHtml(Locator context)
+    {
+        return (String) context.evaluate("el => el.outerHTML");
     }
 
     private PlaywrightContext getPlaywrightContext()
