@@ -476,8 +476,10 @@ class HttpClientFactoryTests
         config.setCircularRedirectsAllowed(circularRedirectsAllowed);
         String cookieSpec = "cookieSpec";
         config.setCookieSpec(cookieSpec);
+        var cookieStoreProvider = mock(CookieStoreProvider.class);
         CookieStore cookieStore = new BasicCookieStore();
-        config.setCookieStore(cookieStore);
+        when(cookieStoreProvider.getCookieStore()).thenReturn(cookieStore);
+        config.setCookieStoreProvider(cookieStoreProvider);
         HttpRequestRetryStrategy retryStrategy = mock();
         config.setHttpRequestRetryStrategy(retryStrategy);
         try (var connectionManagerBuilderStaticMock = mockStatic(PoolingHttpClientConnectionManagerBuilder.class);

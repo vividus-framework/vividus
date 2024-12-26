@@ -19,6 +19,7 @@ package org.vividus.http.client;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -31,8 +32,6 @@ import java.util.Map;
 
 import org.apache.hc.client5.http.DnsResolver;
 import org.apache.hc.client5.http.HttpRequestRetryStrategy;
-import org.apache.hc.client5.http.cookie.BasicCookieStore;
-import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.protocol.RedirectStrategy;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
@@ -215,24 +214,20 @@ class HttpClientConfigTests
     }
 
     @Test
-    void testHasCookieStore()
+    void testDoesNotHaveCookieStoreProvider()
     {
-        config.setCookieStore(new BasicCookieStore());
-        assertTrue(config.hasCookieStore());
-    }
-
-    @Test
-    void testDoesNotHaveCookieStore()
-    {
-        assertFalse(config.hasCookieStore());
+        assertFalse(config.hasCookieStoreProvider());
     }
 
     @Test
     void testCookieStore()
     {
-        CookieStore cookieStore = new BasicCookieStore();
-        config.setCookieStore(cookieStore);
-        assertEquals(cookieStore, config.getCookieStore());
+        var cookieStoreProvider = mock(CookieStoreProvider.class);
+        config.setCookieStoreProvider(cookieStoreProvider);
+        assertAll(
+                () -> assertTrue(config.hasCookieStoreProvider()),
+                () -> assertEquals(cookieStoreProvider, config.getCookieStoreProvider())
+        );
     }
 
     @Test

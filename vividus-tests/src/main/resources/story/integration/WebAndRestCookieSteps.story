@@ -1,7 +1,9 @@
 Meta:
     @epic vividus-plugin-web-app-to-rest-api
 
-Scenario: Validate steps for cookie management between web and REST
+Scenario: Validate steps for cookie sharing between web-application and REST API
+Meta:
+    @playwrightSupported
 Given I am on page with URL `https://httpbingo.org/cookies`
 When I execute HTTP GET request for resource with URL `https://httpbingo.org/cookies/set?c1=v1`
 Then cookie with name that is equal to `c1` is not set

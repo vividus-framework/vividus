@@ -14,27 +14,11 @@
  * limitations under the License.
  */
 
-package org.vividus.http;
+package org.vividus.http.client;
 
-import java.lang.reflect.Method;
+import org.apache.hc.client5.http.cookie.CookieStore;
 
-import org.jbehave.core.steps.NullStepMonitor;
-
-public class CookieStepMonitor extends NullStepMonitor
+public interface CookieStoreProvider
 {
-    private final CookieStoreProvider cookieStoreProvider;
-
-    public CookieStepMonitor(CookieStoreProvider cookieStoreProvider)
-    {
-        this.cookieStoreProvider = cookieStoreProvider;
-    }
-
-    @Override
-    public void afterPerforming(String step, boolean dryRun, Method method)
-    {
-        if (!dryRun)
-        {
-            cookieStoreProvider.resetStepCookies();
-        }
-    }
+    CookieStore getCookieStore();
 }

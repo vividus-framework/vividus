@@ -47,7 +47,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
-import org.vividus.http.CookieStoreProvider;
+import org.vividus.http.client.CookieStoreProvider;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
