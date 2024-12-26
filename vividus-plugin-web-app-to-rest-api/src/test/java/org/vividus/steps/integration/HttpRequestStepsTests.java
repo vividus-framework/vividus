@@ -35,7 +35,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.CookieStoreProvider;
-import org.vividus.http.HttpTestContext;
 import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.ui.web.action.CookieManager;
 import org.vividus.ui.web.action.NavigateActions;
@@ -46,7 +45,6 @@ class HttpRequestStepsTests
     private static final String ATTACHMENT_TEMPLATE_PATH = "org/vividus/steps/integration/browser-cookies.ftl";
     private static final String TEMPLATE_COOKIES_KEY = "cookies";
 
-    @Mock private HttpTestContext httpTestContext;
     @Mock private CookieManager<Cookie> cookieManager;
     @Mock private AttachmentPublisher attachmentPublisher;
     @Mock private CookieStoreProvider cookieStoreProvider;
@@ -57,12 +55,15 @@ class HttpRequestStepsTests
     void shouldSetCookiesFromBrowserAndDelegateRequestToApiSteps()
     {
         CookieStore cookieStore = mock(CookieStore.class);
+        CookieStore httpCookieStore = mock(CookieStore.class);
         when(cookieManager.getCookiesAsHttpCookieStore()).thenReturn(cookieStore);
+        when(cookieStoreProvider.getCookieStore()).thenReturn(httpCookieStore);
         BasicClientCookie cookie1 = new BasicClientCookie("key", "value");
         BasicClientCookie cookie2 = new BasicClientCookie("key1", "value1");
         when(cookieStore.getCookies()).thenReturn(List.of(cookie1, cookie2));
         httpRequestSteps.executeRequestUsingBrowserCookies();
-        verify(httpTestContext).putCookieStore(cookieStore);
+        verify(httpCookieStore).addCookie(cookie1);
+        verify(httpCookieStore).addCookie(cookie2);
         var cookiesCaptor = ArgumentCaptor.forClass(Map.class);
         verify(attachmentPublisher).publishAttachment(eq(ATTACHMENT_TEMPLATE_PATH),
                 cookiesCaptor.capture(), eq("Browser cookies"));
