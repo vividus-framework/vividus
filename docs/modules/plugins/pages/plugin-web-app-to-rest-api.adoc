@@ -479,7 +479,7 @@ Then SSL rating for URL `https://www.google.com` is equal to `B`
 
 ==== Set browser cookies to the HTTP context
 
-Set current browser cookies to the HTTP client for future executing HTTP requests.
+Sets the current browser cookies to the HTTP context to use them in further HTTP requests.
 
 [source,gherkin]
 ----
@@ -496,12 +496,11 @@ When I execute HTTP GET request for resource with relative URL `/get`
 
 ==== Set HTTP cookies to the browser
 
-Set current cookies from the previous HTTP calls to the browser.
-Make sure that expected cookies from HTTP calls matches with web browser opened page domain.
-The actions performed by the step:
+Sets the current cookies from the preceding HTTP calls to the current browser instance.
+After adding the cookies the opened page is refreshed (this is required to apply the new cookies).
 
-* add the cookies;
-* refresh the current page (this action is required to apply the changes in cookies).
+NOTE: If Selenium engine is used, ensure that the expected cookies from HTTP calls match the domain of the page opened
+in the web browser.
 
 [source,gherkin]
 ----
@@ -518,9 +517,11 @@ When I set HTTP context cookies to browser
 
 ==== Set HTTP cookies to the browser without applying changes
 
-Set current cookies from the previous HTTP calls to the browser, but does not apply the changes in cookies instantly.
-The current page must be refreshed or the navigation must be performed to apply the cookie changes.
-Make sure that expected cookies from HTTP calls matches with web browser opened page domain.
+Sets the current cookies from the preceding HTTP calls to the current browser instance, but does not apply the changes
+in cookies instantly. The current page must be refreshed, or navigation must be performed to apply the cookie changes.
+
+NOTE: If Selenium engine is used, ensure that the expected cookies from HTTP calls match the domain of the page opened
+in the web browser.
 
 [source,gherkin]
 ----

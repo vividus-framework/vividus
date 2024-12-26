@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Recources' check result table</title>
+    <title>Cookies table</title>
     <link rel="stylesheet" href="../../styles.css"/>
     <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
 </head>
@@ -30,44 +30,22 @@
     <table class="table table-hover table-bordered table-condensed fixedHeader">
         <thead>
             <tr>
-                <th width="10%">
-                    Name
-                </th>
-                <th width="50%">
-                    Value
-                </th>
-                <th width="10%">
-                    Domain
-                </th>
-                <th width="7%">
-                    Path
-                </th>
-                <th width="13%">
-                    Expires
-                </th>
-                <th width="5%">
-                    Persistent
-                </th>
-                <th width="5%">
-                    Secure
-                </th>
+                <th style="width: 10%">Name</th>
+                <th style="width: 50%">Value</th>
+                <th style="width: 10%">Domain</th>
+                <th style="width: 7%">Path</th>
+                <th style="width: 13%">Expires</th>
+                <th style="width: 5%">Persistent</th>
+                <th style="width: 5%">Secure</th>
             </tr>
         </thead>
         <tbody>
             <#list cookies as cookie>
                 <tr>
-                    <td>
-                        ${cookie.name}
-                    </td>
-                    <td>
-                        ${cookie.value}
-                    </td>
-                    <td>
-                        ${cookie.domain}
-                    </td>
-                    <td>
-                        ${cookie.path}
-                    </td>
+                    <td>${cookie.name}</td>
+                    <td>${cookie.value}</td>
+                    <td>${cookie.domain}</td>
+                    <td>${cookie.path}</td>
                     <td>
                         <#if cookie.expiryDate??>
                             ${cookie.expiryDate?datetime}
@@ -75,12 +53,8 @@
                             Session
                         </#if>
                     </td>
-                    <td>
-                        ${cookie.persistent?c}
-                    </td>
-                    <td>
-                        ${cookie.secure?c}
-                    </td>
+                    <td>${cookie.persistent?c}</td>
+                    <td>${cookie.secure?c}</td>
                 </tr>
             </#list>
         </tbody>

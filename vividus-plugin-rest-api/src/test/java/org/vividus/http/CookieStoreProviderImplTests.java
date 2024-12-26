@@ -27,7 +27,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 
-class CookieStoreProviderTests
+class CookieStoreProviderImplTests
 {
     private static final BasicClientCookie COOKIE = new BasicClientCookie("name", "value");
 
@@ -40,7 +40,7 @@ class CookieStoreProviderTests
     })
     void shouldCreateCookieStore(CookieStoreLevel cookieStoreLevel, Class<?> clazz)
     {
-        CookieStoreProvider cookieStoreProvider = new CookieStoreProvider(cookieStoreLevel);
+        var cookieStoreProvider = new CookieStoreProviderImpl(cookieStoreLevel);
         assertEquals(clazz, cookieStoreProvider.getCookieStore().getClass());
     }
 
@@ -48,8 +48,8 @@ class CookieStoreProviderTests
     @EnumSource(names = "STEP", mode = Mode.EXCLUDE)
     void shouldNotClearCookieStoreAfterStep(CookieStoreLevel cookieStoreLevel)
     {
-        CookieStoreProvider cookieStoreProvider = createProviderWithCookie(cookieStoreLevel);
-        cookieStoreProvider.resetStepCookies();
+        var cookieStoreProvider = createProviderWithCookie(cookieStoreLevel);
+        cookieStoreProvider.afterPerforming(null, false, null);
         assertEquals(List.of(COOKIE), cookieStoreProvider.getCookieStore().getCookies());
     }
 
@@ -57,7 +57,7 @@ class CookieStoreProviderTests
     @EnumSource(names = "SCENARIO", mode = Mode.EXCLUDE)
     void shouldNotClearCookieStoreAfterScenario(CookieStoreLevel cookieStoreLevel)
     {
-        CookieStoreProvider cookieStoreProvider = createProviderWithCookie(cookieStoreLevel);
+        var cookieStoreProvider = createProviderWithCookie(cookieStoreLevel);
         cookieStoreProvider.resetScenarioCookies();
         assertEquals(List.of(COOKIE), cookieStoreProvider.getCookieStore().getCookies());
     }
@@ -66,7 +66,7 @@ class CookieStoreProviderTests
     @EnumSource(names = "STORY", mode = Mode.EXCLUDE)
     void shouldNotClearCookieStoreAfterStory(CookieStoreLevel cookieStoreLevel)
     {
-        CookieStoreProvider cookieStoreProvider = createProviderWithCookie(cookieStoreLevel);
+        var cookieStoreProvider = createProviderWithCookie(cookieStoreLevel);
         cookieStoreProvider.resetStoryCookies();
         assertEquals(List.of(COOKIE), cookieStoreProvider.getCookieStore().getCookies());
     }
@@ -74,15 +74,23 @@ class CookieStoreProviderTests
     @Test
     void shouldClearCookieStoreAfterStep()
     {
-        CookieStoreProvider cookieStoreProvider = createProviderWithCookie(CookieStoreLevel.STEP);
-        cookieStoreProvider.resetStepCookies();
+        var cookieStoreProvider = createProviderWithCookie(CookieStoreLevel.STEP);
+        cookieStoreProvider.afterPerforming(null, false, null);
         assertEquals(List.of(), cookieStoreProvider.getCookieStore().getCookies());
+    }
+
+    @Test
+    void shouldNotClearCookieStoreAfterStepOnDryRun()
+    {
+        var cookieStoreProvider = createProviderWithCookie(CookieStoreLevel.STEP);
+        cookieStoreProvider.afterPerforming(null, true, null);
+        assertEquals(List.of(COOKIE), cookieStoreProvider.getCookieStore().getCookies());
     }
 
     @Test
     void shouldClearCookieStoreAfterScenario()
     {
-        CookieStoreProvider cookieStoreProvider = createProviderWithCookie(CookieStoreLevel.SCENARIO);
+        var cookieStoreProvider = createProviderWithCookie(CookieStoreLevel.SCENARIO);
         cookieStoreProvider.resetScenarioCookies();
         assertEquals(List.of(), cookieStoreProvider.getCookieStore().getCookies());
     }
@@ -90,14 +98,14 @@ class CookieStoreProviderTests
     @Test
     void shouldClearCookieStoreAfterStory()
     {
-        CookieStoreProvider cookieStoreProvider = createProviderWithCookie(CookieStoreLevel.STORY);
+        var cookieStoreProvider = createProviderWithCookie(CookieStoreLevel.STORY);
         cookieStoreProvider.resetStoryCookies();
         assertEquals(List.of(), cookieStoreProvider.getCookieStore().getCookies());
     }
 
-    private CookieStoreProvider createProviderWithCookie(CookieStoreLevel cookieStoreLevel)
+    private CookieStoreProviderImpl createProviderWithCookie(CookieStoreLevel cookieStoreLevel)
     {
-        CookieStoreProvider cookieStoreProvider = new CookieStoreProvider(cookieStoreLevel);
+        var cookieStoreProvider = new CookieStoreProviderImpl(cookieStoreLevel);
         cookieStoreProvider.getCookieStore().addCookie(COOKIE);
         return cookieStoreProvider;
     }

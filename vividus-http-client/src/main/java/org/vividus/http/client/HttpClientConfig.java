@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.apache.hc.client5.http.DnsResolver;
 import org.apache.hc.client5.http.HttpRequestRetryStrategy;
-import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.protocol.RedirectStrategy;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
@@ -49,7 +48,7 @@ public class HttpClientConfig
     private int connectionRequestTimeout = -1;
     private int connectTimeout = -1;
     private int socketTimeout;
-    private CookieStore cookieStore;
+    private CookieStoreProvider cookieStoreProvider;
     private boolean skipResponseEntity;
     private DnsResolver dnsResolver;
     private boolean circularRedirectsAllowed;
@@ -185,19 +184,19 @@ public class HttpClientConfig
         this.socketTimeout = socketTimeout;
     }
 
-    public boolean hasCookieStore()
+    public boolean hasCookieStoreProvider()
     {
-        return cookieStore != null;
+        return cookieStoreProvider != null;
     }
 
-    public CookieStore getCookieStore()
+    public CookieStoreProvider getCookieStoreProvider()
     {
-        return cookieStore;
+        return cookieStoreProvider;
     }
 
-    public void setCookieStore(CookieStore cookieStore)
+    public void setCookieStoreProvider(CookieStoreProvider cookieStoreProvider)
     {
-        this.cookieStore = cookieStore;
+        this.cookieStoreProvider = cookieStoreProvider;
     }
 
     public boolean isSkipResponseEntity()

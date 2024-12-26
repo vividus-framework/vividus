@@ -16,32 +16,38 @@
 
 package org.vividus.http;
 
+import java.lang.reflect.Method;
+
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.AfterStory;
+import org.jbehave.core.steps.NullStepMonitor;
+import org.vividus.http.client.CookieStoreProvider;
 import org.vividus.http.client.ThreadedBasicCookieStore;
 
-public class CookieStoreProvider
+public class CookieStoreProviderImpl extends NullStepMonitor implements CookieStoreProvider
 {
     private final CookieStoreLevel cookieStoreLevel;
     private final CookieStore cookieStore;
 
-    public CookieStoreProvider(CookieStoreLevel cookieStoreLevel)
+    public CookieStoreProviderImpl(CookieStoreLevel cookieStoreLevel)
     {
         this.cookieStoreLevel = cookieStoreLevel;
         this.cookieStore =
                 cookieStoreLevel == CookieStoreLevel.GLOBAL ? new BasicCookieStore() : new ThreadedBasicCookieStore();
     }
 
+    @Override
     public CookieStore getCookieStore()
     {
         return cookieStore;
     }
 
-    public void resetStepCookies()
+    @Override
+    public void afterPerforming(String step, boolean dryRun, Method method)
     {
-        if (cookieStoreLevel == CookieStoreLevel.STEP)
+        if (!dryRun && cookieStoreLevel == CookieStoreLevel.STEP)
         {
             cookieStore.clear();
         }

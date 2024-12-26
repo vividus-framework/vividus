@@ -9,7 +9,7 @@
 
     <bean id="httpTestContext" class="org.vividus.http.HttpTestContext" />
 
-    <bean id="cookieStoreProvider" class="org.vividus.http.CookieStoreProvider">
+    <bean id="cookieStoreProvider" class="org.vividus.http.CookieStoreProviderImpl">
         <constructor-arg value="${rest-api.http.cookie-store-level}" />
     </bean>
 
@@ -32,9 +32,7 @@
                 <property name="httpTestContext" ref="httpTestContext" />
             </bean>
         </property>
-        <property name="cookieStore">
-            <bean factory-method="getCookieStore" factory-bean="cookieStoreProvider" />
-        </property>
+        <property name="cookieStoreProvider" ref="cookieStoreProvider" />
         <property name="httpResponseHandlers">
             <list>
                 <ref bean="extendedHttpLoggingInterceptor" />
@@ -131,6 +129,4 @@
     <bean class="org.vividus.http.expression.PkceExpressionProcessor" />
     <bean class="org.vividus.http.expression.RemoveWrappingDoubleQuotesExpressionProcessor" />
     <bean class="org.vividus.http.expression.UriExpressionProcessors" />
-
-    <bean class="org.vividus.http.CookieStepMonitor" />
 </beans>

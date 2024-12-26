@@ -86,9 +86,9 @@ public class HttpClientFactory implements IHttpClientFactory
         HttpClientBuilder builder = WinHttpClients.custom();
 
         builder.setDefaultHeaders(config.createHeaders());
-        if (config.hasCookieStore())
+        if (config.hasCookieStoreProvider())
         {
-            builder.setDefaultCookieStore(config.getCookieStore());
+            builder.setDefaultCookieStore(config.getCookieStoreProvider().getCookieStore());
         }
 
         configureAuth(config, builder);

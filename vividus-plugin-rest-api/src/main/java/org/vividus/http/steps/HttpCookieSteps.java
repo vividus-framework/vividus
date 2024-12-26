@@ -27,7 +27,7 @@ import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.context.VariableContext;
-import org.vividus.http.CookieStoreProvider;
+import org.vividus.http.client.CookieStoreProvider;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
