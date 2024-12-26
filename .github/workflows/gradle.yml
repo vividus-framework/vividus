@@ -164,6 +164,13 @@ jobs:
                                               -Pvividus.batch-1.resource-include-patterns=*Steps*.story \
                                               -Pvividus.web-application.main-page-url='${variables.vividus-test-site-url}'
 
+    - name: Publish Playwright integration tests report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Playwright Integration Tests - Allure report - ${{ matrix.platform }}
+        path: vividus-tests/output/reports/allure
+
     - name: System tests
       if: matrix.platform == 'ubuntu-latest'
       env:
