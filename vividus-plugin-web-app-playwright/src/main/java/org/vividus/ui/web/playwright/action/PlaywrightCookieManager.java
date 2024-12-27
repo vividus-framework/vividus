@@ -18,7 +18,6 @@ package org.vividus.ui.web.playwright.action;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.options.Cookie;
@@ -114,8 +113,14 @@ public class PlaywrightCookieManager implements CookieManager<Cookie>
         BasicClientCookie httpClientCookie = new BasicClientCookie(cookie.name, cookie.value);
         httpClientCookie.setDomain(cookie.domain);
         httpClientCookie.setPath(cookie.path);
-        Optional.ofNullable(cookie.expires).map(val -> Instant.ofEpochSecond(val.longValue()))
-                .ifPresent(httpClientCookie::setExpiryDate);
+        // CHECKSTYLE:OFF
+        // -1 is a session cookie:
+        // https://github.com/microsoft/playwright/blob/1c8e6f0921b1cc517afb5f8549609f356e81cf85/tests/library/browsercontext-add-cookies.spec.ts#L217
+        // CHECKSTYLE:ON
+        if (cookie.expires != null && cookie.expires != -1)
+        {
+            httpClientCookie.setExpiryDate(Instant.ofEpochSecond(cookie.expires.longValue()));
+        }
         httpClientCookie.setSecure(cookie.secure);
         httpClientCookie.setAttribute(org.apache.hc.client5.http.cookie.Cookie.DOMAIN_ATTR, cookie.domain);
         httpClientCookie.setAttribute(org.apache.hc.client5.http.cookie.Cookie.PATH_ATTR, cookie.path);
