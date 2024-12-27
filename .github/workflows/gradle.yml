@@ -131,7 +131,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: Integration Tests - Allure report - ${{ matrix.platform }}
+        name: Integration Tests - Report - ${{ matrix.platform }}
         path: vividus-tests/output/reports/allure
 
     - name: Validate successful exit code
@@ -167,7 +167,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: Playwright Integration Tests - Allure report - ${{ matrix.platform }}
+        name: Playwright Integration Tests - Report - ${{ matrix.platform }}
         path: vividus-tests/output/reports/allure
 
     - name: System tests
@@ -224,7 +224,7 @@ jobs:
       if: matrix.platform == 'ubuntu-latest' && always()
       uses: actions/upload-artifact@v4
       with:
-        name: System Tests - Allure report
+        name: System Tests - Report
         path: vividus-tests/output/reports/allure
 
     - name: Headless - Web - System tests
@@ -445,7 +445,7 @@ jobs:
       if: matrix.platform == 'ubuntu-latest' && always()
       uses: actions/upload-artifact@v4
       with:
-        name: SauceLabs - System Tests - Allure report - iOS
+        name: SauceLabs - System Tests - Report - iOS
         path: vividus-tests/output/reports/sl-ios-allure
 
     - name: SauceLabs - iOS Proxy - Mobile App - Run system tests
@@ -483,7 +483,7 @@ jobs:
       if: matrix.platform == 'ubuntu-latest' && always()
       uses: actions/upload-artifact@v4
       with:
-        name: SauceLabs - System Tests With Proxy- Allure report - iOS
+        name: SauceLabs - System Tests With Proxy - Report - iOS
         path: vividus-tests/output/reports/sl-ios-proxy-allure
 
     - name: SauceLabs - Android - Mobile App - Run system tests
@@ -520,7 +520,7 @@ jobs:
       if: matrix.platform == 'ubuntu-latest' && always()
       uses: actions/upload-artifact@v4
       with:
-        name: SauceLabs - System Tests - Allure report - Android
+        name: SauceLabs - System Tests - Report - Android
         path: vividus-tests/output/reports/sl-android-allure
 
     - name: SauceLabs - Android Proxy- Mobile App - Run system tests
@@ -558,7 +558,7 @@ jobs:
       if: matrix.platform == 'ubuntu-latest' && always()
       uses: actions/upload-artifact@v4
       with:
-        name: SauceLabs - System Tests With Proxy- Allure report - Android
+        name: SauceLabs - System Tests With Proxy - Report - Android
         path: vividus-tests/output/reports/sl-android-proxy-allure
 
     - name: BrowserStack - Desktop - Web - System tests
@@ -625,7 +625,7 @@ jobs:
       if: matrix.platform == 'macos-latest' && always()
       uses: actions/upload-artifact@v4
       with:
-        name: BrowserStack - System Tests - Allure report - iOS
+        name: BrowserStack - System Tests - Report - iOS
         path: vividus-tests/output/reports/bs-ios-allure
 
     - name: BrowserStack - Android - Mobile App - Run system tests
@@ -661,7 +661,7 @@ jobs:
       if: matrix.platform == 'macos-latest' && always()
       uses: actions/upload-artifact@v4
       with:
-        name: BrowserStack - System Tests - Allure report - Android
+        name: BrowserStack - System Tests - Report - Android
         path: vividus-tests/output/reports/bs-android-allure
 
     - name: Mobitru - Android - Mobile App - Run system tests
@@ -698,7 +698,7 @@ jobs:
       if: matrix.platform == 'macos-latest' && always()
       uses: actions/upload-artifact@v4
       with:
-        name: Mobitru - System Tests - Allure report - Android
+        name: Mobitru - System Tests - Report - Android
         path: vividus-tests/output/reports/mt-android-allure
 
     - name: Mobitru - IOS - Mobile App - Run system tests
@@ -734,7 +734,7 @@ jobs:
       if: matrix.platform == 'macos-latest' && always()
       uses: actions/upload-artifact@v4
       with:
-        name: Mobitru - System Tests - Allure report - iOS
+        name: Mobitru - System Tests - Report - iOS
         path: vividus-tests/output/reports/mt-ios-allure
 
     - name: Validate fail fast
