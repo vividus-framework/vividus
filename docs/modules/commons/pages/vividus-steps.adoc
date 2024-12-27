@@ -266,7 +266,7 @@ If the maximum number of iterations is reached no failure or exception will occu
 
 [source,gherkin]
 ----
-When I execute steps with delay `$delay` at most $max times while variable variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute
+When I execute steps with delay `$delay` at most $max times while variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute
 ----
 
 Alias:
