@@ -21,12 +21,15 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.options.Cookie;
@@ -36,7 +39,9 @@ import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -144,12 +149,23 @@ class PlaywrightCookieManagerTests
         assertEquals(expectedCookies, cookieManager.getCookies());
     }
 
-    @Test
-    void shouldGetCookiesAsHttpCookieStore()
+    static Stream<Arguments> expiryDates()
     {
-        Double expiryDate = (double) ZonedDateTime.now().plusDays(1).toInstant().getEpochSecond();
+        Instant expiryInstant = ZonedDateTime.now().plusDays(1).toInstant();
+        return Stream.of(
+                arguments((double) expiryInstant.getEpochSecond(), expiryInstant.truncatedTo(ChronoUnit.SECONDS)),
+                arguments(-1.0, null),
+                arguments(null, null)
+        );
+    }
+
+    @MethodSource("expiryDates")
+    @ParameterizedTest
+    void shouldGetCookiesAsHttpCookieStore(Double expiryDate, Instant expectedExpiryInstant)
+    {
         when(browserContextProvider.get()).thenReturn(browserContext);
-        Cookie cookie = createCookie().setExpires(expiryDate);
+        Cookie cookie = createCookie();
+        cookie.expires = expiryDate;
         when(browserContext.cookies()).thenReturn(List.of(cookie));
 
         CookieStore cookieStore = cookieManager.getCookiesAsHttpCookieStore();
@@ -158,14 +174,12 @@ class PlaywrightCookieManagerTests
         org.apache.hc.client5.http.cookie.Cookie httpCookie = resultCookies.get(0);
         assertThat(httpCookie, instanceOf(BasicClientCookie.class));
         BasicClientCookie clientCookie = (BasicClientCookie) httpCookie;
-        assertAll(
-                () -> assertEquals(cookie.domain, clientCookie.getDomain()),
-                () -> assertEquals(Instant.ofEpochSecond(expiryDate.longValue()), clientCookie.getExpiryInstant()),
+        assertAll(() -> assertEquals(cookie.domain, clientCookie.getDomain()),
+                () -> assertEquals(expectedExpiryInstant, clientCookie.getExpiryInstant()),
                 () -> assertEquals(cookie.name, clientCookie.getName()),
                 () -> assertEquals(cookie.path, clientCookie.getPath()),
                 () -> assertEquals(cookie.value, clientCookie.getValue()),
-                () -> assertEquals(cookie.secure, clientCookie.isSecure()),
-                () -> assertEquals(cookie.domain,
+                () -> assertEquals(cookie.secure, clientCookie.isSecure()), () -> assertEquals(cookie.domain,
                         clientCookie.getAttribute(org.apache.hc.client5.http.cookie.Cookie.DOMAIN_ATTR)),
                 () -> assertEquals(cookie.path,
                         clientCookie.getAttribute(org.apache.hc.client5.http.cookie.Cookie.PATH_ATTR))

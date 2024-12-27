@@ -156,13 +156,12 @@ jobs:
     - name: Integration tests - Playwright
       shell: bash
       run: |
-        ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments= \
+        ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=integration \
                                               -Pvividus.configuration.suites= \
                                               -Pvividus.configuration.profiles=web_pw/headless/chromium \
                                               -Pvividus.batch-1.meta-filters="groovy: playwrightSupported" \
                                               -Pvividus.batch-1.resource-location=story/integration \
-                                              -Pvividus.batch-1.resource-include-patterns=*Steps*.story \
-                                              -Pvividus.web-application.main-page-url='${variables.vividus-test-site-url}'
+                                              -Pvividus.batch-1.resource-include-patterns=*Steps*.story
 
     - name: Publish Playwright integration tests report
       if: always()
