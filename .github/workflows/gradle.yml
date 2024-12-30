@@ -159,7 +159,7 @@ jobs:
         ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=integration \
                                               -Pvividus.configuration.suites= \
                                               -Pvividus.configuration.profiles=web_pw/headless/chromium \
-                                              -Pvividus.batch-1.meta-filters="groovy: playwrightSupported" \
+                                              -Pvividus.batch-1.meta-filters="groovy: playwrightSupported || playwrightOnly" \
                                               -Pvividus.batch-1.resource-location=story/integration \
                                               -Pvividus.batch-1.resource-include-patterns=*Steps*.story
 

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
 import org.openqa.selenium.Cookie;
@@ -30,13 +31,16 @@ import org.slf4j.LoggerFactory;
 import org.vividus.http.client.CookieStoreCollector;
 import org.vividus.selenium.IWebDriverProvider;
 
-import jakarta.inject.Inject;
-
 public class WebDriverCookieManager implements CookieManager<Cookie>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebDriverCookieManager.class);
 
-    @Inject private IWebDriverProvider webDriverProvider;
+    private final IWebDriverProvider webDriverProvider;
+
+    public WebDriverCookieManager(IWebDriverProvider webDriverProvider)
+    {
+        this.webDriverProvider = webDriverProvider;
+    }
 
     @Override
     public void addCookie(String cookieName, String cookieValue, String path, String urlAsString)
@@ -48,10 +52,25 @@ public class WebDriverCookieManager implements CookieManager<Cookie>
     @Override
     public void addHttpClientCookies(List<org.apache.hc.client5.http.cookie.Cookie> httpCookies)
     {
-        httpCookies.forEach(
-                httpCookie -> addCookieToBrowserContext(httpCookie.getName(), httpCookie.getValue(),
-                httpCookie.getPath(), httpCookie.getDomain())
-        );
+        String currentUrl = webDriverProvider.get().getCurrentUrl();
+        httpCookies.stream()
+                .filter(httpCookie -> {
+                    boolean subDomain = InetAddressUtils.isSubDomain(
+                            StringUtils.removeStart(httpCookie.getDomain(), '.'), currentUrl);
+                    if (!subDomain)
+                    {
+                        LOGGER.atInfo()
+                                .addArgument(httpCookie::getDomain)
+                                .addArgument(currentUrl)
+                                .addArgument(httpCookie)
+                                .log("The cookie is not added to the browser as its domain '{}' is neither subdomain"
+                                     + " nor equal to the current page domain '{}'. Full cookie: {}");
+                    }
+                    return subDomain;
+                })
+                .forEach(
+                        httpCookie -> addCookieToBrowserContext(httpCookie.getName(), httpCookie.getValue(),
+                                httpCookie.getPath(), httpCookie.getDomain()));
     }
 
     private void addCookieToBrowserContext(String cookieName, String cookieValue, String path, String domain)
@@ -60,7 +79,7 @@ public class WebDriverCookieManager implements CookieManager<Cookie>
                 .domain(domain)
                 .path(path)
                 .build();
-        LOGGER.debug("Adding cookie: {}", cookie);
+        LOGGER.info("Adding cookie: {}", cookie);
         getOptions().addCookie(cookie);
     }
 
