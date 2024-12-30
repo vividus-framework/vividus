@@ -16,21 +16,27 @@
 
 package org.vividus.ui.web.action;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
@@ -49,7 +55,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.vividus.selenium.IWebDriverProvider;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class WebDriverCookieManagerTests
 {
     private static final String PATH = "/";
@@ -62,6 +68,8 @@ class WebDriverCookieManagerTests
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private Options options;
     @InjectMocks private WebDriverCookieManager cookieManager;
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(WebDriverCookieManager.class);
 
     @Test
     void shouldDeleteAllCookies()
@@ -89,14 +97,16 @@ class WebDriverCookieManagerTests
         assertEquals(ZERO, cookie.getValue());
         assertEquals(PATH, cookie.getPath());
         assertEquals(domain, cookie.getDomain());
+        assertThat(logger.getLoggingEvents(), is(List.of(info("Adding cookie: {}", cookie))));
     }
 
     @Test
     void shouldAddHttpCookies()
     {
-        String domain = "api_domain";
-        configureMockedWebDriver();
-        BasicClientCookie httpCookie = new BasicClientCookie(COOKIE_NAME, ZERO);
+        var domain = ".onrender.com";
+        var webDriver = configureMockedWebDriver();
+        when(webDriver.getCurrentUrl()).thenReturn("https://vividus-test-site-a92k.onrender.com/stickyHeader.html");
+        var httpCookie = new BasicClientCookie(COOKIE_NAME, ZERO);
         httpCookie.setPath(PATH);
         httpCookie.setDomain(domain);
         cookieManager.addHttpClientCookies(List.of(httpCookie));
@@ -106,6 +116,24 @@ class WebDriverCookieManagerTests
         assertEquals(ZERO, cookie.getValue());
         assertEquals(PATH, cookie.getPath());
         assertEquals(domain, cookie.getDomain());
+    }
+
+    @Test
+    void shouldSkipAddingHttpCookieDueToDomainMismatch()
+    {
+        var domain = "google.com";
+        var webDriver = mockWebDriver();
+        var currentPageUrl = "https://vividus-test-site-a92k.onrender.com/";
+        when(webDriver.getCurrentUrl()).thenReturn(currentPageUrl);
+        var httpCookie = new BasicClientCookie(COOKIE_NAME, ZERO);
+        httpCookie.setPath(PATH);
+        httpCookie.setDomain(domain);
+        cookieManager.addHttpClientCookies(List.of(httpCookie));
+        verifyNoInteractions(options);
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                info("The cookie is not added to the browser as its domain '{}' is neither subdomain nor equal to "
+                     + "the current page domain '{}'. Full cookie: {}", domain, currentPageUrl, httpCookie)))
+        );
     }
 
     @Test
@@ -149,11 +177,11 @@ class WebDriverCookieManagerTests
         Cookie seleniumCookie = createSeleniumCookie(expiryDate);
         mockGetCookies(seleniumCookie);
         CookieStore cookieStore = cookieManager.getCookiesAsHttpCookieStore();
-        List<org.apache.hc.client5.http.cookie.Cookie> resultCookies = cookieStore.getCookies();
+        var resultCookies = cookieStore.getCookies();
         assertEquals(1, resultCookies.size());
-        org.apache.hc.client5.http.cookie.Cookie httpCookie = resultCookies.get(0);
+        var httpCookie = resultCookies.get(0);
         assertThat(httpCookie, instanceOf(BasicClientCookie.class));
-        BasicClientCookie clientCookie = (BasicClientCookie) httpCookie;
+        var clientCookie = (BasicClientCookie) httpCookie;
         assertAll(
             () -> assertEquals(seleniumCookie.getDomain(), clientCookie.getDomain()),
             () -> assertEquals(expiryDate != null ? expiryDate.toInstant().truncatedTo(ChronoUnit.SECONDS) : null,
@@ -169,11 +197,18 @@ class WebDriverCookieManagerTests
         );
     }
 
-    private void configureMockedWebDriver()
+    private WebDriver mockWebDriver()
     {
-        WebDriver webDriver = mock(WebDriver.class);
+        WebDriver webDriver = mock();
         when(webDriverProvider.get()).thenReturn(webDriver);
+        return webDriver;
+    }
+
+    private WebDriver configureMockedWebDriver()
+    {
+        WebDriver webDriver = mockWebDriver();
         when(webDriver.manage()).thenReturn(options);
+        return webDriver;
     }
 
     private Cookie createSeleniumCookie(Date expiry)
@@ -183,7 +218,7 @@ class WebDriverCookieManagerTests
 
     private Set<Cookie> mockGetCookies(Cookie cookie)
     {
-        Set<Cookie> cookies = Collections.singleton(cookie);
+        Set<Cookie> cookies = Set.of(cookie);
         when(options.getCookies()).thenReturn(cookies);
         return cookies;
     }

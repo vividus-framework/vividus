@@ -61,8 +61,8 @@ public class BrowserAndHttpContextIntegrationSteps
      * Sets the current cookies from the preceding HTTP calls to the current browser instance. After adding the cookies
      * the opened page is refreshed (this is required to apply the new cookies).
      * <br>
-     * NOTE: If Selenium engine is used, ensure that the expected cookies from HTTP calls match the domain of the page
-     * opened in the web browser.
+     * NOTE: If the Selenium engine is used, the HTTP context cookies with a domain that is either a subdomain or equal
+     * to the domain of the page opened in the web browser will be set.
      */
     @When("I set HTTP context cookies to browser")
     public void setHttpCookiesToBrowser()
@@ -76,8 +76,8 @@ public class BrowserAndHttpContextIntegrationSteps
      * changes in cookies instantly. The current page must be refreshed, or navigation must be performed to apply the
      * cookie changes.
      * <br>
-     * NOTE: If Selenium engine is used, ensure that the expected cookies from HTTP calls match the domain of the
-     * page opened in the web browser.
+     * NOTE: If the Selenium engine is used, the HTTP context cookies with a domain that is either a subdomain or equal
+     * to the domain of the page opened in the web browser will be set.
      */
     @When("I set HTTP context cookies to browser without applying changes")
     public void setHttpCookiesToBrowserWithoutApply()

@@ -33,4 +33,18 @@ class InetAddressUtilsTests
     {
         assertEquals(domain, InetAddressUtils.getDomain(urlAsString));
     }
+
+    @ParameterizedTest
+    @CsvSource({
+            "https://www.domain.com,                       domain.com,                              true",
+            "http://127.0.0.1:8080,                        127.0.0.1,                               true",
+            "http://localhost:8080,                        localhost,                               true",
+            "https://vividus-test-site-a92k.onrender.com/, vividus-test-site-a92k.onrender.com,     true",
+            "https://vividus-test-site-a92k.onrender.com/, onrender.com,                            true",
+            "https://vividus-test-site-a92k.onrender.com/, abc.vividus-test-site-a92k.onrender.com, false"
+    })
+    void shouldCheckIsSubDomain(String urlAsString, String domain, boolean expected)
+    {
+        assertEquals(expected, InetAddressUtils.isSubDomain(domain, urlAsString));
+    }
 }

@@ -17,6 +17,7 @@
 package org.vividus.ui.web.action;
 
 import java.net.URI;
+import java.util.function.Function;
 
 import com.google.common.net.InetAddresses;
 import com.google.common.net.InternetDomainName;
@@ -37,10 +38,28 @@ public final class InetAddressUtils
      */
     public static String getDomain(String urlAsString)
     {
+        return processDomain(urlAsString, DOMAIN_PARTS_SEPARATOR::concat, Function.identity());
+    }
+
+    /**
+     * Checks if the specified domain is either a subdomain or equal to the given URL domain.
+     *
+     * @param domain      The domain to check.
+     * @param urlAsString The URL as a string to check against.
+     * @return true if the specified domain is either a subdomain or equal to the URL domain, false otherwise.
+     */
+    public static boolean isSubDomain(String domain, String urlAsString)
+    {
+        return processDomain(urlAsString, topDomain -> topDomain.endsWith(domain), host -> host.equals(domain));
+    }
+
+    private static <T> T processDomain(String urlAsString, Function<String, T> domainProcessor,
+            Function<String, T> hostProcessor)
+    {
         String host = URI.create(urlAsString).getHost();
         return host.contains(DOMAIN_PARTS_SEPARATOR) && !InetAddresses.isInetAddress(host)
-                ? DOMAIN_PARTS_SEPARATOR + getTopDomain(host)
-                : host;
+                ? domainProcessor.apply(getTopDomain(host))
+                : hostProcessor.apply(host);
     }
 
     private static String getTopDomain(String host)
