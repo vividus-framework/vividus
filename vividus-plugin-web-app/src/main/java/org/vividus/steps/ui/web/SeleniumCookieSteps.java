@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,13 @@ import java.util.Set;
 
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.jbehave.core.model.ExamplesTable;
 import org.openqa.selenium.Cookie;
 import org.vividus.annotation.Replacement;
 import org.vividus.context.VariableContext;
-import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.CookieSteps;
 import org.vividus.ui.web.action.CookieManager;
-import org.vividus.ui.web.action.INavigateActions;
+import org.vividus.ui.web.action.NavigateActions;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
@@ -39,76 +37,17 @@ public class SeleniumCookieSteps extends CookieSteps<Cookie>
 {
     private static final String COOKIE_PRESENCE_PATTERN = "Cookie with the name '%s' is set";
 
-    private final IWebDriverProvider webDriverProvider;
     private final CookieManager<Cookie> cookieManager;
-    private final INavigateActions navigateActions;
     private final VariableContext variableContext;
     private final ISoftAssert softAssert;
 
-    public SeleniumCookieSteps(IWebDriverProvider webDriverProvider, CookieManager<Cookie> cookieManager,
-            INavigateActions navigateActions, VariableContext variableContext, JsonUtils jsonUtils,
-            ISoftAssert softAssert)
+    public SeleniumCookieSteps(CookieManager<Cookie> cookieManager, NavigateActions navigateActions,
+            VariableContext variableContext, JsonUtils jsonUtils, ISoftAssert softAssert)
     {
-        super(cookieManager, Cookie::getName, Cookie::toJson, variableContext, jsonUtils, softAssert);
-        this.webDriverProvider = webDriverProvider;
+        super(cookieManager, Cookie::getName, Cookie::toJson, navigateActions, variableContext, jsonUtils, softAssert);
         this.cookieManager = cookieManager;
-        this.navigateActions = navigateActions;
         this.variableContext = variableContext;
         this.softAssert = softAssert;
-    }
-
-    /**
-     * Removes all cookies from the current domain
-     * <p>The actions performed by the step:</p>
-     * <ul>
-     * <li>remove all cookies from the current domain;</li>
-     * <li>refresh the current page (this action is required to apply the changes in cookies).</li>
-     * </ul>
-     */
-    @When("I remove all cookies from current domain")
-    public void removeAllCookies()
-    {
-        removeAllCookiesWithoutApply();
-        navigateActions.refresh();
-    }
-
-    /**
-     * Removes all cookies from the current domain, but does not apply the changes in cookies. The current page must be
-     * refreshed or the navigation must be performed to apply the cookie changes.
-     */
-    @When("I remove all cookies from current domain without applying changes")
-    public void removeAllCookiesWithoutApply()
-    {
-        cookieManager.deleteAllCookies();
-    }
-
-    /**
-     * Removes the certain cookie from the current domain
-     * <p>The actions performed by the step:</p>
-     * <ul>
-     * <li>remove the certain cookie the from current domain;</li>
-     * <li>refresh the current page (this action is required to apply the changes in cookies).</li>
-     * </ul>
-     *
-     * @param cookieName The name of the cookie to remove
-     */
-    @When("I remove cookie with name `$cookieName` from current domain")
-    public void removeCookie(String cookieName)
-    {
-        removeCookieWithoutApply(cookieName);
-        navigateActions.refresh();
-    }
-
-    /**
-     * Removes the certain cookie from the current domain, but does not apply the changes in cookies. The current
-     * page must be refreshed or the navigation must be performed to apply the cookie changes.
-     *
-     * @param cookieName The name of the cookie to remove
-     */
-    @When("I remove cookie with name `$cookieName` from current domain without applying changes")
-    public void removeCookieWithoutApply(String cookieName)
-    {
-        cookieManager.deleteCookie(cookieName);
     }
 
     /**
@@ -169,60 +108,5 @@ public class SeleniumCookieSteps extends CookieSteps<Cookie>
     {
         Cookie cookie = cookieManager.getCookie(cookieName);
         softAssert.assertThat(String.format("Cookie with the name '%s' is not set", cookieName), cookie, nullValue());
-    }
-
-    /**
-     * Adds the cookies provided in the input ExamplesTable. It's allowed to add the cookies for the current domain
-     * only: make sure the web browser is opened at the expected domain.
-     * <p>The actions performed by the step:</p>
-     * <ul>
-     * <li>add the cookies;</li>
-     * <li>refresh the current page (this action is required to apply the changes in cookies).</li>
-     * </ul>
-     * <p>The cookie parameters to be defined in the ExamplesTable</p>
-     * <ul>
-     * <li><b>cookieName</b> - the name of the cookie to set</li>
-     * <li><b>cookieValue</b> - the value of the cookie to set</li>
-     * <li><b>path</b> - the path of the cookie to set</li>
-     * </ul>
-     * <p>Usage example:</p>
-     * <code>
-     * <br>When I set all cookies for current domain:
-     * <br>|cookieName   |cookieValue |path |
-     * <br>|cookieAgreed |2           |/    |
-     * </code>
-     *
-     * @param parameters The parameters of the cookies to set as ExamplesTable
-     */
-    @When("I set all cookies for current domain:$parameters")
-    public void setAllCookies(ExamplesTable parameters)
-    {
-        setAllCookiesWithoutApply(parameters);
-        navigateActions.refresh();
-    }
-
-    /**
-     * Adds the cookies provided in the input ExamplesTable, but does not apply the changes in cookies. The current
-     * page must be refreshed or the navigation must be performed to apply the cookie changes. It's allowed to add
-     * the cookies for the current domain only: make sure the web browser is opened at the expected domain.
-     * <p>The cookie parameters to be defined in the ExamplesTable</p>
-     * <ul>
-     * <li><b>cookieName</b> - the name of the cookie to set</li>
-     * <li><b>cookieValue</b> - the value of the cookie to set</li>
-     * <li><b>path</b> - the path of the cookie to set</li>
-     * </ul>
-     * <p>Usage example:</p>
-     * <code>
-     * <br>When I set all cookies for current domain:
-     * <br>|cookieName   |cookieValue |path |
-     * <br>|cookieAgreed |2           |/    |
-     * </code>
-     *
-     * @param parameters The parameters of the cookies to set as ExamplesTable
-     */
-    @When("I set all cookies for current domain without applying changes:$parameters")
-    public void setAllCookiesWithoutApply(ExamplesTable parameters)
-    {
-        setCookies(webDriverProvider.get().getCurrentUrl(), parameters);
     }
 }
