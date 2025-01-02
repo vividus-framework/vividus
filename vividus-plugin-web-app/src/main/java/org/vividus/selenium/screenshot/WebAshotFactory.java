@@ -19,6 +19,7 @@ package org.vividus.selenium.screenshot;
 import java.util.Optional;
 
 import org.vividus.selenium.screenshot.strategies.AdjustingScrollableElementAwareViewportPastingDecorator;
+import org.vividus.selenium.screenshot.strategies.CdpShootingStrategy;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.screenshot.WebCutOptions;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
@@ -107,6 +108,13 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
 
     private AShot createAShot(String strategyName, WebScreenshotParameters screenshotParameters)
     {
+        if ("CDP".equals(strategyName))
+        {
+            return new AShot().shootingStrategy(
+                decorateWithCroppingParams(new CdpShootingStrategy(), screenshotParameters)
+            );
+        }
+
         ShootingStrategy baseShootingStrategy = getBaseShootingStrategy();
         ShootingStrategy shootingStrategy;
         @SuppressWarnings("checkstyle:Indentation")
@@ -128,12 +136,17 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
                     String.format("Unknown shooting strategy with the name: %s", strategyName));
         };
         shootingStrategy = decorateWithScrollbarHiding(shootingStrategy, screenshotParameters);
-        shootingStrategy = screenshotParameters == null
-                ? shootingStrategy
-                : decorateWithCropping(shootingStrategy, screenshotParameters);
+        shootingStrategy = decorateWithCroppingParams(shootingStrategy, screenshotParameters);
 
         return new AShot().shootingStrategy(shootingStrategy)
                 .coordsProvider(new ScrollBarHidingCoordsProviderDecorator(coordsProvider, scrollbarHandler));
+    }
+
+    private ShootingStrategy decorateWithCroppingParams(ShootingStrategy shootingStrategy,
+            WebScreenshotParameters screenshotParameters)
+    {
+        return screenshotParameters == null ? shootingStrategy
+                : decorateWithCropping(shootingStrategy, screenshotParameters);
     }
 
     private ShootingStrategy getBaseShootingStrategy()
