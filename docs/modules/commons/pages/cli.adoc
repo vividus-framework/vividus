@@ -1,3 +1,5 @@
+:tabs-sync-option:
+
 = CLI
 
 In scope of this article the `task` term is a piece of work that is done on stories, scenarios, steps and other entities
@@ -20,7 +22,7 @@ NOTE: The tasks are available only through the `gradlew` command.
 == Run stories
 
 The task runs test stories based on current xref:configuration:tests-configuration.adoc[tests configuration] and tests state
-on the file system.
+on the file system:
 
 :task-name: runStories
 
@@ -53,17 +55,22 @@ The task prints all the steps that are available for the xref:configuration:test
 
 |===
 
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell]
 ----
 ./gradlew printSteps --args='-f my-steps.txt'
 ----
 
-.Windows:
+Windows::
++
 [source,shell]
 ----
 gradlew printSteps --args='-f my-steps.txt'
 ----
+======
 
 .Output
 [source,gherkin]
@@ -101,17 +108,22 @@ The task counts steps in the specified tests folder and prints them in the desce
 
 |===
 
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell]
 ----
 ./gradlew countSteps --args='-t 5 -d story/uat'
 ----
 
-.Windows:
+Windows::
++
 [source,shell]
 ----
 gradlew countSteps --args='-t 5 -d story/uat'
 ----
+======
 
 .Output
 [source,gherkin]
@@ -144,17 +156,22 @@ The task counts and prints stories, scenarios and scenarios containing examples 
 
 |===
 
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell]
 ----
 ./gradlew countScenarios --args='-d story/uat'
 ----
 
-.Windows:
+Windows::
++
 [source,shell]
 ----
 gradlew countScenarios --args='-d story/uat'
 ----
+======
 
 .Output
 [source]
@@ -168,17 +185,22 @@ gradlew countScenarios --args='-d story/uat'
 
 The task validates known issues format and prints the validated known issues into the console.
 
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell]
 ----
 ./gradlew validateKnownIssues
 ----
 
-.Windows:
+Windows::
++
 [source,shell]
 ----
-./gradlew validateKnownIssues
+gradlew validateKnownIssues
 ----
+======
 
 .Output
 [source]
@@ -218,17 +240,22 @@ IMPORTANT: If you miss the file argument into the task it will behave as describ
 .*Doctor Who.*
 ----
 
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell]
 ----
 ./gradlew validateKnownIssues --args='-f ./assertion-failures.txt'
 ----
 
-.Windows:
+Windows::
++
 [source,shell]
 ----
 gradlew validateKnownIssues --args='-f assertion-failures.txt'
 ----
+======
 
 .Output
 [source]
@@ -242,17 +269,22 @@ VVD-6       | .*Doctor Who.*
 The task replaces deprecated steps with actual ones in all stories(`\*.story` files) and composite steps (`*.steps` files) along the path `<project-name>/src/main/resources`.
 Please note that some deprecated steps (for example which should be replaced with two steps) cannot be replaced automatically and must be refactored manually.
 
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell]
 ----
 ./gradlew replaceDeprecatedSteps
 ----
 
-.Windows:
+Windows::
++
 [source,shell]
 ----
 gradlew replaceDeprecatedSteps
 ----
+======
 
 .Output (for cases when found steps which cannot be replaced automatically)
 [source]
@@ -265,17 +297,22 @@ The step "When I check all checkboxes located by `xpath(.//input)`" from "compos
 
 The task replaces deprecated properties with actual ones in all properties files along the path `<project-name>/src/main/resources/properties`.
 
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell]
 ----
 ./gradlew replaceDeprecatedProperties
 ----
 
-.Windows:
+Windows::
++
 [source,shell]
 ----
 gradlew replaceDeprecatedProperties
 ----
+======
 
 The examples below demonstrate property file with deprecated properties before and after applying the `replaceDeprecatedProperties` task.
 

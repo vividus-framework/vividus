@@ -1,3 +1,5 @@
+:tabs-sync-option:
+
 = Getting Started
 
 Everyone has to start somewhere and if you’re new to VIVIDUS, this is where to begin.
@@ -17,8 +19,13 @@ we highly recommend you read xref:configuration:tests-configuration.adoc["How to
 . Download and install https://adoptium.net/temurin/releases/?version=21[Java 21].
 . https://www.baeldung.com/java-home-on-windows-7-8-10-mac-os-x-linux[Configure `JAVA_HOME` environment variable] to point your directory with installed JDK.
 . Add new entry to `PATH` environment variable:
-    * for Windows: `%JAVA_HOME%/bin`
-    * for macOS / Linux: `$JAVA_HOME/bin`
++
+[tabs]
+======
+macOS / Linux:: `$JAVA_HOME/bin`
+
+Windows:: `%JAVA_HOME%/bin`
+======
 
 == Setup test project
 . Login to http://github.com/[GitHub] (create a new account at first if you don't have any).
@@ -60,19 +67,23 @@ cd your_repository_name
 
 . Build the project:
 +
-- macOS / Linux:
+[tabs]
+======
+macOS / Linux::
 +
 [source,shell]
 ----
 ./gradlew build
 ----
 
-- Windows:
+Windows::
 +
 [source,cmd]
 ----
 gradlew build
 ----
+======
+
 
 == Use IDE for the tests development
 
@@ -87,19 +98,22 @@ Please choose any of the listed below IDEs.
 ==== Import the project
 . Generate Eclipse configuration files:
 +
-- macOS / Linux:
+[tabs]
+======
+macOS / Linux::
 +
 [source,shell]
 ----
 ./gradlew eclipse
 ----
 
-- Windows:
+Windows::
 +
 [source,cmd]
 ----
 gradlew eclipse
 ----
+======
 
 . https://help.eclipse.org/2024-03/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Ftasks%2Ftasks-importproject.htm[Import the project to Eclipse]
 . Start creating your tests
@@ -128,19 +142,22 @@ gradlew eclipse
 ## Execute the tests via CLI
 . Execute your tests via Gradle:
 +
-- macOS / Linux:
+[tabs]
+======
+macOS / Linux::
 +
 [source,shell]
 ----
 ./gradlew runStories
 ----
 
-- Windows:
+Windows::
 +
 [source,cmd]
 ----
 gradlew runStories
 ----
+======
 
 ## View the test execution report
 

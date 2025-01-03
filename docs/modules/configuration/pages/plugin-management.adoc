@@ -1,3 +1,5 @@
+:tabs-sync-option:
+
 = Plugin Management
 
 == Bill of Materials
@@ -28,19 +30,22 @@ dependencies {
 After making changes to the `build.gradle` file (adding or removing dependencies), it is necessary to refresh the project
 so that the changes can be recognized and the project can be re-configured accordingly. This can be done by running:
 
-- macOS / Linux:
+[tabs]
+======
+macOS / Linux::
 +
 [source,shell]
 ----
 ./gradlew build
 ----
 
-- Windows:
+Windows::
 +
 [source,cmd]
 ----
 gradlew build
 ----
+======
 
 If the project was imported to the IDE before adding a new plugin, it is required
 xref:ROOT:getting-started.adoc#_use_ide_for_the_tests_development[to re-generate]
