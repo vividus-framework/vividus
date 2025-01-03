@@ -1,32 +1,45 @@
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell,subs="attributes+"]
 ----
 ./gradlew {task-name}
 ----
 
-.Windows:
+Windows::
++
 [source,shell,subs="attributes+"]
 ----
 gradlew {task-name}
 ----
-
+======
 
 === Treat known issues only as a positive result
 
 Any known issues detected during stories run fail the overall execution with the corresponding
 xref:configuration:tests-configuration.adoc#_exit_codes[exit code]. The following command-line option can be used to not treat
 known issues as failures:
-
-.Enable treating of known issues as a positive result for current stories run
+[tabs]
+======
+macOS / Linux::
++
 [source,shell,subs="attributes+"]
 ----
 ./gradlew {task-name} --treat-known-issues-only-as-passed
 ----
 
+Windows::
++
+[source,shell,subs="attributes+"]
+----
+gradlew {task-name} --treat-known-issues-only-as-passed
+----
+======
+
 The treating of known issues as a positive result can be enabled globally at the project level by adding the following
 line into the `build.gradle` file of the tests project:
 
-.Enable treating of known issues as positive result for stories exeuctions at the project level
 [source,gradle,subs="attributes+"]
 ----
 {task-name}.treatKnownIssuesOnlyAsPassed = true
@@ -45,19 +58,43 @@ apply from: "$\{buildSystemPath\}/vividus-test-project.gradle"
 
 === Write exit code to a file
 
-Writing of the exit code can be enabled globally using project properties:
+The following command-line option can be used to write an exit code to a file:
 
-.Write exit code to a file by an absolute path via CLI
+[tabs]
+======
+macOS / Linux::
++
 [source,shell,subs="attributes+"]
 ----
 ./gradlew {task-name} -PfileToSaveExitCode='/user/dir/exitCode.txt'
 ----
 
-.Write an exit code to a file with a path related to the project build directory via CLI
+Windows::
++
+[source,shell,subs="attributes+"]
+----
+gradlew {task-name} -PfileToSaveExitCode='/user/dir/exitCode.txt'
+----
+======
+
+Also, it is possible to specify option to resolve a file path to write an exit code against the project build directory:
+
+[tabs]
+======
+macOS / Linux::
++
 [source,shell,subs="attributes+"]
 ----
 ./gradlew {task-name} -PfileToSaveExitCode='/exitCode.txt' -PresolvePathAgainstProjectBuildDir=true
 ----
+
+Windows::
++
+[source,shell,subs="attributes+"]
+----
+gradlew {task-name} -PfileToSaveExitCode='/exitCode.txt' -PresolvePathAgainstProjectBuildDir=true
+----
+======
 
 Writing of the exit code can be enabled globally for the project by adding the following lines into the
 `build.gradle` file of the test project:
