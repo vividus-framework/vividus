@@ -15,7 +15,7 @@
         <constructor-arg index="0" value="${selenium.grid.username}" />
         <constructor-arg index="1" value="${selenium.grid.password}" />
         <constructor-arg>
-            <bean class="com.saucelabs.ci.sauceconnect.SauceConnectFourManager">
+            <bean class="com.saucelabs.ci.sauceconnect.SauceConnectManager">
                 <constructor-arg index="0" value="VIVIDUS"/>
                 <property name="useLatestSauceConnect" value="${saucelabs.sauce-connect.use-latest-version}"/>
             </bean>
