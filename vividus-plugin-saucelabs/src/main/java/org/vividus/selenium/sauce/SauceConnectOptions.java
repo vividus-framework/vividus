@@ -21,12 +21,15 @@ import static org.vividus.util.ResourceUtils.createTempFile;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.saucelabs.saucerest.DataCenter;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -47,15 +50,15 @@ public class SauceConnectOptions extends TunnelOptions
     private static final String FULL_FILE_PROTOCOL = FILE_PROTOCOL + (SystemUtils.IS_OS_WINDOWS ? "/" : "");
 
     private final boolean useLatestSauceConnect;
-    private final String restUrl;
+    private final DataCenter dataCenter;
     private final String customArguments;
     private final Set<String> skipHostGlobPatterns;
 
-    public SauceConnectOptions(boolean useLatestSauceConnect, String restUrl, String customArguments,
+    public SauceConnectOptions(boolean useLatestSauceConnect, DataCenter dataCenter, String customArguments,
             Set<String> skipHostGlobPatterns)
     {
         this.useLatestSauceConnect = useLatestSauceConnect;
-        this.restUrl = restUrl;
+        this.dataCenter = dataCenter;
         this.customArguments = customArguments;
         this.skipHostGlobPatterns = new TreeSet<>(skipHostGlobPatterns);
         this.skipHostGlobPatterns.addAll(List.of(
@@ -70,6 +73,7 @@ public class SauceConnectOptions extends TunnelOptions
     {
         StringBuilder options = Optional.ofNullable(customArguments).map(args -> new StringBuilder(args).append(' '))
                 .orElseGet(StringBuilder::new);
+        appendOption(options, "region", dataCenter.name().toLowerCase(Locale.ROOT).replace('_', '-'));
         if (tunnelName != null)
         {
             appendOption(options, "tunnel-name", tunnelName);
@@ -83,10 +87,6 @@ public class SauceConnectOptions extends TunnelOptions
                     : FILE_PROTOCOL + FilenameUtils.separatorsToUnix(pacFilePath.toString());
 
             appendOption(options, "pac", pacFileUrl);
-        }
-        if (restUrl != null)
-        {
-            appendOption(options, "rest-url", restUrl);
         }
         appendOption(options, "tunnel-pool");
         return options.substring(0, options.length() - 1);
@@ -127,13 +127,13 @@ public class SauceConnectOptions extends TunnelOptions
             return false;
         }
         SauceConnectOptions that = (SauceConnectOptions) o;
-        return useLatestSauceConnect == that.useLatestSauceConnect && Objects.equals(restUrl, that.restUrl)
+        return useLatestSauceConnect == that.useLatestSauceConnect && Objects.equals(dataCenter, that.dataCenter)
                 && Objects.equals(skipHostGlobPatterns, that.skipHostGlobPatterns);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(super.hashCode(), useLatestSauceConnect, restUrl, skipHostGlobPatterns);
+        return Objects.hash(super.hashCode(), useLatestSauceConnect, dataCenter, skipHostGlobPatterns);
     }
 }
