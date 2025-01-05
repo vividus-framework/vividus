@@ -661,7 +661,7 @@ jobs:
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="BrowserStack Android System tests report" \
-                                                  -Pvividus.variables.app-url=bs://ea0d1b2566605fc5a26258451bf49eb4101d07c2
+                                                  -Pvividus.variables.app-url=bs://9059ff4d077c07a0409eba9c14e012c5ca99db56
         else
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY variables, System tests will be skipped
         fi
