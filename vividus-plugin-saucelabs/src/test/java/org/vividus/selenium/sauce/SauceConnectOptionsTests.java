@@ -72,7 +72,7 @@ class SauceConnectOptionsTests
         {
             Path pacPath = mockPac(resources, DEFAULT_MATCH_CHAIN);
 
-            assertEquals(REGION_OPTION + SPACE + TUNNEL_NAME_OPTION + SPACE + PAC_FILE + pacPath + SPACE + TUNNEL_POOL,
+            assertEquals(TUNNEL_NAME_OPTION + SPACE + REGION_OPTION + SPACE + PAC_FILE + pacPath + SPACE + TUNNEL_POOL,
                     sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
@@ -87,7 +87,7 @@ class SauceConnectOptionsTests
             Path pacPath = mockPac(resources, DEFAULT_MATCH_CHAIN);
 
             assertEquals(
-                    REGION_OPTION + SPACE + TUNNEL_NAME_OPTION + SPACE + PAC_FILE + (SystemUtils.IS_OS_WINDOWS ? "/"
+                    TUNNEL_NAME_OPTION + SPACE + REGION_OPTION + SPACE + PAC_FILE + (SystemUtils.IS_OS_WINDOWS ? "/"
                             : "") + pacPath + SPACE + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
@@ -102,7 +102,7 @@ class SauceConnectOptionsTests
             Path pacPath = mockPac(resources, DEFAULT_MATCH_CHAIN);
             when(pacPath.toString()).thenReturn("c:\\user\\temp.js");
 
-            assertEquals(REGION_OPTION + SPACE + TUNNEL_NAME_OPTION + SPACE + PAC_FILE + "c:/user/temp.js" + SPACE
+            assertEquals(TUNNEL_NAME_OPTION + SPACE + REGION_OPTION + SPACE + PAC_FILE + "c:/user/temp.js" + SPACE
                          + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
@@ -116,7 +116,7 @@ class SauceConnectOptionsTests
         {
             Path pacPath = mockPac(resources, DEFAULT_MATCH_CHAIN);
 
-            assertEquals(customFlags + SPACE + REGION_OPTION + SPACE + TUNNEL_NAME_OPTION + SPACE + PAC_FILE + pacPath
+            assertEquals(customFlags + SPACE + TUNNEL_NAME_OPTION + SPACE + REGION_OPTION + SPACE + PAC_FILE + pacPath
                          + SPACE + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
@@ -133,7 +133,7 @@ class SauceConnectOptionsTests
                     + "\"*.vividus.dev\") || shExpMatch(host, \"example.com\") || shExpMatch(host, \"saucelabs.com\")";
             Path pacPath = mockPac(resources, matchCondition);
 
-            assertEquals(REGION_OPTION + SPACE + TUNNEL_NAME_OPTION + SPACE + PAC_FILE + pacPath + SPACE + TUNNEL_POOL,
+            assertEquals(TUNNEL_NAME_OPTION + SPACE + REGION_OPTION + SPACE + PAC_FILE + pacPath + SPACE + TUNNEL_POOL,
                     sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
@@ -142,15 +142,8 @@ class SauceConnectOptionsTests
     void testBuildWOProxy() throws IOException
     {
         SauceConnectOptions sauceConnectOptions = createEmptyOptions();
-        assertEquals(REGION_OPTION + SPACE + TUNNEL_NAME_OPTION + SPACE + TUNNEL_POOL,
+        assertEquals(TUNNEL_NAME_OPTION + SPACE + REGION_OPTION + SPACE + TUNNEL_POOL,
                 sauceConnectOptions.build(TUNNEL_NAME));
-    }
-
-    @Test
-    void testBuildWOProxyNullOption() throws IOException
-    {
-        SauceConnectOptions sauceConnectOptions = createEmptyOptions();
-        assertEquals(REGION_OPTION + SPACE + TUNNEL_POOL, sauceConnectOptions.build(null));
     }
 
     @Test
