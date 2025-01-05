@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,6 @@ public class SauceConnectOptions extends TunnelOptions
         if (tunnelName != null)
         {
             appendOption(options, "tunnel-name", tunnelName);
-            appendOption(options, "pidfile", createPidFile(tunnelName).toString());
         }
 
         if (getProxy() != null)
@@ -104,11 +103,6 @@ public class SauceConnectOptions extends TunnelOptions
         return skipHostGlobPatterns.stream()
                                    .map(host -> String.format("shExpMatch(host, \"%s\")", host))
                                    .collect(Collectors.joining(" || "));
-    }
-
-    private Path createPidFile(String tunnelName) throws IOException
-    {
-        return createTempFile("sc_client-" + tunnelName + "-", ".pid", null);
     }
 
     private static void appendOption(StringBuilder stringBuilder, String name, String... values)
