@@ -25,7 +25,6 @@ The task runs test stories based on current xref:configuration:tests-configurati
 on the file system:
 
 :task-name: runStories
-
 include::partial$stories-exec.adoc[]
 
 == Debug stories
@@ -33,7 +32,8 @@ include::partial$stories-exec.adoc[]
 The task runs test stories omitting VIVIDUS initialization check based on current xref:configuration:tests-configuration.adoc[tests configuration]
 and tests state on the file system.
 
-include::partial$stories-exec.adoc[task-name=debugStories]
+:task-name: debugStories
+include::partial$stories-exec.adoc[]
 
 == Print available steps
 
