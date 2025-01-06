@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import static org.hamcrest.xml.HasXPath.hasXPath;
 
 import java.io.IOException;
 import java.util.Set;
+
+import javax.xml.xpath.XPathExpressionException;
 
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -51,9 +53,11 @@ public class XmlSteps
      * @param xml XML
      * @param scopes The set of variable scopes (comma separated list of scopes e.g.: STORY, NEXT_BATCHES)
      * @param variableName Name of variable
+     * @throws XPathExpressionException If an XPath expression error has occurred
      */
     @When("I save data found by xpath `$xpath` in XML `$xml` to $scopes variable `$variableName`")
     public void saveDataByXpath(String xpath, String xml, Set<VariableScope> scopes, String variableName)
+            throws XPathExpressionException
     {
         XmlUtils.getXmlByXpath(xml, xpath).ifPresent(
             data -> variableContext.putVariable(scopes, variableName, data));
@@ -78,9 +82,11 @@ public class XmlSteps
      * Checks if xml contains element by XPath
      * @param xml XML
      * @param xpath XPath
+     * @throws IOException If an I/O error has occurred
+     * @throws SAXException If an XML processing error has occurred
      */
     @Then("XML `$xml` contains element by xpath `$xpath`")
-    public void doesElementExistByXpath(String xml, String xpath)
+    public void doesElementExistByXpath(String xml, String xpath) throws SAXException, IOException
     {
         Document doc = XmlUtils.convertToDocument(xml);
         softAssert.assertThat("XML has element with XPath: " + xpath, doc, hasXPath(xpath));
@@ -123,6 +129,25 @@ public class XmlSteps
         try
         {
             XmlUtils.validateXmlAgainstXsd(xml, xsd);
+        }
+        catch (SAXException | IOException e)
+        {
+            softAssert.recordFailedAssertion(e);
+        }
+    }
+
+    /**
+     * Validates if the XML document is well formed
+     *
+     * @param xml The XML document
+     */
+    @Then("XML `$xml` is well formed")
+    public void validateXmlIsWellFormed(String xml)
+    {
+        try
+        {
+            XmlUtils.convertToDocument(xml);
+            softAssert.recordPassedAssertion("The XML document is well formed");
         }
         catch (SAXException | IOException e)
         {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
+import java.io.IOException;
 import java.util.Set;
 
 import javax.xml.transform.TransformerException;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
@@ -37,6 +39,7 @@ import org.vividus.util.xml.XmlUtils;
 import org.vividus.variable.VariableScope;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 @ExtendWith(MockitoExtension.class)
 class XmlStepsTests
@@ -54,7 +57,7 @@ class XmlStepsTests
     private XmlSteps xmlValidationSteps;
 
     @Test
-    void shouldSaveDataByXpathIntoScopeVariable()
+    void shouldSaveDataByXpathIntoScopeVariable() throws XPathExpressionException
     {
         Set<VariableScope> scopes = Set.of(VariableScope.STEP);
         String name = "name";
@@ -64,7 +67,7 @@ class XmlStepsTests
 
     @Test
     @SuppressWarnings("unchecked")
-    void shouldValidateXmlElementExistenceByXpath()
+    void shouldValidateXmlElementExistenceByXpath() throws SAXException, IOException
     {
         Document doc = XmlUtils.convertToDocument(XML);
         softAssert.assertThat(eq("XML has element with XPath: " + XPATH), eq(doc), any(Matcher.class));
@@ -112,6 +115,20 @@ class XmlStepsTests
     {
         xmlValidationSteps.saveTransformedXml(XML, "invalid", null, null);
         verify(softAssert).recordFailedAssertion(any(TransformerException.class));
+    }
+
+    @Test
+    void shouldRecordFailedAssertionIfXmlIsNotWellFormed()
+    {
+        xmlValidationSteps.validateXmlIsWellFormed("<test>xslt test<test>");
+        verify(softAssert).recordFailedAssertion(any(SAXParseException.class));
+    }
+
+    @Test
+    void shouldPassIfXMLDocumentIsWellFormed()
+    {
+        xmlValidationSteps.validateXmlIsWellFormed(XML);
+        verify(softAssert).recordPassedAssertion("The XML document is well formed");
     }
 
     private String loadXsd()

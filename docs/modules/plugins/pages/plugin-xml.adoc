@@ -191,3 +191,28 @@ Then XML `
 </xs:schema>
 `
 ----
+
+=== Validate well formed XML document
+
+Validates if the provided XML document is well formed.
+
+[source,gherkin]
+----
+Then XML `$xml` is well formed
+----
+
+* `$xml` - The {xml} document.
+
+.Check a message is well formed XML document
+[source,gherkin]
+----
+Then XML `
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+  <to>Bob</to>
+  <from>Alice</from>
+  <heading>Reminder</heading>
+  <body>Don't forget to fill TJ gaps for this week</body>
+</message>
+` is well formed
+----
