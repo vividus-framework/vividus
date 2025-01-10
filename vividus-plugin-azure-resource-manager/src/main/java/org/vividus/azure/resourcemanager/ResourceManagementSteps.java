@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.vividus.azure.resourcemanager;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -33,6 +34,7 @@ import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
+import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
@@ -46,14 +48,16 @@ public class ResourceManagementSteps
     private final ISoftAssert softAssert;
     private final VariableContext variableContext;
     private final AzureProfile azureProfile;
+    private final IAttachmentPublisher attachmentPublisher;
 
     public ResourceManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential, ISoftAssert softAssert,
-            VariableContext variableContext)
+            VariableContext variableContext, IAttachmentPublisher attachmentPublisher)
     {
         this.httpPipeline = HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile);
         this.softAssert = softAssert;
         this.variableContext = variableContext;
         this.azureProfile = azureProfile;
+        this.attachmentPublisher = attachmentPublisher;
     }
 
     /**
@@ -87,7 +91,7 @@ public class ResourceManagementSteps
             String variableName)
     {
         executeHttpRequest(HttpMethod.GET, azureResourceUrl, Optional.empty(),
-                responseBody -> variableContext.putVariable(scopes, variableName, responseBody));
+                putVariableWithAttachment(scopes, variableName));
     }
 
     /**
@@ -126,7 +130,7 @@ public class ResourceManagementSteps
             Set<VariableScope> scopes, String variableName)
     {
         executeHttpRequest(HttpMethod.GET, azureResourceIdentifier, apiVersion, Optional.empty(),
-                responseBody -> variableContext.putVariable(scopes, variableName, responseBody));
+                putVariableWithAttachment(scopes, variableName));
     }
 
     /**
@@ -167,7 +171,7 @@ public class ResourceManagementSteps
             String azureOperationBody, Set<VariableScope> scopes, String variableName)
     {
         executeHttpRequest(HttpMethod.POST, azureOperationIdentifier, apiVersion, Optional.of(azureOperationBody),
-                responseBody -> variableContext.putVariable(scopes, variableName, responseBody));
+                putVariableWithAttachment(scopes, variableName));
     }
 
     /**
@@ -260,5 +264,16 @@ public class ResourceManagementSteps
                     )
             );
         }
+    }
+
+    private Consumer<String> putVariableWithAttachment(Set<VariableScope> scopes, String variableName)
+    {
+        return responseBody ->
+        {
+            attachmentPublisher.publishAttachment(
+                    "/vividus-plugin/azure/resourcemanager/attachments/resource-as-json.ftl",
+                    Map.of("body", responseBody, "bodyContentType", "application/json"), "Azure Resource JSON");
+            variableContext.putVariable(scopes, variableName, responseBody);
+        };
     }
 }

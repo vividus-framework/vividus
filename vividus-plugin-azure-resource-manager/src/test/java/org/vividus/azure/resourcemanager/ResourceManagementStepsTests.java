@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Named.named;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
@@ -51,6 +52,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
+import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
@@ -73,28 +75,39 @@ class ResourceManagementStepsTests
     private static final String URL_DOMAIN = "https://management.azure.com/";
     private static final String REQUEST_BODY = "{\"resource\": \"body\"}";
     private static final String RESPONSE_BODY = "{\"key\":\"value\"}";
+    private static final String TEMPLATE_NAME =
+            "/vividus-plugin/azure/resourcemanager/attachments/resource-as-json.ftl";
+    private static final String BODY = "body";
+    private static final String CONTENT_TYPE = "bodyContentType";
+    private static final String APPLICATION_JSON = "application/json";
+    private static final String ATTACHMENT_TITLE = "Azure Resource JSON";
 
     @Mock private TokenCredential tokenCredential;
     @Mock private ISoftAssert softAssert;
     @Mock private VariableContext variableContext;
+    @Mock private IAttachmentPublisher attachmentPublisher;
 
     private Stream<Named<BiConsumer<Consumer<ResourceManagementSteps>, String>>> createTestsCreatingResources()
     {
         return Stream.of(
                 named("successfulCreation", (test, expectedUrlPath) -> {
                     testHttpRequestExecution(test, 200, expectedUrlPath, Optional.of(RESPONSE_BODY),
-                            httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()));
-                    verify(variableContext).putVariable(SCOPES, VAR_NAME, RESPONSE_BODY);
+                            httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()),
+                            () -> {
+                                verify(variableContext).putVariable(SCOPES, VAR_NAME, RESPONSE_BODY);
+                                verify(attachmentPublisher).publishAttachment(TEMPLATE_NAME,
+                                        Map.of(BODY, RESPONSE_BODY, CONTENT_TYPE, APPLICATION_JSON), ATTACHMENT_TITLE);
+                            });
                 }),
                 named("failedCreationWithBody", (test, expectedUrlPath) -> {
                     testHttpRequestExecution(test, 404, expectedUrlPath, Optional.of(RESPONSE_BODY),
-                            httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()));
-                    verifyFailedHttpRequestExecutionWithResponseBody(RESPONSE_BODY);
+                            httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()),
+                            () -> verifyFailedHttpRequestExecutionWithResponseBody(RESPONSE_BODY));
                 }),
                 named("failedCreationWithoutBody", (test, expectedUrlPath) -> {
                     testHttpRequestExecution(test, 404, expectedUrlPath, Optional.empty(),
-                            httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()));
-                    verifyFailedHttpRequestExecutionWithoutResponseBody(404);
+                            httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()),
+                            () -> verifyFailedHttpRequestExecutionWithoutResponseBody(404));
                 })
         );
     }
@@ -126,16 +139,19 @@ class ResourceManagementStepsTests
         return Stream.of(
                 named("successfulOperation", (test, expectedUrlPath) -> {
                     testHttpRequestExecution(test, 200, expectedUrlPath, Optional.of(RESPONSE_BODY),
-                            httpRequest -> assertHttpRequestWithBody(HttpMethod.POST, httpRequest)
-                    );
-                    verify(variableContext).putVariable(SCOPES, VAR_NAME, RESPONSE_BODY);
+                            httpRequest -> assertHttpRequestWithBody(HttpMethod.POST, httpRequest),
+                            () -> {
+                                verify(variableContext).putVariable(SCOPES, VAR_NAME, RESPONSE_BODY);
+                                verify(attachmentPublisher).publishAttachment(TEMPLATE_NAME,
+                                        Map.of(BODY, RESPONSE_BODY, CONTENT_TYPE, APPLICATION_JSON), ATTACHMENT_TITLE);
+                            });
                 }),
-                named("failedOperation", (test, expectedUrlPath) -> {
-                    testHttpRequestExecution(test, 404, expectedUrlPath, Optional.of(RESPONSE_BODY),
-                            httpRequest -> assertHttpRequestWithBody(HttpMethod.POST, httpRequest)
-                    );
-                    verifyFailedHttpRequestExecutionWithResponseBody(RESPONSE_BODY);
-                })
+                named("failedOperation",
+                        (test, expectedUrlPath) -> testHttpRequestExecution(test, 404, expectedUrlPath,
+                                Optional.of(RESPONSE_BODY),
+                                httpRequest -> assertHttpRequestWithBody(HttpMethod.POST, httpRequest),
+                                () -> verifyFailedHttpRequestExecutionWithResponseBody(RESPONSE_BODY)
+                ))
         );
     }
 
@@ -157,7 +173,8 @@ class ResourceManagementStepsTests
         testHttpRequestExecution(
                 steps -> steps.configureAzureResource(AZURE_RESOURCE_IDENTIFIER, REQUEST_BODY, API_VERSION_VALUE),
                 200, URL_PATH, Optional.of(RESPONSE_BODY),
-                httpRequest -> assertHttpRequestWithBody(HttpMethod.PUT, httpRequest)
+                httpRequest -> assertHttpRequestWithBody(HttpMethod.PUT, httpRequest),
+                () -> verifyNoInteractions(attachmentPublisher)
         );
     }
 
@@ -168,13 +185,14 @@ class ResourceManagementStepsTests
         testHttpRequestExecution(
                 steps -> steps.deleteAzureResource(AZURE_RESOURCE_IDENTIFIER, API_VERSION_VALUE),
                 200, URL_PATH, Optional.of(RESPONSE_BODY),
-                httpRequest -> assertEquals(HttpMethod.DELETE, httpRequest.getHttpMethod())
-        );
+                httpRequest -> assertEquals(HttpMethod.DELETE, httpRequest.getHttpMethod()),
+                () -> verifyNoInteractions(attachmentPublisher));
     }
 
     @SuppressWarnings("PMD.CloseResource")
     private void testHttpRequestExecution(Consumer<ResourceManagementSteps> test, int statusCode,
-            String expectedUrlPath, Optional<String> responseAsString, Consumer<HttpRequest> httpRequestValidator)
+            String expectedUrlPath, Optional<String> responseAsString, Consumer<HttpRequest> httpRequestValidator,
+            Runnable additionalTest)
     {
         var azureProfile = new AzureProfile(AzureEnvironment.AZURE);
         try (MockedStatic<HttpPipelineProvider> httpPipelineProviderMock = mockStatic(HttpPipelineProvider.class))
@@ -188,12 +206,14 @@ class ResourceManagementStepsTests
             var httpRequestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
             when(httpPipeline.send(httpRequestCaptor.capture())).thenReturn(Mono.just(httpResponse));
 
-            var steps = new ResourceManagementSteps(azureProfile, tokenCredential, softAssert, variableContext);
+            var steps = new ResourceManagementSteps(azureProfile, tokenCredential, softAssert, variableContext,
+                    attachmentPublisher);
             test.accept(steps);
             var httpRequest = httpRequestCaptor.getValue();
             assertEquals(URL_DOMAIN + expectedUrlPath + API_VERSION_NAME + API_VERSION_VALUE,
                     httpRequest.getUrl().toString());
             httpRequestValidator.accept(httpRequest);
+            additionalTest.run();
         }
     }
 
@@ -202,7 +222,7 @@ class ResourceManagementStepsTests
         assertEquals(httpMethod, httpRequest.getHttpMethod());
         assertEquals(REQUEST_BODY, new String(httpRequest.getBody().blockFirst().array(), StandardCharsets.UTF_8));
         var expectedHeaders = Map.of(
-                "Content-Type", "application/json",
+                "Content-Type", APPLICATION_JSON,
                 "Content-Length", Integer.toString(REQUEST_BODY.length())
         );
         assertEquals(expectedHeaders, httpRequest.getHeaders().toMap());

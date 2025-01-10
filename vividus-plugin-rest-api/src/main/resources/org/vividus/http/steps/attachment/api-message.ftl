@@ -6,7 +6,7 @@
     <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../../styles.css"/>
-    <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../../webjars/bootstrap/5.3.1/css/bootstrap.min.css"/>
 </head>
 <body>
     <style>
@@ -14,43 +14,43 @@
             white-space: pre-wrap;
             word-break: normal;
         }
-        a[data-toggle='collapse'] {
+        a[data-bs-toggle='collapse'] {
             display: inline-block;
             width: 100%;
             height: 100%;
         }
-        .toggleable:hover {
+        .card-header:hover {
              cursor: pointer;
         }
-        .panel-heading a:after {
+        .card-header a:after {
             font-family:'FontAwesome';
             content:"\F107";
             float: right;
             color: grey;
         }
-        .panel-heading a.collapsed:after {
+        .card-header a.collapsed:after {
             content:"\F105";
         }
-        
+        .button-info {
+            color: #31708f;
+            background-color: #d9edf7;
+            border-color: #bce8f1;
+        }
+        .tab-content {
+            background-color: #f5f5f5;
+        }
     </style>
 
-    <div class="panel-group" id="accordion">
-
+    <div class="card" id="accordion">
         <#if statusCode != -1>
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h4 class="panel-title">Status code: ${statusCode}</h4>
-                </div>
-            </div>
+            <h5 class="card-header button-info" style="cursor: default">Status code: ${statusCode}</h4>
         </#if>
 
-        <div class="panel panel-info">
-            <div class="panel-heading">
-                <h4 class="panel-title toggleable">
-                    <a data-toggle="collapse" data-target="#collapse-header" href="#collapse-header" class="collapsed">Headers</a>
-                </h4>
-            </div>
-            <div id="collapse-header" class="panel-collapse collapse">
+        <h4 class="card-header">
+            <a class="btn button-info text-start" data-bs-toggle="collapse" href="#collapse-header" role="button" aria-expanded="false" aria-controls="collapse-header">Headers</a>
+        </h4>
+        <div id="collapse-header" class="collapse multi-collapse border rounded">
+            <div class="card card-body">
                 <table class="table">
                     <tbody>
                         <#list headers as header>
@@ -69,47 +69,18 @@
         </div>
 
         <#if body??>
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h4 class="panel-title toggleable">
-                        <a data-toggle="collapse" data-target="#collapse-body" href="#collapse-body" class="collapsed">Body</a>
-                    </h4>
-                </div>
-                <div id="collapse-body" class="panel-collapse collapse in">
-                    <div class="container">
-                        <ul class="nav nav-tabs">
-                            <li class="active"><a data-toggle="tab" href="#pretty">Pretty</a></li>
-                            <li><a data-toggle="tab" href="#origin">Original</a></li>
-                        </ul>
-                        <div class="tab-content">
-                             <#assign contentType = bodyContentType?split('/')?last>
-                             <div id="pretty" class="tab-pane fade  in active">
-                               <pre><code id = "pretty-code" class="${contentType}"><#outputformat "HTML">${body}</#outputformat></code></pre>
-                             </div>
-                             <div id="origin" class="tab-pane fade">
-                               <pre><code id = "original-code" class="${contentType}"><#outputformat "HTML">${body}</#outputformat></code></pre>
-                             </div>
-                        </div>
-                    </div>
-                </div>
+            <h4 class="card-header">
+                <a class="btn button-info text-start" data-bs-toggle="collapse" href="#collapse-body" role="button" aria-expanded="false" aria-controls="collapse-body">Body</a>
+            </h4>
+            <div id="collapse-body" class="collapse multi-collapse">
+                <#include "/templates/http-body-container-fragment.ftl">
             </div>
         </#if>
     </div>
 
     <script src="../../webjars/jquery/3.6.4/jquery.min.js"></script>
-    <script src="../../webjars/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="../../webjars/bootstrap/5.3.1/js/bootstrap.min.js"></script>
     <script src="../../webjars/highlight.js/11.7.0/highlight.min.js"></script>
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $("code[id='pretty-code']").each(function(i, e) {
-                if(e.className.includes("json")){
-                    var text = $(this).text();
-                    var pretty =  JSON.stringify(JSON.parse(text), null, 2);
-                    $(this).text(pretty);
-                }
-                hljs.highlightElement(e);
-            });
-        });
-    </script>
+    <script src="../../webjars/vividus/js/code-prettifier.js"></script>
 </body>
 </html>
