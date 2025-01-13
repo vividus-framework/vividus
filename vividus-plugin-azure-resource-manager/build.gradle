@@ -4,6 +4,7 @@ dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-extension-azure')
     implementation project(':vividus-soft-assert')
+    implementation project(':vividus-reporter')
     implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.46.0')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.4')
