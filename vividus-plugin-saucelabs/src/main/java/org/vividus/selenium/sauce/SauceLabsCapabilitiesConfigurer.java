@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilit
     private static final String SAUCE_OPTIONS = "sauce:options";
 
     private final boolean useLatestSauceConnect;
-    private final String restUrl;
+    private final DataCenter dataCenter;
     private String sauceConnectArguments;
     private Set<String> skipHostGlobPatterns;
 
@@ -38,7 +38,7 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilit
     {
         super(runContext, sauceConnectManager);
         this.useLatestSauceConnect = useLatestSauceConnect;
-        this.restUrl = dataCenter.apiServer() + "rest/v1";
+        this.dataCenter = dataCenter;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilit
     @Override
     protected SauceConnectOptions createOptions()
     {
-        return new SauceConnectOptions(useLatestSauceConnect, restUrl, sauceConnectArguments,
+        return new SauceConnectOptions(useLatestSauceConnect, dataCenter, sauceConnectArguments,
                 skipHostGlobPatterns == null ? Set.of() : skipHostGlobPatterns);
     }
 

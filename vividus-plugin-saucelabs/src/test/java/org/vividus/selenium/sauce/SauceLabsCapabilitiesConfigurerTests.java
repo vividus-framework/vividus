@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,9 +60,9 @@ class SauceLabsCapabilitiesConfigurerTests
 
     private static final String STORY_PATH = STORY_NAME + ".story";
 
-    private static final String REST_URL = "https://api.eu-central-1.saucelabs.com/rest/v1";
     private static final String CUSTOM_ARGS = "--verbose";
     private static final Set<String> SKIP_HOST_GLOB_PATTERNS = Set.of("example.com");
+    private static final DataCenter DATA_CENTER = DataCenter.EU_CENTRAL;
 
     @Mock private RunContext runContext;
     @Mock private SauceConnectManager sauceConnectManager;
@@ -71,7 +71,7 @@ class SauceLabsCapabilitiesConfigurerTests
     @BeforeEach
     void beforeEach()
     {
-        configurer = new SauceLabsCapabilitiesConfigurer(true, runContext, sauceConnectManager, DataCenter.EU_CENTRAL);
+        configurer = new SauceLabsCapabilitiesConfigurer(true, runContext, sauceConnectManager, DATA_CENTER);
     }
 
     @Test
@@ -99,7 +99,7 @@ class SauceLabsCapabilitiesConfigurerTests
         configurer.setTunnellingEnabled(true);
         Map<String, Object> sauceOptions = new HashMap<>();
         var desiredCapabilities = mockDesiredCapabilities(null, sauceOptions);
-        var sauceConnectOptions = new SauceConnectOptions(true, REST_URL, null, Set.of());
+        var sauceConnectOptions = new SauceConnectOptions(true, DATA_CENTER, null, Set.of());
         when(sauceConnectManager.start(sauceConnectOptions)).thenReturn(TUNNEL_NAME);
 
         configurer.configure(desiredCapabilities);
@@ -118,7 +118,7 @@ class SauceLabsCapabilitiesConfigurerTests
         var httpProxy = "http-proxy:8080";
         when(proxy.getHttpProxy()).thenReturn(httpProxy);
 
-        var sauceConnectOptions = new SauceConnectOptions(true, REST_URL, CUSTOM_ARGS, SKIP_HOST_GLOB_PATTERNS);
+        var sauceConnectOptions = new SauceConnectOptions(true, DATA_CENTER, CUSTOM_ARGS, SKIP_HOST_GLOB_PATTERNS);
         sauceConnectOptions.setProxy(httpProxy);
 
         Map<String, Object> sauceOptions = new HashMap<>();
@@ -146,7 +146,8 @@ class SauceLabsCapabilitiesConfigurerTests
     {
         configurer.setSauceConnectArguments(CUSTOM_ARGS);
         configurer.setSkipHostGlobPatterns(setValue);
-        assertEquals(new SauceConnectOptions(true, REST_URL, CUSTOM_ARGS, expectedValue), configurer.createOptions());
+        assertEquals(new SauceConnectOptions(true, DATA_CENTER, CUSTOM_ARGS, expectedValue),
+                configurer.createOptions());
     }
 
     private void mockRunningStory()
