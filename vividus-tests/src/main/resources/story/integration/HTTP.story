@@ -4,7 +4,7 @@ Meta:
     @epic vividus-plugin-rest-api
 
 Scenario: Verify method DEBUG is supported; accidental space is trimmed in httpMethod enum
-When I execute HTTP DEBUG request for resource with URL `http://example.org/`
+When I execute HTTP DEBUG request for resource with URL `https://httpbingo.org/`
 Then `${response-code}` is equal to `405`
 
 Scenario: Verify handling of plus character in URL query
