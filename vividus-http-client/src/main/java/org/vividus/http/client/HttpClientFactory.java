@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,6 @@ import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.util.Timeout;
 import org.vividus.http.keystore.IKeyStoreFactory;
 import org.vividus.util.UriUtils;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class HttpClientFactory implements IHttpClientFactory
 {
@@ -155,7 +153,6 @@ public class HttpClientFactory implements IHttpClientFactory
         return SSLContexts.createSystemDefault();
     }
 
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH")
     private void configureAuth(HttpClientConfig config, HttpClientBuilder builder)
     {
         Map<String, BasicAuthConfig> auths = filterDefaultConfig(config.getBasicAuthConfig());

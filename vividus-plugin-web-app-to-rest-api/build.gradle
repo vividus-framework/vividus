@@ -20,8 +20,6 @@ dependencies {
     compileOnly project(':vividus-plugin-web-app')
     compileOnly project(':vividus-plugin-web-app-playwright')
 
-    compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
-
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.4')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.15.2')
