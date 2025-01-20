@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
 
+import com.saucelabs.saucerest.DataCenter;
+
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -37,16 +39,14 @@ class SauceConnectOptionsTests
 {
     private static final String SPACE = " ";
     private static final String PAC_FILE = "--pac file://";
-    private static final String DOT_JS = ".js";
-    private static final String PAC_TEST_TUNNEL = "pac-saucelabs-test-tunnel";
     private static final String PROXY = "test";
     private static final String TUNNEL_NAME = "test-tunnel";
-    private static final String PID_FILE_NAME = "sc_client-" + TUNNEL_NAME + "-";
     private static final String TUNNEL_NAME_OPTION = "--tunnel-name" + SPACE + TUNNEL_NAME;
-    private static final String PID_EXTENSION = ".pid";
     private static final String TUNNEL_POOL = "--tunnel-pool";
-    private static final String DEFAULT_REST_URL = "https://saucelabs.com/rest/v1/";
-    private static final String DEFAULT_CUSTOM_ARGS = "--verbose";
+    private static final DataCenter DATA_CENTER = DataCenter.US_WEST;
+    private static final String REGION = "us-west";
+    private static final String REGION_OPTION = "--region" + SPACE + REGION;
+    private static final String DEFAULT_CUSTOM_ARGS = "--log-level debug";
     private static final Set<String> DEFAULT_SKIP_GLOB_HOST_PATTERNS = Set.of("vividus.dev");
     private static final String DEFAULT_MATCH_CHAIN = "shExpMatch(host, \"*.api.testobject.com\") || "
             + "shExpMatch(host, \"*.miso.saucelabs.com\") || shExpMatch(host, \"*.saucelabs.com\") || "
@@ -61,8 +61,6 @@ class SauceConnectOptionsTests
             + "    return \"PROXY test\";%n"
             + "}%n";
 
-    private static final String PID_FILE = "--pidfile";
-
     @Test
     void testBuildWithProxy() throws IOException
     {
@@ -71,26 +69,24 @@ class SauceConnectOptionsTests
         try (MockedStatic<ResourceUtils> resources = mockStatic(ResourceUtils.class))
         {
             Path pacPath = mockPac(resources, DEFAULT_MATCH_CHAIN);
-            Path pidPath = mockPid(resources);
 
-            assertEquals(TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
-                    + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
+            assertEquals(TUNNEL_NAME_OPTION + SPACE + REGION_OPTION + SPACE + PAC_FILE + pacPath + SPACE + TUNNEL_POOL,
+                    sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
     @Test
     void testBuildWithProxyForLatestSauceConnect() throws IOException
     {
-        SauceConnectOptions sauceConnectOptions = new SauceConnectOptions(true, null, null, Set.of());
+        SauceConnectOptions sauceConnectOptions = new SauceConnectOptions(true, DATA_CENTER, null, Set.of());
         sauceConnectOptions.setProxy(PROXY);
         try (MockedStatic<ResourceUtils> resources = mockStatic(ResourceUtils.class))
         {
             Path pacPath = mockPac(resources, DEFAULT_MATCH_CHAIN);
-            Path pidPath = mockPid(resources);
 
-            assertEquals(TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + (
-                            SystemUtils.IS_OS_WINDOWS ? "/" : "") + pacPath + SPACE + TUNNEL_POOL,
-                    sauceConnectOptions.build(TUNNEL_NAME));
+            assertEquals(
+                    TUNNEL_NAME_OPTION + SPACE + REGION_OPTION + SPACE + PAC_FILE + (SystemUtils.IS_OS_WINDOWS ? "/"
+                            : "") + pacPath + SPACE + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
@@ -103,10 +99,9 @@ class SauceConnectOptionsTests
         {
             Path pacPath = mockPac(resources, DEFAULT_MATCH_CHAIN);
             when(pacPath.toString()).thenReturn("c:\\user\\temp.js");
-            Path pidPath = mockPid(resources);
 
-            assertEquals(TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + "c:/user/temp.js"
-                    + SPACE + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
+            assertEquals(TUNNEL_NAME_OPTION + SPACE + REGION_OPTION + SPACE + PAC_FILE + "c:/user/temp.js" + SPACE
+                         + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
@@ -114,15 +109,13 @@ class SauceConnectOptionsTests
     void testBuildWithProxyWithAuth() throws IOException
     {
         String customFlags = "--auth host:9999:user:pass";
-        SauceConnectOptions sauceConnectOptions = createOptions(null, customFlags, Set.of(), PROXY);
+        SauceConnectOptions sauceConnectOptions = createOptions(customFlags, Set.of(), PROXY);
         try (MockedStatic<ResourceUtils> resources = mockStatic(ResourceUtils.class))
         {
             Path pacPath = mockPac(resources, DEFAULT_MATCH_CHAIN);
-            Path pidPath = mockPid(resources);
 
-            assertEquals(
-                    customFlags + SPACE + TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE
-                            + pacPath + SPACE + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
+            assertEquals(customFlags + SPACE + TUNNEL_NAME_OPTION + SPACE + REGION_OPTION + SPACE + PAC_FILE + pacPath
+                         + SPACE + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
@@ -130,45 +123,25 @@ class SauceConnectOptionsTests
     void testBuildWithProxyWithSkipHostsPattern() throws IOException
     {
         Set<String> hosts = Set.of("example.com", "*.vividus.dev");
-        SauceConnectOptions sauceConnectOptions = createOptions(null, null, hosts, PROXY);
+        SauceConnectOptions sauceConnectOptions = createOptions(null, hosts, PROXY);
         try (MockedStatic<ResourceUtils> resources = mockStatic(ResourceUtils.class))
         {
             String matchCondition = "shExpMatch(host, \"*.api.testobject.com\") || shExpMatch"
                     + "(host, \"*.miso.saucelabs.com\") || shExpMatch(host, \"*.saucelabs.com\") || shExpMatch(host, "
                     + "\"*.vividus.dev\") || shExpMatch(host, \"example.com\") || shExpMatch(host, \"saucelabs.com\")";
             Path pacPath = mockPac(resources, matchCondition);
-            Path pidPath = mockPid(resources);
 
-            assertEquals(TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
-                    + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
+            assertEquals(TUNNEL_NAME_OPTION + SPACE + REGION_OPTION + SPACE + PAC_FILE + pacPath + SPACE + TUNNEL_POOL,
+                    sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
     @Test
     void testBuildWOProxy() throws IOException
     {
-        try (MockedStatic<ResourceUtils> resources = mockStatic(ResourceUtils.class))
-        {
-            Path pidPath = mockPid(resources);
-
-            SauceConnectOptions sauceConnectOptions = createEmptyOptions();
-            assertEquals(TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + TUNNEL_POOL,
-                    sauceConnectOptions.build(TUNNEL_NAME));
-        }
-    }
-
-    @Test
-    void testBuildWOProxyNullOption() throws IOException
-    {
         SauceConnectOptions sauceConnectOptions = createEmptyOptions();
-        assertEquals(TUNNEL_POOL, sauceConnectOptions.build(null));
-    }
-
-    @Test
-    void testBuildWithRestUrl() throws IOException
-    {
-        SauceConnectOptions sauceConnectOptions = createOptions(DEFAULT_REST_URL, null, Set.of(), null);
-        assertEquals("--rest-url" + SPACE + DEFAULT_REST_URL + SPACE + TUNNEL_POOL, sauceConnectOptions.build(null));
+        assertEquals(TUNNEL_NAME_OPTION + SPACE + REGION_OPTION + SPACE + TUNNEL_POOL,
+                sauceConnectOptions.build(TUNNEL_NAME));
     }
 
     @Test
@@ -210,46 +183,45 @@ class SauceConnectOptionsTests
     @Test
     void testNotEqualsSkipProxyHostsPattern()
     {
-        assertNotEquals(createOptions(DEFAULT_REST_URL, DEFAULT_CUSTOM_ARGS, Set.of(), PROXY), createDefaultOptions());
+        assertNotEquals(createOptions(DEFAULT_CUSTOM_ARGS, Set.of(), PROXY), createDefaultOptions());
     }
 
     @Test
-    void testNotEqualsRestUrl()
+    void testNotEqualsDataCenter()
     {
-        assertNotEquals(createOptions(null, DEFAULT_CUSTOM_ARGS, DEFAULT_SKIP_GLOB_HOST_PATTERNS, PROXY),
+        assertNotEquals(
+                createOptions(DataCenter.EU_CENTRAL, DEFAULT_CUSTOM_ARGS, DEFAULT_SKIP_GLOB_HOST_PATTERNS, PROXY),
                 createDefaultOptions());
     }
 
     private SauceConnectOptions createDefaultOptions()
     {
-        return createOptions(DEFAULT_REST_URL, DEFAULT_CUSTOM_ARGS, DEFAULT_SKIP_GLOB_HOST_PATTERNS, PROXY);
+        return createOptions(DEFAULT_CUSTOM_ARGS, DEFAULT_SKIP_GLOB_HOST_PATTERNS, PROXY);
     }
 
     private SauceConnectOptions createEmptyOptions()
     {
-        return createOptions(null, null, Set.of(), null);
+        return createOptions(null, Set.of(), null);
     }
 
-    private SauceConnectOptions createOptions(String restUrl, String customArguments, Set<String> skipHostGlobPatterns,
-            String proxy)
+    private SauceConnectOptions createOptions(String customArguments, Set<String> skipHostGlobPatterns, String proxy)
     {
-        SauceConnectOptions options = new SauceConnectOptions(false, restUrl, customArguments, skipHostGlobPatterns);
+        return createOptions(DATA_CENTER, customArguments, skipHostGlobPatterns, proxy);
+    }
+
+    private static SauceConnectOptions createOptions(DataCenter dataCenter, String customArguments,
+            Set<String> skipHostGlobPatterns, String proxy)
+    {
+        SauceConnectOptions options = new SauceConnectOptions(false, dataCenter, customArguments, skipHostGlobPatterns);
         options.setProxy(proxy);
         return options;
-    }
-
-    private Path mockPid(MockedStatic<ResourceUtils> mock)
-    {
-        Path pidPath = mock(Path.class);
-        mock.when(() -> ResourceUtils.createTempFile(PID_FILE_NAME, PID_EXTENSION, null)).thenReturn(pidPath);
-        return pidPath;
     }
 
     private Path mockPac(MockedStatic<ResourceUtils> mock, String matchCondition)
     {
         Path pacPath = mock(Path.class);
-        mock.when(() -> ResourceUtils.createTempFile(PAC_TEST_TUNNEL, DOT_JS, String.format(PAC_DATA, matchCondition)))
-                .thenReturn(pacPath);
+        mock.when(() -> ResourceUtils.createTempFile("pac-saucelabs-test-tunnel", ".js",
+                String.format(PAC_DATA, matchCondition))).thenReturn(pacPath);
         return pacPath;
     }
 }
