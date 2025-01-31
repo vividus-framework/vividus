@@ -45,12 +45,12 @@ Then the page has the relative URL '/mouseEvents.html'
 Scenario: Step verification Then the context element has a width of '$widthInPerc'% relative to the parent element
 Given I am on page with URL `${vividus-test-site-url}/dropdowns.html`
 When I change context to element located by `xpath(.//*[@for='colors'])`
-Then context element has width of 13% relative to parent element
+Then context element has width of 6% relative to parent element
 
 Scenario: Deprecated step verification Then the context element has a width of '$widthInPerc'% relative to the parent element
 Given I am on page with URL `${vividus-test-site-url}/dropdowns.html`
 When I change context to element located by `xpath(.//*[@for='colors'])`
-Then the context element has a width of '13'% relative to the parent element
+Then the context element has a width of '6'% relative to the parent element
 
 Scenario: Deprecated step verification When I perform right click on an element located `$locator`
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
