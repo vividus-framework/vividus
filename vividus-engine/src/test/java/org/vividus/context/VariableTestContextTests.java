@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -40,8 +41,10 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -49,6 +52,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
 import org.vividus.util.EnumUtils;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.IVariablesFactory;
 import org.vividus.variable.VariableScope;
 import org.vividus.variable.Variables;
@@ -60,11 +64,13 @@ class VariableTestContextTests
     private static final String VARIABLE_KEY = "variableKey";
     private static final String VALUE = "value";
     private static final String STEP = "step";
+    private static final String STORY = "story";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(VariableTestContext.class);
 
     @Mock private IVariablesFactory variablesFactory;
     @Spy private final TestContext testContext = new SimpleTestContext();
+    @Spy private final JsonUtils jsonUtils = new JsonUtils();
     @InjectMocks private VariableTestContext variableTestContext;
 
     @Test
@@ -140,7 +146,7 @@ class VariableTestContextTests
         assertThat(loggingEvents, hasItems(
                 info(SAVE_MESSAGE_TEMPLATE, VALUE, STEP, VARIABLE_KEY),
                 info(SAVE_MESSAGE_TEMPLATE, VALUE, "scenario", VARIABLE_KEY),
-                info(SAVE_MESSAGE_TEMPLATE, VALUE, "story", VARIABLE_KEY),
+                info(SAVE_MESSAGE_TEMPLATE, VALUE, STORY, VARIABLE_KEY),
                 info(SAVE_MESSAGE_TEMPLATE, VALUE, "next batches", VARIABLE_KEY)));
         verify(variablesFactory).addNextBatchesVariable(VARIABLE_KEY, VALUE);
     }
@@ -192,5 +198,25 @@ class VariableTestContextTests
         when(variablesFactory.createVariables()).thenReturn(variables);
         variableTestContext.getVariables();
         verify(variables).getVariables();
+    }
+
+    private static Stream<Arguments> containers()
+    {
+        return Stream.of(
+            Arguments.of(Map.of("stars", 323)),
+            Arguments.of(List.of(Map.of("name", "Ulad")))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("containers")
+    void shouldPutContainerToVariable(Object container)
+    {
+        Variables variables = new Variables(Map.of());
+        when(variablesFactory.createVariables()).thenReturn(variables);
+        variableTestContext.putVariable(VariableScope.STORY, VARIABLE_KEY, container);
+        assertEquals(container, variables.getVariable(VARIABLE_KEY));
+        assertThat(logger.getLoggingEvents(),
+                equalTo(List.of(info(SAVE_MESSAGE_TEMPLATE, jsonUtils.toPrettyJson(container), STORY, VARIABLE_KEY))));
     }
 }
