@@ -10,12 +10,12 @@ Given I am on page with URL `https://httpbingo.org/get`
 Then number of HTTP GET requests with URL pattern `https://httpbingo\.org/get` is EQUAL TO `1`
 
 Scenario: Verify step When I clear network recordings
-Given I am on page with URL `http:/httpbingo.org/get`
+Given I am on page with URL `https://httpbingo.org/get`
 When I clear network recordings
-Then number of HTTP GET, POST requests with URL pattern `http://httpbingo\.org/get` is EQUAL TO `0`
-Given I am on page with URL `http:/httpbingo.org/get`
+Then number of HTTP GET, POST requests with URL pattern `https://httpbingo\.org/get` is EQUAL TO `0`
+Given I am on page with URL `https://httpbingo.org/get`
 When I clear proxy log
-Then number of HTTP GET, POST requests with URL pattern `http://httpbingo\.org/get` is EQUAL TO `0`
+Then number of HTTP GET, POST requests with URL pattern `https://httpbingo\.org/get` is EQUAL TO `0`
 
 Scenario: Verify URL and URL query HTTP message parts in step "When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save $httpMessagePart to $scopes variable `$variableName`"
 Meta:
@@ -34,31 +34,31 @@ Then `${query}` is equal to table ignoring extra columns:
 Scenario: Verify request data and response data HTTP message parts in step "When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save $httpMessagePart to $scopes variable `$variableName`"
 Meta:
     @requirementId 1772
-Given I am on page with URL `http://httpbingo.org/forms/post`
+Given I am on page with URL `https://httpbingo.org/forms/post`
 When I check checkbox located by `xpath(//input[@value='cheese'])`
 When I click on element located by `xpath(//button)`
-When I capture HTTP POST request with URL pattern `http://httpbingo\.org/post` and save request data to SCENARIO variable `requestData`
+When I capture HTTP POST request with URL pattern `https://httpbingo\.org/post` and save request data to SCENARIO variable `requestData`
 Then `${requestData.query}` is equal to `{}`
 Then `${requestData.requestBodyParameters}` is equal to `{delivery=[], custtel=[], comments=[], custemail=[], topping=[cheese], custname=[]}`
 Then `${requestData.requestBody}` is not equal to `null`
 Then `${requestData.responseStatus}` is equal to `200`
-When I capture HTTP POST request with URL pattern `http://httpbingo\.org/post` and save response data to SCENARIO variable `responseData`
+When I capture HTTP POST request with URL pattern `https://httpbingo\.org/post` and save response data to SCENARIO variable `responseData`
 Then `${responseData.responseBody}` matches `.*"topping":.*"cheese".*`
 
 Scenario: Verify step When I wait until HTTP $httpMethods request with URL pattern `$urlPattern` is captured
-Given I am on page with URL `http://httpbingo.org/get`
-When I wait until HTTP GET or POST request with URL pattern `http://httpbingo\.org/get` is captured
-When I wait until HTTP GET or POST request with URL pattern `http://httpbingo\.org/get` exists in proxy log
-Then number of HTTP GET or POST requests with URL pattern `http://httpbingo\.org/get` is EQUAL TO `1`
+Given I am on page with URL `https://httpbingo.org/get`
+When I wait until HTTP GET or POST request with URL pattern `https://httpbingo\.org/get` is captured
+When I wait until HTTP GET or POST request with URL pattern `https://httpbingo\.org/get` exists in proxy log
+Then number of HTTP GET or POST requests with URL pattern `https://httpbingo\.org/get` is EQUAL TO `1`
 
 Scenario: Verify step When I add headers to proxied requests with URL pattern which $comparisonRule `$url`:$headers
 Meta:
     @requirementId 603
-When I add headers to proxied requests with URL pattern which is equal to `http://httpbingo.org/headers`:
+When I add headers to proxied requests with URL pattern which is equal to `https://httpbingo.org/headers`:
 |name     |value     |
 |testName1|testValue1|
 |testName2|testValue2|
-Given I am on page with URL `http://httpbingo.org/headers`
+Given I am on page with URL `https://httpbingo.org/headers`
 When I change context to element located by `xpath(//pre)`
 When I set the text found in search context to the 'SCENARIO' variable 'response'
 Then JSON element from `${response}` by JSON path `$.headers` is equal to `
