@@ -229,7 +229,7 @@
     </bean>
 
     <bean class="org.vividus.selenium.BrowserWindowSizeListener" lazy-init="false">
-         <property name="webDriverManager" ref="webDriverManager" />
+         <constructor-arg index="0" value="${web.browser.maximizeWindowOnStart}" />
     </bean>
 
     <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
