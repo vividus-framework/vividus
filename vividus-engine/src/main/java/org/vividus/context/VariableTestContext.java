@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.context;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,14 +76,14 @@ public class VariableTestContext implements VariableContext
                   .log("Saving a value '{}' into the {} variable '{}'");
         }
 
-        switch (variableScope)
+        BiConsumer<String, Object> variableSaver = switch (variableScope)
         {
-            case NEXT_BATCHES -> variablesFactory.addNextBatchesVariable(variableKey, variableValue);
-            case STORY -> getScopedVariables().putStoryVariable(variableKey, variableValue);
-            case SCENARIO -> getScopedVariables().putScenarioVariable(variableKey, variableValue);
-            case STEP -> getScopedVariables().putStepVariable(variableKey, variableValue);
-            default -> throw new IllegalArgumentException("Unsupported variable scope: " + variableScope);
-        }
+            case NEXT_BATCHES -> variablesFactory::addNextBatchesVariable;
+            case STORY -> getScopedVariables()::putStoryVariable;
+            case SCENARIO -> getScopedVariables()::putScenarioVariable;
+            case STEP -> getScopedVariables()::putStepVariable;
+        };
+        variableSaver.accept(variableKey, variableValue);
     }
 
     @Override
