@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,7 +204,7 @@ class EmailParameterFilterFactoryTests
                 .createFilter(ComparisonRule.EQUAL_TO.name(), "11:11:11");
         Exception exception = assertThrows(IllegalArgumentException.class, () -> filter.test(message));
         assertThat(exception.getMessage(), matchesRegex(
-            "Please use ISO 8601 zone date time format like '\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z'"));
+            "Please use ISO 8601 zone date time format like '\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(.\\d{3})?Z'"));
     }
 
     private static Date asDate(ZonedDateTime dateTime)
