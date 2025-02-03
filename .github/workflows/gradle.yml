@@ -152,7 +152,7 @@ jobs:
           echo Exit code is $exitCode
           exit -1
         fi
-    
+
     - name: Integration tests - Playwright
       shell: bash
       run: |
@@ -557,7 +557,7 @@ jobs:
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="SauceLabs Android Proxy tests report" \
-                                                  -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com" \
+                                                  -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com,vividus-test-site-a92k.onrender.com" \
                                                   -Pvividus.variables.app-url=storage:filename=vividus-test-app-android-$TEST_APP_VERSION.zip
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
