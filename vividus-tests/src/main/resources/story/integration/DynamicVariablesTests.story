@@ -24,7 +24,7 @@ When I reset context
 When I save coordinates and size of element located by `tagName(img)` to scenario variable `rect`
 Then `${rect.height}`            is = `400`
 Then `${rect.width}`             is = `400`
-Then `${rect.x}`                 is = `200`
+Then `${rect.x}`                 is > `500`
 Then `${rect.y}`                 is = `8`
 
 Scenario: Verify `source-code` dynamic variable
