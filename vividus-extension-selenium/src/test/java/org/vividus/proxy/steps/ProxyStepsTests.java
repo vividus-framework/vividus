@@ -83,7 +83,6 @@ import io.netty.handler.codec.http.HttpVersion;
 @ExtendWith(MockitoExtension.class)
 class ProxyStepsTests
 {
-    private static final String CONTENT_LENGTH = "Content-Length";
     private static final String URL = "www.test.com";
     private static final String REQUESTS_MATCHING_URL_ASSERTION_PATTERN =
             "Number of HTTP %s requests matching URL pattern '%s'";
@@ -274,12 +273,7 @@ class ProxyStepsTests
         proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, HttpStatus.SC_OK, new DataWrapper(content),
                 headers);
 
-        FullHttpResponse response = (FullHttpResponse) applyFilter(request, messageInfo);
-        assertEquals(HttpResponseStatus.OK, response.status());
-        assertEquals(VALUE1, response.content().toString(StandardCharsets.UTF_8));
-        assertEquals(VALUE2, response.headers().get(KEY1));
-        assertEquals(CONTENT_LENGTH_VALUE, response.headers().get(CONTENT_LENGTH));
-        assertEquals(HttpVersion.HTTP_1_1, response.protocolVersion());
+        verifyFullResponse(request, messageInfo);
     }
 
     @Test
@@ -295,7 +289,7 @@ class ProxyStepsTests
         headers.add(KEY1, VALUE2);
         proxySteps.mockHttpRequests(Set.of(HttpMethod.GET, HttpMethod.POST), StringComparisonRule.CONTAINS,
                 URL, HttpStatus.SC_OK, new DataWrapper(VALUE1), headers);
-        verifyResponse(request, messageInfo);
+        verifyFullResponse(request, messageInfo);
     }
 
     @Test
@@ -326,11 +320,7 @@ class ProxyStepsTests
         headers.add(KEY1, VALUE2);
         proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, HttpStatus.SC_OK, headers);
 
-        HttpResponse response = applyFilter(request, messageInfo);
-        assertEquals(HttpResponseStatus.OK, response.status());
-        assertEquals(VALUE2, response.headers().get(KEY1));
-        assertNull(response.headers().get(CONTENT_LENGTH));
-        assertEquals(HttpVersion.HTTP_1_1, response.protocolVersion());
+        verifyResponseWithoutContent(request, messageInfo, null);
     }
 
     @Test
@@ -348,14 +338,22 @@ class ProxyStepsTests
                         .equals(rule.getComparisonRule(callsNumber).toString())));
     }
 
-    private void verifyResponse(HttpRequest request, HttpMessageInfo messageInfo)
+    private void verifyFullResponse(HttpRequest request, HttpMessageInfo messageInfo)
     {
-        FullHttpResponse response = (FullHttpResponse) applyFilter(request, messageInfo);
-        assertEquals(HttpResponseStatus.OK, response.status());
+        var response = (FullHttpResponse) verifyResponseWithoutContent(request, messageInfo, CONTENT_LENGTH_VALUE);
         assertEquals(VALUE1, response.content().toString(StandardCharsets.UTF_8));
+    }
+
+    private HttpResponse verifyResponseWithoutContent(HttpRequest request, HttpMessageInfo messageInfo,
+            String contentLength)
+    {
+        HttpResponse response = applyFilter(request, messageInfo);
+        assertEquals(HttpResponseStatus.OK, response.status());
         assertEquals(VALUE2, response.headers().get(KEY1));
-        assertEquals(CONTENT_LENGTH_VALUE, response.headers().get(CONTENT_LENGTH));
+        assertEquals(contentLength, response.headers().get("Content-Length"));
+        assertEquals("close", response.headers().get("Connection"));
         assertEquals(HttpVersion.HTTP_1_1, response.protocolVersion());
+        return response;
     }
 
     private HttpResponse applyFilter(HttpRequest request, HttpMessageInfo messageInfo)
