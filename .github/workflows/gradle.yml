@@ -152,7 +152,7 @@ jobs:
           echo Exit code is $exitCode
           exit -1
         fi
-    
+
     - name: Integration tests - Playwright
       shell: bash
       run: |
@@ -332,7 +332,7 @@ jobs:
                                                 -Pvividus.batch-1.resource-include-patterns=ProxyStepsTests.story \
                                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                 -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
-                                                -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com"
+                                                -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com,vividus-test-site-a92k.onrender.com"
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs system tests will be skipped
         fi
