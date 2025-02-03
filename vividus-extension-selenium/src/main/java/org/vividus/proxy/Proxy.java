@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import java.util.function.Function;
 import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.BrowserUpProxyServer;
 import com.browserup.bup.client.ClientUtil;
-import com.browserup.bup.filters.RequestFilter;
-import com.browserup.bup.filters.RequestFilterAdapter.FilterSource;
 
 import de.sstoehr.harreader.model.Har;
 
@@ -34,6 +32,7 @@ public class Proxy implements IProxy
     private final IProxyServerFactory proxyServerFactory;
     private final String proxyHost;
     private BrowserUpProxyServer proxyServer;
+    private MockRequestFilter mockRequestFilter;
 
     public Proxy(IProxyServerFactory proxyServerFactory, String proxyHost)
     {
@@ -57,6 +56,8 @@ public class Proxy implements IProxy
         if (!isStarted())
         {
             proxyServer = proxyServerFactory.createProxyServer();
+            mockRequestFilter = new MockRequestFilter();
+            proxyServer.addRequestFilter(mockRequestFilter);
             starter.accept(proxyServer);
         }
     }
@@ -86,6 +87,7 @@ public class Proxy implements IProxy
         {
             proxyServer.stop();
             proxyServer = null;
+            mockRequestFilter = null;
         }
     }
 
@@ -102,15 +104,15 @@ public class Proxy implements IProxy
     }
 
     @Override
-    public void addRequestFilter(RequestFilter requestFilter)
+    public void addMock(ProxyMock proxyMock)
     {
-        executeIfProxyStarted(proxy -> proxy.addRequestFilter(requestFilter));
+        executeIfProxyStarted(proxy -> mockRequestFilter.getProxyMocks().add(proxyMock));
     }
 
     @Override
-    public void clearRequestFilters()
+    public void clearMocks()
     {
-        executeIfProxyStarted(proxy -> proxy.getFilterFactories().removeIf(source -> source instanceof FilterSource));
+        executeIfProxyStarted(proxy -> mockRequestFilter.getProxyMocks().clear());
     }
 
     @Override

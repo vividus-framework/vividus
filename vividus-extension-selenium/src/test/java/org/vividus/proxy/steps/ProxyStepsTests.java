@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,15 +37,12 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import com.browserup.bup.filters.RequestFilter;
 import com.browserup.bup.util.HttpMessageInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
@@ -55,6 +52,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
 import org.vividus.proxy.IProxy;
+import org.vividus.proxy.MockRequestFilter;
+import org.vividus.proxy.ProxyMock;
 import org.vividus.proxy.model.HttpMessagePart;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
@@ -85,7 +84,6 @@ import io.netty.handler.codec.http.HttpVersion;
 class ProxyStepsTests
 {
     private static final String CONTENT_LENGTH = "Content-Length";
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String URL = "www.test.com";
     private static final String REQUESTS_MATCHING_URL_ASSERTION_PATTERN =
             "Number of HTTP %s requests matching URL pattern '%s'";
@@ -100,7 +98,7 @@ class ProxyStepsTests
     private static final DefaultHttpHeaders HEADERS = new DefaultHttpHeaders();
     private static final Pattern URL_PATTERN = Pattern.compile(URL);
 
-    @Mock private ISoftAssert nonFailingAssert;
+    @Mock private ISoftAssert softAssert;
     @Mock private VariableContext variableContext;
     @Mock private IProxy proxy;
     @Mock private IAttachmentPublisher attachmentPublisher;
@@ -145,13 +143,12 @@ class ProxyStepsTests
         verifyNoInteractions(variableContext);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void checkCaptureQueryStringFromHarEntry() throws IOException
     {
         HttpMethod httpMethod = HttpMethod.POST;
         mockHar(httpMethod, HttpStatus.SC_OK);
-        Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
+        var variableScopes = Set.of(VariableScope.SCENARIO);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.URL_QUERY,
                 variableScopes, VARIABLE_NAME);
         verify(variableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value ->
@@ -167,7 +164,7 @@ class ProxyStepsTests
     {
         HttpMethod httpMethod = HttpMethod.POST;
         mockHar(httpMethod, HttpStatus.SC_OK);
-        Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
+        var variableScopes = Set.of(VariableScope.SCENARIO);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.URL, variableScopes,
                 VARIABLE_NAME);
         verify(variableContext).putVariable(variableScopes, VARIABLE_NAME, URL);
@@ -180,7 +177,7 @@ class ProxyStepsTests
         HttpMethod httpMethod = HttpMethod.POST;
         int statusCode = HttpStatus.SC_OK;
         mockHar(httpMethod, statusCode);
-        Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
+        var variableScopes = Set.of(VariableScope.SCENARIO);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.REQUEST_DATA,
                 variableScopes, VARIABLE_NAME);
         verify(variableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value -> {
@@ -235,48 +232,49 @@ class ProxyStepsTests
     @Test
     void shouldAddHeadersToProxyRequestIfUrlMatches()
     {
-        HttpHeaders httpHeaders = mock(HttpHeaders.class);
-        HttpRequest request = mock(HttpRequest.class);
+        HttpHeaders httpHeaders = mock();
+        HttpRequest request = mock();
         when(request.headers()).thenReturn(httpHeaders);
-        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        HttpMessageInfo messageInfo = mock();
         when(messageInfo.getUrl()).thenReturn(URL);
         proxySteps.addHeadersToProxyRequest(StringComparisonRule.IS_EQUAL_TO, URL, HEADERS);
-        ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
-        verify(proxy).addRequestFilter(filterCaptor.capture());
-        assertNull(filterCaptor.getValue().filterRequest(request, null, messageInfo));
+
+        applyFilter(request, messageInfo);
         verify(httpHeaders).add(HEADERS);
     }
 
     @Test
     void shouldNotAddHeadersToProxyRequestIfUrlDoesNotMatch()
     {
-        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        HttpMessageInfo messageInfo = mock();
         proxySteps.addHeadersToProxyRequest(StringComparisonRule.IS_EQUAL_TO, URL, HEADERS);
-        verify(proxy).addRequestFilter(argThat(filter -> filter.filterRequest(null, null, messageInfo) == null));
+
+        HttpResponse httpResponse = applyFilter(null, messageInfo);
+        assertNull(httpResponse);
     }
 
-    static Stream<Arguments> contentSource()
+    static Stream<Object> contentSource()
     {
-        return Stream.of(Arguments.of(VALUE1), Arguments.of(VALUE1.getBytes(StandardCharsets.UTF_8)));
+        return Stream.of(
+                VALUE1,
+                VALUE1.getBytes(StandardCharsets.UTF_8)
+        );
     }
 
     @ParameterizedTest
     @MethodSource("contentSource")
     void shouldMockARequestWithTheContent(Object content)
     {
-        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        HttpMessageInfo messageInfo = mock();
         when(messageInfo.getUrl()).thenReturn(URL);
-        HttpRequest request = mock(HttpRequest.class);
+        HttpRequest request = mock();
         when(request.protocolVersion()).thenReturn(HttpVersion.HTTP_1_1);
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
         headers.add(KEY1, VALUE2);
         proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, HttpStatus.SC_OK, new DataWrapper(content),
                 headers);
 
-        ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
-        verify(proxy).addRequestFilter(filterCaptor.capture());
-        FullHttpResponse response = (FullHttpResponse) filterCaptor.getValue().filterRequest(request, null,
-                messageInfo);
+        FullHttpResponse response = (FullHttpResponse) applyFilter(request, messageInfo);
         assertEquals(HttpResponseStatus.OK, response.status());
         assertEquals(VALUE1, response.content().toString(StandardCharsets.UTF_8));
         assertEquals(VALUE2, response.headers().get(KEY1));
@@ -287,9 +285,9 @@ class ProxyStepsTests
     @Test
     void shouldMockARequestWithTheContentByMethods()
     {
-        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        HttpMessageInfo messageInfo = mock();
         when(messageInfo.getUrl()).thenReturn(URL);
-        HttpRequest request = mock(HttpRequest.class);
+        HttpRequest request = mock();
         when(messageInfo.getOriginalRequest()).thenReturn(request);
         when(request.protocolVersion()).thenReturn(HttpVersion.HTTP_1_1);
         when(request.method()).thenReturn(io.netty.handler.codec.http.HttpMethod.POST);
@@ -303,36 +301,32 @@ class ProxyStepsTests
     @Test
     void shouldMockARequestWithTheContentByMethodsNotMatch()
     {
-        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        HttpMessageInfo messageInfo = mock();
         when(messageInfo.getUrl()).thenReturn(URL);
-        HttpRequest request = mock(HttpRequest.class);
+        HttpRequest request = mock();
         when(messageInfo.getOriginalRequest()).thenReturn(request);
         when(request.method()).thenReturn(io.netty.handler.codec.http.HttpMethod.OPTIONS);
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
         headers.add(KEY1, VALUE2);
         proxySteps.mockHttpRequests(Set.of(HttpMethod.GET, HttpMethod.POST), StringComparisonRule.CONTAINS,
                 URL, HttpStatus.SC_OK, new DataWrapper(VALUE1), headers);
-        ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
-        verify(proxy).addRequestFilter(filterCaptor.capture());
-        FullHttpResponse response = (FullHttpResponse) filterCaptor.getValue().filterRequest(request, null,
-                messageInfo);
-        assertNull(response);
+
+        HttpResponse httpResponse = applyFilter(null, messageInfo);
+        assertNull(httpResponse);
     }
 
     @Test
     void shouldMockARequestWithoutAContent()
     {
-        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        HttpMessageInfo messageInfo = mock();
         when(messageInfo.getUrl()).thenReturn(URL);
-        HttpRequest request = mock(HttpRequest.class);
+        HttpRequest request = mock();
         when(request.protocolVersion()).thenReturn(HttpVersion.HTTP_1_1);
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
         headers.add(KEY1, VALUE2);
         proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, HttpStatus.SC_OK, headers);
 
-        ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
-        verify(proxy).addRequestFilter(filterCaptor.capture());
-        HttpResponse response = filterCaptor.getValue().filterRequest(request, null, messageInfo);
+        HttpResponse response = applyFilter(request, messageInfo);
         assertEquals(HttpResponseStatus.OK, response.status());
         assertEquals(VALUE2, response.headers().get(KEY1));
         assertNull(response.headers().get(CONTENT_LENGTH));
@@ -340,26 +334,23 @@ class ProxyStepsTests
     }
 
     @Test
-    void shouldClearFilters()
+    void shouldClearMocks()
     {
         proxySteps.resetMocks();
-        verify(proxy).clearRequestFilters();
+        verify(proxy).clearMocks();
     }
 
     private void verifySizeAssertion(String message, int actualMatchedEntriesNumber, ComparisonRule rule,
             int callsNumber)
     {
-        verify(nonFailingAssert).assertThat(eq(message), eq(actualMatchedEntriesNumber),
+        verify(softAssert).assertThat(eq(message), eq(actualMatchedEntriesNumber),
                 argThat(object -> object != null && object.toString()
                         .equals(rule.getComparisonRule(callsNumber).toString())));
     }
 
     private void verifyResponse(HttpRequest request, HttpMessageInfo messageInfo)
     {
-        ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
-        verify(proxy).addRequestFilter(filterCaptor.capture());
-        FullHttpResponse response = (FullHttpResponse) filterCaptor.getValue().filterRequest(request, null,
-                messageInfo);
+        FullHttpResponse response = (FullHttpResponse) applyFilter(request, messageInfo);
         assertEquals(HttpResponseStatus.OK, response.status());
         assertEquals(VALUE1, response.content().toString(StandardCharsets.UTF_8));
         assertEquals(VALUE2, response.headers().get(KEY1));
@@ -367,14 +358,25 @@ class ProxyStepsTests
         assertEquals(HttpVersion.HTTP_1_1, response.protocolVersion());
     }
 
+    private HttpResponse applyFilter(HttpRequest request, HttpMessageInfo messageInfo)
+    {
+        var proxyMockCaptor = ArgumentCaptor.forClass(ProxyMock.class);
+        verify(proxy).addMock(proxyMockCaptor.capture());
+
+        MockRequestFilter filter = new MockRequestFilter();
+        filter.getProxyMocks().add(proxyMockCaptor.getValue());
+
+        return filter.filterRequest(request, null, messageInfo);
+    }
+
     private void mockSizeAssertion(String message, int actualMatchedEntriesNumber, ComparisonRule rule, int callsNumber)
     {
-        when(nonFailingAssert.assertThat(eq(message), eq(actualMatchedEntriesNumber),
+        when(softAssert.assertThat(eq(message), eq(actualMatchedEntriesNumber),
                 argThat(object -> object != null && object.toString()
                         .equals(rule.getComparisonRule(callsNumber).toString())))).thenReturn(true);
     }
 
-    private byte[] mockHar(HttpMethod httpMethod, int statusCode) throws IOException
+    private void mockHar(HttpMethod httpMethod, int statusCode) throws IOException
     {
         HarEntry harEntry = createHarEntry(httpMethod, statusCode);
 
@@ -390,7 +392,6 @@ class ProxyStepsTests
         Har har = new Har();
         har.setLog(harLog);
         when(proxy.getRecordedData()).thenReturn(har);
-        return OBJECT_MAPPER.writeValueAsBytes(har);
     }
 
     private HarEntry createHarEntry(HttpMethod httpMethod, int statusCode)
