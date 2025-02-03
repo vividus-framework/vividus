@@ -40,7 +40,14 @@ public class MockRequestFilter implements RequestFilter
                         .allMatch(p -> p.test(messageInfo))
                 )
                 .findFirst()
-                .map(proxyMock -> proxyMock.requestProcessor().apply(request))
+                .map(proxyMock -> {
+                    HttpResponse response = proxyMock.requestProcessor().apply(request);
+                    if (response != null)
+                    {
+                        response.headers().add("Connection", "close");
+                    }
+                    return response;
+                })
                 .orElse(null);
     }
 
