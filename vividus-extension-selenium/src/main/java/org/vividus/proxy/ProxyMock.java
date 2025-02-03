@@ -16,34 +16,16 @@
 
 package org.vividus.proxy;
 
-import org.openqa.selenium.Proxy;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
-import de.sstoehr.harreader.model.Har;
+import com.browserup.bup.util.HttpMessageInfo;
 
-public interface IProxy
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
+
+public record ProxyMock(List<Predicate<HttpMessageInfo>> messageFilters,
+                        Function<HttpRequest, HttpResponse> requestProcessor)
 {
-    void start();
-
-    void startRecording();
-
-    /**
-     * Retrieves the current HAR.
-     *
-     * @return current HAR, or null if proxy recording was not enabled
-     */
-    Har getRecordedData();
-
-    void clearRecordedData();
-
-    void stopRecording();
-
-    void stop();
-
-    boolean isStarted();
-
-    void addMock(ProxyMock proxyMock);
-
-    void clearMocks();
-
-    Proxy createSeleniumProxy();
 }

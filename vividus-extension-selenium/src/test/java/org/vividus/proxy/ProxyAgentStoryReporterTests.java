@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ class ProxyAgentStoryReporterTests
         when(proxy.isStarted()).thenReturn(Boolean.TRUE);
         Scenario scenario = new Scenario(SCENARIO_TITLE, List.of());
         proxyAgentStoryReporter.beforeScenario(scenario);
-        verify(proxy).clearRequestFilters();
+        verify(proxy).clearMocks();
         verify(proxy).startRecording();
         verify(next).beforeScenario(scenario);
     }
@@ -143,7 +143,7 @@ class ProxyAgentStoryReporterTests
         proxyAgentStoryReporter.setProxyRecordingEnabled(false);
         when(proxy.isStarted()).thenReturn(Boolean.TRUE);
         proxyAgentStoryReporter.beforeScenario(scenario);
-        verify(proxy).clearRequestFilters();
+        verify(proxy).clearMocks();
         verify(proxy).startRecording();
         verify(next).beforeScenario(scenario);
     }
@@ -155,7 +155,7 @@ class ProxyAgentStoryReporterTests
         proxyAgentStoryReporter.setProxyRecordingEnabled(false);
         when(proxy.isStarted()).thenReturn(Boolean.TRUE);
         proxyAgentStoryReporter.beforeScenario(scenario);
-        verify(proxy, never()).clearRequestFilters();
+        verify(proxy, never()).clearMocks();
         verify(proxy, never()).startRecording();
         verify(next).beforeScenario(scenario);
     }
@@ -194,7 +194,7 @@ class ProxyAgentStoryReporterTests
         });
         proxyAgentStoryReporter.beforeScenario(scenario);
         verify(proxy).start();
-        verify(proxy).clearRequestFilters();
+        verify(proxy).clearMocks();
         verify(proxy).startRecording();
         verify(next).beforeScenario(scenario);
     }
