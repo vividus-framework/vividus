@@ -393,6 +393,39 @@ WARNING: This meta tag is deprecated and will be removed in VIVIDUS 0.7.0. Pleas
 . Run tests.
 . Open the report and find the distribution of tests by priorities at Graphs tab.
 
+== Add custom tab to report
+
+User can add a new tab to the report with custom content in https://www.markdownguide.org/getting-started/[Markdown format], such as instructions, project information, or other relevant details.
+
+=== To add Custom Tab
+
+1. Create a *report-plugin/custom-tab* folder in the test project resources directory.
+2. Create a *custom-tab.md* file inside this folder and add your content.
+3. Enable the custom tab by adding the following property `report.tabs.custom-tab.enabled=true`.
+
+=== Adding images
+
+It is possible to include images in the custom-tab.md file.
+
+To do so:
+
+ * place the image inside the *report-plugin/custom-tab* folder (you can create subdirectories, e.g., report-plugin/custom-tab/images).
+ * Use `img` tag to insert the image to custom-tab.md document, e.g. `<img src="./plugin/custom-tab/images/my-image.png">`.
+
+[IMPORTANT]
+All images and resources must be stored inside the report-plugin/custom-tab folder, and the _src_ attribute must start with *./plugin/custom-tab*. Otherwise, images will not be displayed in the Allure report.
+
+=== Renaming Custom Tab
+
+Default tab name is 'Custom tab'. User can define name and translations for tab using the `report.translations.<lang>.tab.custom-tab.name` property.
+
+Multiple translations can be added:
+[source, properties]
+----
+report.translations.en.tab.custom-tab.name=Instructions
+report.translations.es.tab.custom-tab.name=Instrucciones
+----
+
 == Notifications
 
 VIVIDUS can send notifications with test execution summary upon test completion.
