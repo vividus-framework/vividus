@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,17 +192,24 @@ public class GenericWaitSteps
                             private Point lastPosition;
                             private boolean retryOnStaleAttempt;
                             private WebElement movingWebElement = webElement;
+                            private int counter;
 
                             @Override
                             public Boolean apply(SearchContext context)
                             {
                                 try
                                 {
+                                    LOGGER.atInfo().log("Wait counter {}", counter++);
                                     Point currentPosition = movingWebElement.getLocation();
                                     boolean elementStoppedMoving = currentPosition.equals(lastPosition);
                                     if (!elementStoppedMoving)
                                     {
-                                        LOGGER.info("The element is moved at '{}'", currentPosition);
+                                        LOGGER.info("The element is moved to '{}' from last position at '{}'",
+                                                currentPosition, lastPosition);
+                                    }
+                                    else
+                                    {
+                                        LOGGER.info("The element is stopped at '{}'", currentPosition);
                                     }
                                     lastPosition = currentPosition;
                                     return elementStoppedMoving;
