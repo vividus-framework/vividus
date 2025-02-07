@@ -28,7 +28,10 @@
           class="org.vividus.crawler.transformer.AbstractFetchingUrlsTableTransformer"
           abstract="true">
         <property name="webApplicationConfiguration" ref="webApplicationConfiguration" />
-        <property name="httpRedirectsProvider" ref="httpRedirectsProvider" />
+    </bean>
+
+    <bean id="sitemapCrawlerHeaders" factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
+        <constructor-arg value="sitemap.parser.http.header." />
     </bean>
 
     <bean name="FROM_SITEMAP" class="org.vividus.crawler.transformer.SiteMapTableTransformer"
@@ -41,11 +44,7 @@
                           factory-method="buildHttpClient">
                         <constructor-arg>
                             <bean parent="httpClientConfig">
-                                <property name="headers">
-                                    <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
-                                        <constructor-arg value="sitemap.parser.http.header." />
-                                    </bean>
-                                </property>
+                                <property name="headers" ref="sitemapCrawlerHeaders" />
                                 <property name="httpResponseHandlers">
                                     <list>
                                         <bean class="org.vividus.http.handler.StatusCodeValidatingHandler" >
@@ -68,6 +67,21 @@
         <property name="filterRedirects" value="${transformer.from-sitemap.filter-redirects}" />
         <property name="mainPageUrl" value="${transformer.from-sitemap.main-page-url}" />
         <property name="mainPageUrlProperty" value="transformer.from-sitemap.main-page-url" />
+        <property name="httpRedirectsProvider">
+            <bean class="org.vividus.http.HttpRedirectsProvider">
+                <property name="httpClient">
+                    <bean class="org.vividus.http.client.HttpClient"
+                        factory-bean="httpClientFactory"
+                        factory-method="buildHttpClient">
+                        <constructor-arg>
+                            <bean parent="redirectsHttpClientConfig">
+                                <property name="headers" ref="sitemapCrawlerHeaders" />
+                            </bean>
+                        </constructor-arg>
+                    </bean>
+                </property>
+            </bean>
+        </property>
     </bean>
 
     <bean name="FROM_HEADLESS_CRAWLING" class="org.vividus.crawler.transformer.HeadlessCrawlerTableTransformer"
@@ -87,6 +101,25 @@
         <property name="excludeExtensionsRegex" value="${transformer.from-headless-crawling.exclude-extensions-regex}" />
         <property name="mainPageUrl" value="${transformer.from-headless-crawling.main-page-url}" />
         <property name="mainPageUrlProperty" value="transformer.from-headless-crawling.main-page-url" />
+        <property name="httpRedirectsProvider">
+            <bean class="org.vividus.http.HttpRedirectsProvider">
+                <property name="httpClient">
+                    <bean class="org.vividus.http.client.HttpClient"
+                        factory-bean="httpClientFactory"
+                        factory-method="buildHttpClient">
+                        <constructor-arg>
+                            <bean parent="redirectsHttpClientConfig">
+                                <property name="headers">
+                                    <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
+                                        <constructor-arg value="transformer.from-headless-crawling.http.headers." />
+                                    </bean>
+                                </property>
+                            </bean>
+                        </constructor-arg>
+                    </bean>
+                </property>
+            </bean>
+        </property>
     </bean>
 
     <bean class="org.vividus.databind.BasicHeadersDeserializer" />

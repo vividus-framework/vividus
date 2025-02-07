@@ -68,16 +68,16 @@
         <constructor-arg ref="softAssert" />
     </bean>
 
+    <bean id="redirectsHttpClientConfig" parent="httpClientConfig">
+        <property name="circularRedirectsAllowed" value="${http.redirects-provider.circular-redirects-allowed}" />
+    </bean>
+
     <bean id="httpRedirectsProvider" class="org.vividus.http.HttpRedirectsProvider">
         <property name="httpClient">
             <bean class="org.vividus.http.client.HttpClient"
                   factory-bean="httpClientFactory"
                   factory-method="buildHttpClient">
-                <constructor-arg>
-                    <bean parent="httpClientConfig">
-                        <property name="circularRedirectsAllowed" value="${http.redirects-provider.circular-redirects-allowed}" />
-                    </bean>
-                </constructor-arg>
+                <constructor-arg ref="redirectsHttpClientConfig" />
             </bean>
         </property>
     </bean>
