@@ -3,7 +3,7 @@ Meta:
     @requirementId 1049
 
 Scenario: Init
-Given I initialize story variable `topic` with value `hnzzmrpq-default`
+Given I initialize story variable `topic` with value `vividus-topic`
 
 
 Scenario: Produce/consume events to/from Kafka
