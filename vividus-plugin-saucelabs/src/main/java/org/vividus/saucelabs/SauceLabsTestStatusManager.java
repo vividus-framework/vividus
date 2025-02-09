@@ -17,6 +17,7 @@
 package org.vividus.saucelabs;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import com.google.common.eventbus.Subscribe;
 import com.saucelabs.saucerest.SauceREST;
@@ -30,20 +31,18 @@ import org.vividus.selenium.cloud.CloudTestStatusMapping;
 import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.testcontext.TestContext;
 import org.vividus.ui.action.JavascriptActions;
-import org.vividus.util.wait.Waiter;
+import org.vividus.util.wait.DurationBasedWaiter;
 
 public class SauceLabsTestStatusManager extends AbstractCloudTestStatusManager
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(SauceLabsTestStatusManager.class);
 
-    private static final long SESSION_COMPLETE_TIMEOUT_SECONDS = 20;
-
     private final JavascriptActions javascriptActions;
     private final SauceREST sauceRestClient;
-    private final Waiter sessionCompletionWaiter;
+    private final DurationBasedWaiter sessionCompletionWaiter;
 
     public SauceLabsTestStatusManager(IWebDriverProvider webDriverProvider, TestContext testContext,
-            JavascriptActions javascriptActions, SauceREST sauceRestClient, Waiter sessionCompletionWaiter)
+            JavascriptActions javascriptActions, SauceREST sauceRestClient, DurationBasedWaiter sessionCompletionWaiter)
     {
         super(new CloudTestStatusMapping("passed", "failed"), webDriverProvider, testContext);
         this.javascriptActions = javascriptActions;
@@ -61,12 +60,13 @@ public class SauceLabsTestStatusManager extends AbstractCloudTestStatusManager
     public final void waitForSessionCompletion(AfterWebDriverQuitEvent event)
     {
         String sessionId = event.sessionId();
-        boolean completed = sessionCompletionWaiter.wait(() -> isTestExecutionCompleted(sessionId), r -> r);
+        boolean completed = sessionCompletionWaiter.wait(() -> isTestExecutionCompleted(sessionId));
         if (!completed)
         {
-            LOGGER.atError().addArgument(SESSION_COMPLETE_TIMEOUT_SECONDS)
+            LOGGER.atError()
+                    .addArgument(() -> Duration.ofMillis(sessionCompletionWaiter.getDurationInMillis()).toSeconds())
                     .addArgument(sessionId)
-                    .log("Timeout while waiting for SauceLabs test job completion after {} seconds. SessionId: {}");
+                    .log("Timeout occurred after waiting {} seconds for the SauceLabs job with ID '{}' to complete");
         }
     }
 
@@ -76,16 +76,12 @@ public class SauceLabsTestStatusManager extends AbstractCloudTestStatusManager
         {
             Job jobDetails = sauceRestClient.getJobsEndpoint().getJobDetails(sessionId);
             String jobStatus = jobDetails.status;
-            LOGGER.atDebug().addArgument(sessionId)
-                    .addArgument(jobStatus)
-                    .log("SauceLabs test with id={} execution status is {}");
+            LOGGER.debug("Execution status of the SauceLabs job with ID '{}' is {}", sessionId, jobStatus);
             return "complete".equals(jobStatus);
         }
         catch (IOException e)
         {
-            LOGGER.atError().setCause(e)
-                    .addArgument(sessionId)
-                    .log("Unable to get SauceLabs test job status for SessionId={}");
+            LOGGER.error("Unable to get the status of the SauceLabs job  with ID '{}'", sessionId, e);
         }
         return false;
     }

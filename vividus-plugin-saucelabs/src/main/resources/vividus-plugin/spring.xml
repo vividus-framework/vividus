@@ -11,6 +11,12 @@
         <constructor-arg value="${saucelabs.data-center}" />
     </bean>
 
+    <bean id="sauceRest" class="com.saucelabs.saucerest.SauceREST">
+        <constructor-arg index="0" value="${selenium.grid.username}" />
+        <constructor-arg index="1" value="${selenium.grid.password}" />
+        <constructor-arg index="2" ref="sauceDataCenter" />
+    </bean>
+
     <bean id="sauceConnectManager" class="org.vividus.selenium.sauce.SauceConnectManager">
         <constructor-arg index="0" value="${selenium.grid.username}" />
         <constructor-arg index="1" value="${selenium.grid.password}" />
@@ -19,29 +25,26 @@
                 <constructor-arg index="0" value="false"/>
                 <constructor-arg index="1" value="VIVIDUS"/>
                 <property name="useLatestSauceConnect" value="${saucelabs.sauce-connect.use-latest-version}"/>
+                <property name="sauceRest" ref="sauceRest" />
             </bean>
         </constructor-arg>
     </bean>
 
     <bean id="sauceLabsLinkPublisher" class="org.vividus.saucelabs.SauceLabsTestLinkPublisher" />
 
-    <bean class="org.vividus.saucelabs.SauceLabsTestStatusManager" lazy-init="false"/>
-
-    <bean class="com.saucelabs.saucerest.SauceREST">
-        <constructor-arg index="0" value="${selenium.grid.username}" />
-        <constructor-arg index="1" value="${selenium.grid.password}" />
-        <constructor-arg index="2" ref="sauceDataCenter" />
-    </bean>
-
-    <bean class="org.vividus.util.wait.DurationBasedWaiter">
-        <constructor-arg index="0">
-            <bean class="java.time.Duration" factory-method="ofSeconds">
-                <constructor-arg value="20" />
-            </bean>
-        </constructor-arg>
-        <constructor-arg index="1">
-            <bean class="java.time.Duration" factory-method="ofSeconds">
-                <constructor-arg value="2" />
+    <bean class="org.vividus.saucelabs.SauceLabsTestStatusManager" lazy-init="false">
+        <constructor-arg>
+            <bean class="org.vividus.util.wait.DurationBasedWaiter">
+                <constructor-arg index="0">
+                    <bean class="java.time.Duration" factory-method="ofSeconds">
+                        <constructor-arg value="20" />
+                    </bean>
+                </constructor-arg>
+                <constructor-arg index="1">
+                    <bean class="java.time.Duration" factory-method="ofSeconds">
+                        <constructor-arg value="2" />
+                    </bean>
+                </constructor-arg>
             </bean>
         </constructor-arg>
     </bean>
