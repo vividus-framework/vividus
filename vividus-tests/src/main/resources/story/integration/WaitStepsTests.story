@@ -62,7 +62,7 @@ Scenario: Verify step: 'When I wait until element located by `$locator` stops mo
 Given I am on page with URL `${vividus-test-site-url}/movingElement.html`
 When I change context to element located by `cssSelector(.external)`
 When I wait until element located by `cssSelector(.internal)` stops moving
-When I COMPARE_AGAINST baseline with name `moving-element-after-stopping`
+When I COMPARE_AGAINST baseline with name `moving-element-after-stopping#{eval(isWindows ? '-windows' : '')}`
 When I reset context
 
 Scenario: Verify steps: "When I wait until alert appears" and "When I wait until alert disappears"
