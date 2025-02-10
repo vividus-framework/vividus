@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.vividus.util.wait;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
+import org.apache.commons.lang3.function.FailableBooleanSupplier;
 import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.function.FailableSupplier;
 
@@ -43,6 +44,11 @@ public abstract class Waiter
             },
             alwaysNull -> stopCondition.getAsBoolean()
         );
+    }
+
+    public <E extends Exception> boolean wait(FailableBooleanSupplier<E> valueProvider) throws E
+    {
+        return wait(valueProvider::getAsBoolean, result -> result);
     }
 
     protected long getPollingTimeoutMillis()
