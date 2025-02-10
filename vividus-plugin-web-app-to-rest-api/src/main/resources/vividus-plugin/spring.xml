@@ -36,7 +36,7 @@
 
     <bean name="FROM_SITEMAP" class="org.vividus.crawler.transformer.SiteMapTableTransformer"
           parent="abstractFetchingUrlsTableTransformer">
-        <property name="siteMapParser">
+        <constructor-arg index="0">
             <bean class="org.vividus.crawler.CrawlerCommonsSiteMapParser">
                 <property name="httpClient">
                     <bean class="org.vividus.http.client.HttpClient"
@@ -61,9 +61,9 @@
                 <property name="baseUrl" value="${sitemap.parser.base-url}" />
                 <property name="followRedirects" value="${sitemap.parser.follow-redirects}" />
             </bean>
-        </property>
-        <property name="ignoreErrors" value="${transformer.from-sitemap.ignore-errors}" />
-        <property name="strict" value="${transformer.from-sitemap.strict}" />
+        </constructor-arg>
+        <constructor-arg index="1" value="${transformer.from-sitemap.ignore-errors}" />
+        <constructor-arg index="2" value="${transformer.from-sitemap.strict}" />
         <property name="filterRedirects" value="${transformer.from-sitemap.filter-redirects}" />
         <property name="mainPageUrl" value="${transformer.from-sitemap.main-page-url}" />
         <property name="mainPageUrlProperty" value="transformer.from-sitemap.main-page-url" />

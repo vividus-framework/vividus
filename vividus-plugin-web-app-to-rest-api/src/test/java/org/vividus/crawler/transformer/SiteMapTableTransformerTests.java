@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.crawler.SiteMapParseException;
@@ -83,7 +82,6 @@ class SiteMapTableTransformerTests
     @Mock private SiteMapParser siteMapParser;
     @Mock private WebApplicationConfiguration webApplicationConfiguration;
     @Mock private HttpRedirectsProvider redirectsProvider;
-    @InjectMocks private SiteMapTableTransformer siteMapTableTransformer;
 
     private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters =  new ParameterConverters();
@@ -104,7 +102,10 @@ class SiteMapTableTransformerTests
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         var strict = true;
         when(siteMapParser.parse(strict, SITEMAP_XML)).thenReturn(getSiteMapUrls());
-        siteMapTableTransformer.setStrict(strict);
+
+        var siteMapTableTransformer = new SiteMapTableTransformer(siteMapParser, false, strict);
+        siteMapTableTransformer.setWebApplicationConfiguration(webApplicationConfiguration);
+
         var properties = createTableProperties();
         var actual = siteMapTableTransformer.fetchUrls(properties);
         assertEquals(Set.of(OUTGOING_ABSOLUTE_SIMPLE_URL, OUTGOING_ABSOLUTE_NOT_ENCODED_URL), actual);
@@ -123,6 +124,7 @@ class SiteMapTableTransformerTests
     void testFetchUrlsWithoutSiteMapRelativeUrl()
     {
         var tableProperties = new TableProperties("", keywords, parameterConverters);
+        var siteMapTableTransformer = new SiteMapTableTransformer(siteMapParser, false, false);
         var exception = assertThrows(IllegalArgumentException.class,
             () -> siteMapTableTransformer.fetchUrls(tableProperties));
         assertEquals("'siteMapRelativeUrl' is not set in ExamplesTable properties", exception.getMessage());
@@ -134,7 +136,10 @@ class SiteMapTableTransformerTests
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         var strict = false;
         when(siteMapParser.parse(strict, SITEMAP_XML)).thenReturn(Set.of());
-        siteMapTableTransformer.setStrict(strict);
+
+        var siteMapTableTransformer = new SiteMapTableTransformer(siteMapParser, false, strict);
+        siteMapTableTransformer.setWebApplicationConfiguration(webApplicationConfiguration);
+
         var properties = createTableProperties();
         var exception = assertThrows(SiteMapTableGenerationException.class,
             () -> siteMapTableTransformer.transform("", null, properties));
@@ -147,7 +152,10 @@ class SiteMapTableTransformerTests
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         when(siteMapParser.parse(true, SITEMAP_XML)).thenReturn(Set.of());
-        siteMapTableTransformer.setStrict(false);
+
+        var siteMapTableTransformer = new SiteMapTableTransformer(siteMapParser, false, false);
+        siteMapTableTransformer.setWebApplicationConfiguration(webApplicationConfiguration);
+
         var properties = createTableProperties();
         properties.getProperties().put(IGNORE_ERRORS_PARAMETER_NAME, Boolean.TRUE.toString());
         properties.getProperties().put(STRICT_PARAMETER_NAME, Boolean.TRUE.toString());
@@ -159,11 +167,13 @@ class SiteMapTableTransformerTests
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         when(siteMapParser.parse(false, SITEMAP_XML)).thenReturn(Set.of());
-        siteMapTableTransformer.setStrict(true);
+
+        var siteMapTableTransformer = new SiteMapTableTransformer(siteMapParser, true, true);
+        siteMapTableTransformer.setWebApplicationConfiguration(webApplicationConfiguration);
+
         var properties = createTableProperties();
         properties.getProperties().put(IGNORE_ERRORS_PARAMETER_NAME, Boolean.FALSE.toString());
         properties.getProperties().put(STRICT_PARAMETER_NAME, Boolean.FALSE.toString());
-        siteMapTableTransformer.setIgnoreErrors(true);
         var exception = assertThrows(SiteMapTableGenerationException.class,
             () -> siteMapTableTransformer.transform("", null, properties));
         assertEquals(NO_URLS_FOUND_MESSAGE, exception.getMessage());
@@ -176,7 +186,10 @@ class SiteMapTableTransformerTests
         var exception = new SiteMapParseException(SITEMAP, new IOException());
         var strict = true;
         when(siteMapParser.parse(strict, SITEMAP_XML)).thenThrow(exception);
-        siteMapTableTransformer.setStrict(strict);
+
+        var siteMapTableTransformer = new SiteMapTableTransformer(siteMapParser, false, strict);
+        siteMapTableTransformer.setWebApplicationConfiguration(webApplicationConfiguration);
+
         var properties = createTableProperties();
         var actualException = assertThrows(IllegalStateException.class,
             () -> siteMapTableTransformer.transform("", null, properties));
@@ -190,8 +203,10 @@ class SiteMapTableTransformerTests
         var exception = new SiteMapParseException(SITEMAP, new IOException());
         var strict = true;
         when(siteMapParser.parse(strict, SITEMAP_XML)).thenThrow(exception);
-        siteMapTableTransformer.setStrict(strict);
-        siteMapTableTransformer.setIgnoreErrors(true);
+
+        var siteMapTableTransformer = new SiteMapTableTransformer(siteMapParser, true, strict);
+        siteMapTableTransformer.setWebApplicationConfiguration(webApplicationConfiguration);
+
         assertEquals(Set.of(), siteMapTableTransformer.fetchUrls(createTableProperties()));
     }
 
@@ -202,7 +217,10 @@ class SiteMapTableTransformerTests
         var exception = new SiteMapParseException(SITEMAP, new IOException());
         var strict = true;
         when(siteMapParser.parse(strict, SITEMAP_XML)).thenThrow(exception);
-        siteMapTableTransformer.setStrict(strict);
+
+        var siteMapTableTransformer = new SiteMapTableTransformer(siteMapParser, false, strict);
+        siteMapTableTransformer.setWebApplicationConfiguration(webApplicationConfiguration);
+
         var properties = createTableProperties();
         properties.getProperties().put(IGNORE_ERRORS_PARAMETER_NAME, Boolean.TRUE.toString());
         assertEquals(Set.of(), siteMapTableTransformer.fetchUrls(properties));
@@ -214,10 +232,14 @@ class SiteMapTableTransformerTests
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         var strict = true;
         when(siteMapParser.parse(strict, SITEMAP_XML)).thenReturn(Set.of(new URL(PRODUCT_URL)));
-        siteMapTableTransformer.setStrict(strict);
+
+        var siteMapTableTransformer = new SiteMapTableTransformer(siteMapParser, false, strict);
+        siteMapTableTransformer.setWebApplicationConfiguration(webApplicationConfiguration);
+        siteMapTableTransformer.setHttpRedirectsProvider(redirectsProvider);
         var prop = "transformer.from-sitemap.main-page-url";
         siteMapTableTransformer.setMainPageUrlProperty(prop);
         siteMapTableTransformer.setFilterRedirects(true);
+
         var httpResponseException = new HttpResponseException(HttpStatus.SC_NOT_FOUND, "");
         when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUTE_SIMPLE_URL))).thenThrow(httpResponseException);
         var actual = siteMapTableTransformer.fetchUrls(createTableProperties());
@@ -236,10 +258,14 @@ class SiteMapTableTransformerTests
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         var strict = true;
         when(siteMapParser.parse(strict, SITEMAP_XML)).thenReturn(getSiteMapUrls());
-        siteMapTableTransformer.setStrict(strict);
-        siteMapTableTransformer.setFilterRedirects(true);
         when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUTE_SIMPLE_URL))).thenReturn(List.of());
         when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUTE_ENCODED_URL))).thenReturn(List.of());
+
+        var siteMapTableTransformer = new SiteMapTableTransformer(siteMapParser, false, strict);
+        siteMapTableTransformer.setFilterRedirects(true);
+        siteMapTableTransformer.setWebApplicationConfiguration(webApplicationConfiguration);
+        siteMapTableTransformer.setHttpRedirectsProvider(redirectsProvider);
+
         var actual = siteMapTableTransformer.fetchUrls(createTableProperties());
         assertEquals(Set.of(OUTGOING_ABSOLUTE_SIMPLE_URL, OUTGOING_ABSOLUTE_NOT_ENCODED_URL), actual);
     }
