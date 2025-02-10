@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Recources' check result table</title>
+    <title>Resources check result table</title>
     <link rel="stylesheet" href="../../styles.css"/>
     <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
 </head>
