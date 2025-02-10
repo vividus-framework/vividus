@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ class ResourceCheckStepsTests
     private static final String ROOT_ID = "#root";
     private static final String HTTPS_ID = "#https";
     private static final String HTTP_ID = "#http";
-    private static final String TEMPLATE_NAME = "resources-validation-result.ftl";
+    private static final String TEMPLATE_NAME = "resources-validation-result.ftlh";
     private static final String REPORT_NAME = "Resource validation results";
     private static final URI VIVIDUS_URI = URI.create("https://vividus.org");
     private static final URI VIVIDUS_ABOUT_URI = URI.create("https://vividus.org/about");

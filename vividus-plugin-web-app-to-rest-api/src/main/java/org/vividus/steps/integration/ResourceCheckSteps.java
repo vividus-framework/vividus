@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ public class ResourceCheckSteps
         Set<WebPageResourceValidation> results = resourceValidation
                .map(this::validate)
                .collect(Collectors.toCollection(TreeSet::new));
-        attachmentPublisher.publishAttachment("resources-validation-result.ftl", Map.of("results", results),
+        attachmentPublisher.publishAttachment("resources-validation-result.ftlh", Map.of("results", results),
                 "Resource validation results");
     }
 
