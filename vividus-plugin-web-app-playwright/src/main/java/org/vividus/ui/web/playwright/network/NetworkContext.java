@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,11 @@ import org.vividus.testcontext.TestContext;
 
 public class NetworkContext
 {
-    private static final Class<Request> NETWORK_RECORDINGS_CONTEXT_KEY = Request.class;
     private static final String PROXY_META = "proxy";
 
     private final TestContext testContext;
     private final RunContext runContext;
     private final boolean recordingEnabledGlobally;
-
-    private boolean networkRecordingEnabled;
 
     public NetworkContext(TestContext testContext, RunContext runContext, boolean recordingEnabledGlobally)
     {
@@ -51,21 +48,20 @@ public class NetworkContext
 
     public void listenNetwork(BrowserContext browserContext)
     {
-        List<Request> networkRecordings = testContext.get(NETWORK_RECORDINGS_CONTEXT_KEY,
-                () -> Collections.synchronizedList(new ArrayList<>()));
+        NetworkContextData networkContextData = getNetworkContextData();
 
         browserContext.onRequest(r ->
         {
-            if (networkRecordingEnabled)
+            if (networkContextData.networkRecordingEnabled)
             {
-                networkRecordings.add(r);
+                networkContextData.networkRecordings.add(r);
             }
         });
     }
 
     public List<Request> getNetworkRecordings()
     {
-        return testContext.get(NETWORK_RECORDINGS_CONTEXT_KEY);
+        return getNetworkContextData().networkRecordings;
     }
 
     @BeforeStory
@@ -73,34 +69,37 @@ public class NetworkContext
     {
         if (isNetworkRecordingEnabledOnStoryLevel())
         {
-            networkRecordingEnabled = true;
+            getNetworkContextData().networkRecordingEnabled = true;
         }
     }
 
     @BeforeScenario
     public void beforeScenario()
     {
-        if (!networkRecordingEnabled && isNetworkRecordingEnabledOnScenarioLevel())
+        NetworkContextData networkContextData = getNetworkContextData();
+        if (!networkContextData.networkRecordingEnabled && isNetworkRecordingEnabledOnScenarioLevel())
         {
-            networkRecordingEnabled = true;
+            networkContextData.networkRecordingEnabled = true;
         }
     }
 
     @AfterScenario
     public void afterScenario()
     {
-        if (networkRecordingEnabled)
+        NetworkContextData networkContextData = getNetworkContextData();
+        if (networkContextData.networkRecordingEnabled)
         {
-            networkRecordingEnabled = false;
+            networkContextData.networkRecordingEnabled = false;
         }
     }
 
     @AfterStory
     public void afterStory()
     {
-        if (networkRecordingEnabled)
+        NetworkContextData networkContextData = getNetworkContextData();
+        if (networkContextData.networkRecordingEnabled)
         {
-            networkRecordingEnabled = false;
+            networkContextData.networkRecordingEnabled = false;
         }
     }
 
@@ -124,5 +123,22 @@ public class NetworkContext
     private boolean isProxyMetaTagContainedIn(Meta meta)
     {
         return meta.hasProperty(PROXY_META);
+    }
+
+    private NetworkContextData getNetworkContextData()
+    {
+        return testContext.get(NetworkContextData.class, NetworkContextData::new);
+    }
+
+    private static final class NetworkContextData
+    {
+        private boolean networkRecordingEnabled;
+        private final List<Request> networkRecordings;
+
+        private NetworkContextData()
+        {
+            this.networkRecordingEnabled = false;
+            this.networkRecordings = Collections.synchronizedList(new ArrayList<>());
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,18 @@ import org.vividus.util.UriUtils;
 
 public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransformer
 {
-    private SiteMapParser siteMapParser;
-    private boolean ignoreErrors;
-    private boolean strict;
+    private final SiteMapParser siteMapParser;
+    private final boolean ignoreErrors;
+    private final boolean strict;
 
     private final List<SiteMap> siteMaps = Collections.synchronizedList(new LinkedList<>());
+
+    public SiteMapTableTransformer(SiteMapParser siteMapParser, boolean ignoreErrors, boolean strict)
+    {
+        this.siteMapParser = siteMapParser;
+        this.ignoreErrors = ignoreErrors;
+        this.strict = strict;
+    }
 
     @Override
     public Set<String> fetchUrls(TableProperties properties)
@@ -87,21 +94,6 @@ public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransforme
     protected URI parseUri(String uri)
     {
         return UriUtils.createUri(uri);
-    }
-
-    public void setSiteMapParser(SiteMapParser siteMapParser)
-    {
-        this.siteMapParser = siteMapParser;
-    }
-
-    public void setIgnoreErrors(boolean ignoreErrors)
-    {
-        this.ignoreErrors = ignoreErrors;
-    }
-
-    public void setStrict(boolean strict)
-    {
-        this.strict = strict;
     }
 
     private record SiteMap(URI siteMapUrl, Set<String> urls)
