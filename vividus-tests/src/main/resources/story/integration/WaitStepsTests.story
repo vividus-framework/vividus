@@ -60,10 +60,15 @@ Then number of elements found by `id(element-to-show)` is equal to `1`
 
 Scenario: Verify step: 'When I wait until element located by `$locator` stops moving'
 Given I am on page with URL `${vividus-test-site-url}/movingElement.html`
+When I take screenshot
 When I change context to element located by `cssSelector(.external)`
+When I take screenshot
 When I wait until element located by `cssSelector(.internal)` stops moving
+When I take screenshot
 When I COMPARE_AGAINST baseline with name `moving-element-after-stopping#{eval(isWindows ? '-windows' : '')}`
+When I take screenshot
 When I reset context
+When I take screenshot
 
 Scenario: Verify steps: "When I wait until alert appears" and "When I wait until alert disappears"
 Given I am on page with URL `${vividus-test-site-url}/alertprompt.html`
