@@ -752,9 +752,11 @@ jobs:
         run: |
           declare -a profiles=( ipad )
           for profile in "${profiles[@]}"; do
-            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs/${profile} \
-                                                  -Pvividus.configuration.suites=system/${profile} \
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs \
                                                   -Pvividus.configuration.profiles=saucelabs/web,web/tablet/${profile} \
+                                                  -Pvividus.configuration.suites=system \
+                                                  -Pvividus.batch-1.resource-include-patterns=HealthCheck.story,IPadVisualStepsTests.story \
+                                                  -Pvividus.selenium.grid.capabilities.deviceName="iPad (5th generation) Simulator" \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                   -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
           done
