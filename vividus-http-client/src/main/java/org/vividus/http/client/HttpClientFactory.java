@@ -89,7 +89,9 @@ public class HttpClientFactory implements IHttpClientFactory
             builder.setDefaultCookieStore(config.getCookieStoreProvider().getCookieStore());
         }
 
-        configureAuth(config, builder);
+        Map<String, HttpContextConfig> httpContexts = config.getHttpContextConfig();
+        configureAuth(httpContexts, builder);
+        configureHttpHeaders(httpContexts, builder);
 
         builder.setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
                 .setMaxConnTotal(config.getMaxTotalConnections())
@@ -153,9 +155,44 @@ public class HttpClientFactory implements IHttpClientFactory
         return SSLContexts.createSystemDefault();
     }
 
-    private void configureAuth(HttpClientConfig config, HttpClientBuilder builder)
+    private void configureHttpHeaders(Map<String, HttpContextConfig> httpContexts, HttpClientBuilder builder)
     {
-        Map<String, BasicAuthConfig> auths = filterDefaultConfig(config.getBasicAuthConfig());
+        Map<String, Map<String, String>> originToHeaders = httpContexts.entrySet().stream()
+                .filter(e -> e.getValue().getHeaders() != null)
+                .peek(e -> validateOrigin(e.getValue().getOrigin(), e.getKey()))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toMap(HttpContextConfig::getOrigin, HttpContextConfig::getHeaders));
+
+        if (!originToHeaders.isEmpty())
+        {
+            Map<HttpHost, List<BasicHeader>> headersPerHost = new HashMap<>();
+            Map<String, String> baseHeaders = originToHeaders.getOrDefault(ANY_ORIGIN, Map.of());
+
+            originToHeaders.forEach((o, h) ->
+            {
+                if (!ANY_ORIGIN.equals(o))
+                {
+                    Map<String, String> headers = new HashMap<>(baseHeaders);
+                    headers.putAll(h);
+
+                    List<BasicHeader> basicHeaders = headers.entrySet().stream()
+                            .map(e -> new BasicHeader(e.getKey(), e.getValue())).toList();
+                    headersPerHost.put(asHost(o), basicHeaders);
+                }
+            });
+
+            builder.addRequestInterceptorFirst((req, entity, ctx) ->
+            {
+                HttpHost requestOrigin = HttpHost.create(getRequestUri(req));
+                Optional.ofNullable(headersPerHost.get(requestOrigin))
+                        .ifPresent(headers -> headers.forEach(req::addHeader));
+            });
+        }
+    }
+
+    private void configureAuth(Map<String, HttpContextConfig> config, HttpClientBuilder builder)
+    {
+        Map<String, HttpContextConfig> auths = filterContextsWithAuth(config);
         if (auths.isEmpty())
         {
             return;
@@ -168,9 +205,10 @@ public class HttpClientFactory implements IHttpClientFactory
 
         auths.forEach((key, data) ->
         {
-            Credentials credentials = new UsernamePasswordCredentials(data.getUsername(),
-                    data.getPassword().toCharArray());
-            if (data.isPreemptiveAuthEnabled())
+            BasicAuthConfig auth = data.getAuth();
+            Credentials credentials = new UsernamePasswordCredentials(auth.getUsername(),
+                    auth.getPassword().toCharArray());
+            if (auth.isPreemptiveAuthEnabled())
             {
                 preemptiveAuthConfigs.put(data.getOrigin(), credentials);
                 return;
@@ -213,24 +251,26 @@ public class HttpClientFactory implements IHttpClientFactory
     }
 
     @Deprecated(forRemoval = true, since = "0.8.0")
-    private Map<String, BasicAuthConfig> filterDefaultConfig(Map<String, BasicAuthConfig> configs)
+    private Map<String, HttpContextConfig> filterContextsWithAuth(Map<String, HttpContextConfig> configs)
     {
         return configs.entrySet().stream().filter(e ->
         {
-            BasicAuthConfig c = e.getValue();
-            return !"003e952c9a".equals(e.getKey()) && isNotEmpty(c.getUsername()) || isNotEmpty(c.getPassword())
-                    || !ANY_ORIGIN.equals(c.getOrigin());
+            HttpContextConfig ctx = e.getValue();
+            BasicAuthConfig c = e.getValue().getAuth();
+            return c != null && (!"003e952c9a".equals(e.getKey()) && isNotEmpty(c.getUsername())
+                    || isNotEmpty(c.getPassword()) || !ANY_ORIGIN.equals(ctx.getOrigin()));
         }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
-    private void validateAuthConfiguration(Map<String, BasicAuthConfig> auths)
+    private void validateAuthConfiguration(Map<String, HttpContextConfig> auths)
     {
         String errorFormat = "The '%s' parameter is missing for '%s' authentication configuration";
         auths.forEach((key, data) ->
         {
-            isTrue(isNotEmpty(data.getUsername()), errorFormat.formatted("username", key));
-            isTrue(isNotEmpty(data.getPassword()), errorFormat.formatted("password", key));
-            isTrue(isNotEmpty(data.getOrigin()), errorFormat.formatted("origin", key));
+            BasicAuthConfig auth = data.getAuth();
+            isTrue(isNotEmpty(auth.getUsername()), errorFormat.formatted("username", key));
+            isTrue(isNotEmpty(auth.getPassword()), errorFormat.formatted("password", key));
+            validateOrigin(data.getOrigin(), key);
         });
 
         auths.entrySet().stream()
@@ -241,6 +281,12 @@ public class HttpClientFactory implements IHttpClientFactory
                         }, mapping(Entry::getKey, toList())))
                         .forEach((host, keys) -> isTrue(keys.size() == 1,
                             "Found conflicting origin URLs in %s configurations", String.join(", ", keys)));
+    }
+
+    private void validateOrigin(String origin, String key)
+    {
+        isTrue(isNotEmpty(origin),
+                "The 'origin' parameter is missing for '%s' HTTP context configuration".formatted(key));
     }
 
     private boolean isAnyOrigin(String origin)

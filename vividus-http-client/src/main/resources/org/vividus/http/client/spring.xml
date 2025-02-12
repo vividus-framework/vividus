@@ -63,14 +63,14 @@
                 <constructor-arg value="org.vividus.http.client.HttpClient" type="java.lang.Class" />
             </bean>
         </property>
-        <property name="basicAuthConfig">
-            <bean factory-bean="authConfigs" factory-method="getData" />
+        <property name="httpContextConfig">
+            <bean factory-bean="httpContextConfigs" factory-method="getData" />
         </property>
     </bean>
 
-    <bean id="authConfigs" factory-bean="propertyMapper" factory-method="readValuesCaseInsensitively">
-        <constructor-arg value="http.auth." />
-        <constructor-arg value="org.vividus.http.client.BasicAuthConfig" />
+    <bean id="httpContextConfigs" factory-bean="propertyMapper" factory-method="readValuesCaseInsensitively">
+        <constructor-arg value="http.context." />
+        <constructor-arg value="org.vividus.http.client.HttpContextConfig" />
     </bean>
 
     <bean id="localDnsStorage" factory-bean="propertyParser"

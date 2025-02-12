@@ -16,39 +16,41 @@
 
 package org.vividus.http.client;
 
-public class BasicAuthConfig
+import java.util.Map;
+
+public class HttpContextConfig
 {
-    private String username;
-    private String password;
-    private boolean preemptiveAuthEnabled;
+    private String origin;
+    private BasicAuthConfig auth;
+    private Map<String, String> headers;
 
-    public String getUsername()
+    public String getOrigin()
     {
-        return username;
+        return origin;
     }
 
-    public void setUsername(String username)
+    public void setOrigin(String origin)
     {
-        this.username = username;
+        this.origin = origin;
     }
 
-    public String getPassword()
+    public BasicAuthConfig getAuth()
     {
-        return password;
+        return auth;
     }
 
-    public void setPassword(String password)
+    public void setAuth(BasicAuthConfig auth)
     {
-        this.password = password;
+        this.auth = auth;
     }
 
-    public boolean isPreemptiveAuthEnabled()
+    public Map<String, String> getHeaders()
     {
-        return preemptiveAuthEnabled;
+        return headers;
     }
 
-    public void setPreemptiveAuthEnabled(boolean preemptiveAuthEnabled)
+    public void setHeaders(Map<String, String> headers)
     {
-        this.preemptiveAuthEnabled = preemptiveAuthEnabled;
+        this.headers = headers;
     }
 }

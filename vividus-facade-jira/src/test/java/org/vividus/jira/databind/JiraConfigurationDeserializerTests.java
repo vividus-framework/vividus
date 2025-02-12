@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import org.junit.jupiter.api.Test;
 import org.vividus.http.client.BasicAuthConfig;
 import org.vividus.http.client.HttpClientConfig;
+import org.vividus.http.client.HttpContextConfig;
 import org.vividus.jira.model.JiraConfiguration;
 
 class JiraConfigurationDeserializerTests
@@ -61,13 +62,15 @@ class JiraConfigurationDeserializerTests
         HttpClientConfig http = configuration.getHttpClientConfig();
         assertNotNull(http);
         assertEquals(1, http.getSocketTimeout());
-        Map<String, BasicAuthConfig> authConfigs = http.getBasicAuthConfig();
-        assertNotNull(authConfigs);
-        BasicAuthConfig config = authConfigs.get("jira");
+        Map<String, HttpContextConfig> contextConfigs = http.getHttpContextConfig();
+        assertNotNull(contextConfigs);
+        HttpContextConfig contextConfig = contextConfigs.get("jira");
+        assertNotNull(contextConfig);
+        BasicAuthConfig config = contextConfig.getAuth();
         assertNotNull(config);
         assertEquals("Bob", config.getUsername());
         assertEquals("052ddff802a174847345", config.getPassword());
-        assertEquals(endpoint, config.getOrigin());
+        assertEquals(endpoint, contextConfig.getOrigin());
     }
 
     @Test
