@@ -50,7 +50,7 @@ Mobitru device search capabilities.
 
 IMPORTANT: `selenium.grid.capabilities.platformName` and `selenium.grid.capabilities.udid` capabilities can not be specified along with Mobitru device search capabilities.
 
-To select a device from the pull of known devices use comma-separated unique device IDs.
+To select a device from the pool of known devices use comma-separated unique device IDs.
 
 .Capabilities to run tests on the one of specified device
 [source,properties]
