@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.vividus.http.client.BasicAuthConfig;
 import org.vividus.http.client.HttpClientConfig;
+import org.vividus.http.client.HttpContextConfig;
 import org.vividus.jira.model.JiraConfiguration;
 
 public class JiraConfigurationDeserializer extends JsonDeserializer<JiraConfiguration>
@@ -47,7 +48,7 @@ public class JiraConfigurationDeserializer extends JsonDeserializer<JiraConfigur
         Pattern projectKeyPattern = codec.treeToValue(projectKeyNode, Pattern.class);
         configuration.setProjectKeyRegex(projectKeyPattern);
 
-        String endpoint = Optional.ofNullable(jsonNode.get("endpoint")).map(JsonNode::asText).orElse(null);
+        String endpoint = asText(jsonNode, "endpoint");
         configuration.setEndpoint(endpoint);
 
         JsonNode mappingNode = jsonNode.get("fields-mapping");
@@ -62,11 +63,22 @@ public class JiraConfigurationDeserializer extends JsonDeserializer<JiraConfigur
             configuration.setHttpClientConfig(httpClientConfig);
 
             JsonNode authNode = httpNode.get("auth");
-            BasicAuthConfig authConfig = codec.treeToValue(authNode, BasicAuthConfig.class);
-            authConfig.setOrigin(endpoint);
-            httpClientConfig.setBasicAuthConfig(Map.of("jira", authConfig));
+            BasicAuthConfig authConfig = new BasicAuthConfig();
+            authConfig.setUsername(asText(authNode, "username"));
+            authConfig.setPassword(asText(authNode, "password"));
+            authConfig.setPreemptiveAuthEnabled(Optional.ofNullable(authNode.get("preemptive-auth-enabled"))
+                    .map(JsonNode::asBoolean).orElse(false));
+            HttpContextConfig contextConfig = new HttpContextConfig();
+            contextConfig.setOrigin(endpoint);
+            contextConfig.setAuth(authConfig);
+            httpClientConfig.setHttpContextConfig(Map.of("jira", contextConfig));
         }
 
         return configuration;
+    }
+
+    private String asText(JsonNode root, String key)
+    {
+        return Optional.ofNullable(root.get(key)).map(JsonNode::asText).orElse(null);
     }
 }
