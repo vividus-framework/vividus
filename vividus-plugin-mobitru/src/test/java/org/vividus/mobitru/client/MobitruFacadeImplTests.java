@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -49,6 +50,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.slf4j.event.Level;
 import org.vividus.mobitru.client.exception.MobitruDeviceSearchException;
 import org.vividus.mobitru.client.exception.MobitruDeviceTakeException;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
@@ -67,10 +69,11 @@ class MobitruFacadeImplTests
     private static final String DOWNLOAD_RECORDING_LOG_MESSAGE = "download device screen recording";
     private static final String UNABLE_TO_TAKE_DEVICE_WITH_CONFIGURATION_ERROR_FORMAT =
             "Unable to take device with configuration %s";
-    private static final String UNABLE_TO_TAKE_DEVICE_WITH_UDID_ERROR_FORMAT = "Unable to take device with udid %s";
+    private static final String UNABLE_TO_TAKE_DEVICE_WITH_UDID_ERROR_FORMAT = "Unable to take device with udid(-s) %s";
     private static final String UDID = "Z3CT103D2DZ";
     private static final String RECORDING_ID = "15a02180-16f6-4eb9-b5e8-9e945f5e85fe";
     private static final String DEVICE_TYPE_CAPABILITY_NAME = "mobitru-device-search:type";
+    private static final String UDIDS_CAPABILITY_NAME = "mobitru-device-search:udids";
     private static final String PHONE = "phone";
     private static final String PLATFORM_NAME = "platformName";
     private static final String UDID_CAP = "udid";
@@ -144,7 +147,46 @@ class MobitruFacadeImplTests
         assertEquals(List.of(
                 LoggingEvent.info(TRYING_TO_TAKE_DEVICE_UDID_MESSAGE, UDID),
                 LoggingEvent.warn(deviceTakeException, RETRY_LOG_MESSAGE, TAKE_DEVICE_LOG_MESSAGE),
+                LoggingEvent.info(TRYING_TO_TAKE_DEVICE_UDID_MESSAGE, UDID),
                 LoggingEvent.info(DEVICE_TAKEN_MESSAGE, takenDevice)), LOGGER.getLoggingEvents());
+    }
+
+    @Test
+    void shouldTakeDeviceByUdids() throws MobitruOperationException
+    {
+        String firstDeviceId = "111";
+        String secondDeviceId = UDID;
+        var desiredCapabilities = new DesiredCapabilities(
+                Map.of(PLATFORM_NAME, ANDROID, UDIDS_CAPABILITY_NAME, "111, " + UDID));
+
+        mobitruFacadeImpl.setWaitForDeviceTimeout(Duration.ofSeconds(20));
+        var deviceTakeException = new MobitruDeviceTakeException(NO_DEVICE);
+        when(mobitruClient.takeDeviceBySerial(firstDeviceId))
+                .thenThrow(deviceTakeException);
+        when(mobitruClient.takeDeviceBySerial(secondDeviceId))
+                .thenThrow(deviceTakeException)
+                .thenReturn(CAPABILITIES_WITH_UDID_JSON.getBytes(StandardCharsets.UTF_8));
+
+        String actualDeviceId = mobitruFacadeImpl.takeDevice(desiredCapabilities);
+        assertEquals(secondDeviceId, actualDeviceId);
+        var takenDevice = getTestDevice();
+
+        List<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
+        final String unableTakeDeviceMessage = "Unable to take device with udid {}";
+        assertTrue(loggingEvents.containsAll(List.of(
+                        LoggingEvent.info(TRYING_TO_TAKE_DEVICE_UDID_MESSAGE, firstDeviceId),
+                        LoggingEvent.info(TRYING_TO_TAKE_DEVICE_UDID_MESSAGE, secondDeviceId),
+                        LoggingEvent.warn(deviceTakeException, unableTakeDeviceMessage, firstDeviceId),
+                        LoggingEvent.warn(deviceTakeException, unableTakeDeviceMessage, secondDeviceId),
+                        LoggingEvent.info(DEVICE_TAKEN_MESSAGE, takenDevice))
+                ));
+        assertEquals(1, loggingEvents.stream()
+                .filter(l -> l.getLevel().equals(Level.WARN))
+                .filter(l -> l.getThrowable().isPresent())
+                .map(l -> l.getThrowable().get())
+                .filter(t -> t.getMessage()
+                        .matches("Unable to take device with udid\\(-s\\) (111, Z3CT103D2DZ|Z3CT103D2DZ, 111)"))
+                .count());
     }
 
     @Test

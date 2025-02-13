@@ -43,8 +43,24 @@ selenium.grid.capabilities.platformVersion=12
 selenium.grid.capabilities.deviceName=iPhone 13
 ----
 
+*Takes device using Mobitru capabilities*
+
 For more fine-grained configuration of taking device additionally use
-Mobitru device search capabilities specified below.
+Mobitru device search capabilities.
+
+IMPORTANT: `selenium.grid.capabilities.platformName` and `selenium.grid.capabilities.udid` capabilities can not be specified along with Mobitru device search capabilities.
+
+To select a device from the pool of known devices use comma-separated unique device IDs.
+
+.Capabilities to run tests on the one of specified device
+[source,properties]
+----
+selenium.grid.capabilities.mobitru-device-search\:udids=83f1493135524933, ad0c1603a8c1c4db04, LGM250KBIRD6MJEECA
+----
+
+Otherwise, use the capabilities specified below to search device by specific parameters, like model, type, etc.
+
+IMPORTANT: Only one device selection method is allowed: by *udids* or by *search parameters*.
 
 NOTE: The properties marked with *bold* are mandatory.
 
@@ -69,7 +85,7 @@ NOTE: The properties marked with *bold* are mandatory.
 |The model of the device (case-insensitive).
 |===
 
-IMPORTANT: `selenium.grid.capabilities.platformName` and `selenium.grid.capabilities.udid`  capabilities can not be specified along with Mobitru device search capabilities.
+
 
 .Capabilities to run tests on any SAMSUNG phone with a specific platform version
 [source,properties]

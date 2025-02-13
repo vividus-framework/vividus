@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,14 @@ package org.vividus.mobitru.client;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -77,6 +81,11 @@ public class MobitruFacadeImpl implements MobitruFacade
         if (isSearchForDevice(desiredCapabilities))
         {
             DeviceSearchParameters deviceSearchParameters = new DeviceSearchParameters(desiredCapabilities);
+            Set<String> udids = deviceSearchParameters.getUdids();
+            if (!udids.isEmpty())
+            {
+                return takeDevice(shuffleUdids(udids));
+            }
             List<Device> foundDevices = findDevices(deviceSearchParameters);
             return takeDevice(foundDevices);
         }
@@ -85,16 +94,44 @@ public class MobitruFacadeImpl implements MobitruFacade
         Object deviceUdid = capabilities.getOrDefault(APPIUM_UDID, capabilities.get(UDID));
         if (deviceUdid != null)
         {
-            //use different API in case if udid is provided in capabilities
-            //it's required in some cases like if the device is already taken
-            LOGGER.info("Trying to take device with udid {}", deviceUdid);
-            return takeDevice(getDefaultDeviceWaiter(),
-                    () -> mobitruClient.takeDeviceBySerial(String.valueOf(deviceUdid)),
-                    () -> "Unable to take device with udid " + deviceUdid);
+            return takeDevice(Set.of(String.valueOf(deviceUdid)));
         }
         Device device = new Device();
         device.setDesiredCapabilities(desiredCapabilities.asMap());
         return takeDevice(device, getDefaultDeviceWaiter());
+    }
+
+    private Set<String> shuffleUdids(Set<String> udids)
+    {
+        List<String> udidsList = new ArrayList<>(udids);
+        Collections.shuffle(udidsList);
+        return new LinkedHashSet<>(udidsList);
+    }
+
+    private String takeDevice(Set<String> udids) throws MobitruOperationException
+    {
+        String udidsAsString = String.join(", ", udids);
+        final String errorMessage = "Unable to take device with udid(-s) " + udidsAsString;
+        return takeDevice(getDefaultDeviceWaiter(), () ->
+        {
+            for (String udid : udids)
+            {
+                LOGGER.atInfo().addArgument(udid).log("Trying to take device with udid {}");
+                try
+                {
+                    return mobitruClient.takeDeviceBySerial(udid);
+                }
+                catch (MobitruOperationException e)
+                {
+                    if (udids.size() == 1)
+                    {
+                        throw e;
+                    }
+                    LOGGER.atWarn().setCause(e).addArgument(udid).log("Unable to take device with udid {}");
+                }
+            }
+            throw new MobitruOperationException(errorMessage);
+        }, () -> errorMessage);
     }
 
     private Waiter getDefaultDeviceWaiter()
