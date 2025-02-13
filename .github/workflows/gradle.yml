@@ -701,7 +701,7 @@ jobs:
 
 
   system-mobile-tests-on-saucelabs:
-    if: ${{ github.repository == 'vividus-framework/vividus' }}
+    if: github.event.pull_request.head.repo.fork == false
     env:
       TEST_APP_VERSION: 0.6.0
     runs-on: ubuntu-latest
