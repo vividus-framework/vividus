@@ -77,6 +77,14 @@ a|
 |
 |https://wiki.saucelabs.com/display/DOCS/Data+Center+Endpoints[Sauce Labs data center] to use
 
+|`saucelabs.free-device-wait-timeout`
+|{durations-format-link} format
+|`PT0S`
+|When the https://docs.saucelabs.com/dev/error-messages/#youve-exceeded-your-sauce-labs-concurrency-limit[Sauce Labs concurrency limit is exceeded],
+the error message will be "Could not start a new session. Response code 400. Message: CCYAbuse - too many jobs".
+This means all devices are busy. This property sets the maximum wait time for a free device before throwing an exception.
+If set to zero, waiting is disabled.
+
 |`saucelabs.sauce-connect.enabled`
 a|`true` +
 `false`
