@@ -633,6 +633,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: recursive
+        fetch-tags: true
 
     - name: Restore cached ~/.gradle/caches
       uses: actions/cache/restore@v4
@@ -711,6 +712,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-tags: true
 
       - name: Restore cached ~/.gradle/caches
         uses: actions/cache/restore@v4
