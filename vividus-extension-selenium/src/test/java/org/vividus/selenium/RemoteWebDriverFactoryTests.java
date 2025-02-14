@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,8 @@ class RemoteWebDriverFactoryTests
 
     @Mock private RemoteWebDriverUrlProvider provider;
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(RemoteWebDriverFactory.class);
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(
+            SessionCreationRetryOnHttpConnectTimeoutHandler.class);
 
     @BeforeEach
     void init() throws URISyntaxException
@@ -130,7 +131,7 @@ class RemoteWebDriverFactoryTests
                     );
                 }))
         {
-            var actualDriver = new RemoteWebDriverFactory(false, READ_TIMEOUT, provider).getRemoteWebDriver(
+            var actualDriver = new RemoteWebDriverFactory(READ_TIMEOUT, provider, List.of()).getRemoteWebDriver(
                     capabilities);
             assertEquals(driver.constructed(), List.of(actualDriver));
             assertThat(logger.getLoggingEvents(), is(empty()));
@@ -148,7 +149,7 @@ class RemoteWebDriverFactoryTests
             RemoteWebDriver remoteWebDriver = mock();
             when(remoteWebDriverBuilder.build()).thenReturn(remoteWebDriver);
             driverMock.when(RemoteWebDriver::builder).thenReturn(remoteWebDriverBuilder);
-            var actualDriver = new RemoteWebDriverFactory(false, READ_TIMEOUT, provider).getRemoteWebDriver(
+            var actualDriver = new RemoteWebDriverFactory(READ_TIMEOUT, provider, List.of()).getRemoteWebDriver(
                     capabilities);
             assertEquals(remoteWebDriver, actualDriver);
             assertThat(logger.getLoggingEvents(), is(empty()));
@@ -190,7 +191,9 @@ class RemoteWebDriverFactoryTests
             }
         }))
         {
-            var actualDriver = new RemoteWebDriverFactory(true, READ_TIMEOUT, provider).getRemoteWebDriver(
+            List<SessionCreationRetryHandler> retryHandlers = List.of(
+                    new SessionCreationRetryOnHttpConnectTimeoutHandler(true));
+            var actualDriver = new RemoteWebDriverFactory(READ_TIMEOUT, provider, retryHandlers).getRemoteWebDriver(
                     desiredCapabilities);
             assertEquals(sessionId, actualDriver.getSessionId().toString());
             assertThat(logger.getLoggingEvents(), is(List.of(
@@ -221,8 +224,9 @@ class RemoteWebDriverFactoryTests
                     Either.left(exception))
         ))
         {
-            var remoteWebDriverFactory = new RemoteWebDriverFactory(retrySessionCreationOnHttpConnectTimeout,
-                    READ_TIMEOUT, provider);
+            List<SessionCreationRetryHandler> retryHandlers = List.of(
+                    new SessionCreationRetryOnHttpConnectTimeoutHandler(retrySessionCreationOnHttpConnectTimeout));
+            var remoteWebDriverFactory = new RemoteWebDriverFactory(READ_TIMEOUT, provider, retryHandlers);
             var actualException = assertThrows(SessionNotCreatedException.class,
                     () -> remoteWebDriverFactory.getRemoteWebDriver(desiredCapabilities));
             assertEquals(exception, actualException);

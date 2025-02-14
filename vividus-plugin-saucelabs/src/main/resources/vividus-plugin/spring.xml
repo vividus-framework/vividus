@@ -49,6 +49,11 @@
         </constructor-arg>
     </bean>
 
+    <bean class="org.vividus.saucelabs.SessionCreationRetryOnConcurrencyLimitHandler">
+        <constructor-arg index="0" value="${saucelabs.free-device-wait-timeout}" />
+        <constructor-arg index="1" value="PT30S" />
+    </bean>
+
     <bean class="org.vividus.selenium.sauce.SauceLabsCapabilitiesConfigurer">
         <constructor-arg index="0" value="${saucelabs.sauce-connect.use-latest-version}" />
         <property name="tunnellingEnabled" value="${saucelabs.sauce-connect.enabled}"/>
