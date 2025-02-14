@@ -1,0 +1,114 @@
+=== Relative Locators
+
+Relative locators enable finding elements based on their relationship to other elements on the page.
+This simplifies working with dynamic layouts by allowing flexible and context-aware element identification.
+
+==== Relative locator format
+----
+By.relative([rootElementLocator]>>relativePosition([relativeElementLocator])):[visibility]->filter.[filterType]([filterValue])
+----
+
+[IMPORTANT]
+By. prefix is optional.
+
+[WARNING]
+====
+Root element locator type can be only: id, cssSelector, xPath, unnormalizedXPath, tagName, className, caseInsensitiveText, imageSrc, imageSrcPart, fieldName, radioButton, shadowCssSelector
+====
+
+. `rootElementLocator` - *[mandatory]* common VIVIDUS locator for elements to find
+. `relativePosition` - *[mandatory]* how root elements placed against relative element. See the table below
+. `relativeElementLocator` - *[mandatory]* common VIVIDUS locator for elements to find. Supports all VIVIDUS locator types.
+. `visibility` - *[optional]* visibility of root elements (visible by default)
+. `filterType` - *[optional]* type of the filter for root elements
+. `filterValue` - *[required if filter type defined]* value of the filter
+
+.Locate elements by xpath = '//div' placed below relative element with id = 'title'
+----
+relative(xpath(//div)>>below(id(title)))
+----
+
+You can also chain locators if needed. Sometimes the element is most easily identified as being both above/below one element and right/left of another.
+
+.Chaining relative locators
+----
+relative(xpath(//div)>>below(className(header))>>toRightOf(id(left_menu))>>above(xpath(//div[@testId='footer'])))
+----
+
+[cols="2,3,3", options="header", title="Supported relative positions"]
+|===
+
+|Relative position
+|Example
+|Description
+
+|`above`
+|relative(xpath(//div)>>above(id(bottom_block)))
+|Locates elements matching xpath `//div` and placed *above* of relative element with id = bottom_block
+
+|`below`
+|relative(xpath(//div)>>below(id(top_block)))
+|Locates elements matching xpath `//div` and placed *below* of relative element with id = top_block
+
+|`toLeftOf`
+|relative(xpath(//div)>>toLeftOf(id(right_block)))
+|Locates elements matching xpath `//div` and placed *to the left of* relative element with id = right_block
+
+|`toRightOf`
+|relative(xpath(//div)>>toRightOf(id(left_block)))
+|Locates elements matching xpath `//div` and placed *to the right of* relative element with id = left_block
+
+|`near`
+|relative(xpath(//div)>>near(id(near_block)))
+|Locates elements matching xpath `//div` and placed at most *50px* away (in any direction) from the relative element with id = near_block
+
+|`nearXpx`
+|relative(xpath(//div)>>near200px(id(distant_block)))
+|Provide possibility to configure max distance between near elements.
+
+Locates elements matching xpath `//div` and placed at most *200px* away (in any direction) from the relative element with id = distant_block
+
+|===
+
+==== Examples
+
+.Verify a number of elements with xpath = `//div` placed relative to other elements
+[source,gherkin]
+----
+Then number of elements found by `relative(xpath(//div)>>below(id(title)))` is = `1`
+Then number of elements found by `relative(xpath(//div)>>toLeftOf(id(right_image)))` is = `3`
+----
+
+.Verify that two elements aren't placed in the specific relative position
+[source,gherkin]
+----
+Then number of elements found by `id(block1)` is = `1`
+Then number of elements found by `id(block2)` is = `1`
+Then number of elements found by `relative(id(block1)>>toRightOf(id(block2)))` is = `0`
+----
+
+.Different locator types in the relative locators
+[source,gherkin]
+----
+Then number of elements found by `relative(id(block1)>>toLeftOf(className(item2)))` is = `1`
+Then number of elements found by `relative(className(item1)>>toLeftOf(cssSelector(.item2)))` is = `1`
+Then number of elements found by `relative(xpath(//div[@id='block1'])>>toLeftOf(name(item2)))` is = `1`
+----
+
+.Verify number of invisible elements with xpath = '//div' and placed at the right of element with id = 'left-menu'
+[source,gherkin]
+----
+Then number of elements found by `relative(xpath(//div)>>toRightOf(id(left-menu))):i` is = `1`
+----
+
+.Verify number of elements with xpath = '//div' and text part = 'some text' placed at the right of element with id = 'left-menu'
+[source,gherkin]
+----
+Then number of elements found by `relative(xpath(//div)>>toRightOf(id(left-menu)))->filter.textPart(some text)` is = `1``1`
+----
+
+.Apply filter to the inner relative element locator
+[source,gherkin]
+----
+Then number of elements found by `relative(xpath(//div)>>above(xpath(//a)->filter.linkUrlPart(links)))` is = `1`
+----
