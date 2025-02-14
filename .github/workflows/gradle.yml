@@ -651,11 +651,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-wrapper-
 
-    - name: Cache tests history
-      if: github.ref == 'refs/heads/master'
-      uses: actions/cache@v4
+    - name: Restore cached tests history
+      uses: actions/cache/restore@v4
       with:
-        save-always: true
         path: vividus-tests/output/history
         key: kafka-tests-history-cache-${{ github.sha }}
         restore-keys: |
@@ -700,6 +698,14 @@ jobs:
         name: System Kafka Tests - Report
         path: vividus-tests/output/reports/allure
 
+    - name: Cache tests history
+      if: always() && github.ref == 'refs/heads/master'
+      uses: actions/cache/save@v4
+      with:
+        path: vividus-tests/output/history
+        key: kafka-tests-history-cache-${{ github.sha }}
+        restore-keys: |
+          kafka-tests-history-cache-
 
   system-mobile-tests-on-saucelabs:
     if: github.event.pull_request.head.repo.fork == false && github.actor != 'dependabot[bot]'
@@ -730,11 +736,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-wrapper-
 
-      - name: Cache tests history
-        if: github.ref == 'refs/heads/master'
-        uses: actions/cache@v4
+      - name: Restore cached tests history
+        uses: actions/cache/restore@v4
         with:
-          save-always: true
           path: vividus-tests/output/history
           key: mobile-tests-on-saucelabs-history-cache-${{ github.sha }}
           restore-keys: |
@@ -907,3 +911,13 @@ jobs:
         with:
           name: SauceLabs - System Tests With Proxy - Report - Android
           path: vividus-tests/output/reports/sl-android-proxy-allure
+
+      - name: Cache tests history
+        if: always() && github.ref == 'refs/heads/master'
+        uses: actions/cache/save@v4
+        with:
+          path: vividus-tests/output/history
+          key: mobile-tests-on-saucelabs-history-cache-${{ github.sha }}
+          restore-keys: |
+            mobile-tests-on-saucelabs-history-cache-
+
