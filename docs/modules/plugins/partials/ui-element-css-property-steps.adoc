@@ -19,3 +19,30 @@ Then context element has CSS property `$cssName` with value that $comparisonRule
 When I change context to element located by `id(rainbow)`
 Then context element has CSS property `color` with value that is equal to `rgba(0, 0, 0, 1)`
 ----
+
+=== Check an element CSS properties
+
+Checks the context element has the expected CSS properties.
+
+The context can be set by the <<_change_context,corresponding steps>>.
+
+[source,gherkin]
+----
+Then context element does have CSS properties matching rules:$parameters
+----
+
+* `$parameters` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] containing the following columns:
+** [subs=+quotes]`*cssProperty*` - A name of the CSS property.
+** [subs=+quotes]`*comparisonRule*` - CSS property xref:parameters:string-comparison-rule.adoc[comparison rule].
+** [subs=+quotes]`*expectedValue*` - The expected value of the CSS property.
+
+.Change context to element and verify several CSS properties
+[source,gherkin]
+----
+When I change context to element located by `id(block)`
+Then context element does have CSS properties matching rules:
+|cssProperty |comparisonRule |expectedValue |
+|align-items |is equal to    |center        |
+|border      |contains       |solid         |
+|font-size   |contains       |20            |
+----
