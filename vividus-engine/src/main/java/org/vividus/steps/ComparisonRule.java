@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,14 @@ public enum ComparisonRule
             return Matchers.lessThanOrEqualTo(variable);
         }
     },
+    AT_MOST("at most")
+    {
+        @Override
+        public <T extends Comparable<T>> Matcher<T> getComparisonRule(T variable)
+        {
+            return Matchers.lessThanOrEqualTo(variable);
+        }
+    },
     GREATER_THAN(">")
     {
         @Override
@@ -49,6 +57,14 @@ public enum ComparisonRule
         }
     },
     GREATER_THAN_OR_EQUAL_TO(">=")
+    {
+        @Override
+        public <T extends Comparable<T>> Matcher<T> getComparisonRule(T variable)
+        {
+            return Matchers.greaterThanOrEqualTo(variable);
+        }
+    },
+    AT_LEAST("at least")
     {
         @Override
         public <T extends Comparable<T>> Matcher<T> getComparisonRule(T variable)

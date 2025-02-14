@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,8 +58,10 @@ class ComparisonRuleTests
         return Stream.of(
             Arguments.of("less than", ComparisonRule.LESS_THAN),
             Arguments.of("less than or equal to", ComparisonRule.LESS_THAN_OR_EQUAL_TO),
+            Arguments.of("at most", ComparisonRule.AT_MOST),
             Arguments.of("greater than", ComparisonRule.GREATER_THAN),
             Arguments.of("greater than or equal to", ComparisonRule.GREATER_THAN_OR_EQUAL_TO),
+            Arguments.of("at least", ComparisonRule.AT_LEAST),
             Arguments.of("equal to", ComparisonRule.EQUAL_TO),
             Arguments.of("not equal to", ComparisonRule.NOT_EQUAL_TO)
         );
@@ -72,8 +74,10 @@ class ComparisonRuleTests
         return Stream.of(
             Arguments.of(ComparisonRule.LESS_THAN, lessThan(VARIABLE)),
             Arguments.of(ComparisonRule.LESS_THAN_OR_EQUAL_TO, lessThanOrEqualTo(VARIABLE)),
+            Arguments.of(ComparisonRule.AT_MOST, lessThanOrEqualTo(VARIABLE)),
             Arguments.of(ComparisonRule.GREATER_THAN, greaterThan(VARIABLE)),
             Arguments.of(ComparisonRule.GREATER_THAN_OR_EQUAL_TO, greaterThanOrEqualTo(VARIABLE)),
+            Arguments.of(ComparisonRule.AT_LEAST, greaterThanOrEqualTo(VARIABLE)),
             Arguments.of(ComparisonRule.EQUAL_TO, comparesEqualTo(VARIABLE)),
             Arguments.of(ComparisonRule.NOT_EQUAL_TO, not(comparesEqualTo(VARIABLE)))
         );
@@ -110,8 +114,8 @@ class ComparisonRuleTests
 
     @ParameterizedTest
     @MethodSource("getComparisonRuleAsString")
-    void shouldReturnComparisonRulesInPlainText(String expecred, ComparisonRule toCheck)
+    void shouldReturnComparisonRulesInPlainText(String expected, ComparisonRule toCheck)
     {
-        assertEquals(expecred, toCheck.toString());
+        assertEquals(expected, toCheck.toString());
     }
 }

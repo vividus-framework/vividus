@@ -24,12 +24,23 @@ Shows how parameters should be compared.
 <=
 +++
 
+|AT_MOST
+|at most
+|
++++
+<=
++++
+
 |GREATER_THAN
 |greater than
 |>
 
 |GREATER_THAN_OR_EQUAL_TO
 |greater than or equal to
+|>=
+
+|AT_LEAST
+|at least
 |>=
 
 |EQUAL_TO
