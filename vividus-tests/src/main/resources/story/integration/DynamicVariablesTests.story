@@ -26,8 +26,8 @@ Then `${rect.height}`            is = `400`
 Then `${rect.width}`             is = `400`
 !-- Browser window has borders of 8px size on Windows OS, that's why x == 192 on Windows and x == 200 on Linux and MacOS
 !-- https://stackoverflow.com/a/42491227/2067574
-Then `${rect.x}`                 is >= `192`
-Then `${rect.x}`                 is <= `200`
+Then `${rect.x}`                 is at least `192`
+Then `${rect.x}`                 is at most `200`
 Then `${rect.y}`                 is = `8`
 
 Scenario: Verify `source-code` dynamic variable
