@@ -6,7 +6,7 @@ Given I am on page with URL `${vividus-test-site-url}/stickyHeader.html`
 When I change context to element located by `id(myHeader)`
 Then `${context-width}` is <conditionBefore> `<targetWidth>`
 When I change window size to `<targetWidth>x<targetHeight>`
-Then `${context-width}` is <= `<targetWidth>`
+Then `${context-width}` is at most `<targetWidth>`
 Examples:
 |conditionBefore|targetWidth|targetHeight|
 |>              |640        |320         |

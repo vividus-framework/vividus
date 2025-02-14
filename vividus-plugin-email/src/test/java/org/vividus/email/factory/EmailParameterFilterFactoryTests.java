@@ -182,8 +182,8 @@ class EmailParameterFilterFactoryTests
     @CsvSource(value = {
         "MATCHES | MATCHES filter is not applicable for SENT_DATE parameter",
         "SIMILAR | Unknown rule SIMILAR, please choose among the following rules:"
-            + " [DOES_NOT_CONTAIN, IS_EQUAL_TO, GREATER_THAN, LESS_THAN_OR_EQUAL_TO,"
-            + " MATCHES, EQUAL_TO, LESS_THAN, GREATER_THAN_OR_EQUAL_TO, CONTAINS, NOT_EQUAL_TO]"
+            + " [DOES_NOT_CONTAIN, IS_EQUAL_TO, AT_MOST, GREATER_THAN, LESS_THAN_OR_EQUAL_TO,"
+            + " MATCHES, EQUAL_TO, LESS_THAN, GREATER_THAN_OR_EQUAL_TO, CONTAINS, NOT_EQUAL_TO, AT_LEAST]"
         }, delimiter = '|')
     void testErrors(String rule, String errorMessage) throws MessagingException
     {
