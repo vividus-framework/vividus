@@ -48,12 +48,12 @@ Then element located by `<videoLocator>` exists for `PT1S` duration
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
 Then `${details.currentTime}` is > `${rewindTime}`
 Then `${details.duration}` is > `8`
-Then `${details.networkState}` is >= `1`
+Then `${details.networkState}` is at least `1`
 Then `${details.src}` matches `.+/video/countdown\.mp4`
 When I play video in video player located by `<videoLocator>`
 Then element located by `<videoLocator>` exists for `PT1S` duration
 When I save info from video player located by `<videoLocator>` to SCENARIO variable `details`
 Then `${details.currentTime}` is > `${rewindTime}`
 Then `${details.duration}` is > `8`
-Then `${details.networkState}` is >= `1`
+Then `${details.networkState}` is at least `1`
 Then `${details.src}` matches `.+/video/countdown\.mp4`
