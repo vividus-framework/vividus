@@ -93,6 +93,12 @@ This locator type is deprecated and will be removed in VIVIDUS 0.7.0. Use `name`
 |chain of css selectors, separated by `;`, where first value - selector for upper shadow host, last value - target element selector
 |shadowCssSelector(.upperHost; #innerHost1; #innerHost2; .targetValue)
 
+|`relative`
+|https://www.selenium.dev/documentation/webdriver/elements/locators/#relative-locators[Selenium Relative Locators] allow to find web elements based on their position relative to other elements, making it easier to target elements in dynamic or complex layouts.
+
+More detailed information with examples can be found in the xref:plugins:partial$plugin-web-app-relative-locators.adoc[Relative Locators] section.
+|relative(id(element)>>below(id(title))
+
 |===
 
 include::partial$visibility-types.adoc[]
@@ -182,3 +188,5 @@ This filter type is deprecated and will be removed in VIVIDUS 0.7.0.
 |id(v1)->filter.dropDownText(value)
 
 |===
+
+include::plugins:partial$plugin-web-app-relative-locators.adoc[]

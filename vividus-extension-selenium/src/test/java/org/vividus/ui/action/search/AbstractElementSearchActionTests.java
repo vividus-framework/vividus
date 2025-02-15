@@ -57,6 +57,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.locators.RelativeLocator;
 import org.vividus.testdouble.TestLocatorType;
 import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
@@ -241,5 +242,64 @@ class AbstractElementSearchActionTests
         verifyNoInteractions(waitActions);
         verify(elementActions, times(2)).isElementVisible(element);
         assertThat(logger.getLoggingEvents(), equalTo(loggingEvents));
+    }
+
+    private static Stream<Arguments> provideRelativeLocatorsTestData()
+    {
+        return Stream.of(
+                arguments("{filters=[{args=[[[ChromeDriver: chrome on windows (01f56f2d17b5ef27cc8a53b86869913a)]"
+                        + " -> id: block2]], kind=left}], root={css selector=#block1}}",
+                        "css selector=#block1 and placed left of the element with id: block2"),
+                arguments("{filters=[{args=[kind=right, [[ChromeDriver: chrome on windows"
+                                + " (02f56f2d17b5ef27cc8a53b86869913a)] -> id: block2]]}],"
+                                + " root={css selector=#block11}}",
+                        "css selector=#block11 and placed right of the element with id: block2"),
+                arguments("{root={css selector=#block1}, filters=[{args=[[[ChromeDriver: chrome on windows"
+                                + " (03f56f2d17b5ef27cc8a53b86869913a)]"
+                                + " -> id: block2]], kind=below}]}",
+                        "css selector=#block1 and placed below of the element with id: block2"),
+                arguments("{filters=[{args=[[[ChromeDriver: chrome on windows (04f56f2d17b5ef27cc8a53b86869913a)]"
+                                + " -> id: block7]], kind=left},"
+                                + " {args=[[[ChromeDriver: chrome on windows (05f56f2d17b5ef27cc8a53b86869913a)]"
+                                + " -> id: block9]], kind=above}], root={css selector=#block5}}",
+                        "css selector=#block5 and placed:" + System.lineSeparator()
+                          + "  - left of the element with id: block7" + System.lineSeparator()
+                          + "  - above of the element with id: block9" + System.lineSeparator()
+                        ),
+                arguments("{filters=[{args=[[[ChromeDriver: chrome on windows (06f56f2d17b5ef27cc8a53b86869913a)]"
+                                + " -> id: block2], 50], kind=near}], root={css selector=#block1}}",
+                        "css selector=#block1 and placed near 50px of the element with id: block2"),
+                arguments("{filters=[{args=[[[ChromeDriver: chrome on windows (07f56f2d17b5ef27cc8a53b86869913a)]"
+                                + " -> xpath: .//*[normalize-space(.)=\"Two\""
+                                + " and not(.//*[normalize-space(.)=\"Two\"])]]], kind=left}],"
+                                + " root={css selector=#block1}}",
+                        "css selector=#block1 and placed left of the element with xpath:"
+                                + " .//*[normalize-space(.)=\"Two\" and not(.//*[normalize-space(.)=\"Two\"])]"),
+                arguments("{filters=[{args=[[[ChromeDriver: chrome on windows (08f56f2d17b5ef27cc8a53b86869913a)]]],"
+                                + " kind=right}], root={xpath=//div}}",
+                        "xpath=//div and placed right of the element with unknown locator"),
+                arguments("{filters=[{args=[[[ChromeDriver: chrome on windows (09f56f2d17b5ef27cc8a53b86869913a)]]],"
+                                + " -> id: block2]]}], root={css selector=#block1}}",
+                        "Unable to find relative filters for the element located css selector=#block1"),
+                arguments("{filters=[{args=[[[ChromeDriver: chrome on windows (00f56f2d17b5ef27cc8a53b86869913a)]]],"
+                                + " -> id: block2]], kind=left}]}",
+                        "unknown locator and placed left of the element with id: block2")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideRelativeLocatorsTestData")
+    void testRelativeElementsLogMessage(String relativeByParametersValue, String expectedFormattedRelativeLocator)
+    {
+        var parameters = mock(SearchParameters.class);
+        var relativeBy = mock(RelativeLocator.RelativeBy.class);
+        var relativeByParameters = mock(By.Remotable.Parameters.class);
+        when(relativeBy.getRemoteParameters()).thenReturn(relativeByParameters);
+        when(relativeByParameters.value()).thenReturn(relativeByParametersValue);
+
+        elementSearchAction.findElements(searchContext, relativeBy, parameters);
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+                info(TOTAL_NUMBER_OF_ELEMENTS, expectedFormattedRelativeLocator, 0)
+        )));
     }
 }
