@@ -352,30 +352,6 @@ jobs:
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY, Browserstack phone system tests will be skipped
         fi
 
-    - name: Mobitru - Mobile - Web - System tests
-      if: matrix.platform == 'macos-latest'
-      env:
-        MOBITRU_USER: ${{ secrets.MOBITRU_USER }}
-        MOBITRU_KEY: ${{ secrets.MOBITRU_KEY }}
-      shell: bash
-      run: |
-        if [[ -n $MOBITRU_USER && -n $MOBITRU_KEY ]]; then
-
-          ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
-                                                -Pvividus.configuration.profiles=mobitru/web,web/phone/iphone \
-                                                -Pvividus.selenium.grid.capabilities.appium\:platformVersion=18 \
-                                                -Pvividus.selenium.grid.username=${MOBITRU_USER} \
-                                                -Pvividus.selenium.grid.password=${MOBITRU_KEY}
-
-          ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
-                                                -Pvividus.configuration.profiles=mobitru/web,web/phone/android \
-                                                -Pvividus.selenium.grid.capabilities.appium\:platformVersion=14 \
-                                                -Pvividus.selenium.grid.username=${MOBITRU_USER} \
-                                                -Pvividus.selenium.grid.password=${MOBITRU_KEY}
-        else
-            echo No MOBITRU_USER and/or MOBITRU_KEY, Mobitru web mobile system tests will be skipped
-        fi
-
     - name: BrowserStack - Desktop - Web - System tests
       if: matrix.platform == 'macos-latest'
       env:
@@ -888,6 +864,24 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 23
+
+      - name: Mobitru - Mobile - Web - System tests
+        env:
+          MOBITRU_USER: ${{ secrets.MOBITRU_USER }}
+          MOBITRU_KEY: ${{ secrets.MOBITRU_KEY }}
+        shell: bash
+        run: |
+          ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
+                                                -Pvividus.configuration.profiles=mobitru/web,web/phone/iphone \
+                                                -Pvividus.selenium.grid.capabilities.appium\:platformVersion=18 \
+                                                -Pvividus.selenium.grid.username=${MOBITRU_USER} \
+                                                -Pvividus.selenium.grid.password=${MOBITRU_KEY}
+
+          ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
+                                                -Pvividus.configuration.profiles=mobitru/web,web/phone/android \
+                                                -Pvividus.selenium.grid.capabilities.appium\:platformVersion=14 \
+                                                -Pvividus.selenium.grid.username=${MOBITRU_USER} \
+                                                -Pvividus.selenium.grid.password=${MOBITRU_KEY}
 
       - name: Mobitru - Android - Mobile App - Run system tests
         env:
