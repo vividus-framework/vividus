@@ -756,7 +756,7 @@ jobs:
                                                   -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY}
           done
-  
+
       - name: BrowserStack - Desktop - Web - System tests
         env:
           BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
@@ -771,7 +771,7 @@ jobs:
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
                                                   -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="VIVIDUS BrowserStack Integration Tests"
           done
-  
+
       - name: BrowserStack - iOS - Mobile App - Run system tests
         env:
           BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
@@ -806,14 +806,14 @@ jobs:
                                                 -Pvividus.notifications.mail.from=vividus.team@gmail.com \
                                                 -Pvividus.notifications.mail.recipient="vividus.team@gmail.com, ivan@vividus.dev" \
                                                 -Pvividus.notifications.mail.security-protocol=STARTTLS
-  
+
       - name: BrowserStack - iOS - Mobile App - Publish system tests report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: BrowserStack - System Tests - Report - iOS
           path: vividus-tests/output/reports/bs-ios-allure
-  
+
       - name: BrowserStack - Android - Mobile App - Run system tests
         env:
           BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
@@ -837,7 +837,7 @@ jobs:
                                                 -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                 -Pvividus.allure.executor.report-name="BrowserStack Android System tests report" \
                                                 -Pvividus.variables.app-url=bs://9d822d48132d61d848244f4822901ecd91b6cba2
-  
+
       - name: BrowserStack - Android - Mobile App - Publish system tests report
         if: always()
         uses: actions/upload-artifact@v4
@@ -895,7 +895,28 @@ jobs:
           distribution: 'temurin'
           java-version: 23
 
-      - name: Mobitru - Mobile - Web - System tests
+      - name: Mobitru - Android - Mobile - Web - System tests
+        env:
+          MOBITRU_USER: ${{ secrets.MOBITRU_USER }}
+          MOBITRU_KEY: ${{ secrets.MOBITRU_KEY }}
+        shell: bash
+        run: |
+          ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
+                                                -Pvividus.configuration.profiles=mobitru/web,web/phone/android \
+                                                -Pvividus.selenium.grid.capabilities.appium\:platformVersion=14 \
+                                                -Pvividus.selenium.grid.username=${MOBITRU_USER} \
+                                                -Pvividus.selenium.grid.password=${MOBITRU_KEY} \
+                                                -Pvividus.allure.history-directory=output/history/mt-android-web-system-tests \
+                                                -Pvividus.allure.report-directory=output/reports/mt-android-web-allure
+
+      - name: Mobitru - Android - Mobile - Web - Publish system tests report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mobitru - System Tests - Report - Web Android
+          path: vividus-tests/output/reports/mt-android-web-allure
+
+      - name: Mobitru - IOS - Mobile - Web - System tests
         env:
           MOBITRU_USER: ${{ secrets.MOBITRU_USER }}
           MOBITRU_KEY: ${{ secrets.MOBITRU_KEY }}
@@ -905,13 +926,16 @@ jobs:
                                                 -Pvividus.configuration.profiles=mobitru/web,web/phone/iphone \
                                                 -Pvividus.selenium.grid.capabilities.appium\:platformVersion=18 \
                                                 -Pvividus.selenium.grid.username=${MOBITRU_USER} \
-                                                -Pvividus.selenium.grid.password=${MOBITRU_KEY}
+                                                -Pvividus.selenium.grid.password=${MOBITRU_KEY} \
+                                                -Pvividus.allure.history-directory=output/history/mt-ios-web-system-tests \
+                                                -Pvividus.allure.report-directory=output/reports/mt-ios-web-allure
 
-          ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
-                                                -Pvividus.configuration.profiles=mobitru/web,web/phone/android \
-                                                -Pvividus.selenium.grid.capabilities.appium\:platformVersion=14 \
-                                                -Pvividus.selenium.grid.username=${MOBITRU_USER} \
-                                                -Pvividus.selenium.grid.password=${MOBITRU_KEY}
+      - name: Mobitru - IOS - Mobile - Web - Publish system tests report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mobitru - System Tests - Report - Web IOS
+          path: vividus-tests/output/reports/mt-ios-web-allure
 
       - name: Mobitru - Android - Mobile App - Run system tests
         env:
