@@ -79,9 +79,6 @@ ext {
     versions = [
         jbehave:                '6.0.0-alpha.9',
         powermock:              'a0be5c4bbe',
-        // eyes and eyesUniversal versions should be updated and tested together
-        eyes:                   '5.69.5',
-        eyesUniversal:          '5.64.17',
         jsonPath:               '52ebb195bd'
     ]
 }
