@@ -62,6 +62,7 @@ dependencies {
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.4')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testRuntimeOnly(group: 'org.junit.vintage', name: 'junit-vintage-engine')
     testCompileOnly(group: 'junit', name: 'junit', version: '4.13.2')
     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '3.0')
