@@ -194,6 +194,7 @@ jobs:
         AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         AZURE_COSMOS_DB_KEY: ${{ secrets.AZURE_COSMOS_DB_KEY }}
         GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
+        LIGHTHOUSE_API_KEY: ${{ secrets.LIGHTHOUSE_API_KEY }}
       shell: bash
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY && -n $MONGODB_USERNAME && -n $MONGODB_PASSWORD && -n $AWS_ACCESS_KEY_ID && -n $AWS_SECRET_ACCESS_KEY && -n $AWS_REGION && -n $AZURE_CLIENT_ID && -n $AZURE_CLIENT_SECRET && -n $AZURE_TENANT_ID && -n $AZURE_SUBSCRIPTION_ID && -n $AZURE_COSMOS_DB_KEY && -n $GMAIL_PASSWORD ]]; then
@@ -201,6 +202,7 @@ jobs:
                                                   -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
                                                   -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="VIVIDUS System Tests" \
+                                                  -Pvividus.lighthouse.api-key=${LIGHTHOUSE_API_KEY} \
                                                   -Pvividus.allure.history-directory=output/history/system-tests \
                                                   -Pvividus.allure.executor.name="Github Actions (Vividus)" \
                                                   -Pvividus.allure.executor.type=github \
