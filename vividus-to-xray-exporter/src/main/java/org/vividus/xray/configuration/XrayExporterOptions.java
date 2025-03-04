@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ public class XrayExporterOptions
     private String testExecutionSummary;
     private List<Path> testExecutionAttachments;
     private boolean testCaseUpdatesEnabled;
+    private TestCase testCase;
 
     public Path getJsonResultsDirectory()
     {
@@ -89,5 +90,30 @@ public class XrayExporterOptions
     public void setTestCaseUpdatesEnabled(boolean testCaseUpdatesEnabled)
     {
         this.testCaseUpdatesEnabled = testCaseUpdatesEnabled;
+    }
+
+    public TestCase getTestCase()
+    {
+        return testCase;
+    }
+
+    public void setTestCase(TestCase testCase)
+    {
+        this.testCase = testCase;
+    }
+
+    public static final class TestCase
+    {
+        private boolean useScenarioTitleAsDescription;
+
+        public boolean isUseScenarioTitleAsDescription()
+        {
+            return useScenarioTitleAsDescription;
+        }
+
+        public void setUseScenarioTitleAsDescription(boolean useScenarioTitleAsDescription)
+        {
+            this.useScenarioTitleAsDescription = useScenarioTitleAsDescription;
+        }
     }
 }
