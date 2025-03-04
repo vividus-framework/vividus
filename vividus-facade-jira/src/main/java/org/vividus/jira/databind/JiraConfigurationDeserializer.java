@@ -61,17 +61,20 @@ public class JiraConfigurationDeserializer extends JsonDeserializer<JiraConfigur
         {
             HttpClientConfig httpClientConfig = codec.treeToValue(httpNode, HttpClientConfig.class);
             configuration.setHttpClientConfig(httpClientConfig);
+            HttpContextConfig contextConfig = new HttpContextConfig();
+            httpClientConfig.setHttpContextConfig(Map.of("jira", contextConfig));
 
             JsonNode authNode = httpNode.get("auth");
-            BasicAuthConfig authConfig = new BasicAuthConfig();
-            authConfig.setUsername(asText(authNode, "username"));
-            authConfig.setPassword(asText(authNode, "password"));
-            authConfig.setPreemptiveAuthEnabled(Optional.ofNullable(authNode.get("preemptive-auth-enabled"))
-                    .map(JsonNode::asBoolean).orElse(false));
-            HttpContextConfig contextConfig = new HttpContextConfig();
-            contextConfig.setOrigin(endpoint);
-            contextConfig.setAuth(authConfig);
-            httpClientConfig.setHttpContextConfig(Map.of("jira", contextConfig));
+            if (authNode != null)
+            {
+                BasicAuthConfig authConfig = new BasicAuthConfig();
+                authConfig.setUsername(asText(authNode, "username"));
+                authConfig.setPassword(asText(authNode, "password"));
+                authConfig.setPreemptiveAuthEnabled(Optional.ofNullable(authNode.get("preemptive-auth-enabled"))
+                        .map(JsonNode::asBoolean).orElse(false));
+                contextConfig.setOrigin(endpoint);
+                contextConfig.setAuth(authConfig);
+            }
         }
 
         return configuration;

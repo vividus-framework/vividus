@@ -36,10 +36,12 @@ import org.vividus.jira.model.JiraConfiguration;
 
 class JiraConfigurationDeserializerTests
 {
+    private static final String JIRA_KEY = "jira";
+
     @Test
     void shouldDeserialize() throws IOException
     {
-        JsonParser parser = new JavaPropsFactory().createParser("""
+        JiraConfiguration configuration = deserialize("""
                 project-key-regex=VVDS
                 endpoint=https://jira.vividus.com
                 fields-mapping.test-case-type=customfield_00001
@@ -48,10 +50,6 @@ class JiraConfigurationDeserializerTests
                 http.auth.password=052ddff802a174847345
                 http.socket-timeout=1
                 """);
-        parser.setCodec(new JavaPropsMapper().setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE));
-
-        JiraConfigurationDeserializer deserializer = new JiraConfigurationDeserializer();
-        JiraConfiguration configuration = deserializer.deserialize(parser, null);
 
         assertEquals("VVDS", configuration.getProjectKeyRegex().pattern());
         String endpoint = "https://jira.vividus.com";
@@ -64,7 +62,7 @@ class JiraConfigurationDeserializerTests
         assertEquals(1, http.getSocketTimeout());
         Map<String, HttpContextConfig> contextConfigs = http.getHttpContextConfig();
         assertNotNull(contextConfigs);
-        HttpContextConfig contextConfig = contextConfigs.get("jira");
+        HttpContextConfig contextConfig = contextConfigs.get(JIRA_KEY);
         assertNotNull(contextConfig);
         BasicAuthConfig config = contextConfig.getAuth();
         assertNotNull(config);
@@ -74,17 +72,39 @@ class JiraConfigurationDeserializerTests
     }
 
     @Test
+    void shouldDeserializeWithoutAuth() throws IOException
+    {
+        JiraConfiguration configuration = deserialize("""
+                http.socket-timeout=1
+                """);
+
+        HttpClientConfig http = configuration.getHttpClientConfig();
+        assertNotNull(http);
+        assertEquals(1, http.getSocketTimeout());
+        Map<String, HttpContextConfig> contextConfigs = http.getHttpContextConfig();
+        assertNotNull(contextConfigs);
+        HttpContextConfig contextConfig = contextConfigs.get(JIRA_KEY);
+        assertNotNull(contextConfig);
+        assertNull(contextConfig.getAuth());
+    }
+
+    @Test
     void shouldDeserializeEmpty() throws IOException
     {
-        JsonParser parser = new JavaPropsFactory().createParser("");
-        parser.setCodec(new JavaPropsMapper().setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE));
-
-        JiraConfigurationDeserializer deserializer = new JiraConfigurationDeserializer();
-        JiraConfiguration configuration = deserializer.deserialize(parser, null);
+        JiraConfiguration configuration = deserialize("");
 
         assertNull(configuration.getProjectKeyRegex());
         assertNull(configuration.getEndpoint());
         assertNull(configuration.getFieldsMapping());
         assertNull(configuration.getHttpClientConfig());
+    }
+
+    private JiraConfiguration deserialize(String input) throws IOException
+    {
+        JsonParser parser = new JavaPropsFactory().createParser(input);
+        parser.setCodec(new JavaPropsMapper().setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE));
+
+        JiraConfigurationDeserializer deserializer = new JiraConfigurationDeserializer();
+        return deserializer.deserialize(parser, null);
     }
 }
