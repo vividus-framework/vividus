@@ -7,7 +7,7 @@ dependencies {
     implementation project(':vividus-util')
     implementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.31')
     implementation(group: 'com.azure', name: 'azure-messaging-servicebus')
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.16')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.12.0')

@@ -6,7 +6,7 @@ dependencies {
     implementation(group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb')
     implementation(group: 'com.amazonaws', name: 'aws-java-sdk-sts')
     implementation project(':vividus-extension-aws')
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.16')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.12.0')

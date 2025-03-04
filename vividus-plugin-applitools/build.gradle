@@ -11,7 +11,7 @@ dependencies {
 
     implementation(group: 'com.applitools', name: 'eyes-images-java5', version: '5.75.3')
     implementation(group: 'com.applitools', name: 'eyes-selenium-java5', version: '5.77.0')
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.16')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.12.0')
