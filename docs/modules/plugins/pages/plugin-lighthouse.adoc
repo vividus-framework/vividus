@@ -14,15 +14,15 @@ include::partial$plugin-installation.adoc[]
 |Default
 |Description
 
+|[subs=+quotes]`*lighthouse.api-key*`
+|<string>
+|
+|The API key that identifies your project and provides you with API access, quota, and reports.
+
 |`lighthouse.application-name`
 |<string>
 |
 |The application name to be used in the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent[User-Agent] header.
-
-|`lighthouse.api-key`
-|<string>
-|
-|The API key that identifies your project and provides you with API access, quota, and reports. Its recommended to specify the key if you plan to use the plugin in an automated way and make multiple queries per second.
 
 |`lighthouse.categories`
 |comma-separated list of categories (`performance`, `best-practices`, `accessibility`, `seo`)
