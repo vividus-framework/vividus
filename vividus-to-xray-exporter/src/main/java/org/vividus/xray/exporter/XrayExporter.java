@@ -154,6 +154,11 @@ public class XrayExporter
             AbstractTestCase testCase = testCaseFactories.get(testCaseType).apply(parameters);
             if (testCaseId == null)
             {
+                if (xrayExporterOptions.getTestCase().isUseScenarioTitleAsDescription())
+                {
+                    testCase.setDescription(scenario.getTitle());
+                }
+
                 testCaseId = xrayFacade.createTestCase(testCase);
             }
             else if (xrayExporterOptions.isTestCaseUpdatesEnabled())

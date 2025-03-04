@@ -60,6 +60,10 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 |false
 |Comma-separated list of file and folder paths that should be uploaded to test execution as attachments. Please note that regular files like images, texts are uploaded as is, whereas folders are archived before the upload.
 
+|`xray-exporter.test-case.use-scenario-title-as-description`
+|false
+|If enabled (`true` value), the scenario title will be used as the description, but *only* for newly created test cases, otherwise the description will be left empty.
+
 |===
 
 .application.properties

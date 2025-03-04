@@ -13,6 +13,7 @@
       "value": "Manual"
     },
     "summary": "summary",
+    "description": "description",
     "labels": [
       "label 1",
       "label 2"

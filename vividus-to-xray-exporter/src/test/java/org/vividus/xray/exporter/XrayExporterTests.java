@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -72,6 +73,7 @@ import org.vividus.model.jbehave.Scenario;
 import org.vividus.output.ManualTestStep;
 import org.vividus.util.ResourceUtils;
 import org.vividus.xray.configuration.XrayExporterOptions;
+import org.vividus.xray.configuration.XrayExporterOptions.TestCase;
 import org.vividus.xray.facade.AbstractTestCaseParameters;
 import org.vividus.xray.facade.CucumberTestCaseParameters;
 import org.vividus.xray.facade.ManualTestCaseParameters;
@@ -116,6 +118,7 @@ class XrayExporterTests
     {
         xrayExporterOptions.setTestCaseUpdatesEnabled(true);
         xrayExporterOptions.setTestExecutionAttachments(List.of(ROOT));
+        xrayExporterOptions.setTestCase(new TestCase());
     }
 
     @AfterEach
@@ -130,6 +133,7 @@ class XrayExporterTests
     {
         URI jsonResultsUri = getJsonResultsUri("createcucumber");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        xrayExporterOptions.getTestCase().setUseScenarioTitleAsDescription(false);
         CucumberTestCase testCase = mock(CucumberTestCase.class);
 
         when(xrayFacade.createTestCase(testCase)).thenReturn(ISSUE_ID);
@@ -147,6 +151,7 @@ class XrayExporterTests
             + "|parameter-value-3|" + lineSeparator();
         verifyCucumberTestCaseParameters("Scenario Outline", scenario);
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
+        verify(testCase, never()).setDescription(any());
     }
 
     @Test
@@ -155,6 +160,7 @@ class XrayExporterTests
     {
         URI jsonResultsUri = getJsonResultsUri(UPDATECUCUMBER_RESOURCE_KEY);
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        xrayExporterOptions.getTestCase().setUseScenarioTitleAsDescription(true);
         CucumberTestCase testCase = mock(CucumberTestCase.class);
 
         when(testCaseFactory.createCucumberTestCase(cucumberTestCaseParametersCaptor.capture())).thenReturn(testCase);
@@ -165,6 +171,7 @@ class XrayExporterTests
         String scenario = GIVEN_STEP + lineSeparator() + WHEN_STEP + lineSeparator() + THEN_STEP;
         verifyCucumberTestCaseParameters("Scenario", scenario);
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
+        verify(testCase, never()).setDescription(any());
     }
 
     @Test
@@ -281,10 +288,12 @@ class XrayExporterTests
     }
 
     @Test
-    void shouldExportNewTestAndLinkToRequirements() throws URISyntaxException, IOException, JiraConfigurationException
+    void shouldExportNewTestAndLinkToRequirementsAndUseScenarioTitleAsTestCaseDescription()
+            throws URISyntaxException, IOException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri("createandlink");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        xrayExporterOptions.getTestCase().setUseScenarioTitleAsDescription(true);
         ManualTestCase testCase = mock(ManualTestCase.class);
 
         when(xrayFacade.createTestCase(testCase)).thenReturn(ISSUE_ID);
@@ -296,6 +305,7 @@ class XrayExporterTests
 
         verifyManualTestCaseParameters(Set.of(), Set.of());
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
+        verify(testCase).setDescription(SCENARIO_TITLE);
     }
 
     @Test
