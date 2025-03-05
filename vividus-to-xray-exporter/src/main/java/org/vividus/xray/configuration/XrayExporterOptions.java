@@ -20,17 +20,18 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Name;
 
 @ConfigurationProperties("xray-exporter")
 public class XrayExporterOptions
 {
     private Path jsonResultsDirectory;
     private String testSetKey;
-    private String testExecutionKey;
-    private String testExecutionSummary;
-    private List<Path> testExecutionAttachments;
     private boolean testCaseUpdatesEnabled;
-    private TestCase testCase;
+    @Name("test-case")
+    private TestCaseOptions testCaseOptions;
+    @Name("test-execution")
+    private TestExecutionOptions testExecutionOptions;
 
     public Path getJsonResultsDirectory()
     {
@@ -52,36 +53,6 @@ public class XrayExporterOptions
         this.testSetKey = testSetKey;
     }
 
-    public String getTestExecutionKey()
-    {
-        return testExecutionKey;
-    }
-
-    public void setTestExecutionKey(String testExecutionKey)
-    {
-        this.testExecutionKey = testExecutionKey;
-    }
-
-    public String getTestExecutionSummary()
-    {
-        return testExecutionSummary;
-    }
-
-    public void setTestExecutionSummary(String testExecutionSummary)
-    {
-        this.testExecutionSummary = testExecutionSummary;
-    }
-
-    public List<Path> getTestExecutionAttachments()
-    {
-        return testExecutionAttachments;
-    }
-
-    public void setTestExecutionAttachments(List<Path> testExecutionAttachments)
-    {
-        this.testExecutionAttachments = testExecutionAttachments;
-    }
-
     public boolean isTestCaseUpdatesEnabled()
     {
         return testCaseUpdatesEnabled;
@@ -92,17 +63,27 @@ public class XrayExporterOptions
         this.testCaseUpdatesEnabled = testCaseUpdatesEnabled;
     }
 
-    public TestCase getTestCase()
+    public TestCaseOptions getTestCaseOptions()
     {
-        return testCase;
+        return testCaseOptions;
     }
 
-    public void setTestCase(TestCase testCase)
+    public void setTestCaseOptions(TestCaseOptions testCaseOptions)
     {
-        this.testCase = testCase;
+        this.testCaseOptions = testCaseOptions;
     }
 
-    public static final class TestCase
+    public TestExecutionOptions getTestExecutionOptions()
+    {
+        return testExecutionOptions;
+    }
+
+    public void setTestExecutionOptions(TestExecutionOptions testExecutionOptions)
+    {
+        this.testExecutionOptions = testExecutionOptions;
+    }
+
+    public static final class TestCaseOptions
     {
         private boolean useScenarioTitleAsDescription;
 
@@ -114,6 +95,54 @@ public class XrayExporterOptions
         public void setUseScenarioTitleAsDescription(boolean useScenarioTitleAsDescription)
         {
             this.useScenarioTitleAsDescription = useScenarioTitleAsDescription;
+        }
+    }
+
+    public static final class TestExecutionOptions
+    {
+        private String key;
+        private String summary;
+        private String description;
+        private List<Path> attachments;
+
+        public String getKey()
+        {
+            return key;
+        }
+
+        public void setKey(String key)
+        {
+            this.key = key;
+        }
+
+        public String getSummary()
+        {
+            return summary;
+        }
+
+        public void setSummary(String summary)
+        {
+            this.summary = summary;
+        }
+
+        public String getDescription()
+        {
+            return description;
+        }
+
+        public void setDescription(String description)
+        {
+            this.description = description;
+        }
+
+        public List<Path> getAttachments()
+        {
+            return attachments;
+        }
+
+        public void setAttachments(List<Path> attachments)
+        {
+            this.attachments = attachments;
         }
     }
 }

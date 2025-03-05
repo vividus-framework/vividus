@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.validation.Errors;
 import org.vividus.xray.configuration.XrayExporterOptions;
+import org.vividus.xray.configuration.XrayExporterOptions.TestExecutionOptions;
 
 @ExtendWith(MockitoExtension.class)
 class XrayExporterOptionsValidatorTests
 {
-    private static final String TEST_EXECUTION_ATTACHMENTS_FIELD = "test-execution-attachments";
+    private static final String TEST_EXECUTION_ATTACHMENTS_FIELD = "test-execution.attachments";
     private static final String DATA_TXT = "data.txt";
 
     @Mock private Errors errors;
@@ -55,8 +56,7 @@ class XrayExporterOptionsValidatorTests
     @Test
     void shouldRejectIfAttachmentPathPointsToTheRoot(@TempDir Path directory)
     {
-        XrayExporterOptions options = new XrayExporterOptions();
-        options.setTestExecutionAttachments(List.of(directory.getRoot()));
+        XrayExporterOptions options = createOptions(List.of(directory.getRoot()));
 
         validator.validate(options, errors);
 
@@ -68,9 +68,8 @@ class XrayExporterOptionsValidatorTests
     @Test
     void shouldRejectIfAttachmentPathPointsToNonExistentFile()
     {
-        XrayExporterOptions options = new XrayExporterOptions();
         Path nonExstentPath = Paths.get("path/to/nowhere");
-        options.setTestExecutionAttachments(List.of(nonExstentPath));
+        XrayExporterOptions options = createOptions(List.of(nonExstentPath));
 
         validator.validate(options, errors);
 
@@ -82,8 +81,7 @@ class XrayExporterOptionsValidatorTests
     @Test
     void shouldRejectIfAttachmentDirectoryIsEmpty(@TempDir Path directory)
     {
-        XrayExporterOptions options = new XrayExporterOptions();
-        options.setTestExecutionAttachments(List.of(directory));
+        XrayExporterOptions options = createOptions(List.of(directory));
 
         validator.validate(options, errors);
 
@@ -96,8 +94,7 @@ class XrayExporterOptionsValidatorTests
     void shouldPassValidationIfFolderExists(@TempDir Path directory) throws IOException
     {
         Files.createFile(directory.resolve(DATA_TXT));
-        XrayExporterOptions options = new XrayExporterOptions();
-        options.setTestExecutionAttachments(List.of(directory));
+        XrayExporterOptions options = createOptions(List.of(directory));
 
         validator.validate(options, errors);
 
@@ -108,11 +105,19 @@ class XrayExporterOptionsValidatorTests
     void shouldPassValidationIfRegularFileExists(@TempDir Path directory) throws IOException
     {
         Path filePath = Files.createFile(directory.resolve(DATA_TXT));
-        XrayExporterOptions options = new XrayExporterOptions();
-        options.setTestExecutionAttachments(List.of(filePath));
+        XrayExporterOptions options = createOptions(List.of(filePath));
 
         validator.validate(options, errors);
 
         verifyNoInteractions(errors);
+    }
+
+    private XrayExporterOptions createOptions(List<Path> attachments)
+    {
+        XrayExporterOptions options = new XrayExporterOptions();
+        TestExecutionOptions executionOptions = new TestExecutionOptions();
+        executionOptions.setAttachments(attachments);
+        options.setTestExecutionOptions(executionOptions);
+        return options;
     }
 }
