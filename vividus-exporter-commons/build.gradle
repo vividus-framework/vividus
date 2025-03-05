@@ -11,6 +11,7 @@ configurations.all {
 dependencies {
     implementation project(':vividus-util')
     implementation(group: 'org.springframework.boot', name: 'spring-boot-starter', version: "${springBootVersion}")
+    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version: "${springBootVersion}")
 
     testImplementation (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "${springBootVersion}")
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.12.0')

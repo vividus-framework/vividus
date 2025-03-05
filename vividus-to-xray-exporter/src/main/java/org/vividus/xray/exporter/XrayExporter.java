@@ -41,6 +41,7 @@ import org.vividus.output.ManualStepConverter;
 import org.vividus.output.OutputReader;
 import org.vividus.output.SyntaxException;
 import org.vividus.xray.configuration.XrayExporterOptions;
+import org.vividus.xray.configuration.XrayExporterOptions.TestExecutionOptions;
 import org.vividus.xray.converter.CucumberScenarioConverter;
 import org.vividus.xray.converter.CucumberScenarioConverter.CucumberScenario;
 import org.vividus.xray.facade.AbstractTestCaseParameters;
@@ -108,13 +109,17 @@ public class XrayExporter
 
     private void addTestCasesToTestExecution(List<Entry<String, Scenario>> testCases)
     {
-        String testExecutionKey = xrayExporterOptions.getTestExecutionKey();
+        TestExecutionOptions testExecutionOptions = xrayExporterOptions.getTestExecutionOptions();
+        String testExecutionKey = testExecutionOptions.getKey();
 
-        if (testExecutionKey != null || xrayExporterOptions.getTestExecutionSummary() != null)
+        if (testExecutionKey != null || testExecutionOptions.getSummary() != null)
         {
             TestExecution testExecution = testExecutionFactory.create(testCases);
-            executeSafely(() -> xrayFacade.importTestExecution(testExecution,
-                    xrayExporterOptions.getTestExecutionAttachments()), "test execution", testExecutionKey);
+            FailableRunnable runnable = testExecutionKey != null
+                    ? () -> xrayFacade.updateTestExecution(testExecution, testExecutionOptions.getAttachments())
+                    : () -> xrayFacade.createTestExecution(testExecution, testExecutionOptions.getAttachments());
+
+            executeSafely(runnable, "test execution", testExecutionKey);
         }
     }
 
@@ -154,7 +159,7 @@ public class XrayExporter
             AbstractTestCase testCase = testCaseFactories.get(testCaseType).apply(parameters);
             if (testCaseId == null)
             {
-                if (xrayExporterOptions.getTestCase().isUseScenarioTitleAsDescription())
+                if (xrayExporterOptions.getTestCaseOptions().isUseScenarioTitleAsDescription())
                 {
                     testCase.setDescription(scenario.getTitle());
                 }

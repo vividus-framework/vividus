@@ -60,7 +60,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -73,7 +74,8 @@ import org.vividus.model.jbehave.Scenario;
 import org.vividus.output.ManualTestStep;
 import org.vividus.util.ResourceUtils;
 import org.vividus.xray.configuration.XrayExporterOptions;
-import org.vividus.xray.configuration.XrayExporterOptions.TestCase;
+import org.vividus.xray.configuration.XrayExporterOptions.TestCaseOptions;
+import org.vividus.xray.configuration.XrayExporterOptions.TestExecutionOptions;
 import org.vividus.xray.facade.AbstractTestCaseParameters;
 import org.vividus.xray.facade.CucumberTestCaseParameters;
 import org.vividus.xray.facade.ManualTestCaseParameters;
@@ -117,8 +119,10 @@ class XrayExporterTests
     void beforeEach()
     {
         xrayExporterOptions.setTestCaseUpdatesEnabled(true);
-        xrayExporterOptions.setTestExecutionAttachments(List.of(ROOT));
-        xrayExporterOptions.setTestCase(new TestCase());
+        TestExecutionOptions executionOptions = new TestExecutionOptions();
+        executionOptions.setAttachments(List.of(ROOT));
+        xrayExporterOptions.setTestExecutionOptions(executionOptions);
+        xrayExporterOptions.setTestCaseOptions(new TestCaseOptions());
     }
 
     @AfterEach
@@ -133,7 +137,7 @@ class XrayExporterTests
     {
         URI jsonResultsUri = getJsonResultsUri("createcucumber");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
-        xrayExporterOptions.getTestCase().setUseScenarioTitleAsDescription(false);
+        xrayExporterOptions.getTestCaseOptions().setUseScenarioTitleAsDescription(false);
         CucumberTestCase testCase = mock(CucumberTestCase.class);
 
         when(xrayFacade.createTestCase(testCase)).thenReturn(ISSUE_ID);
@@ -160,7 +164,7 @@ class XrayExporterTests
     {
         URI jsonResultsUri = getJsonResultsUri(UPDATECUCUMBER_RESOURCE_KEY);
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
-        xrayExporterOptions.getTestCase().setUseScenarioTitleAsDescription(true);
+        xrayExporterOptions.getTestCaseOptions().setUseScenarioTitleAsDescription(true);
         CucumberTestCase testCase = mock(CucumberTestCase.class);
 
         when(testCaseFactory.createCucumberTestCase(cucumberTestCaseParametersCaptor.capture())).thenReturn(testCase);
@@ -195,13 +199,13 @@ class XrayExporterTests
     }
 
     @Test
-    void shouldExportTestWithLabelsAndComponentsAndUpdatableTestCaseId()
+    void shouldExportTestWithLabelsAndComponentsAndUpdatableTestCaseIdAndImportTestExecution()
             throws URISyntaxException, IOException, NonEditableIssueStatusException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri("componentslabelsupdatabletci");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
         xrayExporterOptions.setTestSetKey(TEST_SET_KEY);
-        xrayExporterOptions.setTestExecutionKey(TEST_EXECUTION_KEY);
+        xrayExporterOptions.getTestExecutionOptions().setKey(TEST_EXECUTION_KEY);
         ManualTestCase testCase = mock(ManualTestCase.class);
 
         when(testCaseFactory.createManualTestCase(manualTestCaseParametersCaptor.capture())).thenReturn(testCase);
@@ -215,7 +219,7 @@ class XrayExporterTests
         verifyManualTestCaseParameters(Set.of("dummy-label-1", "dummy-label-2"),
                 Set.of("dummy-component-1", "dummy-component-2"));
 
-        verify(xrayFacade).importTestExecution(testExecution, List.of(ROOT));
+        verify(xrayFacade).updateTestExecution(testExecution, List.of(ROOT));
         List<Entry<String, Scenario>> scenarios = scenariosCaptor.getValue();
         assertThat(scenarios, hasSize(1));
         assertEquals(ISSUE_ID, scenarios.get(0).getKey());
@@ -224,12 +228,24 @@ class XrayExporterTests
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
     }
 
+    static Stream<Arguments> failOnExportDataProvider()
+    {
+        return Stream.of(
+            Arguments.of(
+                    TEST_EXECUTION_KEY,
+                    "Failed to update test execution with the key TEST-EXEC: error message",
+                    (TestExecutionMocker) f -> f.updateTestExecution(any(), eq(List.of(ROOT)))),
+            Arguments.of(
+                    null,
+                    "Failed to create test execution: error message",
+                    (TestExecutionMocker) f -> f.createTestExecution(any(), eq(List.of(ROOT))))
+        );
+    }
+
     @ParameterizedTest
-    @CsvSource({
-        TEST_EXECUTION_KEY + ", Failed to update test execution with the key TEST-EXEC: error message",
-        ", Failed to create test execution: error message"
-    })
-    void shouldCompleteExportIfExportAttemptThrownIOException(String testExecutionKey, String testExecutionMessage)
+    @MethodSource("failOnExportDataProvider")
+    void shouldCompleteExportIfExportAttemptThrownIOException(String testExecutionKey, String testExecutionMessage,
+            TestExecutionMocker mocker)
             throws URISyntaxException, IOException, NonEditableIssueStatusException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri("continueiferror");
@@ -249,16 +265,17 @@ class XrayExporterTests
         errorLogMessage += "Error #2" + lineSeparator()
                 + "Failed to update test set with the key TEST-SET: error message" + lineSeparator();
 
-        xrayExporterOptions.setTestExecutionKey(testExecutionKey);
-        xrayExporterOptions.setTestExecutionSummary("summary");
-        doThrow(exception).when(xrayFacade).importTestExecution(any(), eq(List.of(ROOT)));
+        TestExecutionOptions executionOptions = xrayExporterOptions.getTestExecutionOptions();
+        executionOptions.setKey(testExecutionKey);
+        executionOptions.setSummary("summary");
+        mocker.mock(doThrow(exception).when(xrayFacade));
         errorLogMessage += "Error #3" + lineSeparator() + testExecutionMessage + lineSeparator();
 
         xrayExporter.exportResults();
 
         verify(xrayFacade).updateTestCase(ISSUE_ID, testCase);
         verify(xrayFacade).updateTestSet(TEST_SET_KEY, List.of(ISSUE_ID));
-        verify(xrayFacade).importTestExecution(any(), eq(List.of(ROOT)));
+        mocker.mock(verify(xrayFacade));
         verifyManualTestCaseParameters(Set.of(), Set.of());
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), error(exception, ERROR_MESSAGE),
                 getExportingScenarioEvent(), getExportFailedErrorEvent(errorLogMessage));
@@ -293,7 +310,7 @@ class XrayExporterTests
     {
         URI jsonResultsUri = getJsonResultsUri("createandlink");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
-        xrayExporterOptions.getTestCase().setUseScenarioTitleAsDescription(true);
+        xrayExporterOptions.getTestCaseOptions().setUseScenarioTitleAsDescription(true);
         ManualTestCase testCase = mock(ManualTestCase.class);
 
         when(xrayFacade.createTestCase(testCase)).thenReturn(ISSUE_ID);
@@ -398,5 +415,10 @@ class XrayExporterTests
     public URI getJsonResultsUri(String resource) throws URISyntaxException
     {
         return ResourceUtils.findResource(getClass(), resource).toURI();
+    }
+
+    private interface TestExecutionMocker
+    {
+        void mock(XrayFacade facade) throws IOException, JiraConfigurationException;
     }
 }

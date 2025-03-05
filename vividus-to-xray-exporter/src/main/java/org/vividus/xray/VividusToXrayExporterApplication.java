@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package org.vividus.xray;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.vividus.exporter.config.VividusExporterCommonConfiguration;
@@ -39,5 +41,15 @@ public class VividusToXrayExporterApplication
     {
         ApplicationContext context = SpringApplication.run(VividusToXrayExporterApplication.class, args);
         context.getBean(XrayExporter.class).exportResults();
+    }
+
+    @Bean
+    public Map<String, String> deprecatedProperties()
+    {
+        return Map.of(
+            "xray-exporter.test-execution-key", "xray-exporter.test-execution.key",
+            "xray-exporter.test-execution-summary", "xray-exporter.test-execution.summary",
+            "xray-exporter.test-execution-attachments", "xray-exporter.test-execution.attachments"
+        );
     }
 }

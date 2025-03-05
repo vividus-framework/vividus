@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,32 +123,43 @@ public class XrayFacade
                        .log("{} Test with key {} has been updated");
     }
 
-    public void importTestExecution(TestExecution testExecution, List<Path> attachments)
+    public void createTestExecution(TestExecution testExecution, List<Path> attachments)
+            throws IOException, JiraConfigurationException
+    {
+        importTestExecution(testExecution, (request, client) ->
+        {
+            LOGGER.atInfo().addArgument(request).log("Creating Test Execution: {}");
+            String response = client.apply(jiraClientProvider.getByJiraConfigurationKey(jiraInstanceKey));
+            String testExecutionKey = JsonPathUtils.getData(response, "$.testExecIssue.key");
+            addAttachments(testExecutionKey, attachments);
+            LOGGER.atInfo().addArgument(testExecutionKey).log("Test Execution with key {} has been created");
+        });
+    }
+
+    public void updateTestExecution(TestExecution testExecution, List<Path> attachments)
+            throws IOException, JiraConfigurationException
+    {
+        importTestExecution(testExecution, (request, client) ->
+        {
+            String testExecutionKey = testExecution.getTestExecutionKey();
+            LOGGER.atInfo()
+                  .addArgument(testExecutionKey)
+                  .addArgument(request)
+                  .log("Updating Test Execution with ID {}: {}");
+            client.apply(jiraClientProvider.getByIssueKey(testExecutionKey));
+            addAttachments(testExecutionKey, attachments);
+            LOGGER.atInfo().addArgument(testExecutionKey).log("Test Execution with key {} has been updated");
+        });
+    }
+
+    private void importTestExecution(TestExecution testExecution, ExecutionImportConsumer importer)
             throws IOException, JiraConfigurationException
     {
         String testExecutionRequest = objectMapper.writeValueAsString(testExecution);
         FailableFunction<JiraClient, String, IOException> importFunction = client -> client
                 .executePost("/rest/raven/1.0/import/execution", testExecutionRequest);
 
-        String testExecutionKey = testExecution.getTestExecutionKey();
-        if (testExecutionKey != null)
-        {
-            LOGGER.atInfo()
-                  .addArgument(testExecutionKey)
-                  .addArgument(testExecutionRequest)
-                  .log("Updating Test Execution with ID {}: {}");
-            importFunction.apply(jiraClientProvider.getByIssueKey(testExecutionKey));
-            addAttachments(testExecutionKey, attachments);
-            LOGGER.atInfo().addArgument(testExecutionKey).log("Test Execution with key {} has been updated");
-        }
-        else
-        {
-            LOGGER.atInfo().addArgument(testExecutionRequest).log("Creating Test Execution: {}");
-            String response = importFunction.apply(jiraClientProvider.getByJiraConfigurationKey(jiraInstanceKey));
-            testExecutionKey = JsonPathUtils.getData(response, "$.testExecIssue.key");
-            addAttachments(testExecutionKey, attachments);
-            LOGGER.atInfo().addArgument(testExecutionKey).log("Test Execution with key {} has been created");
-        }
+        importer.consume(testExecutionRequest, importFunction);
     }
 
     public void addAttachments(String testExecutionKey, List<Path> attachmentPaths)
@@ -256,5 +267,12 @@ public class XrayFacade
         {
             super("Issue " + testCaseId + " is in non-editable '" + status + "' status");
         }
+    }
+
+    @FunctionalInterface
+    private interface ExecutionImportConsumer
+    {
+        void consume(String request, FailableFunction<JiraClient, String, IOException> client)
+                throws IOException, JiraConfigurationException;
     }
 }
