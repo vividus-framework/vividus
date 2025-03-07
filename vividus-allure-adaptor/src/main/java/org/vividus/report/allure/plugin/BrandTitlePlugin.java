@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.vividus.report.allure.plugin;
 
 import java.io.IOException;
 import java.util.List;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class BrandTitlePlugin extends DynamicPlugin
 {
@@ -43,7 +41,6 @@ public class BrandTitlePlugin extends DynamicPlugin
               font-size: 11px;%n\
             }""";
 
-    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public BrandTitlePlugin(String brandTitle) throws IOException
     {
         super("brand-title", "styles.css", () -> List.of(CSS_TEMPLATE.formatted(brandTitle)));

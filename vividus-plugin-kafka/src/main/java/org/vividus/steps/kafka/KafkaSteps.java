@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,8 +68,6 @@ import org.vividus.testcontext.TestContext;
 import org.vividus.util.property.IPropertyParser;
 import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.variable.VariableScope;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class KafkaSteps
 {
@@ -152,7 +150,6 @@ public class KafkaSteps
      * @throws ExecutionException   If the computation threw an exception
      * @throws TimeoutException     If the wait timed out
      */
-    @SuppressFBWarnings("NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS")
     @When("I send event with value `$value` to `$producerKey` Kafka topic `$topic`")
     public void sendEvent(String value, String producerKey, String topic)
             throws InterruptedException, ExecutionException, TimeoutException

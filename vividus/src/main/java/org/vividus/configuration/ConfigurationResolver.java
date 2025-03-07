@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.vividus.spring.SpelExpressionResolver;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public final class ConfigurationResolver
 {
@@ -79,7 +77,6 @@ public final class ConfigurationResolver
         this.properties = properties;
     }
 
-    @SuppressFBWarnings("SING_SINGLETON_GETTER_NOT_SYNCHRONIZED")
     public static ConfigurationResolver getInstance() throws IOException
     {
         if (instance != null)

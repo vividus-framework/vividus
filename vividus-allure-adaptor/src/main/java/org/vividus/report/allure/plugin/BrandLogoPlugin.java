@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public class BrandLogoPlugin extends DynamicPlugin
               background-size: 44px 44px !important;%n\
             }""";
 
-    @SuppressFBWarnings({ "CT_CONSTRUCTOR_THROW", "NP_NULL_ON_SOME_PATH" })
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH")
     public BrandLogoPlugin(String logoPath, PluginFilesLoader pluginFilesLoader) throws IOException
     {
         super("brand-logo", "styles.css", () -> List.of(CSS_TEMPLATE.formatted(FilenameUtils.getName(logoPath))));

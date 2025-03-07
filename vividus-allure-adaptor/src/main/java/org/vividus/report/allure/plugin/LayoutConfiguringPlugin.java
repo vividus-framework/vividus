@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.vividus.util.property.PropertyMappedCollection;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 public class LayoutConfiguringPlugin extends DynamicPlugin
 {
-    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public LayoutConfiguringPlugin(PropertyMappedCollection<Component> tabs,
             PropertyMappedCollection<Component> widgets, PropertyMappedCollection<Component> charts) throws IOException
     {
