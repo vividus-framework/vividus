@@ -278,14 +278,26 @@ jobs:
       shell: bash
       run: |
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
-          declare -a profiles=( iexplore chrome firefox edge safari )
+          declare -a profiles=( chrome firefox edge )
           for profile in "${profiles[@]}"; do
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs \
                                                   -Pvividus.configuration.suites=health_check \
                                                   -Pvividus.configuration.profiles=saucelabs/web,web/desktop/${profile} \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
-                                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
+                                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
+                                                  -Pvividus.selenium.grid.capabilities.platformName="Windows 11"
           done
+          ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs \
+                                                -Pvividus.configuration.suites=health_check \
+                                                -Pvividus.configuration.profiles=saucelabs/web,web/desktop/iexplore \
+                                                -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
+                                                -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
+
+          ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs \
+                                                -Pvividus.configuration.suites=health_check \
+                                                -Pvividus.configuration.profiles=saucelabs/web,web/desktop/safari \
+                                                -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
+                                                -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs system tests will be skipped
         fi
@@ -329,7 +341,8 @@ jobs:
                                                 -Pvividus.batch-1.resource-location=story/integration \
                                                 -Pvividus.batch-1.resource-include-patterns=ProxyStepsTests.story \
                                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
-                                                -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
+                                                -Pvividus.selenium.grid.password=${SAUCELABS_KEY}  \
+                                                -Pvividus.selenium.grid.capabilities.platformName="Windows 11" \
                                                 -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com,vividus-test-site-a92k.onrender.com"
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs system tests will be skipped
