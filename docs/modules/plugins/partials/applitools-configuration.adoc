@@ -20,3 +20,4 @@
 ** `disableBrowserFetching` - By default, is `false`.  If `true`, page resources for rendering on the UFG will be fetched from outside of the browser.
 ** `layoutBreakpoints` - By default, is `true`.  If `true`, the viewport width and height are changed to the specified device's values prior to capturing the page source for rendering in UFG.
 ** `scaleRatio` - The scale ratio of the image, the less the ratio the smaller the image and vice versa, for example if we want to make the image 25% smaller the ration should be set to `0.75`, this can be useful if image height exceeds the Applitools height limit (15000 pixels).
+** `properties` - The list of key value pairs used as a metadata for visual test in Applitools. The required value format is `key1=value1, key2=value2, ...` where the key must not be empty e.g. `Component name=Menu Item, State=Open, Version=1`.
