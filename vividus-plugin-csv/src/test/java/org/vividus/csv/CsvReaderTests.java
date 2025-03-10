@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class CsvReaderTests
     {
         try (var inputStream = getClass().getResourceAsStream("unittest-escaped.csv"))
         {
-            var csvFormat = CSVFormat.DEFAULT.builder().setDelimiter(',').setEscape('\\').build();
+            var csvFormat = CSVFormat.DEFAULT.builder().setDelimiter(',').setEscape('\\').get();
             var result = new CsvReader(csvFormat).readCsvStream(inputStream, FIRST_HEADER, SECOND_HEADER);
             assertEquals(List.of(Map.of(FIRST_HEADER, FIRST_VALUE, SECOND_HEADER, "value2 with \" inside")), result);
         }

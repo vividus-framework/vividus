@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class CsvTableTransformer implements ExtendedTableTransformer
             int delimiterLength = delimiter.length();
             isTrue(delimiterLength == 1, "CSV delimiter must be a single char, but value '%s' has length of %d",
                     delimiter, delimiterLength);
-            csvFormat = csvFormat.builder().setDelimiter(delimiter.charAt(0)).build();
+            csvFormat = csvFormat.builder().setDelimiter(delimiter.charAt(0)).get();
         }
 
         try
