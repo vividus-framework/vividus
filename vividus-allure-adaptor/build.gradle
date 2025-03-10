@@ -2,7 +2,7 @@ project.description = 'VIVIDUS Allure report adaptor'
 
 nohttp.source.excludes += '**/webjars/**'
 
-ext.allureReportVersion = '2.32.2'
+ext.allureReportVersion = '2.33.0'
 
 dependencies {
     implementation project(':vividus-engine')
