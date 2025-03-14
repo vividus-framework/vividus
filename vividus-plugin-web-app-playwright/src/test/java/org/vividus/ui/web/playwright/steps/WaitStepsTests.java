@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,6 +208,31 @@ class WaitStepsTests
 
             playwrightLocatorAssertions.verify(
                 () -> PlaywrightLocatorAssertions.assertElementHasTextMatchingRegex(locator, pattern, true));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void shouldWaitUntilElementAppearsInViewport()
+    {
+        doNothing().when(waitActions).runWithTimeoutAssertion((Supplier<String>) argThat(s ->
+        {
+            String value = ((Supplier<String>) s).get();
+            return "The element located by `css(div) with visibility: visible` is visible in viewport".equals(value);
+        }), argThat(runnable ->
+        {
+            runnable.run();
+            return true;
+        }));
+        Locator locator = mock();
+        when(uiContext.locateElement(playwrightLocator)).thenReturn(locator);
+
+        try (var playwrightLocatorAssertions = mockStatic(PlaywrightLocatorAssertions.class))
+        {
+            waitSteps.waitForElementAppearanceInViewport(playwrightLocator);
+
+            playwrightLocatorAssertions.verify(
+                () -> PlaywrightLocatorAssertions.assertElementInViewport(locator, true));
         }
     }
 

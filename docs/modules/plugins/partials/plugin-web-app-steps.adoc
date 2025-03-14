@@ -110,8 +110,10 @@ include::plugins:partial$ui-scrolling-steps.adoc[]
 include::plugins:partial$ui-elements-validation-steps.adoc[]
 
 include::plugins:partial$ui-selenium-text-content-steps.adoc[]
+
 include::plugins:partial$common-web-app-text-steps.adoc[]
 
+include::plugins:partial$common-web-app-wait-steps.adoc[]
 
 === Tab steps
 ==== Open a new tab

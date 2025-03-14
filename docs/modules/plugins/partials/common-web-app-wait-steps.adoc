@@ -16,3 +16,21 @@ When I wait until page title $comparisonRule `$pattern`
 Given I am on page with URL `http://example.com`
 When I wait until page title matches `.*Domain`
 ----
+
+==== Wait for element appearance in viewport
+
+Waits for an element to appear in the browser viewport.
+
+[source,gherkin]
+----
+When I wait until element located by `$locator` appears in viewport
+----
+
+* `$locator` - The <<_locator,locator>> used to find element.
+
+.Wait for element appearance in viewport
+[source,gherkin]
+----
+When I scroll element located by `id(items-list)` into view
+When I wait until element located by `id(sticky-items-filter)` appears in viewport
+----
