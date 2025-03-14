@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
 
 import java.time.Duration;
+import java.util.Optional;
 
 import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matcher;
@@ -31,6 +32,7 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -43,16 +45,19 @@ import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.State;
 import org.vividus.ui.action.IExpectedConditions;
+import org.vividus.ui.action.IExpectedSearchContextCondition;
+import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.IWaitActions;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
+import org.vividus.ui.web.action.ScrollActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
 import jakarta.inject.Inject;
 
-@SuppressWarnings("PMD.ExcessiveImports")
+@SuppressWarnings({ "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects" })
 @TakeScreenshotOnFailure
 public class WaitSteps
 {
@@ -67,6 +72,8 @@ public class WaitSteps
     @Inject private IBaseValidations baseValidations;
     @Inject private WebJavascriptActions javascriptActions;
     @Inject private TimeoutConfigurer timeoutConfigurer;
+    @Inject private ScrollActions<WebElement> scrollActions;
+    @Inject private ISearchActions searchActions;
 
     /**
      * Waits for <b><i>an alert</i></b> appearance on the page
@@ -130,6 +137,41 @@ public class WaitSteps
                 return "alert to be not present";
             }
         });
+    }
+
+    /**
+     * Waits for an element to appear in the browser viewport.
+     *
+     * @param locator The locator of the element to wait
+     */
+    @When("I wait until element located by `$locator` appears in viewport")
+    public void waitForElementAppearanceInViewport(Locator locator)
+    {
+        locator.getSearchParameters().setVisibility(Visibility.ALL);
+        IExpectedSearchContextCondition<WebElement> condition = new IExpectedSearchContextCondition<>()
+        {
+            @Override
+            public WebElement apply(SearchContext searchContext)
+            {
+                try
+                {
+                    Optional<WebElement> element = searchActions.findElement(locator);
+                    return element.map(scrollActions::isElementInViewport).orElse(false) ? element.get() : null;
+                }
+                catch (StaleElementReferenceException e)
+                {
+                    return null;
+                }
+            }
+
+            @Override
+            public String toString()
+            {
+                return String.format("element located by %s to be visible in viewport", locator);
+            }
+        };
+
+        waitActions.wait(getWebDriver(), condition);
     }
 
     /**

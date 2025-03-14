@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,22 @@ public class WaitSteps
     public void waitForElementDisappearance(PlaywrightLocator locator)
     {
         waitForElementStateValidatingVisibility(locator, ElementState.NOT_VISIBLE);
+    }
+
+    /**
+     * Waits for appearance of an <b><i>element</i></b> with the specified <b>locator</b> in viewport
+     * @param locator locator to locate element
+     */
+    @When("I wait until element located by `$locator` appears in viewport")
+    public void waitForElementAppearanceInViewport(PlaywrightLocator locator)
+    {
+        Supplier<String> conditionDescription = () -> "The element located by `%s` is visible in viewport"
+                .formatted(locator);
+        waitActions.runWithTimeoutAssertion(conditionDescription, () ->
+        {
+            Locator element = uiContext.locateElement(locator);
+            PlaywrightLocatorAssertions.assertElementInViewport(element, true);
+        });
     }
 
     /**

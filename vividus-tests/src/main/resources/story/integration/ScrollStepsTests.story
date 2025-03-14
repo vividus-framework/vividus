@@ -27,13 +27,14 @@ When I scroll context to TOP edge
 When I reset context
 When I wait until element located by `id(current-vertical):a` contains text `0`
 
-Scenario: Verify steps: "When I scroll element located by `$locator` into view", "Then element located by `$locator` $presence visible in viewport", "When I wait until element located by `$locator` has text matching `$regex`"
+Scenario: Verify steps: "When I scroll element located by `$locator` into view", "Then element located by `$locator` $presence visible in viewport", "When I wait until element located by `$locator` has text matching `$regex`", "When I wait until element located by `$locator` appears in viewport"
 Meta:
     @requirementId 436
     @playwrightSupported
 Given I am on page with URL `${vividus-test-site-url}/scrollableElements.html`
 Then element located by `xpath(//a[text()="Contact"])` is not visible in viewport
 When I scroll element located by `xpath(//a[text()="Contact"])` into view
+When I wait until element located by `xpath(//a[text()="Contact"])` appears in viewport
 Then element located by `xpath(//a[text()="Contact"])` is visible in viewport
 When I wait until element located by `id(current-vertical):a` has text matching `\d+`
 
