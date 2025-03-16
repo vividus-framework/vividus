@@ -12,6 +12,6 @@ dependencies {
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '3.0')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.16.0')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.16.1')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
 }
