@@ -99,7 +99,7 @@ dependencies {
 
     compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.12.0')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.12.1')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.16.0')
@@ -124,12 +124,12 @@ dependencies {
     integrationTestImplementation project(':vividus-plugin-winrm')
     integrationTestImplementation project(':vividus-plugin-xml')
     integrationTestImplementation project(':vividus-plugin-yaml')
-    integrationTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.12.0')
+    integrationTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.12.1')
     integrationTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     integrationTestRuntimeOnly('org.junit.platform:junit-platform-launcher')
     integrationTestImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '2.3.0')
 
-    systemTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.12.0')
+    systemTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.12.1')
     systemTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     systemTestRuntimeOnly('org.junit.platform:junit-platform-launcher')
     systemTestImplementation platform(group: 'org.testcontainers', name: 'testcontainers-bom', version: '1.20.6')
