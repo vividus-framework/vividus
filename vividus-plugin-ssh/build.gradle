@@ -9,7 +9,7 @@ dependencies {
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0')
-    implementation(group: 'com.github.mwiede', name: 'jsch', version: '0.2.23')
+    implementation(group: 'com.github.mwiede', name: 'jsch', version: '0.2.24')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.12.0')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
