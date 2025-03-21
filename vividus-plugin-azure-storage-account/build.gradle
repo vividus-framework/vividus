@@ -8,7 +8,7 @@ dependencies {
     implementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.32')
     implementation(group: 'com.azure', name: 'azure-storage-blob')
     implementation(group: 'com.azure', name: 'azure-storage-file-share')
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.0-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.5-jre')
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
     implementation(group: 'org.apache.tika', name: 'tika-core', version: '3.1.0')
