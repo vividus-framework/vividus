@@ -968,6 +968,24 @@ include::plugins:partial$web-storage-steps.adoc[]
 include::partial$proxy-steps.adoc[]
 
 === Window Steps
+
+==== Maximize browser window
+
+Maximizes the current window if it is not already maximized, the step can be useful if you previously performed any resize actions with the browser window.
+
+[source,gherkin]
+----
+When I maximize window
+----
+
+.Maximize browser window after resize
+[source,gherkin]
+----
+Given I am on page with URL `https://example.com/`
+When I change window size to `640x320`
+When I maximize window
+----
+
 ==== Resize the current browser window
 
 Changes the current browser window size to the specified one.
