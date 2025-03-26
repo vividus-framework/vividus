@@ -227,6 +227,37 @@ Then `${jsonDataTable[0].host}` is not equal to `[httpbingo.org]`
 {transformer=FROM_JSON, path=data/test.json, columns=fname=$..firstName;lname=$..lastName}
 ----
 
+== Expressions
+
+NOTE: The expression parameters marked with *bold* are mandatory.
+
+=== `formatToOneLineJson`
+
+Formats any JSON into a one line.
+
+[source, subs="+quotes"]
+----
+#{formatToOneLineJson(*$json*)}
+----
+
+* *`$json`* - The input JSON.
+
+.Format pretty JSON to one line JSON
+[source,gherkin]
+----
+Given I initialize scenario variable `oneLineJson` with value `#{formatToOneLineJson(
+{
+  "title": "Berserk",
+  "year": 1997,
+  "episodes": 25,
+  "genre": ["Action", "Adventure", "Dark Fantasy"],
+  "director": "Naohito Takahashi",
+  "studio": "OLM, Inc.",
+  "synopsis": "A mercenary named Guts joins the Band of the Hawk, leading to a tragic fate."
+}
+)}`
+----
+
 == Steps
 
 :json-path: <<JSON Path, JSON path>>
