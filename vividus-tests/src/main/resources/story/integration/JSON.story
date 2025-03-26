@@ -260,3 +260,11 @@ Then `${documentTable}` is equal to table:
 |Evelyn Waugh     |Sword of Honour       |
 |Herman Melville  |Moby Dick             |
 |J. R. R. Tolkien |The Lord of the Rings |
+
+Scenario: Verify formatToOneLineJson expression
+Given I initialize scenario variable `prettyJson` with value `
+{
+    "character": "Baldheaded Ulad"
+}
+`
+Then `#{formatToOneLineJson(${prettyJson})}` is equal to `{"character":"Baldheaded Ulad"}`
