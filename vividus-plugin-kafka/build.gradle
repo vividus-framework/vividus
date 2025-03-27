@@ -19,7 +19,7 @@ dependencies {
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.12.1')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.16.0')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.16.1')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'org.springframework.kafka', name: 'spring-kafka-test')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
