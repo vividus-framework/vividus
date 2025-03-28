@@ -23,7 +23,7 @@ dependencies {
     implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '6.0.0') {
         exclude group: 'com.github.docker-java'
     }
-    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.3')
+    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.5')
     implementation(group: 'org.springframework', name: 'spring-context')
     implementation(group: 'org.apache.commons', name: 'commons-text', version: '1.13.0')
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
