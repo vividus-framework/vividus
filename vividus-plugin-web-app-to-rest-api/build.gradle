@@ -15,7 +15,7 @@ dependencies {
     implementation(group: 'de.hs-heilbronn.mi', name: 'crawler4j-with-hsqldb', version: '5.1.1') {
         exclude module: 'log4j-slf4j-impl'
     }
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.0-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.6-jre')
 
     compileOnly project(':vividus-plugin-web-app')
     compileOnly project(':vividus-plugin-web-app-playwright')
