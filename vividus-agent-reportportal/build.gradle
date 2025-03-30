@@ -4,7 +4,7 @@ dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-reporter')
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.0-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.6-jre')
     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.5')
     implementation(group: 'org.springframework', name: 'spring-context')
 
