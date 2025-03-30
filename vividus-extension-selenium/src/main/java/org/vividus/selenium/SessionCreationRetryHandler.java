@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 import org.openqa.selenium.SessionNotCreatedException;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+@SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface SessionCreationRetryHandler
 {
     /**

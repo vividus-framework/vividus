@@ -62,7 +62,7 @@ class WebJavascriptActionsTests
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IWebDriverManager webDriverManager;
-    @Spy private TestContext testContext = new SimpleTestContext();
+    @Spy private final TestContext testContext = new SimpleTestContext();
 
     @Mock(extraInterfaces = { JavascriptExecutor.class, HasCapabilities.class })
     private WebDriver webDriver;
