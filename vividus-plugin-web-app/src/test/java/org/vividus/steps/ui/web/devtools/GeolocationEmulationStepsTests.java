@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,8 +71,8 @@ class GeolocationEmulationStepsTests
         permissions.setGeolocationEnabled(initialState);
         when(webDriverManager.getBrowserPermissions()).thenReturn(permissions);
 
-        double latitude = 55.410014;
-        double longitude = 28.628027;
+        double latitude = 55.410_014;
+        double longitude = 28.628_027;
 
         steps.emulateGeolocation(latitude, longitude);
 
