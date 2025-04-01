@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,9 @@ class GenericWaitStepsTests
     private static final Locator LOCATOR = new Locator(TestLocatorType.SEARCH, VALUE);
     private static final String ELEMENT_TO_VALIDATE_EXISTENCE = "The element to validate existence";
     private static final String ELEMENT_TO_VALIDATE_STOP_MOVEMENT = "The element to validate stop of its movement";
+    private static final Duration TIMEOUT = Duration.ofSeconds(1L);
+    private static final String LOCATOR_VISIBILITY_ERROR = "The step supports locators with VISIBLE visibility settings"
+            + " only, but the locator is `search 'value' (invisible)`";
 
     @Mock private IWaitActions waitActions;
     @Mock private IUiContext uiContext;
@@ -116,8 +119,7 @@ class GenericWaitStepsTests
     {
         Locator locator = new Locator(TestLocatorType.SEARCH, new SearchParameters(VALUE, Visibility.INVISIBLE));
         var iae = assertThrows(IllegalArgumentException.class, () -> waitSteps.waitForElementAppearance(locator));
-        assertEquals("The step supports locators with VISIBLE visibility settings only, but the locator is `search"
-                + " 'value' (invisible)`", iae.getMessage());
+        assertEquals(LOCATOR_VISIBILITY_ERROR, iae.getMessage());
         verifyNoInteractions(expectedSearchActionsConditions, waitActions);
     }
 
@@ -373,6 +375,27 @@ class GenericWaitStepsTests
         IExpectedSearchContextCondition<Boolean> condition = captor.getValue();
         assertFalse(condition.apply(context));
         verifyNoMoreInteractions(elementActions);
+    }
+
+    @Test
+    void shouldWaitForElementAppearanceWithTimeout()
+    {
+        var element = mock(WebElement.class);
+        when(uiContext.getSearchContext()).thenReturn(element);
+        IExpectedSearchContextCondition<WebElement> condition = mock();
+        when(expectedSearchActionsConditions.visibilityOfElement(LOCATOR)).thenReturn(condition);
+        waitSteps.waitForElementAppearance(LOCATOR, TIMEOUT);
+        verify(waitActions).wait(element, TIMEOUT, condition);
+    }
+
+    @Test
+    void shouldThrowAnExceptionInCaseOfIncorrectVisibilityUsedForAppearanceWaitWithTimeout()
+    {
+        Locator locator = new Locator(TestLocatorType.SEARCH, new SearchParameters(VALUE, Visibility.INVISIBLE));
+        var iae = assertThrows(IllegalArgumentException.class,
+                () -> waitSteps.waitForElementAppearance(locator, TIMEOUT));
+        assertEquals(LOCATOR_VISIBILITY_ERROR, iae.getMessage());
+        verifyNoInteractions(expectedSearchActionsConditions, waitActions);
     }
 
     private SearchContext mockSearchContext()

@@ -101,9 +101,9 @@
   "VVD-15": {
     "type": "Internal",
     "assertionPattern": ".+waiting for visibility of element located by .+ \\(visible\\) \\(tried for 4 second\\(s\\) with .+ milliseconds interval\\).*",
-    "scenarioPattern": "Verify step: 'Then element located by `.+` appears in `.+`'",
+    "scenarioPattern": "Verify step: 'Then element located by `.+` appears in `.+`', 'When I wait until element located by `.+` appears in `.+`'",
     "storyPattern": "WaitStepsTests",
-    "stepPattern": "Then element located by `.+` appears in `.+`"
+    "stepPattern": "(Then element located by `.+` appears in `.+`|When I wait until element located by `.+` appears in `.+`)"
   },
   "VVD-16": {
     "type": "Internal",
