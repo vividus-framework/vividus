@@ -1187,27 +1187,6 @@ Then `${response}` matcher `.+`
 
 === Element wait steps
 
-==== Wait for element appearance with timeout
-
-Waits for element appearance with desired timeout.
-
-WARNING: It's forbidden to use <<_visibility_types>> in the locator.
-
-[source,gherkin]
-----
-Then element located by `$locator` appears in `$timeout`
-----
-
-* `$locator` - The <<_locator,locator>> used to find element.
-* `$timeout` - The maximum time to wait for the element appearance in {durations-format-link} format.
-
-.Click on the button and waiting for element appearance for 2 minutes
-[source,gherkin]
-----
-When I click on element located by `buttonName(Show element)`
-Then element located by 'id(element-to-show)' appears in 'PT2M'
-----
-
 ==== Wait for element disappearance with timeout
 
 Waits for element disappearance with desired timeout.

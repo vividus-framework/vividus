@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,19 @@ public class GenericWaitSteps
     }
 
     /**
+     * Waits for element appearance with desired timeout
+     * @param locator the locator to locate element
+     * @param timeout the waiting time according to
+     *                <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> standard
+     */
+    @When("I wait until element located by `$locator` appears in `$timeout`")
+    public void waitForElementAppearance(Locator locator, Duration timeout)
+    {
+        checkLocatorVisibility(locator);
+        waitActions.wait(getSearchContext(), timeout, expectedSearchActionsConditions.visibilityOfElement(locator));
+    }
+
+    /**
      * Waits for disappearance of an <b><i>element</i></b> with the specified <b>locator</b>
      * Step supports only <b>VISIBLE</b> elements waiting. If locator will be configured to <b>ALL</b>
      * or <b>INVISIBLE</b> exception will be thrown.
@@ -100,10 +113,15 @@ public class GenericWaitSteps
     private <T> void waitForConditionValidatingVisibility(Locator locator,
             Function<Locator, IExpectedSearchContextCondition<T>> conditionFactory)
     {
+        checkLocatorVisibility(locator);
+        waitForCondition(conditionFactory.apply(locator));
+    }
+
+    private void checkLocatorVisibility(Locator locator)
+    {
         Validate.isTrue(Visibility.VISIBLE == locator.getSearchParameters().getVisibility(),
             "The step supports locators with VISIBLE visibility settings only, but the locator is `%s`",
                 locator.toHumanReadableString());
-        waitForCondition(conditionFactory.apply(locator));
     }
 
     /**
@@ -133,7 +151,7 @@ public class GenericWaitSteps
     public boolean waitDurationWithPollingDurationTillElementState(Duration duration, Duration pollingDuration,
                                                                    Locator locator, State state)
     {
-        return waitActions.wait(uiContext.getSearchContext(), duration, pollingDuration,
+        return waitActions.wait(getSearchContext(), duration, pollingDuration,
                 state.getExpectedCondition(expectedSearchActionsConditions, locator)).isWaitPassed();
     }
 
@@ -323,6 +341,11 @@ public class GenericWaitSteps
 
     private void waitForCondition(IExpectedSearchContextCondition<?> condition)
     {
-        waitActions.wait(uiContext.getSearchContext(), condition);
+        waitActions.wait(getSearchContext(), condition);
+    }
+
+    private SearchContext getSearchContext()
+    {
+        return uiContext.getSearchContext();
     }
 }

@@ -17,3 +17,7 @@ When I wait until HTTP <httpMethods> request with URL pattern `<urlPattern>` is 
 Composite: When I clear proxy log
 !-- DEPRECATED: 0.8.0, When I clear network recordings
 When I clear network recordings
+
+Composite: Then element located by `$locator` appears in `$timeout`
+!-- DEPRECATED: 0.8.0, When I wait until element located by `%1$s` appears in `%2$s`
+When I wait until element located by `<locator>` appears in `<timeout>`

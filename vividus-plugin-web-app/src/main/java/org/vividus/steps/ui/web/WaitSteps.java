@@ -24,7 +24,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
 import java.time.Duration;
 import java.util.Optional;
 
-import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -308,20 +307,6 @@ public class WaitSteps
         WaitResult<Alert> wait = waitActions.wait(getWebDriver(), timeout, timeout.dividedBy(DIVISOR), alertIsPresent(),
                 false);
         return softAssert.assertFalse("Alert does not appear", wait.isWaitPassed());
-    }
-
-    /**
-     * Waits for element appearance with desired timeout
-     * @param locator The locating mechanism to use
-     * @param timeout Desired timeout
-     */
-    @Then("element located by `$locator` appears in `$timeout`")
-    public void waitForElementAppearance(Locator locator, Duration timeout)
-    {
-        Validate.isTrue(Visibility.VISIBLE == locator.getSearchParameters().getVisibility(),
-                "The step supports locators with VISIBLE visibility settings only, but the locator is `%s`",
-                locator.toHumanReadableString());
-        waitActions.wait(getSearchContext(), timeout, expectedSearchActionsConditions.visibilityOfElement(locator));
     }
 
     /**
