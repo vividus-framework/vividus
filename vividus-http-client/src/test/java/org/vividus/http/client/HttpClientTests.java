@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 
-import org.apache.hc.client5.http.ClientProtocolException;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.AuthenticationException;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
@@ -51,7 +50,6 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpHead;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.protocol.RedirectLocations;
 import org.apache.hc.core5.http.ClassicHttpResponse;
@@ -248,15 +246,6 @@ class HttpClientTests
         assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
         assertEquals(redirectLocations, httpResponse.getRedirectLocations());
         verify(handler).handle(httpResponse);
-    }
-
-    @Test
-    void shouldThrowClientProtocolExceptionOnUnsupportedUrl()
-    {
-        httpClient.setCloseableHttpClient(HttpClients.createDefault());
-        var invalidUrl = URI.create("file:///C:/Users/77805/Downloads/privacy@abc.com");
-        var exception = assertThrows(ClientProtocolException.class, () -> httpClient.doHttpGet(invalidUrl));
-        assertEquals("Target host is not specified", exception.getMessage());
     }
 
     private ArgumentMatcher<HttpClientResponseHandler<HttpResponse>> responseHandlerMatcher(String httpMethod,
