@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,11 +51,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
-import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.ui.web.ViewportPresence;
 import org.vividus.ui.web.action.ResourceFileLoader;
 import org.vividus.ui.web.playwright.UiContext;
-import org.vividus.ui.web.playwright.action.ElementActions;
 import org.vividus.ui.web.playwright.assertions.PlaywrightLocatorAssertions;
 import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
@@ -71,15 +69,12 @@ class ElementStepsTests
     private static final String LOCATOR_VALUE = "div";
     private static final String ATTRIBUTE_NAME = "attributeName";
     private static final String ATTRIBUTE_VALUE = "attributeValue";
-    private static final String CSS_NAME = "cssName";
-    private static final String CSS_VALUE = "cssValue";
     private static final String FILE_PATH = "filePath";
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.STORY);
 
     @Mock private UiContext uiContext;
     @Mock private ISoftAssert softAssert;
     @Mock private VariableContext variableContext;
-    @Mock private ElementActions elementActions;
     @Mock private PlaywrightSoftAssert playwrightSoftAssert;
     @Mock private ScrollValidations<Locator> scrollValidations;
     @Mock private ResourceFileLoader resourceFileLoader;
@@ -228,17 +223,6 @@ class ElementStepsTests
             ordered.verify(fileInputLocator).setInputFiles(filePath);
             ordered.verifyNoMoreInteractions();
         }
-    }
-
-    @Test
-    void shouldAssertElementCssProperty()
-    {
-        Locator locator = mock();
-        when(uiContext.getCurrentContexOrPageRoot()).thenReturn(locator);
-        when(elementActions.getCssValue(locator, CSS_NAME)).thenReturn(CSS_VALUE);
-        steps.assertElementCssProperty(CSS_NAME, StringComparisonRule.IS_EQUAL_TO, CSS_VALUE);
-        verify(softAssert).assertThat(eq("Element css property value is"), eq(CSS_VALUE),
-                argThat(matcher -> matcher.matches(CSS_VALUE)));
     }
 
     @ParameterizedTest
