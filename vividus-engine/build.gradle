@@ -12,7 +12,7 @@ dependencies {
     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.5')
     implementation(group: 'org.springframework', name: 'spring-beans')
     implementation(group: 'org.springframework', name: 'spring-context')
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.6-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.7-jre')
     implementation(group: 'jakarta.inject', name: 'jakarta.inject-api', version: '2.0.1')
     runtimeOnly(group: 'org.vividus', name: 'jbehave-spring', version: versions.jbehave)
 
