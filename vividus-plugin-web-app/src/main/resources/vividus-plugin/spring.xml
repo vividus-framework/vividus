@@ -205,6 +205,7 @@
     <bean id="performanceSteps" class="org.vividus.steps.ui.web.PerformanceSteps" />
     <bean id="mobileEmulationSteps" class="org.vividus.steps.ui.web.devtools.MobileEmulationSteps" />
     <bean id="geolocationEmulationSteps" class="org.vividus.steps.ui.web.devtools.GeolocationEmulationSteps" />
+    <bean id="browserPermissionsSteps" class="org.vividus.steps.ui.web.bidi.BrowserPermissionsSteps" />
     <bean id="scriptSteps" class="org.vividus.steps.ui.web.ScriptSteps" />
     <bean id="scrollSteps" class="org.vividus.steps.ui.web.ScrollSteps" />
     <bean id="setContextSteps" class="org.vividus.steps.ui.web.SetContextSteps" />
@@ -292,6 +293,7 @@
         <idref bean="browserSteps" />
         <idref bean="mobileEmulationSteps" />
         <idref bean="geolocationEmulationSteps" />
+        <idref bean="browserPermissionsSteps" />
     </util:list>
 
     <util:map id="propertyEditors-WebUi" key-type="java.lang.Class">

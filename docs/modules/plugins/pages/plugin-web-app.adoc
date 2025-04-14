@@ -1763,6 +1763,68 @@ When I refresh page
 Then text `Brooklyn, NY` does not exist
 ----
 
+=== Browser Permissions
+
+==== Configure permission
+
+Configures desired browser permission for currently opened page. You might need to refresh the page to make permission
+changes applied.
+
+IMPORTANT: The steps requires current page to be non-blank page.
+
+[source,gherkin]
+----
+When I set state of `$permission` browser permission to `$state`
+----
+
+* `$permission` - The https://www.w3.org/TR/permissions/#permissions[permission].
+* `$state` - The https://www.w3.org/TR/permissions/#dfn-states[permission state].
+
+.Enable geolocation permission
+[source,gherkin]
+----
+Given I am on page with URL `https://example.com`
+When I set state of `geolocation` browser permission to `granted`
+----
+
+==== Configure permission for origin
+
+Configures desired browser permission for the specified origin.
+
+[source,gherkin]
+----
+When I set state of `$permission` browser permission to `$state` for `$origin` origin
+----
+
+* `$permission` - The https://www.w3.org/TR/permissions/#permissions[permission].
+* `$state` - The https://www.w3.org/TR/permissions/#dfn-states[permission state].
+* `$origin` - The URL of origin to configure permission for.
+
+.Enable persistent storage permission
+[source,gherkin]
+----
+When I set state of `persistent storage` browser permission to `granted` for `https://example.com` origin
+Given I am on page with URL `https://example.com`
+----
+
+==== Configure multiple permissions
+
+Configures multiple browser permissions.
+
+[source,gherkin]
+----
+When I configure browser permissions:$permissions
+----
+
+.Disable geolocation and enable persistent storage permissions
+[source,gherkin]
+----
+When I configure browser permissions:
+|permissionName    |state  |origin             |
+|geolocation       |denied |https://example.com|
+|persistent storage|granted|https://example.com|
+----
+
 == Tips & Tricks
 
 === Validate URL host of the opened page
