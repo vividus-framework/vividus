@@ -58,21 +58,7 @@ When I perform Lighthouse $scanType scan of `$webPageUrl` page:$metricsValidatio
 
 include::partial$lighthouse-scan-type.adoc[]
 * `$webPageUrl` - The page URL to perform scan on.
-* `$metricsValidations` - The metric validations:
-** `$metric` - The Lighthouse metric name.
-*** Performance metrics:
-**** `First Contentful Paint`
-**** `Largest Contentful Paint`
-**** `Total Blocking Time`
-**** `Cumulative Layout Shift`
-**** `Speed Index`
-*** Audit scores:
-**** `Accessibility Score`
-**** `Best Practices Score`
-**** `Performance Score`
-**** `SEO Score`
-** `$rule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-** `$threshold` - The expected integer or floating (e.g. `0.35`) number.
+include::partial$lighthouse-metrics-validations.adoc[]
 
 .Perform Lighthouse scan on both desktop and mobile devices
 [source]
@@ -122,4 +108,44 @@ include::partial$lighthouse-scan-type.adoc[]
 [source]
 ----
 Then Lighthouse desktop audit scores for `https://www.vividus-reactjs.com/` page are not less than for `https://www.vividus-vuejs.com/` page
+----
+
+=== Perform Local Lighthouse scan
+
+Performs local Lighthouse scan of the specified web page and validates performance metrics against expected thresholds.
+
+IMPORTANT: The step can be used only on unix-like operating systems.
+
+Pre-installed software requirements:
+* https://nodejs.org/en[NodeJS]: required to install https://www.npmjs.com/package/lighthouse[local Lighthouse] using `npm` package manager
+* https://www.google.com/chrome[Google Chrome]: required by Lighthouse
+
+[source,gherkin]
+----
+When I perform local Lighthouse scan of `$webPageUrl` page with options `$options`:$metricsValidations
+----
+
+* `$webPageUrl` - The page URL to perform scan on.
+* `$options` - The https://github.com/GoogleChrome/lighthouse/blob/main/readme.md#cli-options[Lighthouse CLI options], please note that *Output* options are prohibited from use.
+include::partial$lighthouse-metrics-validations.adoc[]
+
+[TIP]
+.Install Chrome in CI environment
+====
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+apt install -y ./google-chrome-stable_current_amd64.deb
+====
+
+TIP: Steps to install NodeJS in CI environment can be found https://nodejs.org/en/download[here]
+
+.Perform Lighthouse scan for protected site on desktop device in CI environment
+[source]
+----
+When I perform local Lighthouse scan of `https://my-protected-site.com/` page with options `--only-categories=performance --chrome-flags="--no-sandbox --headless --disable-dev-shm-usage" --extra-headers="{\"Authorization\":\"Basic S0VzLnV3bmx5OQ==\"}"`:
+|metric                  |rule        |threshold|
+|First Contentful Paint  |LESS_THAN   |500      |
+|Largest Contentful Paint|LESS_THAN   |500      |
+|Total Blocking Time     |LESS_THAN   |100      |
+|Cumulative Layout Shift |LESS_THAN   |100      |
+|Speed Index             |LESS_THAN   |1500     |
 ----
