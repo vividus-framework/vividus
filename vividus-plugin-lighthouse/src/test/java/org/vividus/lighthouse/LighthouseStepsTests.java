@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -67,13 +69,17 @@ import com.google.api.services.pagespeedonline.v5.PagespeedInsights;
 import com.google.api.services.pagespeedonline.v5.PagespeedInsights.Pagespeedapi;
 import com.google.api.services.pagespeedonline.v5.PagespeedInsights.Pagespeedapi.Runpagespeed;
 import com.google.api.services.pagespeedonline.v5.model.Categories;
+import com.google.api.services.pagespeedonline.v5.model.ConfigSettings;
 import com.google.api.services.pagespeedonline.v5.model.LighthouseAuditResultV5;
 import com.google.api.services.pagespeedonline.v5.model.LighthouseCategoryV5;
 import com.google.api.services.pagespeedonline.v5.model.LighthouseResultV5;
 import com.google.api.services.pagespeedonline.v5.model.PagespeedApiPagespeedResponseV5;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.tika.utils.FileProcessResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -89,9 +95,11 @@ import org.vividus.lighthouse.LighthouseSteps.PerformanceValidationConfiguration
 import org.vividus.lighthouse.model.MetricRule;
 import org.vividus.lighthouse.model.ScanType;
 import org.vividus.reporter.event.IAttachmentPublisher;
+import org.vividus.shell.ShellCommandExecutor;
 import org.vividus.softassert.FailableRunnable;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
+import org.vividus.util.ResourceUtils;
 import org.vividus.util.Sleeper;
 
 @SuppressWarnings("MethodCount")
@@ -109,7 +117,9 @@ class LighthouseStepsTests
     private static final BigDecimal SCORE_METRIC_VAL = new BigDecimal(0.99f);
     private static final String RESULT_AS_STRING = "{}";
     private static final String SEO = "seo";
-    private static final List<String> CATEGORIES = List.of("performance", "best-practices", "accessibility", SEO);
+    private static final String PERFORMANCE_CATEGORY = "performance";
+    private static final List<String> CATEGORIES = List.of(PERFORMANCE_CATEGORY, "best-practices", "accessibility",
+            SEO);
     private static final String DESKTOP_STRATEGY = ScanType.DESKTOP.getStrategies()[0];
     private static final String UNKNOWN_ERROR_MESSAGE = "Lighthouse returned error: Something went wrong.";
     private static final String PERFORMANCE_SCORE_LOG = "The performance score of the measurement #{} is {}";
@@ -119,8 +129,13 @@ class LighthouseStepsTests
     private static final int DEFAULT_MEASUREMENTS_NUMBER = 3;
     private static final int DEFAULT_PERCENTILE = 90;
 
+    private static final String LIGHTHOUSE_OPTIONS = "--only-categories=performance --preset=desktop";
+    private static final String LIGHTHOUSE_EXECUTABLE = "./node_modules/lighthouse/cli/index.js";
+    private static final String ERROR = "error";
+
     @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private ISoftAssert softAssert;
+    @Mock private ShellCommandExecutor commandExecutor;
     @Mock private PagespeedInsights pagespeedInsights;
     @Mock private JsonFactory jsonFactory;
 
@@ -215,6 +230,8 @@ class LighthouseStepsTests
 
             PagespeedApiPagespeedResponseV5 pagespeedApiPagespeedResponseV5 = mock();
             LighthouseResultV5 lighthouseResultV5 = mock();
+            mockFormFactor(lighthouseResultV5, DESKTOP_STRATEGY);
+            when(lighthouseResultV5.getRequestedUrl()).thenReturn(URL);
             when(pagespeedApiPagespeedResponseV5.getLighthouseResult()).thenReturn(lighthouseResultV5);
             when(jsonFactory.toString(lighthouseResultV5)).thenReturn(RESULT_AS_STRING);
             when(lighthouseResultV5.getAudits()).thenReturn(Map.of());
@@ -440,7 +457,7 @@ class LighthouseStepsTests
             Pagespeedapi pagespeedapi = mock();
             Runpagespeed runpagespeed = mockConfiguration(pagespeedapi, URL, DESKTOP_STRATEGY, CATEGORIES);
             GoogleJsonResponseException thrown = createResponseError(500, UNKNOWN_ERROR_MESSAGE);
-            PagespeedApiPagespeedResponseV5 response = mockResponse(metrics);
+            PagespeedApiPagespeedResponseV5 response = mockResponse(metrics, DESKTOP_STRATEGY);
             doThrow(thrown).doReturn(response).when(runpagespeed).execute();
             when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
 
@@ -525,10 +542,105 @@ class LighthouseStepsTests
         });
     }
 
+    static Stream<Optional<PerformanceValidationConfiguration>> validationConfigs()
+    {
+        return Stream.of(
+            Optional.empty(),
+            createConfiguration(1, 50)
+        );
+    }
+
+    @MethodSource("validationConfigs")
+    @ParameterizedTest
+    void shouldPerformLocalLighthouseScan(Optional<PerformanceValidationConfiguration> config,
+            @TempDir Path outputDirectory) throws Exception
+    {
+        mockLighthouseInstall(0);
+
+        FileProcessResult lighthouseResult = mock();
+        when(lighthouseResult.getExitValue()).thenReturn(0);
+        doAnswer(a ->
+        {
+            String lighthouseScan = ResourceUtils.loadResource(getClass(), "lighthouse-scan.json");
+            Files.writeString(locateResultsFile(outputDirectory), lighthouseScan + System.lineSeparator(),
+                    StandardCharsets.UTF_8);
+            return lighthouseResult;
+        }).when(commandExecutor).executeCommand(argThat(arg -> arg.toString().contains(LIGHTHOUSE_EXECUTABLE)));
+        mockRun();
+
+        LighthouseSteps steps = createSteps(List.of(PERFORMANCE_CATEGORY), 0, config, outputDirectory.toString());
+
+        MetricRule perfScoreRule = createRule(PERF_SCORE_METRIC, 85, ComparisonRule.GREATER_THAN);
+        steps.performLocalLighthouseScan(URL, LIGHTHOUSE_OPTIONS, List.of(perfScoreRule));
+
+        validateMetric(DESKTOP_STRATEGY, perfScoreRule, alignScore(new BigDecimal(1)), GREATER_VALUE_FORMAT);
+        verifyNoMoreInteractions(softAssert);
+        String arg = "%s %s --output-path=%s --output=json %s".formatted(LIGHTHOUSE_EXECUTABLE, URL,
+                locateResultsFile(outputDirectory), LIGHTHOUSE_OPTIONS);
+        assertThat(logger.getLoggingEvents(), is(List.of(
+            info("Starting Lighthouse scan: {}", arg)
+        )));
+    }
+
+    private Path locateResultsFile(Path outputDirectory) throws IOException
+    {
+        return Files.walk(outputDirectory).filter(p -> p.toString().endsWith(".json")).findFirst().get();
+    }
+
+    @ValueSource(strings = { "--output-path", "--output", "--view" })
+    @ParameterizedTest
+    void shouldFailLocalLighthouseScanIfUserPassedNotAllowedOptions(String option) throws Exception
+    {
+        LighthouseSteps steps = createSteps(List.of(PERFORMANCE_CATEGORY), 0, Optional.empty());
+        List<MetricRule> metricsValidations = List.of();
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> steps.performLocalLighthouseScan(URL, option, metricsValidations));
+        assertEquals("The %s option is not allowed.".formatted(option), thrown.getMessage());
+    }
+
+    @Test
+    void shouldFailLocalLighthouseScanIfFailedToInstallLighthouse() throws Exception
+    {
+        FileProcessResult result = mockLighthouseInstall(1);
+        when(result.getStderr()).thenReturn(ERROR);
+        LighthouseSteps steps = createSteps(List.of(PERFORMANCE_CATEGORY), 0, Optional.empty());
+        List<MetricRule> metricsValidations = List.of();
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> steps.performLocalLighthouseScan(URL, StringUtils.EMPTY, metricsValidations));
+        assertEquals("Failed to install Lighthouse:%n%s".formatted(ERROR), thrown.getMessage());
+    }
+
+    @Test
+    void shouldFailLocalLighthouseScanIfFailedToPerformLighthouseScan(@TempDir Path outputDirectory) throws Exception
+    {
+        mockLighthouseInstall(0);
+        FileProcessResult lighthouseRunResult = mock();
+        when(commandExecutor.executeCommand(argThat(arg -> arg.toString().contains(LIGHTHOUSE_EXECUTABLE))))
+                .thenReturn(lighthouseRunResult);
+        when(lighthouseRunResult.getExitValue()).thenReturn(1);
+        when(lighthouseRunResult.getStderr()).thenReturn(ERROR);
+        LighthouseSteps steps = createSteps(List.of(PERFORMANCE_CATEGORY), 0, Optional.empty(),
+                outputDirectory.toString());
+        List<MetricRule> metricsValidations = List.of();
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> steps.performLocalLighthouseScan(URL, StringUtils.EMPTY, metricsValidations));
+        assertEquals("Failed to perform Lighthouse scan:%n%s".formatted(ERROR), thrown.getMessage());
+    }
+
+    private FileProcessResult mockLighthouseInstall(int exitCode) throws IOException
+    {
+        FileProcessResult npmInstallResult = mock();
+        when(commandExecutor.executeCommand("npm init -y && npm install lighthouse")).thenReturn(npmInstallResult);
+        when(npmInstallResult.getExitValue()).thenReturn(exitCode);
+        return npmInstallResult;
+    }
+
     private LighthouseResultV5 createLighthouseResult(double performance, double seo, double accessibility,
             double bestPractices)
     {
         LighthouseResultV5 results = mock();
+        mockFormFactor(results, DESKTOP_STRATEGY);
+        lenient().when(results.getRequestedUrl()).thenReturn(URL);
         Categories categories = new Categories();
         when(results.getCategories()).thenReturn(categories);
 
@@ -538,6 +650,13 @@ class LighthouseStepsTests
         categories.setBestPractices(createCategory(bestPractices));
 
         return results;
+    }
+
+    private void mockFormFactor(LighthouseResultV5 result, String formFactor)
+    {
+        ConfigSettings settings = new ConfigSettings();
+        settings.setFormFactor(formFactor);
+        lenient().when(result.getConfigSettings()).thenReturn(settings);
     }
 
     private static void runWithMockedSleeper(FailableRunnable<Exception> runnable, int times) throws Exception
@@ -616,13 +735,19 @@ class LighthouseStepsTests
     private LighthouseSteps createSteps(List<String> categories, int delta,
             Optional<PerformanceValidationConfiguration> configuration) throws Exception
     {
-        return new LighthouseSteps(APP_NAME, API_KEY, categories, delta, configuration, attachmentPublisher,
-                softAssert);
+        return createSteps(categories, delta, configuration, "");
+    }
+
+    private LighthouseSteps createSteps(List<String> categories, int delta,
+            Optional<PerformanceValidationConfiguration> configuration, String outputDirectory) throws Exception
+    {
+        return new LighthouseSteps(APP_NAME, API_KEY, categories, delta, configuration, outputDirectory,
+                attachmentPublisher, softAssert, commandExecutor);
     }
 
     private Pagespeedapi mockPagespeedapiCall(String strategy, ArrayMap<String, BigDecimal> metrics) throws IOException
     {
-        PagespeedApiPagespeedResponseV5 pagespeedApiPagespeedResponseV5 = mockResponse(metrics);
+        PagespeedApiPagespeedResponseV5 pagespeedApiPagespeedResponseV5 = mockResponse(metrics, strategy);
         return mockPagespeedapiCall(URL, strategy, CATEGORIES, pagespeedApiPagespeedResponseV5);
     }
 
@@ -641,10 +766,13 @@ class LighthouseStepsTests
         return pagespeedapi;
     }
 
-    private PagespeedApiPagespeedResponseV5 mockResponse(ArrayMap<String, BigDecimal> metrics) throws IOException
+    private PagespeedApiPagespeedResponseV5 mockResponse(ArrayMap<String, BigDecimal> metrics, String formFactor)
+            throws IOException
     {
         PagespeedApiPagespeedResponseV5 pagespeedApiPagespeedResponseV5 = mock();
         LighthouseResultV5 lighthouseResultV5 = mock();
+        mockFormFactor(lighthouseResultV5, formFactor);
+        when(lighthouseResultV5.getRequestedUrl()).thenReturn(URL);
         when(pagespeedApiPagespeedResponseV5.getLighthouseResult()).thenReturn(lighthouseResultV5);
         when(jsonFactory.toString(lighthouseResultV5)).thenReturn(RESULT_AS_STRING);
         mockMetricItems(lighthouseResultV5, metrics);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,43 +17,23 @@
 package org.vividus.shell;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.apache.tika.utils.FileProcessResult;
-import org.apache.tika.utils.ProcessUtils;
 import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
-import org.vividus.shell.model.Shell;
-import org.vividus.util.property.PropertyMappedCollection;
 import org.vividus.variable.VariableScope;
 
 public class ShellSteps
 {
     private final VariableContext variableContext;
-    private final PropertyMappedCollection<Shell> shells;
-    private final String shell;
+    private final ShellCommandExecutor shellCommandExecutor;
 
-    private Duration processFinishWaitTimeout;
-
-    public ShellSteps(PropertyMappedCollection<Shell> shells, Optional<String> shell, VariableContext variableContext)
+    public ShellSteps(VariableContext variableContext, ShellCommandExecutor shellCommandExecutor)
     {
         this.variableContext = variableContext;
-        this.shells = shells;
-        String osName = System.getProperty("os.name");
-        this.shell = shell.orElseGet(() -> {
-            if (osName.startsWith("Mac"))
-            {
-                return "zsh";
-            }
-            if (osName.startsWith("Windows"))
-            {
-                return "powershell";
-            }
-            return "bash";
-        });
+        this.shellCommandExecutor = shellCommandExecutor;
     }
 
     /**
@@ -75,7 +55,7 @@ public class ShellSteps
     public void executeCommand(String command, Set<VariableScope> scopes, String variableName)
             throws IOException
     {
-        executeCommand(command, shell, scopes, variableName);
+        saveResults(scopes, variableName, shellCommandExecutor.executeCommand(command));
     }
 
     /**
@@ -98,29 +78,15 @@ public class ShellSteps
     public void executeCommand(String command, String shellKey, Set<VariableScope> scopes, String variableName)
             throws IOException
     {
-        Shell shellToUse = shells.get(shellKey, "Unable to find the shell with key `%s`. Configured shells: %s",
-                shellKey, shells.getData().keySet());
-        ProcessBuilder processBuilder = new ProcessBuilder().command(shellToUse.getExecutable(),
-            shellToUse.getOption(), command);
-        FileProcessResult fileProcessResult = ProcessUtils.execute(processBuilder,
-                processFinishWaitTimeout.toMillis(), Integer.MAX_VALUE, Integer.MAX_VALUE);
-        if (fileProcessResult.isTimeout())
-        {
-            throw new IllegalStateException(
-                    String.format("The command `%s` execution is not finished in `%s`.%nError: %s,%nOutput: %s",
-                            command, processFinishWaitTimeout, fileProcessResult.getStderr(),
-                            fileProcessResult.getStdout()));
-        }
+        saveResults(scopes, variableName, shellCommandExecutor.executeCommand(shellKey, command));
+    }
 
+    private void saveResults(Set<VariableScope> scopes, String variableName, FileProcessResult fileProcessResult)
+    {
         variableContext.putVariable(scopes, variableName, Map.of(
                 "stdout", fileProcessResult.getStdout(),
                 "stderr", fileProcessResult.getStderr(),
                 "exit-code", fileProcessResult.getExitValue()
         ));
-    }
-
-    public void setProcessFinishWaitTimeout(Duration processFinishWaitTimeout)
-    {
-        this.processFinishWaitTimeout = processFinishWaitTimeout;
     }
 }

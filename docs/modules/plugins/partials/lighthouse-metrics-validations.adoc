@@ -1,0 +1,15 @@
+* `$metricsValidations` - The metric validations:
+** `$metric` - The Lighthouse metric name.
+*** Performance metrics:
+**** `First Contentful Paint`
+**** `Largest Contentful Paint`
+**** `Total Blocking Time`
+**** `Cumulative Layout Shift`
+**** `Speed Index`
+*** Audit scores:
+**** `Accessibility Score`
+**** `Best Practices Score`
+**** `Performance Score`
+**** `SEO Score`
+** `$rule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+** `$threshold` - The expected integer or floating (e.g. `0.35`) number.
