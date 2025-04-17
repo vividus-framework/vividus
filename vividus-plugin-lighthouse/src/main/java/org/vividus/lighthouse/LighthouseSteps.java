@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Deque;
@@ -284,7 +285,9 @@ public final class LighthouseSteps
         FileProcessResult npmInstallResult = commandExecutor.executeCommand("npm init -y && npm install lighthouse");
         isTrue(npmInstallResult.getExitValue() == 0, "Failed to install Lighthouse:%n%s", npmInstallResult.getStderr());
 
-        Path baseDirectory = Paths.get(outputDirectory).resolve(String.valueOf(System.currentTimeMillis()));
+        Instant instant = Instant.now();
+        Path baseDirectory = Paths.get(outputDirectory)
+                .resolve(String.valueOf(instant.getEpochSecond()) + instant.getNano());
         Files.createDirectories(baseDirectory);
 
         LighthouseResultV5 result;
