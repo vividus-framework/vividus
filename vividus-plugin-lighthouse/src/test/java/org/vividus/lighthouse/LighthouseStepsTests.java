@@ -575,11 +575,23 @@ class LighthouseStepsTests
 
         validateMetric(DESKTOP_STRATEGY, perfScoreRule, alignScore(new BigDecimal(1)), GREATER_VALUE_FORMAT);
         verifyNoMoreInteractions(softAssert);
-        String arg = "%s %s --output-path=\"%s\" --output=json %s".formatted(LIGHTHOUSE_EXECUTABLE, URL,
-                locateResultsFile(outputDirectory), LIGHTHOUSE_OPTIONS);
+        Path resultsFile = locateResultsFile(outputDirectory);
+        String arg = getLighthouseExec(resultsFile);
+        Files.delete(resultsFile);
+
+        steps.performLocalLighthouseScan(URL, LIGHTHOUSE_OPTIONS, List.of(perfScoreRule));
+
+        String scanLog = "Starting Lighthouse scan: {}";
         assertThat(logger.getLoggingEvents(), is(List.of(
-            info("Starting Lighthouse scan: {}", arg)
+            info(scanLog, arg),
+            info(scanLog, getLighthouseExec(locateResultsFile(outputDirectory)))
         )));
+    }
+
+    private String getLighthouseExec(Path resultsFile)
+    {
+        return "%s %s --output-path=\"%s\" --output=json %s".formatted(LIGHTHOUSE_EXECUTABLE, URL, resultsFile,
+                LIGHTHOUSE_OPTIONS);
     }
 
     private Path locateResultsFile(Path outputDirectory) throws IOException
