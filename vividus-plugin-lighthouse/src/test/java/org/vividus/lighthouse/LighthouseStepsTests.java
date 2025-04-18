@@ -575,7 +575,7 @@ class LighthouseStepsTests
 
         validateMetric(DESKTOP_STRATEGY, perfScoreRule, alignScore(new BigDecimal(1)), GREATER_VALUE_FORMAT);
         verifyNoMoreInteractions(softAssert);
-        String arg = "%s %s --output-path=%s --output=json %s".formatted(LIGHTHOUSE_EXECUTABLE, URL,
+        String arg = "%s %s --output-path=\"%s\" --output=json %s".formatted(LIGHTHOUSE_EXECUTABLE, URL,
                 locateResultsFile(outputDirectory), LIGHTHOUSE_OPTIONS);
         assertThat(logger.getLoggingEvents(), is(List.of(
             info("Starting Lighthouse scan: {}", arg)
