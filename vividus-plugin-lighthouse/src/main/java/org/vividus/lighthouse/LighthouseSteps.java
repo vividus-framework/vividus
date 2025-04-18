@@ -317,7 +317,7 @@ public final class LighthouseSteps
     {
         Files.createFile(outputPath);
 
-        String command = "./node_modules/lighthouse/cli/index.js %s --output-path=%s --output=json %s"
+        String command = "./node_modules/lighthouse/cli/index.js %s --output-path=\"%s\" --output=json %s"
                 .formatted(webPageUrl, outputPath, options.trim()).trim();
         LOGGER.info("Starting Lighthouse scan: {}", command);
 
