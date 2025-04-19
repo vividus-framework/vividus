@@ -40,6 +40,9 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -103,6 +106,9 @@ public final class LighthouseSteps
     private final int acceptableScorePercentageDelta;
     private final Optional<PerformanceValidationConfiguration> configuration;
     private final String outputDirectory;
+
+    private final Lock lighthouseInstallLock = new ReentrantLock();
+    private final AtomicBoolean lighthouseInstalled = new AtomicBoolean(false);
 
     public LighthouseSteps(String applicationName, String apiKey, List<String> categories,
             int acceptableScorePercentageDelta, Optional<PerformanceValidationConfiguration> configuration,
@@ -282,8 +288,7 @@ public final class LighthouseSteps
     {
         LIGHTHOUSE_PROHIBITED_OPTIONS.forEach(o -> isTrue(!options.contains(o), "The %s option is not allowed.", o));
 
-        FileProcessResult npmInstallResult = commandExecutor.executeCommand("npm init -y && npm install lighthouse");
-        isTrue(npmInstallResult.getExitValue() == 0, "Failed to install Lighthouse:%n%s", npmInstallResult.getStderr());
+        installLighthouse();
 
         Instant instant = Instant.now();
         Path baseDirectory = Paths.get(outputDirectory)
@@ -310,6 +315,34 @@ public final class LighthouseSteps
         }
 
         processLighthouseResult(result, metricsValidations);
+    }
+
+    private void installLighthouse() throws IOException
+    {
+        if (lighthouseInstalled.get())
+        {
+            return;
+        }
+
+        try
+        {
+            lighthouseInstallLock.lock();
+
+            if (lighthouseInstalled.get())
+            {
+                return;
+            }
+
+            FileProcessResult npmInstallResult = commandExecutor
+                    .executeCommand("npm init -y && npm install lighthouse");
+            isTrue(npmInstallResult.getExitValue() == 0, "Failed to install Lighthouse:%n%s",
+                    npmInstallResult.getStderr());
+            this.lighthouseInstalled.set(true);
+        }
+        finally
+        {
+            lighthouseInstallLock.unlock();
+        }
     }
 
     private LighthouseResultV5 performLocalLighthouseScan(Path outputPath, String webPageUrl, String options)
