@@ -42,7 +42,7 @@ An empty property value will lead to the error: "Application session scope is no
 a|`true` +
 `false`
 |`true`
-|Whether to publish the application source code on failure or not
+|Whether to publish the application source code on failure or not. `@noSourceCodeOnFailure` meta tag can also be used to disable source code publishing at the story or scenario level.
 
 |`ui.context.self-healing`
 a|`true` +
