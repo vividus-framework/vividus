@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.listener;
+package org.vividus.ui.monitor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -26,54 +27,54 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.context.RunContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.ContextSourceCodeProvider;
 
 @ExtendWith(MockitoExtension.class)
-class SourceCodePublishingOnFailureListenerTests
+class PublishingSourceCodeOnFailureMonitorTests
 {
-    @Mock private IWebDriverProvider webDriverProvider;
+    private static final String FORMAT = "html";
+
     @Mock private ContextSourceCodeProvider contextSourceCodeProvider;
+    @Mock private RunContext runContext;
+    @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IAttachmentPublisher attachmentPublisher;
 
-    @InjectMocks private SourceCodePublishingOnFailureListener listener;
-
-    @Test
-    void shouldNoPublishSourceCodeWhenWebDriverIsNotInitialized()
+    private PublishingSourceCodeOnFailureMonitor createMonitor(boolean enabled)
     {
-        listener.onAssertionFailure(null);
-        verify(webDriverProvider).isWebDriverInitialized();
-        verifyNoInteractions(attachmentPublisher);
-        verifyNoMoreInteractions(webDriverProvider);
+        return new PublishingSourceCodeOnFailureMonitor(enabled, FORMAT, contextSourceCodeProvider, runContext,
+                webDriverProvider, attachmentPublisher);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void shouldReturnIfPublishingIfEnabled(boolean enabled)
+    {
+        assertEquals(enabled, createMonitor(enabled).isPublishingEnabled(null));
     }
 
     @Test
-    void shouldPublishSourceCode()
+    void shouldPublishAttachment()
     {
         var sourceCode = "<html/>";
-        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(contextSourceCodeProvider.getSourceCode()).thenReturn(Optional.of(sourceCode));
-        var html = "html";
-        listener.setSourceCodeAttachmentFormat(html);
-        listener.onAssertionFailure(null);
-        verify(webDriverProvider).isWebDriverInitialized();
+        createMonitor(true).publishAttachment();
         verify(attachmentPublisher).publishAttachment("/templates/source-code.ftl",
-                Map.of("sourceCode", sourceCode, "format", html), "Application source code.html");
+                Map.of("sourceCode", sourceCode, "format", FORMAT), "Application source code.html");
         verifyNoMoreInteractions(webDriverProvider, contextSourceCodeProvider, attachmentPublisher);
     }
 
     @Test
-    void shouldNotPublishMissingSource()
+    void shouldNotPublishAttachmentIfSourceCodeIsEmpty()
     {
-        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(contextSourceCodeProvider.getSourceCode()).thenReturn(Optional.empty());
-        listener.onAssertionFailure(null);
-        verify(webDriverProvider).isWebDriverInitialized();
+        createMonitor(true).publishAttachment();
         verifyNoInteractions(attachmentPublisher);
-        verifyNoMoreInteractions(webDriverProvider, contextSourceCodeProvider);
     }
 }

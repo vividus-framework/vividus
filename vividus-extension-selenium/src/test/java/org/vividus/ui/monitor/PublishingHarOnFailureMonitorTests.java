@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package org.vividus.ui.monitor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -43,7 +43,6 @@ import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
-import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.Meta;
@@ -63,7 +62,7 @@ import org.vividus.context.RunContext;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
 import org.vividus.proxy.IProxy;
-import org.vividus.reporter.event.AttachmentPublishEvent;
+import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.testcontext.TestContext;
 
@@ -85,7 +84,7 @@ class PublishingHarOnFailureMonitorTests
     private static final String ERROR_MESSAGE = "Unable to capture HAR";
     private static final Meta EMPTY_META = new Meta();
 
-    @Mock private EventBus eventBus;
+    @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private RunContext runContext;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IProxy proxy;
@@ -96,8 +95,8 @@ class PublishingHarOnFailureMonitorTests
 
     private PublishingHarOnFailureMonitor createMonitor(boolean publishHarOnFailure)
     {
-        return new PublishingHarOnFailureMonitor(publishHarOnFailure, eventBus, runContext, webDriverProvider, proxy,
-                testContext);
+        return new PublishingHarOnFailureMonitor(publishHarOnFailure, runContext, webDriverProvider,
+                attachmentPublisher, proxy, testContext);
     }
 
     private static Method getCapturingHarMethod() throws NoSuchMethodException
@@ -181,7 +180,7 @@ class PublishingHarOnFailureMonitorTests
         monitor.beforePerforming(I_DO_ACTION, false, getCapturingHarMethod());
         monitor.onAssertionFailure(null);
         assertEquals("{\"log\":{\"version\":\"1.1\",\"creator\":{},\"pages\":[],\"entries\":[]}}",
-                captureAttachmentPublishEvent());
+                captureAttachmentPublishData());
         assertThat(logger.getLoggingEvents(), empty());
         verifyNoMoreInteractions(testContext);
     }
@@ -201,7 +200,7 @@ class PublishingHarOnFailureMonitorTests
         var monitor = createMonitor(true);
         monitor.beforePerforming(I_DO_ACTION, false, null);
         monitor.onAssertionFailure(null);
-        var actualHar = new HarReader().readFromString(captureAttachmentPublishEvent());
+        var actualHar = new HarReader().readFromString(captureAttachmentPublishData());
         var actualHarLog = actualHar.getLog();
         assertEquals(List.of(har.getLog().getPages().get(1)), actualHarLog.getPages());
         assertEquals(List.of(har.getLog().getEntries().get(1)), actualHarLog.getEntries());
@@ -295,15 +294,11 @@ class PublishingHarOnFailureMonitorTests
         return harPage;
     }
 
-    private String captureAttachmentPublishEvent()
+    private String captureAttachmentPublishData()
     {
-        var eventCaptor = ArgumentCaptor.forClass(Object.class);
-        verify(eventBus).post(eventCaptor.capture());
-        var event = eventCaptor.getValue();
-        assertThat(event, instanceOf(AttachmentPublishEvent.class));
-        var attachment = ((AttachmentPublishEvent) event).attachment();
-        assertEquals("har-on-failure.har", attachment.getTitle());
-        return new String(attachment.getContent(), StandardCharsets.UTF_8);
+        var bodyCaptor = ArgumentCaptor.forClass(byte[].class);
+        verify(attachmentPublisher).publishAttachment(bodyCaptor.capture(), eq("har-on-failure.har"));
+        return new String(bodyCaptor.getValue(), StandardCharsets.UTF_8);
     }
 
     @CaptureHarOnFailure
