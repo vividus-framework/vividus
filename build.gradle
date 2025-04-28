@@ -79,6 +79,6 @@ ext {
     versions = [
         jbehave:                '6.0.0-alpha.9',
         powermock:              'a0be5c4bbe',
-        jsonPath:               '52ebb195bd'
+        jsonPath:               'eec830ced9'
     ]
 }
