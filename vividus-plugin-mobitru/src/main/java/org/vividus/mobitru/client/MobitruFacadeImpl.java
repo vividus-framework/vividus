@@ -20,15 +20,13 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -40,7 +38,6 @@ import org.apache.commons.lang3.function.FailableSupplier;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.event.Level;
 import org.vividus.mobitru.client.exception.MobitruDeviceSearchException;
 import org.vividus.mobitru.client.exception.MobitruDeviceTakeException;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
@@ -78,60 +75,55 @@ public class MobitruFacadeImpl implements MobitruFacade
     @Override
     public String takeDevice(DesiredCapabilities desiredCapabilities) throws MobitruOperationException
     {
+        List<Device> devices;
+        boolean waitUntilAvailable;
         if (isSearchForDevice(desiredCapabilities))
         {
             DeviceSearchParameters deviceSearchParameters = new DeviceSearchParameters(desiredCapabilities);
             Set<String> udids = deviceSearchParameters.getUdids();
-            if (!udids.isEmpty())
+            if (udids.isEmpty())
             {
-                return takeDevice(shuffleUdids(udids));
+                devices = findDevices(deviceSearchParameters);
+                waitUntilAvailable = false;
             }
-            List<Device> foundDevices = findDevices(deviceSearchParameters);
-            return takeDevice(foundDevices);
+            else
+            {
+                devices = udids.stream().map(udid -> {
+                    Device device = new Device();
+                    device.setDesiredCapabilities(Map.of(UDID, udid));
+                    return device;
+                }).collect(Collectors.toCollection(ArrayList::new));
+                Collections.shuffle(devices);
+                waitUntilAvailable = true;
+            }
         }
-
-        Map<String, Object> capabilities = desiredCapabilities.asMap();
-        Object deviceUdid = capabilities.getOrDefault(APPIUM_UDID, capabilities.get(UDID));
-        if (deviceUdid != null)
+        else
         {
-            return takeDevice(Set.of(String.valueOf(deviceUdid)));
+            Device device = new Device();
+            device.setDesiredCapabilities(desiredCapabilities.asMap());
+            devices = List.of(device);
+            waitUntilAvailable = true;
         }
-        Device device = new Device();
-        device.setDesiredCapabilities(desiredCapabilities.asMap());
-        return takeDevice(device, getDefaultDeviceWaiter());
+        return takeDevice(devices, waitUntilAvailable);
     }
 
-    private Set<String> shuffleUdids(Set<String> udids)
+    private String takeDevice(List<Device> devices, boolean waitUntilAvailable) throws MobitruOperationException
     {
-        List<String> udidsList = new ArrayList<>(udids);
-        Collections.shuffle(udidsList);
-        return new LinkedHashSet<>(udidsList);
-    }
-
-    private String takeDevice(Set<String> udids) throws MobitruOperationException
-    {
-        String udidsAsString = String.join(", ", udids);
-        final String errorMessage = "Unable to take device with udid(-s) " + udidsAsString;
-        return takeDevice(getDefaultDeviceWaiter(), () ->
+        List<String> deviceCapabilities = new ArrayList<>();
+        for (Device device : devices)
         {
-            for (String udid : udids)
-            {
-                LOGGER.atInfo().addArgument(udid).log("Trying to take device with udid {}");
-                try
-                {
-                    return mobitruClient.takeDeviceBySerial(udid);
-                }
-                catch (MobitruOperationException e)
-                {
-                    if (udids.size() == 1)
-                    {
-                        throw e;
-                    }
-                    LOGGER.atWarn().setCause(e).addArgument(udid).log("Unable to take device with udid {}");
-                }
-            }
-            throw new MobitruOperationException(errorMessage);
-        }, () -> errorMessage);
+            deviceCapabilities.add(performMapperOperation(mapper -> mapper.writeValueAsString(device)));
+        }
+        if (deviceCapabilities.size() == 1)
+        {
+            return takeDevice(deviceCapabilities.get(0), waitUntilAvailable);
+        }
+        if (waitUntilAvailable)
+        {
+            return performWaiterOperation(getDefaultDeviceWaiter(), () -> takeAnyDevice(deviceCapabilities),
+                    e -> LOGGER.warn("{}. Retrying attempt...", e.getMessage()));
+        }
+        return takeAnyDevice(deviceCapabilities);
     }
 
     private Waiter getDefaultDeviceWaiter()
@@ -167,50 +159,57 @@ public class MobitruFacadeImpl implements MobitruFacade
         String recordingId = screenRecordingMetadataInfo.recordingId();
         Waiter waiter = new RetryTimesBasedWaiter(DOWNLOAD_RECORDING_POOLING_TIMEOUT,
                 DOWNLOAD_RECORDING_RETRY_COUNT);
-        byte[] recordingContent = performWaiterOperation(waiter,
-                () -> mobitruClient.downloadDeviceScreenRecording(recordingId), Level.DEBUG,
-                "download device screen recording",
-                e -> new MobitruOperationException("Unable to download recording with id " + recordingId, e));
-        return new ScreenRecording(recordingId, recordingContent);
+        try
+        {
+            byte[] recordingContent = performWaiterOperation(waiter,
+                    () -> mobitruClient.downloadDeviceScreenRecording(recordingId),
+                    e -> LOGGER.debug("Unable to download device screen recording, retrying attempt...", e));
+            return new ScreenRecording(recordingId, recordingContent);
+        }
+        catch (MobitruOperationException e)
+        {
+            throw new MobitruOperationException("Unable to download recording with id " + recordingId, e);
+        }
     }
 
-    private String takeDevice(Device device, Waiter deviceWaiter) throws MobitruOperationException
+    private String takeAnyDevice(List<String> capabilitiesOfDevices) throws MobitruOperationException
     {
-        LOGGER.info("Trying to take device with configuration {}", device);
-        String capabilities = performMapperOperation(mapper -> mapper.writeValueAsString(device));
-        return takeDevice(deviceWaiter, () -> mobitruClient.takeDevice(capabilities),
-                () -> "Unable to take device with configuration " + capabilities);
-    }
-
-    private String takeDevice(Waiter waiter, FailableSupplier<byte[], MobitruOperationException> takeDeviceOperation,
-            Supplier<String> unableToTakeDeviceErrorMessage) throws MobitruOperationException
-    {
-        byte[] receivedDevice = performWaiterOperation(waiter, takeDeviceOperation, Level.WARN, "take device",
-                e -> new MobitruDeviceTakeException(unableToTakeDeviceErrorMessage.get(), e));
-        Device takenDevice = performMapperOperation(mapper -> mapper.readValue(receivedDevice, Device.class));
-        LOGGER.info("Device with configuration {} is taken", takenDevice);
-        return (String) takenDevice.getDesiredCapabilities().get(UDID);
-    }
-
-    private String takeDevice(List<Device> devices) throws MobitruOperationException
-    {
-        Waiter waiter = new RetryTimesBasedWaiter(Duration.ZERO, 1);
-        Iterator<Device> devicesIterator = devices.iterator();
-        while (true)
+        for (String deviceCapabilities : capabilitiesOfDevices)
         {
             try
             {
-                return takeDevice(devicesIterator.next(), waiter);
+                return takeDevice(deviceCapabilities, false);
             }
             catch (MobitruOperationException e)
             {
-                if (!devicesIterator.hasNext())
-                {
-                    throw e;
-                }
-                LOGGER.atWarn().log(e::getMessage);
+                LOGGER.atWarn().addArgument(e::getMessage).log("{}");
             }
         }
+        String errorMessage = capabilitiesOfDevices.stream()
+                .collect(Collectors.joining(", ", "Unable to take device with any of configuration(s): ", ""));
+        throw new MobitruDeviceTakeException(errorMessage);
+    }
+
+    private String takeDevice(String deviceCapabilities, boolean waitUntilAvailable) throws MobitruOperationException
+    {
+        LOGGER.info("Trying to take device with configuration {}", deviceCapabilities);
+        byte[] receivedDevice;
+        if (waitUntilAvailable)
+        {
+            receivedDevice = performWaiterOperation(getDefaultDeviceWaiter(),
+                    () -> mobitruClient.takeDevice(deviceCapabilities),
+                    e -> LOGGER.atWarn()
+                            .addArgument(deviceCapabilities)
+                            .addArgument(e::getMessage)
+                            .log("Unable to take device with configuration {}. {}. Retrying attempt..."));
+        }
+        else
+        {
+            receivedDevice = mobitruClient.takeDevice(deviceCapabilities);
+        }
+        Device takenDevice = performMapperOperation(mapper -> mapper.readValue(receivedDevice, Device.class));
+        LOGGER.info("Device with configuration {} is taken", takenDevice);
+        return (String) takenDevice.getDesiredCapabilities().get(UDID);
     }
 
     private List<Device> findDevices(DeviceSearchParameters deviceSearchConfiguration) throws MobitruOperationException
@@ -265,24 +264,22 @@ public class MobitruFacadeImpl implements MobitruFacade
         }
     }
 
-    private byte[] performWaiterOperation(Waiter waiter, FailableSupplier<byte[], MobitruOperationException> operation,
-            Level logLevel, String operationTitle,
-            Function<MobitruOperationException, ? extends MobitruOperationException> exceptionOnMissingResult)
-            throws MobitruOperationException
+    private <T> T performWaiterOperation(Waiter waiter, FailableSupplier<T, MobitruOperationException> operation,
+            Consumer<MobitruOperationException> onAttemptException) throws MobitruOperationException
     {
         AtomicReference<MobitruOperationException> lastException = new AtomicReference<>(null);
-        return waiter.<Optional<byte[]>, RuntimeException>wait(() -> {
+        return waiter.<Optional<T>, RuntimeException>wait(() -> {
             try
             {
                 return Optional.of(operation.get());
             }
             catch (MobitruOperationException e)
             {
-                LOGGER.atLevel(logLevel).setCause(e).log("Unable to {}, retrying attempt", operationTitle);
+                onAttemptException.accept(e);
                 lastException.set(e);
                 return Optional.empty();
             }
-        }, Optional::isPresent).orElseThrow(() -> exceptionOnMissingResult.apply(lastException.get()));
+        }, Optional::isPresent).orElseThrow(lastException::get);
     }
 
     private boolean isSearchForDevice(DesiredCapabilities desiredCapabilities)
