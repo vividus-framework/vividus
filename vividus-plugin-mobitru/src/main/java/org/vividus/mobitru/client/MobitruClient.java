@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,16 +57,12 @@ public class MobitruClient
                 MobitruDeviceSearchException::new);
     }
 
-    public byte[] takeDeviceBySerial(String udid) throws MobitruOperationException
+    public byte[] takeDevice(String deviceCapabilities) throws MobitruOperationException
     {
-        URIBuilder uriBuilder = new URIBuilder().setPath(DEVICE_PATH).appendPath(udid);
-        return executeRequest(uriBuilder.toString(), HttpMethod.POST, UnaryOperator.identity(),
-                HttpStatus.SC_OK, MobitruDeviceTakeException::new);
-    }
-
-    public byte[] takeDevice(String requestedDevice) throws MobitruOperationException
-    {
-        return executePost(DEVICE_PATH, requestedDevice, HttpStatus.SC_OK);
+        return executeRequest(DEVICE_PATH, HttpMethod.POST,
+                rb -> rb.withContent(deviceCapabilities, ContentType.APPLICATION_JSON), HttpStatus.SC_OK,
+                message -> new MobitruDeviceTakeException(
+                        "Unable to take device with configuration " + deviceCapabilities + ". " + message));
     }
 
     public byte[] getArtifacts() throws MobitruOperationException
@@ -113,14 +109,6 @@ public class MobitruClient
     private byte[] executeGet(String relativeUrl, int expectedResponseCode) throws MobitruOperationException
     {
         return executeRequest(relativeUrl, HttpMethod.GET, UnaryOperator.identity(), expectedResponseCode);
-    }
-
-    private byte[] executePost(String relativeUrl, String payload, int expectedResponseCode)
-        throws MobitruOperationException
-    {
-        return executeRequest(relativeUrl, HttpMethod.POST,
-                rb -> rb.withContent(payload, ContentType.APPLICATION_JSON), expectedResponseCode,
-            MobitruDeviceTakeException::new);
     }
 
     private byte[] executeRequest(String relativeUrl, HttpMethod httpMethod,
