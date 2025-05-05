@@ -329,7 +329,7 @@ class WebDriverFactoryTests
                 + "  \"browserName\" : \"firefox\",%n"
                 + "  \"moz:firefoxOptions\" : {%n"
                 + "    \"prefs\" : {%n"
-                + "      \"remote.active-protocols\" : 3,%n"
+                + "      \"remote.active-protocols\" : 1,%n"
                 + "      \"startup.homepage_welcome_url.additional\" : \"about:blank\"%n"
                 + "    }%n"
                 + "  }%n}";
