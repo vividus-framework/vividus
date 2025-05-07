@@ -14,5 +14,5 @@ dependencies {
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.17.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
-    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.19.3')
+    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '4.0')
 }
