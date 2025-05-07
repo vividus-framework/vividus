@@ -182,6 +182,7 @@
     <bean id="cookieSteps" class="org.vividus.steps.ui.web.SeleniumCookieSteps" />
     <bean id="checkboxSteps" class="org.vividus.steps.ui.web.CheckboxSteps" />
     <bean id="dropdownSteps" class="org.vividus.steps.ui.web.DropdownSteps" />
+    <bean id="elementCssSteps" class="org.vividus.steps.ui.web.ElementCssSteps" />
     <bean id="elementSteps" class="org.vividus.steps.ui.web.ElementSteps" />
     <bean id="fieldSteps" class="org.vividus.steps.ui.web.FieldSteps" />
     <bean id="focusSteps" class="org.vividus.steps.ui.web.FocusSteps" />
@@ -273,6 +274,7 @@
         <idref bean="buttonSteps" />
         <idref bean="checkboxSteps" />
         <idref bean="dropdownSteps" />
+        <idref bean="elementCssSteps" />
         <idref bean="elementSteps" />
         <idref bean="fieldSteps" />
         <idref bean="pageSteps" />
