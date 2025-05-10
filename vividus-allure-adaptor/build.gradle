@@ -19,7 +19,7 @@ dependencies {
 
     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.6')
     implementation(group: 'org.springframework', name: 'spring-core')
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.7-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.8-jre')
     implementation(group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1')
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
