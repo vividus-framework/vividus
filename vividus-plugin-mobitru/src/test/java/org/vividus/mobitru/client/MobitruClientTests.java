@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -36,8 +37,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestBuilder;
@@ -56,12 +55,7 @@ class MobitruClientTests
     private static final String DEVICE_ID = "deviceid";
     private static final String TAKE_DEVICE_ENDPOINT = "/billing/unit/vividus/automation/api/device";
     private static final String UDID = "Z3CT103D2DZ";
-    private static final String DELIMITER = "/";
-    private static final String DEVICE_RECORDING_ENDPOINT = TAKE_DEVICE_ENDPOINT.
-            concat(DELIMITER).concat(UDID).
-            concat(DELIMITER).concat("recording");
-    private static final String RECORDING_ENDPOINT = "/billing/unit/vividus/automation/api/recording";
-    private static final String RECORDING_ID = "5eefb29c-78a4-4f39-ac52-bd54a22c5243";
+    private static final String DEVICE_RECORDING_ENDPOINT = TAKE_DEVICE_ENDPOINT + "/" + UDID + "/recording";
 
     @Mock private IHttpClient httpClient;
     @Mock private HttpResponse httpResponse;
@@ -78,14 +72,14 @@ class MobitruClientTests
     @Test
     void shouldFindDevicesBySearchParameters() throws IOException, MobitruOperationException
     {
-        var builder = mock(HttpRequestBuilder.class);
-        ClassicHttpRequest httpRequest = mock();
-        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        try (var builderMock = mockStatic(HttpRequestBuilder.class))
         {
+            HttpRequestBuilder builder = mock();
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
             when(builder.withHttpMethod(HttpMethod.GET)).thenReturn(builder);
             when(builder.withRelativeUrl(TAKE_DEVICE_ENDPOINT + "/ios?type=phone&version=15")).thenReturn(builder);
+            ClassicHttpRequest httpRequest = mock();
             when(builder.build()).thenReturn(httpRequest);
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
@@ -100,15 +94,15 @@ class MobitruClientTests
     @Test
     void shouldTakeDevice() throws IOException, MobitruOperationException
     {
-        var builder = mock(HttpRequestBuilder.class);
-        ClassicHttpRequest httpRequest = mock();
-        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        try (var builderMock = mockStatic(HttpRequestBuilder.class))
         {
+            HttpRequestBuilder builder = mock();
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
             when(builder.withContent(CONTENT, ContentType.APPLICATION_JSON)).thenReturn(builder);
             when(builder.withHttpMethod(HttpMethod.POST)).thenReturn(builder);
             when(builder.withRelativeUrl(TAKE_DEVICE_ENDPOINT)).thenReturn(builder);
+            ClassicHttpRequest httpRequest = mock();
             when(builder.build()).thenReturn(httpRequest);
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
@@ -120,14 +114,14 @@ class MobitruClientTests
     @Test
     void shouldStartRecording() throws IOException, MobitruOperationException
     {
-        var builder = mock(HttpRequestBuilder.class);
-        ClassicHttpRequest httpRequest = mock();
-        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        try (var builderMock = mockStatic(HttpRequestBuilder.class))
         {
+            HttpRequestBuilder builder = mock();
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
             when(builder.withHttpMethod(HttpMethod.POST)).thenReturn(builder);
             when(builder.withRelativeUrl(DEVICE_RECORDING_ENDPOINT)).thenReturn(builder);
+            ClassicHttpRequest httpRequest = mock();
             when(builder.build()).thenReturn(httpRequest);
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_CREATED);
@@ -140,15 +134,15 @@ class MobitruClientTests
     @Test
     void shouldStopRecording() throws IOException, MobitruOperationException
     {
-        var builder = mock(HttpRequestBuilder.class);
-        ClassicHttpRequest httpRequest = mock();
-        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        try (var builderMock = mockStatic(HttpRequestBuilder.class))
         {
+            HttpRequestBuilder builder = mock();
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
             when(builder.withHttpMethod(HttpMethod.DELETE)).thenReturn(builder);
             when(builder.withRelativeUrl(DEVICE_RECORDING_ENDPOINT)).thenReturn(builder);
+            ClassicHttpRequest httpRequest = mock();
             when(builder.build()).thenReturn(httpRequest);
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
@@ -160,75 +154,58 @@ class MobitruClientTests
     @Test
     void shouldDownloadRecording() throws IOException, MobitruOperationException
     {
-        var builder = mock(HttpRequestBuilder.class);
-        ClassicHttpRequest httpRequest = mock();
-        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        try (var builderMock = mockStatic(HttpRequestBuilder.class))
         {
+            HttpRequestBuilder builder = mock();
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
             when(builder.withHttpMethod(HttpMethod.GET)).thenReturn(builder);
-            when(builder.withRelativeUrl(RECORDING_ENDPOINT.concat(DELIMITER).concat(RECORDING_ID)))
-                    .thenReturn(builder);
+            var recordingId = "5eefb29c-78a4-4f39-ac52-bd54a22c5243";
+            when(builder.withRelativeUrl("/billing/unit/vividus/automation/api/recording/" + recordingId)).thenReturn(
+                    builder);
+            ClassicHttpRequest httpRequest = mock();
             when(builder.build()).thenReturn(httpRequest);
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
             when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_OK);
-            assertArrayEquals(RESPONSE, mobitruClient.downloadDeviceScreenRecording(RECORDING_ID));
-        }
-    }
-
-    @Test
-    void shouldTakeDeviceBySerial() throws IOException, MobitruOperationException
-    {
-        var builder = mock(HttpRequestBuilder.class);
-        ClassicHttpRequest httpRequest = mock();
-        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
-        {
-            builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
-            when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
-            when(builder.withHttpMethod(HttpMethod.POST)).thenReturn(builder);
-            when(builder.withRelativeUrl(TAKE_DEVICE_ENDPOINT.concat(DELIMITER).concat(UDID))).thenReturn(builder);
-            when(builder.build()).thenReturn(httpRequest);
-            when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
-            when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
-            when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_OK);
-            assertArrayEquals(RESPONSE, mobitruClient.takeDeviceBySerial(UDID));
+            assertArrayEquals(RESPONSE, mobitruClient.downloadDeviceScreenRecording(recordingId));
         }
     }
 
     @Test
     void shouldThrowDeviceExceptionIfInvalidStatusCodeReturned() throws IOException
     {
-        var builder = mock(HttpRequestBuilder.class);
-        ClassicHttpRequest httpRequest = mock();
-        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        try (var builderMock = mockStatic(HttpRequestBuilder.class))
         {
+            HttpRequestBuilder builder = mock();
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
             when(builder.withContent(CONTENT, ContentType.APPLICATION_JSON)).thenReturn(builder);
             when(builder.withHttpMethod(HttpMethod.POST)).thenReturn(builder);
             when(builder.withRelativeUrl(TAKE_DEVICE_ENDPOINT)).thenReturn(builder);
+            ClassicHttpRequest httpRequest = mock();
             when(builder.build()).thenReturn(httpRequest);
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_NOT_FOUND);
             var mdse = assertThrows(MobitruDeviceTakeException.class, () -> mobitruClient.takeDevice(CONTENT));
-            assertEquals("Expected status code `200` but got `404`.", mdse.getMessage());
+            assertEquals("Unable to take device with configuration content. Expected status code `200` but got `404`.",
+                    mdse.getMessage());
         }
     }
 
     @Test
     void shouldWrapIOException() throws IOException
     {
-        var builder = mock(HttpRequestBuilder.class);
-        ClassicHttpRequest httpRequest = mock();
-        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        try (var builderMock = mockStatic(HttpRequestBuilder.class))
         {
+            HttpRequestBuilder builder = mock();
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
             when(builder.withContent(CONTENT, ContentType.APPLICATION_JSON)).thenReturn(builder);
             when(builder.withHttpMethod(HttpMethod.POST)).thenReturn(builder);
             when(builder.withRelativeUrl(TAKE_DEVICE_ENDPOINT)).thenReturn(builder);
+            ClassicHttpRequest httpRequest = mock();
             when(builder.build()).thenReturn(httpRequest);
             var exception = new IOException();
             when(httpClient.execute(httpRequest)).thenThrow(exception);
@@ -240,15 +217,15 @@ class MobitruClientTests
     @Test
     void shouldGetApps() throws IOException, MobitruOperationException
     {
-        var builder = mock(HttpRequestBuilder.class);
-        ClassicHttpRequest httpRequest = mock();
-        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        try (var builderMock = mockStatic(HttpRequestBuilder.class))
         {
+            HttpRequestBuilder builder = mock();
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
             when(builder.withHttpMethod(HttpMethod.GET)).thenReturn(builder);
             when(builder.withRelativeUrl("/billing/unit/vividus/automation/api/v1/spaces/artifacts"))
                 .thenReturn(builder);
+            ClassicHttpRequest httpRequest = mock();
             when(builder.build()).thenReturn(httpRequest);
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
@@ -267,17 +244,17 @@ class MobitruClientTests
     void shouldInstallApp(boolean resign, boolean injection, String urlQuery)
             throws IOException, MobitruOperationException
     {
-        var builder = mock(HttpRequestBuilder.class);
-        ClassicHttpRequest httpRequest = mock();
         var installApplicationOptions = new InstallApplicationOptions(resign, injection);
-        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        try (var builderMock = mockStatic(HttpRequestBuilder.class))
         {
+            HttpRequestBuilder builder = mock();
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
             when(builder.withHttpMethod(HttpMethod.GET)).thenReturn(builder);
             when(builder.withRelativeUrl(
                     "/billing/unit/vividus/automation/api/storage/install/udid/fileid?" + urlQuery)).thenReturn(
                     builder);
+            ClassicHttpRequest httpRequest = mock();
             when(builder.build()).thenReturn(httpRequest);
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
@@ -290,15 +267,14 @@ class MobitruClientTests
     @Test
     void shouldStopUsingDevice() throws IOException, MobitruOperationException
     {
-        var builder = mock(HttpRequestBuilder.class);
-        ClassicHttpRequest httpRequest = mock();
-        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        try (var builderMock = mockStatic(HttpRequestBuilder.class))
         {
+            HttpRequestBuilder builder = mock();
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
             when(builder.withHttpMethod(HttpMethod.DELETE)).thenReturn(builder);
-            when(builder.withRelativeUrl(DEVICE_ENDPOINT))
-                    .thenReturn(builder);
+            when(builder.withRelativeUrl(DEVICE_ENDPOINT)).thenReturn(builder);
+            ClassicHttpRequest httpRequest = mock();
             when(builder.build()).thenReturn(httpRequest);
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_OK);
@@ -309,20 +285,20 @@ class MobitruClientTests
 
     @CsvSource({
             ",Expected status code `200` but got `404`.",
-            "{},Expected status code `200` but got `404`."
-                + " Response body: {}" })
+            "{},Expected status code `200` but got `404`. Response body: {}"
+    })
     @ParameterizedTest
     void shouldThrowAnExceptionInCaseOfUnexpectedStatusCode(String responseBody, String expectedMessage)
             throws IOException
     {
-        var builder = mock(HttpRequestBuilder.class);
-        ClassicHttpRequest httpRequest = mock();
-        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        try (var builderMock = mockStatic(HttpRequestBuilder.class))
         {
+            HttpRequestBuilder builder = mock();
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
             when(builder.withHttpMethod(HttpMethod.DELETE)).thenReturn(builder);
             when(builder.withRelativeUrl(DEVICE_ENDPOINT)).thenReturn(builder);
+            ClassicHttpRequest httpRequest = mock();
             when(builder.build()).thenReturn(httpRequest);
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_NOT_FOUND);
