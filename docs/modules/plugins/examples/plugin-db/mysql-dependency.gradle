@@ -1,1 +1,1 @@
-implementation(group: 'com.mysql', name: 'mysql-connector-j', version: '9.2.0')
+implementation(group: 'com.mysql', name: 'mysql-connector-j', version: '9.3.0')
