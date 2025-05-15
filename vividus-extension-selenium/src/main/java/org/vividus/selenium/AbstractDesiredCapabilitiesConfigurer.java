@@ -58,8 +58,11 @@ public abstract class AbstractDesiredCapabilitiesConfigurer implements DesiredCa
 
     protected void consumeTestName(Consumer<String> testNameConsumer)
     {
-        Optional.ofNullable(runContext.getRootRunningStory())
-                .map(RunningStory::getName)
-                .ifPresent(testNameConsumer);
+        getRunningStory().map(RunningStory::getName).ifPresent(testNameConsumer);
+    }
+
+    protected Optional<RunningStory> getRunningStory()
+    {
+        return Optional.ofNullable(runContext.getRootRunningStory());
     }
 }
