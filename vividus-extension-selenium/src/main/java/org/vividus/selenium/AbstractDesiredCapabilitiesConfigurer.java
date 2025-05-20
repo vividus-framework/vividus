@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import org.jbehave.core.model.Story;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.context.RunContext;
 import org.vividus.model.RunningStory;
@@ -58,8 +59,16 @@ public abstract class AbstractDesiredCapabilitiesConfigurer implements DesiredCa
 
     protected void consumeTestName(Consumer<String> testNameConsumer)
     {
-        Optional.ofNullable(runContext.getRootRunningStory())
-                .map(RunningStory::getName)
-                .ifPresent(testNameConsumer);
+        getRunningStory().map(RunningStory::getName).ifPresent(testNameConsumer);
+    }
+
+    protected Optional<RunningStory> getRunningStory()
+    {
+        return Optional.ofNullable(runContext.getRootRunningStory());
+    }
+
+    protected boolean hasControllingMetaTag(ControllingMetaTag tag)
+    {
+        return getRunningStory().map(RunningStory::getStory).map(Story::getMeta).map(tag::isContainedIn).orElse(false);
     }
 }
