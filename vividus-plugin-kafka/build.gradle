@@ -14,7 +14,7 @@ dependencies {
     implementation platform(group: 'org.springframework.kafka', name: 'spring-kafka-bom', version: '3.3.6')
     implementation(group: 'org.springframework.kafka', name: 'spring-kafka')
 
-    // 'spring-kafka' uses 'kafka-clients' 3.8.1, but it is needed to use 3.9.1 
+    // 'spring-kafka' uses 'kafka-clients' 3.8.1, but it is needed to use 3.9.1
     // as it includes fix for https://issues.apache.org/jira/browse/KAFKA-17078
     // which allows to use Java 24
     implementation(group: 'org.apache.kafka', name: 'kafka-clients', version: '3.9.1')
