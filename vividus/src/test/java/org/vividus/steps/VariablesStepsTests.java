@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ class VariablesStepsTests
     private static final String KEY_2 = "k2";
     private static final String VALUE_2 = "v2";
     private static final ExamplesTable SINGLE_VALUE_TABLE = new ExamplesTable("|k1|\n|v1|");
+    private static final String TITLE = "Comparison result";
 
     @Mock private VariableContext variableContext;
     @Mock private ISoftAssert softAssert;
@@ -97,7 +98,7 @@ class VariablesStepsTests
         variablesSteps.compareVariables(variable1, ComparisonRule.LESS_THAN_OR_EQUAL_TO, variable2);
         verify(softAssert).assertThat(eq(assertDescription),
                 eq(BigDecimal.ONE), argThat(m -> matcherAsString.equals(m.toString())), any());
-        verify(diffAttachmentPublisher).publishDiff(BigDecimal.ONE, BigDecimal.TEN);
+        verify(diffAttachmentPublisher).publishDiff(TITLE, BigDecimal.ONE, BigDecimal.TEN);
     }
 
     @ParameterizedTest
@@ -111,7 +112,7 @@ class VariablesStepsTests
         String description = "Checking if \"" + variable1 + "\" is equal to \"" + variable2 + "\"";
         doAnswer(getAssertionAnswer(passed)).when(softAssert).assertThat(eq(description), eq(variable1), any(), any());
         assertEquals(passed, variablesSteps.compareVariables(variable1, ComparisonRule.EQUAL_TO, variable2));
-        verify(diffAttachmentPublisher, times(published)).publishDiff(variable1, variable2);
+        verify(diffAttachmentPublisher, times(published)).publishDiff(TITLE, variable1, variable2);
     }
 
     static Stream<Object> variableValues()
