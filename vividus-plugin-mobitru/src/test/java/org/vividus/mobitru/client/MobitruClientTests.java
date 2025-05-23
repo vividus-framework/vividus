@@ -48,6 +48,7 @@ import org.vividus.mobitru.client.exception.MobitruOperationException;
 @ExtendWith(MockitoExtension.class)
 class MobitruClientTests
 {
+    private static final String VIVIDUS = "vividus";
     private static final byte[] RESPONSE = {1, 0, 1};
     private static final String ENDPOINT = "https://app.mobitry.com";
     private static final String CONTENT = "content";
@@ -65,7 +66,7 @@ class MobitruClientTests
     @BeforeEach
     void beforeEach()
     {
-        mobitruClient = new MobitruClient(httpClient, "vividus");
+        mobitruClient = new MobitruClient(httpClient, VIVIDUS, "");
         mobitruClient.setApiUrl(ENDPOINT);
     }
 
@@ -306,6 +307,29 @@ class MobitruClientTests
             var moe = assertThrows(
                 MobitruOperationException.class, () -> mobitruClient.returnDevice(DEVICE_ID));
             assertEquals(expectedMessage, moe.getMessage());
+        }
+    }
+
+    @Test
+    void shouldGetAppsFromWorkspace() throws IOException, MobitruOperationException
+    {
+        mobitruClient = new MobitruClient(httpClient, VIVIDUS, "vividus-dedicated-space");
+        mobitruClient.setApiUrl(ENDPOINT);
+        try (var builderMock = mockStatic(HttpRequestBuilder.class))
+        {
+            HttpRequestBuilder builder = mock();
+            builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
+            when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
+            when(builder.withHttpMethod(HttpMethod.GET)).thenReturn(builder);
+            when(builder.withRelativeUrl(
+                    "/billing/unit/vividus/workspace/vividus-dedicated-space/automation/api/v1/spaces/artifacts"))
+                .thenReturn(builder);
+            ClassicHttpRequest httpRequest = mock();
+            when(builder.build()).thenReturn(httpRequest);
+            when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
+            when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
+            when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_OK);
+            assertArrayEquals(RESPONSE, mobitruClient.getArtifacts());
         }
     }
 }

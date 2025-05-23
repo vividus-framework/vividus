@@ -43,10 +43,15 @@ public class MobitruClient
 
     private String apiUrl;
 
-    public MobitruClient(IHttpClient httpClient, String billingUnit)
+    public MobitruClient(IHttpClient httpClient, String billingUnit, String workspaceId)
     {
         this.httpClient = httpClient;
-        this.apiBasePath = String.format("/billing/unit/%s/automation/api", billingUnit);
+        StringBuilder basePath = new StringBuilder("/billing/unit/").append(billingUnit);
+        if (!workspaceId.isEmpty())
+        {
+            basePath.append("/workspace/").append(workspaceId);
+        }
+        this.apiBasePath = basePath.append("/automation/api").toString();
     }
 
     public byte[] findDevices(String platform, Map<String, String> parameters) throws MobitruOperationException

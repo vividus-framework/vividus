@@ -131,6 +131,11 @@ NOTE: The properties marked with *bold* are mandatory.
 |`<empty>`
 |`Package name` for Android or `Bundle identifier` from `Plist.info` for iOS. It is used to activate the application under tests after Appium session start.
 
+|`mobitru.workspace-id`
+|The valid workspace id.
+|`<empty>`
+|Used for team account in the dedicated mobile cloud (workspace) where devices are kept.
+
 |`mobitru.resign-ios-app`
 a|`true` +
 `false`
