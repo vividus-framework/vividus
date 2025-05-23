@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,11 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.function.Consumer;
 
+import org.jbehave.core.model.Meta;
+import org.jbehave.core.model.Story;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -41,6 +44,8 @@ import org.openqa.selenium.Proxy;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.context.RunContext;
+import org.vividus.model.RunningStory;
+import org.vividus.selenium.ControllingMetaTag;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractTunnellingCapabilitiesConfigurerTests
@@ -80,6 +85,27 @@ class AbstractTunnellingCapabilitiesConfigurerTests
 
         when(capabilities.getCapability(CapabilityType.PROXY)).thenReturn(null);
         when(tunnelManager.start(optionsCaptor.capture())).thenReturn(TUNNEL);
+
+        tunnellingConfigurer.configureTunnel(capabilities, tunnelConsumer);
+
+        verify(capabilities).setCapability(CapabilityType.PROXY, (Object) null);
+        verify(tunnelConsumer).accept(TUNNEL);
+        assertNull(optionsCaptor.getValue().getProxy());
+    }
+
+    @Test
+    void shouldConfigureTunnelAtStoryLevelWithoutProxy() throws TunnelException
+    {
+        tunnellingConfigurer.setTunnellingEnabled(false);
+
+        when(capabilities.getCapability(CapabilityType.PROXY)).thenReturn(null);
+        when(tunnelManager.start(optionsCaptor.capture())).thenReturn(TUNNEL);
+        RunningStory runningStory = mock();
+        when(runContext.getRootRunningStory()).thenReturn(runningStory);
+        Story story = mock();
+        when(runningStory.getStory()).thenReturn(story);
+        Meta meta = new Meta(List.of(ControllingMetaTag.TUNNEL.name().toLowerCase()));
+        when(story.getMeta()).thenReturn(meta);
 
         tunnellingConfigurer.configureTunnel(capabilities, tunnelConsumer);
 

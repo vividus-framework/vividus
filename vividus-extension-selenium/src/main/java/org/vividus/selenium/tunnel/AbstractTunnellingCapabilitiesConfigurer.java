@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.context.RunContext;
 import org.vividus.selenium.AbstractDesiredCapabilitiesConfigurer;
+import org.vividus.selenium.ControllingMetaTag;
 import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 
 public abstract class AbstractTunnellingCapabilitiesConfigurer<T extends TunnelOptions>
@@ -43,7 +44,7 @@ public abstract class AbstractTunnellingCapabilitiesConfigurer<T extends TunnelO
     protected void configureTunnel(DesiredCapabilities desiredCapabilities, Consumer<String> tunnelConsumer)
     {
         Proxy proxy = (Proxy) desiredCapabilities.getCapability(CapabilityType.PROXY);
-        if (tunnellingEnabled || proxy != null)
+        if (isTunnelingEnabled() || proxy != null)
         {
             T options = createOptions();
             if (proxy != null)
@@ -66,6 +67,11 @@ public abstract class AbstractTunnellingCapabilitiesConfigurer<T extends TunnelO
     }
 
     protected abstract T createOptions();
+
+    private boolean isTunnelingEnabled()
+    {
+        return tunnellingEnabled || hasControllingMetaTag(ControllingMetaTag.TUNNEL);
+    }
 
     @Subscribe
     public void stopTunnel(AfterWebDriverQuitEvent event) throws TunnelException
