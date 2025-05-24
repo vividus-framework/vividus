@@ -73,7 +73,6 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -306,7 +305,6 @@ class WebDriverFactoryTests
             assertEquals(acceptsInsecureCerts, capabilities.getCapability(CapabilityType.ACCEPT_INSECURE_CERTS));
             return true;
         }))).thenReturn(remoteWebDriver);
-        desiredCapabilities.setCapability(InternetExplorerDriver.NATIVE_EVENTS, false);
         assertRemoteWebDriverCreation(desiredCapabilities);
         assertLogger();
     }
@@ -356,7 +354,6 @@ class WebDriverFactoryTests
         var desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName(Browser.IE.browserName());
         when(remoteWebDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(remoteWebDriver);
-        desiredCapabilities.setCapability(InternetExplorerDriver.NATIVE_EVENTS, false);
         assertRemoteWebDriverCreation(desiredCapabilities);
         assertLogger();
     }
