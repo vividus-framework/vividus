@@ -35,13 +35,16 @@ public class RemoteWebDriverFactory implements IRemoteWebDriverFactory
     private static final String DEFAULT_HTTP_VERSION = "HTTP_1_1";
 
     private final Duration readTimeout;
+    private final Duration connectionTimeout;
     private final RemoteWebDriverUrlProvider remoteWebDriverUrlProvider;
     private final List<SessionCreationRetryHandler> sessionCreationRetryHandlers;
 
-    public RemoteWebDriverFactory(Duration readTimeout, RemoteWebDriverUrlProvider remoteWebDriverUrlProvider,
+    public RemoteWebDriverFactory(Duration readTimeout, Duration connectionTimeout,
+            RemoteWebDriverUrlProvider remoteWebDriverUrlProvider,
             List<SessionCreationRetryHandler> sessionCreationRetryHandlers)
     {
         this.readTimeout = readTimeout;
+        this.connectionTimeout = connectionTimeout;
         this.remoteWebDriverUrlProvider = remoteWebDriverUrlProvider;
         this.sessionCreationRetryHandlers = sessionCreationRetryHandlers;
     }
@@ -52,7 +55,8 @@ public class RemoteWebDriverFactory implements IRemoteWebDriverFactory
         URL remoteDriverUrl = remoteWebDriverUrlProvider.getRemoteDriverUrl();
         ClientConfig clientConfig = ClientConfig.defaultConfig()
                 .baseUrl(remoteDriverUrl)
-                .readTimeout(readTimeout);
+                .readTimeout(readTimeout)
+                .connectionTimeout(connectionTimeout);
         try
         {
             return createRemoteWebDriver(capabilities, clientConfig);

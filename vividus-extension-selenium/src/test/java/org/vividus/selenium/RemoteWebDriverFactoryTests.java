@@ -81,6 +81,7 @@ class RemoteWebDriverFactoryTests
     private static final String HTTP_CONNECT_TIMED_OUT = "Response code 500. Message: "
             + "java.net.http.HttpConnectTimeoutException: HTTP connect timed out";
     private static final Duration READ_TIMEOUT = Duration.ofMinutes(3);
+    private static final Duration CONNECTION_TIMEOUT = Duration.ofMinutes(1);
 
     @Mock private RemoteWebDriverUrlProvider provider;
 
@@ -99,6 +100,7 @@ class RemoteWebDriverFactoryTests
     {
         assertEquals(GRID_URI, clientConfig.baseUri());
         assertEquals(READ_TIMEOUT, clientConfig.readTimeout());
+        assertEquals(CONNECTION_TIMEOUT, clientConfig.connectionTimeout());
         assertEquals(expectedHttpVersion, clientConfig.version());
     }
 
@@ -131,8 +133,8 @@ class RemoteWebDriverFactoryTests
                     );
                 }))
         {
-            var actualDriver = new RemoteWebDriverFactory(READ_TIMEOUT, provider, List.of()).getRemoteWebDriver(
-                    capabilities);
+            var actualDriver = new RemoteWebDriverFactory(READ_TIMEOUT, CONNECTION_TIMEOUT, provider, List.of())
+                    .getRemoteWebDriver(capabilities);
             assertEquals(driver.constructed(), List.of(actualDriver));
             assertThat(logger.getLoggingEvents(), is(empty()));
         }
@@ -149,8 +151,8 @@ class RemoteWebDriverFactoryTests
             RemoteWebDriver remoteWebDriver = mock();
             when(remoteWebDriverBuilder.build()).thenReturn(remoteWebDriver);
             driverMock.when(RemoteWebDriver::builder).thenReturn(remoteWebDriverBuilder);
-            var actualDriver = new RemoteWebDriverFactory(READ_TIMEOUT, provider, List.of()).getRemoteWebDriver(
-                    capabilities);
+            var actualDriver = new RemoteWebDriverFactory(READ_TIMEOUT, CONNECTION_TIMEOUT, provider, List.of())
+                    .getRemoteWebDriver(capabilities);
             assertEquals(remoteWebDriver, actualDriver);
             assertThat(logger.getLoggingEvents(), is(empty()));
             var clientConfigArgumentCaptor = ArgumentCaptor.forClass(ClientConfig.class);
@@ -193,8 +195,8 @@ class RemoteWebDriverFactoryTests
         {
             List<SessionCreationRetryHandler> retryHandlers = List.of(
                     new SessionCreationRetryOnHttpConnectTimeoutHandler(true));
-            var actualDriver = new RemoteWebDriverFactory(READ_TIMEOUT, provider, retryHandlers).getRemoteWebDriver(
-                    desiredCapabilities);
+            var actualDriver = new RemoteWebDriverFactory(READ_TIMEOUT, CONNECTION_TIMEOUT, provider, retryHandlers)
+                    .getRemoteWebDriver(desiredCapabilities);
             assertEquals(sessionId, actualDriver.getSessionId().toString());
             assertThat(logger.getLoggingEvents(), is(List.of(
                     warn(exception, "Failed to create a new session due to HTTP connect timout"),
@@ -226,7 +228,8 @@ class RemoteWebDriverFactoryTests
         {
             List<SessionCreationRetryHandler> retryHandlers = List.of(
                     new SessionCreationRetryOnHttpConnectTimeoutHandler(retrySessionCreationOnHttpConnectTimeout));
-            var remoteWebDriverFactory = new RemoteWebDriverFactory(READ_TIMEOUT, provider, retryHandlers);
+            var remoteWebDriverFactory = new RemoteWebDriverFactory(READ_TIMEOUT, CONNECTION_TIMEOUT, provider,
+                    retryHandlers);
             var actualException = assertThrows(SessionNotCreatedException.class,
                     () -> remoteWebDriverFactory.getRemoteWebDriver(desiredCapabilities));
             assertEquals(exception, actualException);
