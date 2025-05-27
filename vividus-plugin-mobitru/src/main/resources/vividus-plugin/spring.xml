@@ -48,6 +48,7 @@
             </bean>
         </constructor-arg>
         <constructor-arg name="billingUnit" value="${selenium.grid.username}" />
+        <constructor-arg name="workspaceId" value="${mobitru.workspace-id}" />
         <property name="apiUrl" value="https://${selenium.grid.host}" />
     </bean>
     <util:list id="stepBeanNames-MobileApp-Hooks">
