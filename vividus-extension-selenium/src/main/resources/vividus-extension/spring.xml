@@ -15,6 +15,7 @@
 
     <bean id="remoteWebDriverFactory" class="org.vividus.selenium.RemoteWebDriverFactory">
         <constructor-arg index="0" value="${selenium.grid.http.read-timeout}" />
+        <constructor-arg index="1" value="${selenium.grid.http.connection-timeout}" />
     </bean>
 
     <bean class="org.vividus.selenium.SessionCreationRetryOnHttpConnectTimeoutHandler">
