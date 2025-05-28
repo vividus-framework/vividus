@@ -66,7 +66,7 @@ class MobitruClientTests
     @BeforeEach
     void beforeEach()
     {
-        mobitruClient = new MobitruClient(httpClient, VIVIDUS, "");
+        mobitruClient = new MobitruClient(httpClient, VIVIDUS, null);
         mobitruClient.setApiUrl(ENDPOINT);
     }
 

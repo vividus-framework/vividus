@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpStatus;
@@ -47,7 +48,7 @@ public class MobitruClient
     {
         this.httpClient = httpClient;
         StringBuilder basePath = new StringBuilder("/billing/unit/").append(billingUnit);
-        if (!workspaceId.isEmpty())
+        if (StringUtils.isNotBlank(workspaceId))
         {
             basePath.append("/workspace/").append(workspaceId);
         }
