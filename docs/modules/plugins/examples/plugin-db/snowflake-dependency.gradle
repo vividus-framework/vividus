@@ -1,1 +1,1 @@
-implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.24.0')
+implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.24.1')
