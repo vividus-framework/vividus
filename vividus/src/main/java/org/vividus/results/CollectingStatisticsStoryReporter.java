@@ -114,11 +114,11 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
     public ExitCode calculateExitCode()
     {
         return status.get().map(s -> switch (s)
-        {
-            case PASSED -> ExitCode.PASSED;
-            case KNOWN_ISSUES_ONLY -> ExitCode.KNOWN_ISSUES;
-            default -> ExitCode.FAILED;
-        }).orElse(ExitCode.FAILED);
+            {
+                case PASSED -> ExitCode.PASSED;
+                case KNOWN_ISSUES_ONLY -> ExitCode.KNOWN_ISSUES;
+                default -> ExitCode.FAILED;
+            }).orElse(ExitCode.FAILED);
     }
 
     @Override
