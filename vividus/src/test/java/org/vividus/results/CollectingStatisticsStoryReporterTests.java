@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ import org.vividus.testcontext.ThreadedTestContext;
 import org.vividus.util.json.JsonUtils;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
-@SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended" })
 class CollectingStatisticsStoryReporterTests
 {
     private static final String STEP_AS_STRING = "step";
@@ -398,7 +398,7 @@ class CollectingStatisticsStoryReporterTests
         return Files.readString(tempDirectory.resolve("statistics.json"), StandardCharsets.UTF_8).replaceAll("\\r", "");
     }
 
-    @SuppressWarnings({ "MethodLength", "PMD.ExcessiveMethodLength", "PMD.NcssCount" })
+    @SuppressWarnings({ "MethodLength", "PMD.NcssCount" })
     private void reporterFlowProvider()
     {
         when(runContext.isRunInProgress()).thenReturn(true);
