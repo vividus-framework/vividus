@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map;
 import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.Then;
 import org.vividus.http.HttpRedirectsProvider;
+import org.vividus.http.HttpTestContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.UriUtils;
@@ -36,13 +37,15 @@ public class RedirectValidationSteps
     private final HttpRedirectsProvider redirectsProvider;
     private final ISoftAssert softAssert;
     private final IAttachmentPublisher attachmentPublisher;
+    private final HttpTestContext httpTestContext;
 
     public RedirectValidationSteps(HttpRedirectsProvider redirectsProvider, ISoftAssert softAssert,
-            IAttachmentPublisher attachmentPublisher)
+            IAttachmentPublisher attachmentPublisher, HttpTestContext httpTestContext)
     {
         this.redirectsProvider = redirectsProvider;
         this.softAssert = softAssert;
         this.attachmentPublisher = attachmentPublisher;
+        this.httpTestContext = httpTestContext;
     }
 
     /**
@@ -56,6 +59,7 @@ public class RedirectValidationSteps
      * <td><b>startUrl</b></td>
      * <td><b>endUrl</b></td>
      * <td><b>redirectsNumber</b></td>
+     * <td><b>statusCode</b></td>
      * </tr>
      * </thead>
      * <tbody>
@@ -63,6 +67,7 @@ public class RedirectValidationSteps
      * <td>https://example.com/redirect</td>
      * <td>https://example.com/get-response</td>
      * <td>1</td>
+     * <td>301</td>
      * </tr>
      * </tbody>
      * </table>
@@ -71,11 +76,15 @@ public class RedirectValidationSteps
      * <li><b>startUrl</b> - The URL from which redirection starts.</li>
      * <li><b>endUrl</b> - The expected final URL to redirect to.</li>
      * <li><b>redirectsNumber</b> - The expected number of redirects between startUrl and endUrl (optional)</li>
+     * <li><b>statusCodes</b> - The comma-separated sequence of expected HTTP status codes of the redirects
+     * (e.g. 301,302) (optional)</li>
      * </ul>
+     * Note: `redirectsNumber` and `statusCodes` can't be specified simultaneously.
      */
     @Then("I validate HTTP redirects:$expectedRedirects")
     public void validateRedirects(List<ExpectedRedirect> expectedRedirects)
     {
+        validateStepParameters(expectedRedirects);
         softAssert.runIgnoringTestFailFast(() ->
         {
             List<RedirectValidationState> redirectsResults = expectedRedirects.stream().map(e ->
@@ -110,6 +119,7 @@ public class RedirectValidationSteps
                 softAssert.recordPassedAssertion(assertionMessageBuilder.toString());
 
                 assertRedirectsNumber(validationState);
+                assertStatusCodes(validationState);
             }
             else
             {
@@ -130,6 +140,7 @@ public class RedirectValidationSteps
                     assertionMessageBuilder.append(resultMessage);
                     softAssert.recordPassedAssertion(assertionMessageBuilder.toString());
                     assertRedirectsNumber(validationState);
+                    assertStatusCodes(validationState);
                 }
                 else
                 {
@@ -161,7 +172,35 @@ public class RedirectValidationSteps
         }
     }
 
-    private static void initTestResult(RedirectValidationState validationState, List<URI> redirects)
+    private void assertStatusCodes(RedirectValidationState validationState)
+    {
+        List<Integer> expectedStatusCodes = validationState.getExpectedRedirect().getStatusCodes();
+        if (!expectedStatusCodes.isEmpty())
+        {
+            List<Integer> actualStatusCodes = new ArrayList<>(validationState.getActualStatusCodes());
+            if (actualStatusCodes.size() > 1)
+            {
+                actualStatusCodes.remove(actualStatusCodes.size() - 1);
+            }
+            if (!softAssert.assertEquals("Status codes of redirects", expectedStatusCodes, actualStatusCodes))
+            {
+                validationState.fail("unexpected status codes of redirects");
+            }
+        }
+    }
+
+    private void validateStepParameters(List<ExpectedRedirect> expectedRedirects)
+    {
+        expectedRedirects.forEach(e -> {
+            if (null != e.getRedirectsNumber() && !e.getStatusCodes().isEmpty())
+            {
+                throw new IllegalArgumentException(
+                    "The 'redirectsNumber' and 'statusCodes' can't be specified simultaneously");
+            }
+        });
+    }
+
+    private void initTestResult(RedirectValidationState validationState, List<URI> redirects)
     {
         if (!redirects.isEmpty())
         {
@@ -174,6 +213,7 @@ public class RedirectValidationSteps
             validationState.setRedirects(new ArrayList<>());
             validationState.setActualRedirectsNumber(0);
         }
+        validationState.setActualStatusCodes(httpTestContext.getStatusCodes());
     }
 
     @AsParameters
@@ -182,6 +222,7 @@ public class RedirectValidationSteps
         private URI startUrl;
         private URI endUrl;
         private Integer redirectsNumber;
+        private List<Integer> statusCodes = List.of();
 
         public URI getStartUrl()
         {
@@ -212,6 +253,16 @@ public class RedirectValidationSteps
         {
             this.redirectsNumber = redirectsNumber;
         }
+
+        public List<Integer> getStatusCodes()
+        {
+            return statusCodes;
+        }
+
+        public void setStatusCodes(List<Integer> statusCodes)
+        {
+            this.statusCodes = statusCodes;
+        }
     }
 
     public static class RedirectValidationState
@@ -220,6 +271,7 @@ public class RedirectValidationSteps
 
         private URI actualEndUrl;
         private int actualRedirectsNumber = -1;
+        private List<Integer> actualStatusCodes = List.of();
         private List<URI> redirects;
 
         private String resultMessage = "Passed";
@@ -271,9 +323,19 @@ public class RedirectValidationSteps
             return actualRedirectsNumber;
         }
 
+        public List<Integer> getActualStatusCodes()
+        {
+            return actualStatusCodes;
+        }
+
         public void setActualRedirectsNumber(int actualRedirectsNumber)
         {
             this.actualRedirectsNumber = actualRedirectsNumber;
+        }
+
+        public void setActualStatusCodes(List<Integer> actualStatusCodes)
+        {
+            this.actualStatusCodes = actualStatusCodes;
         }
 
         public List<URI> getRedirects()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,16 @@ public class HttpTestContext implements JsonContext
         getData().connectionDetails = connectionDetails;
     }
 
+    public void addStatusCode(Integer statusCode)
+    {
+        getData().statusCodes.add(statusCode);
+    }
+
+    public void resetStatusCodes()
+    {
+        getData().statusCodes = new ArrayList<>();
+    }
+
     public void putResponse(HttpResponse response)
     {
         HttpTestContextData data = getData();
@@ -95,6 +105,11 @@ public class HttpTestContext implements JsonContext
     public ConnectionDetails getConnectionDetails()
     {
         return getData().connectionDetails;
+    }
+
+    public List<Integer> getStatusCodes()
+    {
+        return getData().statusCodes;
     }
 
     public HttpResponse getResponse()
@@ -135,6 +150,7 @@ public class HttpTestContext implements JsonContext
         private List<Header> requestHeaders = new ArrayList<>();
         private CookieStore cookieStore;
         private ConnectionDetails connectionDetails;
+        private List<Integer> statusCodes = new ArrayList<>();
 
         private HttpResponse response;
         private Optional<String> jsonElement = Optional.empty();

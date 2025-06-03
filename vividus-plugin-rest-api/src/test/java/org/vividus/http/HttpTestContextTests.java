@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,6 +148,30 @@ class HttpTestContextTests
         response.setResponseBody(responseBody.getBytes(StandardCharsets.UTF_8));
         httpTestContext.putResponse(response);
         assertEquals(responseBody, httpTestContext.getJsonContext());
+    }
+
+    @Test
+    void testAddStatusCode()
+    {
+        int statusCode = 301;
+        httpTestContext.addStatusCode(statusCode);
+        assertEquals(List.of(statusCode), httpTestContext.getStatusCodes());
+    }
+
+    @Test
+    void testMultipleStatusCodes()
+    {
+        httpTestContext.addStatusCode(301);
+        httpTestContext.addStatusCode(302);
+        assertEquals(List.of(301, 302), httpTestContext.getStatusCodes());
+    }
+
+    @Test
+    void testResetStatusCodes()
+    {
+        httpTestContext.addStatusCode(301);
+        httpTestContext.resetStatusCodes();
+        assertThat(httpTestContext.getStatusCodes(), empty());
     }
 
     @Test
