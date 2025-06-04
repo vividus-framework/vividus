@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,11 @@
 
 package org.vividus.selenium.lambdatest;
 
+import org.apache.commons.lang3.Validate;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.context.RunContext;
 import org.vividus.selenium.AbstractDesiredCapabilitiesConfigurer;
+import org.vividus.selenium.ControllingMetaTag;
 
 public class LambdaTestCapabilitiesConfigurer extends AbstractDesiredCapabilitiesConfigurer
 {
@@ -30,6 +32,9 @@ public class LambdaTestCapabilitiesConfigurer extends AbstractDesiredCapabilitie
     @Override
     public void configure(DesiredCapabilities desiredCapabilities)
     {
+        Validate.isTrue(!hasControllingMetaTag(ControllingMetaTag.TUNNEL),
+                "LambdaTest doesn't support tunneling capabilities.");
+
         configureTestName(desiredCapabilities, "LT:Options", "name");
     }
 }
