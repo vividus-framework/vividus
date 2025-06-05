@@ -31,6 +31,11 @@
         <property name="waitForDeviceTimeout" value="${mobitru.device-wait-timeout}" />
     </bean>
 
+    <bean class="org.vividus.mobitru.selenium.MobitruSeleniumConfigurationValidator">
+        <constructor-arg index="0" value="${selenium.grid.host}" />
+        <constructor-arg index="1" value="${selenium.grid.url}" />
+    </bean>
+
     <bean class="org.vividus.mobitru.client.MobitruClient" >
         <constructor-arg name="httpClient">
             <bean class="org.vividus.http.client.HttpClient"

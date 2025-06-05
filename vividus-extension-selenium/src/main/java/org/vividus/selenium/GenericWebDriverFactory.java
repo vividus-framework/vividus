@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ public class GenericWebDriverFactory implements IGenericWebDriverFactory
     private final IPropertyParser propertyParser;
     private final JsonUtils jsonUtils;
     private final Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters;
+    private final Optional<SeleniumConfigurationValidator> seleniumConfigurationValidator;
 
     private final Supplier<DesiredCapabilities> seleniumGridDesiredCapabilities = Suppliers.memoize(
         () -> getCapabilitiesByPrefix(SELENIUM_GRID_PROPERTY_PREFIX));
@@ -75,12 +76,14 @@ public class GenericWebDriverFactory implements IGenericWebDriverFactory
             });
 
     public GenericWebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, IPropertyParser propertyParser,
-            JsonUtils jsonUtils, Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters)
+            JsonUtils jsonUtils, Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters,
+            Optional<SeleniumConfigurationValidator> seleniumConfigurationValidator)
     {
         this.remoteWebDriverFactory = remoteWebDriverFactory;
         this.propertyParser = propertyParser;
         this.jsonUtils = jsonUtils;
         this.desiredCapabilitiesAdjusters = desiredCapabilitiesAdjusters;
+        this.seleniumConfigurationValidator = seleniumConfigurationValidator;
     }
 
     private DesiredCapabilities getCapabilitiesByPrefix(String prefix)
@@ -98,6 +101,7 @@ public class GenericWebDriverFactory implements IGenericWebDriverFactory
     @Override
     public WebDriver createWebDriver(DesiredCapabilities desiredCapabilities)
     {
+        validateConfigurationProperties();
         DesiredCapabilities mergedDesiredCapabilities = getWebDriverCapabilities(false, desiredCapabilities);
         DesiredCapabilities updatedDesiredCapabilities = updateDesiredCapabilities(mergedDesiredCapabilities);
         return createWebDriver(() -> remoteWebDriverFactory.getRemoteWebDriver(updatedDesiredCapabilities),
@@ -124,6 +128,11 @@ public class GenericWebDriverFactory implements IGenericWebDriverFactory
         desiredCapabilitiesAdjusters.ifPresent(
                 adjusters -> adjusters.forEach(adjuster -> adjuster.adjust(desiredCapabilities)));
         return desiredCapabilities;
+    }
+
+    protected void validateConfigurationProperties()
+    {
+        seleniumConfigurationValidator.ifPresent(SeleniumConfigurationValidator::validate);
     }
 
     protected DesiredCapabilities getWebDriverCapabilities(boolean localRun, DesiredCapabilities toMerge)
