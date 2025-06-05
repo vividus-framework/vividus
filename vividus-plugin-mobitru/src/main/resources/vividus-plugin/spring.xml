@@ -29,6 +29,11 @@
 
     <bean class="org.vividus.mobitru.client.MobitruFacadeImpl" >
         <property name="waitForDeviceTimeout" value="${mobitru.device-wait-timeout}" />
+        <property name="matchesDriverUrl"
+            value="#{
+                      T(java.net.URI).create('${selenium.grid.url}').authority ==
+                      '${selenium.grid.username}:' + T(java.net.URLEncoder).encode('${selenium.grid.password}', T(java.nio.charset.StandardCharsets).UTF_8) + '@' + '${selenium.grid.host}'
+                   }" />
     </bean>
 
     <bean class="org.vividus.mobitru.client.MobitruClient" >

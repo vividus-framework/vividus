@@ -66,6 +66,7 @@ public class MobitruFacadeImpl implements MobitruFacade
 
     private final MobitruClient mobitruClient;
     private Duration waitForDeviceTimeout;
+    private Boolean matchesDriverUrl;
 
     public MobitruFacadeImpl(MobitruClient mobitruClient)
     {
@@ -75,6 +76,11 @@ public class MobitruFacadeImpl implements MobitruFacade
     @Override
     public String takeDevice(DesiredCapabilities desiredCapabilities) throws MobitruOperationException
     {
+        if (!matchesDriverUrl)
+        {
+            throw new MobitruOperationException("The driver URL authority does not match Mobitru."
+                    + " Check your Selenium Grid properties.");
+        }
         List<Device> devices;
         boolean waitUntilAvailable;
         if (isSearchForDevice(desiredCapabilities))
@@ -316,5 +322,10 @@ public class MobitruFacadeImpl implements MobitruFacade
     public void setWaitForDeviceTimeout(Duration waitForDeviceTimeout)
     {
         this.waitForDeviceTimeout = waitForDeviceTimeout;
+    }
+
+    public void setMatchesDriverUrl(Boolean matchesDriverUrl)
+    {
+        this.matchesDriverUrl = matchesDriverUrl;
     }
 }
