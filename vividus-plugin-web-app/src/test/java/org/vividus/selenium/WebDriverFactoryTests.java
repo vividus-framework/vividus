@@ -194,7 +194,7 @@ class WebDriverFactoryTests
         var webDriverType = WebDriverType.CHROME;
         WebDriverListenerFactory webDriverListenerFactory = mock();
         var webDriverFactory = new WebDriverFactory(false, remoteWebDriverFactory, propertyParser, new JsonUtils(),
-                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer, CREDENTIALS,
+                proxy, webDriverStartContext, Optional.empty(), Optional.empty(), timeoutConfigurer, CREDENTIALS,
                 List.of(webDriverListenerFactory));
         webDriverFactory.setWebDriverType(webDriverType);
         lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, BINARY_PATH)).thenReturn(
@@ -238,7 +238,8 @@ class WebDriverFactoryTests
     {
         var webDriverType = WebDriverType.SAFARI;
         var webDriverFactory = new WebDriverFactory(false, remoteWebDriverFactory, propertyParser, new JsonUtils(),
-                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer, CREDENTIALS, List.of());
+                proxy, webDriverStartContext, Optional.empty(), Optional.empty(), timeoutConfigurer,
+                CREDENTIALS, List.of());
         webDriverFactory.setWebDriverType(webDriverType);
         when(propertyParser.getPropertyValue(PROPERTY_FORMAT, SAFARI_BROWSER_NAME, BINARY_PATH)).thenReturn(null);
         when(webDriverStartContext.get(WebDriverStartParameters.COMMAND_LINE_ARGUMENTS)).thenReturn(ARG_1);
@@ -253,7 +254,8 @@ class WebDriverFactoryTests
     {
         var webDriverType = WebDriverType.SAFARI;
         var webDriverFactory = new WebDriverFactory(false, remoteWebDriverFactory, propertyParser, new JsonUtils(),
-                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer, CREDENTIALS, List.of());
+                proxy, webDriverStartContext, Optional.empty(), Optional.empty(), timeoutConfigurer,
+                CREDENTIALS, List.of());
         webDriverFactory.setWebDriverType(webDriverType);
         when(propertyParser.getPropertyValue(PROPERTY_FORMAT, SAFARI_BROWSER_NAME, BINARY_PATH)).thenReturn("testPath");
         DesiredCapabilities desiredCapabilities = mock();
@@ -267,7 +269,8 @@ class WebDriverFactoryTests
     {
         var webDriverType = WebDriverType.SAFARI;
         var webDriverFactory = new WebDriverFactory(false, remoteWebDriverFactory, propertyParser, new JsonUtils(),
-                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer, CREDENTIALS, List.of());
+                proxy, webDriverStartContext, Optional.empty(), Optional.empty(), timeoutConfigurer,
+                CREDENTIALS, List.of());
         webDriverFactory.setWebDriverType(webDriverType);
         when(propertyParser.getPropertyValue(PROPERTY_FORMAT, SAFARI_BROWSER_NAME, BINARY_PATH)).thenReturn(null);
         when(propertyParser.getPropertyValue(PROPERTY_FORMAT, SAFARI_BROWSER_NAME, COMMAND_LINE_ARGUMENTS)).thenReturn(
@@ -413,7 +416,7 @@ class WebDriverFactoryTests
         PropertyMappedCollection<BasicAuthCredentials> creds = new PropertyMappedCollection<>(credentials);
 
         var webDriverFactory = new WebDriverFactory(false, remoteWebDriverFactory, propertyParser, new JsonUtils(),
-                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer, creds, List.of());
+                proxy, webDriverStartContext, Optional.empty(), Optional.empty(), timeoutConfigurer, creds, List.of());
         webDriverFactory.setWebDriverType(browserType);
 
         try (var mockedConstruction = mockConstruction(mockDriverClass, (mock, context) ->
@@ -458,7 +461,8 @@ class WebDriverFactoryTests
     {
         var credentialsMock = mock(PropertyMappedCollection.class);
         var webDriverFactory = new WebDriverFactory(true, remoteWebDriverFactory, propertyParser, new JsonUtils(),
-                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer, credentialsMock, List.of());
+                proxy, webDriverStartContext, Optional.empty(), Optional.empty(), timeoutConfigurer,
+                credentialsMock, List.of());
         var remoteDriver = mock(mockDriverClass);
         when(remoteWebDriverFactory.getRemoteWebDriver(any())).thenReturn(remoteDriver);
         when(remoteDriver.getCapabilities()).thenReturn(new DesiredCapabilities(Map.of(BROWSER_NAME, browserName)));
@@ -496,7 +500,7 @@ class WebDriverFactoryTests
 
         WebDriverListenerFactory webDriverListenerFactory = mock();
         var webDriverFactory = new WebDriverFactory(true, remoteWebDriverFactory, propertyParser, new JsonUtils(),
-                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer, CREDENTIALS,
+                proxy, webDriverStartContext, Optional.empty(), Optional.empty(), timeoutConfigurer, CREDENTIALS,
                 List.of(webDriverListenerFactory));
         testWebDriverCreation(desiredCapabilities, webDriverFactory, webDriverListenerFactory, () -> remoteWebDriver);
         verify(timeoutConfigurer).configure(timeouts);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,15 +60,17 @@ public class WebDriverFactory extends GenericWebDriverFactory
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
 
-    @SuppressWarnings("paramNum")
+    @SuppressWarnings({"paramNum", "PMD.ExcessiveParameterList"})
     public WebDriverFactory(boolean remoteExecution, IRemoteWebDriverFactory remoteWebDriverFactory,
             IPropertyParser propertyParser, JsonUtils jsonUtils, IProxy proxy,
             WebDriverStartContext webDriverStartContext,
             Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters,
+            Optional<SeleniumConfigurationValidator> seleniumConfigurationValidator,
             TimeoutConfigurer timeoutConfigurer, PropertyMappedCollection<BasicAuthCredentials> basicAuthCredentials,
             List<WebDriverListenerFactory> webDriverListenerFactories)
     {
-        super(remoteWebDriverFactory, propertyParser, jsonUtils, desiredCapabilitiesAdjusters);
+        super(remoteWebDriverFactory, propertyParser, jsonUtils, desiredCapabilitiesAdjusters,
+                seleniumConfigurationValidator);
         this.remoteExecution = remoteExecution;
         this.proxy = proxy;
         this.webDriverStartContext = webDriverStartContext;
