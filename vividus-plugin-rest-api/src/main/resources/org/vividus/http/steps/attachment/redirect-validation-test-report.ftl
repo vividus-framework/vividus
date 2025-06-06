@@ -34,6 +34,10 @@
             <th>Start URL</th>
             <th>Expected end URL</th>
             <th>Actual end URL</th>
+            <#if (result.expectedRedirect.statusCodes)?? >
+                <th>Expected Status Codes</th>
+                <th>Actual Status Codes</th>
+            </#if>
             <#if (result.expectedRedirect.redirectsNumber)?? >
                 <th>Expected redirects number</th>
                 <th>Actual redirects number</th>
@@ -46,6 +50,10 @@
             <td><a href="${(result.expectedRedirect.startUrl)!}">${startURL}</a></td>
             <td><a href="${(result.expectedRedirect.endUrl)!}">${endURL}</a></td>
             <td><a href="${(result.actualEndUrl)!}">${(result.actualEndUrl)!}</a></td>
+            <#if (result.expectedRedirect.statusCodes)?? >
+                <td><#list result.expectedRedirect.statusCodes as code>${code}<#sep>, </#list></td>
+                <td><#list result.actualStatusCodes as code>${code}<#sep>, </#list></td>
+            </#if>
             <#if fullTable?? >
                 <td>${(result.expectedRedirect.redirectsNumber)!}</td>
                 <td>${(result.actualRedirectsNumber)!}</td>
@@ -62,13 +70,15 @@
         <tr>
             <td>${(result.expectedRedirect.startUrl)!}</td>
         </tr>
-        <#list result.redirects>
-            <#items as url>
-                <tr>
-                    <td>${url}</td>
-                </tr>
-            </#items>
-        </#list>
+        <#if result.redirects??>
+            <#list result.redirects>
+                <#items as url>
+                    <tr>
+                        <td>${url}</td>
+                    </tr>
+                </#items>
+            </#list>
+        </#if>
     </table>
     </#list>
 </body>

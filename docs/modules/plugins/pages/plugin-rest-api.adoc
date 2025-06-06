@@ -922,6 +922,9 @@ Then I validate HTTP redirects:$expectedRedirects
 ** [subs=+quotes]`*startUrl*` - The URL from which redirection starts.
 ** [subs=+quotes]`*endUrl*` - The expected final URL to redirect to.
 ** [subs=+quotes]`*redirectsNumber*` - The expected number of redirects between `startUrl` and `endUrl` (optional).
+** [subs=+quotes]`*statusCodes*` - The comma-separated sequence of expected HTTP status codes of the redirects (optional).
+
+NOTE: `redirectsNumber` and `statusCodes` can't be specified simultaneously.
 
 .Validate redirects
 [source,gherkin]
@@ -929,6 +932,9 @@ Then I validate HTTP redirects:$expectedRedirects
 Then I validate HTTP redirects:
 |startUrl                    |endUrl                          |redirectsNumber |
 |http://example.com/redirect |http://example.com/get-response |1               |
+Then I validate HTTP redirects:
+|startUrl                    |endUrl                          |statusCodes |
+|http://example.com/redirect |http://example.com/get-response |301         |
 ----
 
 
