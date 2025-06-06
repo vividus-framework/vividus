@@ -43,7 +43,6 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,6 +57,7 @@ import org.vividus.mobitru.client.exception.MobitruDeviceTakeException;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
 import org.vividus.mobitru.client.model.Device;
 import org.vividus.mobitru.client.model.DeviceSearchParameters;
+import org.vividus.mobitru.selenium.MobitruPropertiesValidator;
 
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
 class MobitruFacadeImplTests
@@ -85,13 +85,8 @@ class MobitruFacadeImplTests
     private final TestLogger logger = TestLoggerFactory.getTestLogger(MobitruFacadeImpl.class);
 
     @Mock private MobitruClient mobitruClient;
+    @Mock private MobitruPropertiesValidator mobitruPropertiesValidator;
     @InjectMocks private MobitruFacadeImpl mobitruFacade;
-
-    @BeforeEach
-    void beforeEach()
-    {
-        mobitruFacade.setMatchesDriverUrl(true);
-    }
 
     @Test
     void shouldFindDeviceWithRetryAndTakeIt() throws MobitruOperationException
@@ -257,16 +252,6 @@ class MobitruFacadeImplTests
         var exception = assertThrows(IllegalArgumentException.class, () -> mobitruFacade.takeDevice(capabilities));
         assertEquals(String.format("Conflicting capabilities are found. `%s` capability can not be specified along"
                 + " with `mobitru-device-search:` capabilities", capabilityName), exception.getMessage());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenDriverUrlDoesNotMatch()
-    {
-        mobitruFacade.setMatchesDriverUrl(false);
-        var capabilities = new DesiredCapabilities(Map.of(UDID_CAP, UDID));
-        var exception = assertThrows(MobitruOperationException.class, () -> mobitruFacade.takeDevice(capabilities));
-        assertEquals("The driver URL authority does not match Mobitru. Check your Selenium Grid properties.",
-                exception.getMessage());
     }
 
     @Test

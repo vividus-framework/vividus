@@ -45,6 +45,7 @@ import org.vividus.mobitru.client.model.Application;
 import org.vividus.mobitru.client.model.Device;
 import org.vividus.mobitru.client.model.DeviceSearchParameters;
 import org.vividus.mobitru.client.model.ScreenRecordingMetadata;
+import org.vividus.mobitru.selenium.MobitruPropertiesValidator;
 import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.RetryTimesBasedWaiter;
 import org.vividus.util.wait.WaitMode;
@@ -66,21 +67,18 @@ public class MobitruFacadeImpl implements MobitruFacade
 
     private final MobitruClient mobitruClient;
     private Duration waitForDeviceTimeout;
-    private Boolean matchesDriverUrl;
+    private final MobitruPropertiesValidator mobitruPropertiesValidator;
 
-    public MobitruFacadeImpl(MobitruClient mobitruClient)
+    public MobitruFacadeImpl(MobitruPropertiesValidator mobitruPropertiesValidator, MobitruClient mobitruClient)
     {
+        this.mobitruPropertiesValidator = mobitruPropertiesValidator;
+        this.mobitruPropertiesValidator.validate();
         this.mobitruClient = mobitruClient;
     }
 
     @Override
     public String takeDevice(DesiredCapabilities desiredCapabilities) throws MobitruOperationException
     {
-        if (!matchesDriverUrl)
-        {
-            throw new MobitruOperationException("The driver URL authority does not match Mobitru."
-                    + " Check your Selenium Grid properties.");
-        }
         List<Device> devices;
         boolean waitUntilAvailable;
         if (isSearchForDevice(desiredCapabilities))
@@ -322,10 +320,5 @@ public class MobitruFacadeImpl implements MobitruFacade
     public void setWaitForDeviceTimeout(Duration waitForDeviceTimeout)
     {
         this.waitForDeviceTimeout = waitForDeviceTimeout;
-    }
-
-    public void setMatchesDriverUrl(Boolean matchesDriverUrl)
-    {
-        this.matchesDriverUrl = matchesDriverUrl;
     }
 }
