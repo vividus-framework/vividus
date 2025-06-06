@@ -45,6 +45,7 @@ import org.vividus.mobitru.client.model.Application;
 import org.vividus.mobitru.client.model.Device;
 import org.vividus.mobitru.client.model.DeviceSearchParameters;
 import org.vividus.mobitru.client.model.ScreenRecordingMetadata;
+import org.vividus.mobitru.selenium.MobitruPropertiesValidator;
 import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.RetryTimesBasedWaiter;
 import org.vividus.util.wait.WaitMode;
@@ -66,9 +67,12 @@ public class MobitruFacadeImpl implements MobitruFacade
 
     private final MobitruClient mobitruClient;
     private Duration waitForDeviceTimeout;
+    private final MobitruPropertiesValidator mobitruPropertiesValidator;
 
-    public MobitruFacadeImpl(MobitruClient mobitruClient)
+    public MobitruFacadeImpl(MobitruPropertiesValidator mobitruPropertiesValidator, MobitruClient mobitruClient)
     {
+        this.mobitruPropertiesValidator = mobitruPropertiesValidator;
+        this.mobitruPropertiesValidator.validate();
         this.mobitruClient = mobitruClient;
     }
 

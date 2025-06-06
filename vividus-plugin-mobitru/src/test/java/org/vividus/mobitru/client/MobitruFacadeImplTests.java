@@ -57,6 +57,7 @@ import org.vividus.mobitru.client.exception.MobitruDeviceTakeException;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
 import org.vividus.mobitru.client.model.Device;
 import org.vividus.mobitru.client.model.DeviceSearchParameters;
+import org.vividus.mobitru.selenium.MobitruPropertiesValidator;
 
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
 class MobitruFacadeImplTests
@@ -84,6 +85,7 @@ class MobitruFacadeImplTests
     private final TestLogger logger = TestLoggerFactory.getTestLogger(MobitruFacadeImpl.class);
 
     @Mock private MobitruClient mobitruClient;
+    @Mock private MobitruPropertiesValidator mobitruPropertiesValidator;
     @InjectMocks private MobitruFacadeImpl mobitruFacade;
 
     @Test
