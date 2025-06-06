@@ -36,6 +36,7 @@ import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -47,6 +48,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
@@ -76,6 +78,7 @@ import com.google.api.services.pagespeedonline.v5.model.LighthouseResultV5;
 import com.google.api.services.pagespeedonline.v5.model.PagespeedApiPagespeedResponseV5;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.function.FailableConsumer;
 import org.apache.tika.utils.FileProcessResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -91,6 +94,7 @@ import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.context.VariableContext;
 import org.vividus.lighthouse.LighthouseSteps.PerformanceValidationConfiguration;
 import org.vividus.lighthouse.model.MetricRule;
 import org.vividus.lighthouse.model.ScanType;
@@ -101,6 +105,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.Sleeper;
+import org.vividus.variable.VariableScope;
 
 @SuppressWarnings("MethodCount")
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -135,6 +140,7 @@ class LighthouseStepsTests
 
     @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private ISoftAssert softAssert;
+    @Mock private VariableContext variableContext;
     @Mock private ShellCommandExecutor commandExecutor;
     @Mock private PagespeedInsights pagespeedInsights;
     @Mock private JsonFactory jsonFactory;
@@ -555,6 +561,31 @@ class LighthouseStepsTests
     void shouldPerformLocalLighthouseScan(Optional<PerformanceValidationConfiguration> config,
             @TempDir Path outputDirectory) throws Exception
     {
+        performLocalTest(outputDirectory, r ->
+        {
+            LighthouseSteps steps = createSteps(List.of(PERFORMANCE_CATEGORY), 0, config, outputDirectory.toString());
+            steps.performLocalLighthouseScan(URL, LIGHTHOUSE_OPTIONS, List.of(r));
+        });
+        verifyNoInteractions(variableContext);
+    }
+
+    @Test
+    void shouldPerformLocalLighthouseScanAndSaveResult(@TempDir Path outputDirectory) throws Exception
+    {
+        String variable = "variable";
+        performLocalTest(outputDirectory, r ->
+        {
+            LighthouseSteps steps = createSteps(List.of(PERFORMANCE_CATEGORY), 0, Optional.empty(),
+                    outputDirectory.toString());
+            steps.performLocalLighthouseScanAndSavePath(URL, LIGHTHOUSE_OPTIONS, Set.of(VariableScope.SCENARIO),
+                    variable, List.of(r));
+        });
+        verify(variableContext).putVariable(Set.of(VariableScope.SCENARIO), variable,
+                locateResultsFile(outputDirectory).toString());
+    }
+
+    private void performLocalTest(Path outputDirectory, FailableConsumer<MetricRule, Exception> run) throws Exception
+    {
         mockLighthouseInstall(0);
 
         FileProcessResult lighthouseResult = mock();
@@ -568,10 +599,8 @@ class LighthouseStepsTests
         }).when(commandExecutor).executeCommand(argThat(arg -> arg.toString().contains(LIGHTHOUSE_EXECUTABLE)));
         mockRun();
 
-        LighthouseSteps steps = createSteps(List.of(PERFORMANCE_CATEGORY), 0, config, outputDirectory.toString());
-
         MetricRule perfScoreRule = createRule(PERF_SCORE_METRIC, 85, ComparisonRule.GREATER_THAN);
-        steps.performLocalLighthouseScan(URL, LIGHTHOUSE_OPTIONS, List.of(perfScoreRule));
+        run.accept(perfScoreRule);
 
         validateMetric(DESKTOP_STRATEGY, perfScoreRule, alignScore(new BigDecimal(1)), GREATER_VALUE_FORMAT);
         verifyNoMoreInteractions(softAssert);
@@ -579,13 +608,11 @@ class LighthouseStepsTests
         String arg = getLighthouseExec(resultsFile);
         Files.delete(resultsFile);
 
-        steps.performLocalLighthouseScan(URL, LIGHTHOUSE_OPTIONS, List.of(perfScoreRule));
+        run.accept(perfScoreRule);
 
         String scanLog = "Starting Lighthouse scan: {}";
-        assertThat(logger.getLoggingEvents(), is(List.of(
-            info(scanLog, arg),
-            info(scanLog, getLighthouseExec(locateResultsFile(outputDirectory)))
-        )));
+        assertThat(logger.getLoggingEvents(),
+                is(List.of(info(scanLog, arg), info(scanLog, getLighthouseExec(locateResultsFile(outputDirectory))))));
     }
 
     private String getLighthouseExec(Path resultsFile)
@@ -754,7 +781,7 @@ class LighthouseStepsTests
             Optional<PerformanceValidationConfiguration> configuration, String outputDirectory) throws Exception
     {
         return new LighthouseSteps(APP_NAME, API_KEY, categories, delta, configuration, outputDirectory,
-                attachmentPublisher, softAssert, commandExecutor);
+                attachmentPublisher, softAssert, commandExecutor, variableContext);
     }
 
     private Pagespeedapi mockPagespeedapiCall(String strategy, ArrayMap<String, BigDecimal> metrics) throws IOException

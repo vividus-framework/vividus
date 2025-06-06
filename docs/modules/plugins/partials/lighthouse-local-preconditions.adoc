@@ -1,0 +1,5 @@
+IMPORTANT: The step can be used only on unix-like operating systems.
+
+Pre-installed software requirements:
+* https://nodejs.org/en[NodeJS]: required to install https://www.npmjs.com/package/lighthouse[local Lighthouse] using `npm` package manager
+* https://www.google.com/chrome[Google Chrome]: required by Lighthouse
