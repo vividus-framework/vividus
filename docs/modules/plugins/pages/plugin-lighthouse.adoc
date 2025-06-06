@@ -114,11 +114,7 @@ Then Lighthouse desktop audit scores for `https://www.vividus-reactjs.com/` page
 
 Performs local Lighthouse scan of the specified web page and validates performance metrics against expected thresholds.
 
-IMPORTANT: The step can be used only on unix-like operating systems.
-
-Pre-installed software requirements:
-* https://nodejs.org/en[NodeJS]: required to install https://www.npmjs.com/package/lighthouse[local Lighthouse] using `npm` package manager
-* https://www.google.com/chrome[Google Chrome]: required by Lighthouse
+include::partial$lighthouse-local-preconditions.adoc[]
 
 [source,gherkin]
 ----
@@ -129,19 +125,43 @@ When I perform local Lighthouse scan of `$webPageUrl` page with options `$option
 * `$options` - The https://github.com/GoogleChrome/lighthouse/blob/main/readme.md#cli-options[Lighthouse CLI options], please note that *Output* options are prohibited from use.
 include::partial$lighthouse-metrics-validations.adoc[]
 
-[TIP]
-.Install Chrome in CI environment
-====
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-apt install -y ./google-chrome-stable_current_amd64.deb
-====
-
-TIP: Steps to install NodeJS in CI environment can be found https://nodejs.org/en/download[here]
+include::partial$lighthouse-local-tips.adoc[]
 
 .Perform Lighthouse scan for protected site on desktop device in CI environment
 [source]
 ----
 When I perform local Lighthouse scan of `https://my-protected-site.com/` page with options `--only-categories=performance --chrome-flags="--no-sandbox --headless --disable-dev-shm-usage" --extra-headers="{\"Authorization\":\"Basic S0VzLnV3bmx5OQ==\"}"`:
+|metric                  |rule        |threshold|
+|First Contentful Paint  |LESS_THAN   |500      |
+|Largest Contentful Paint|LESS_THAN   |500      |
+|Total Blocking Time     |LESS_THAN   |100      |
+|Cumulative Layout Shift |LESS_THAN   |100      |
+|Speed Index             |LESS_THAN   |1500     |
+----
+
+=== Perform Local Lighthouse scan with result saving
+
+Performs local Lighthouse scan of the specified web page, validates performance metrics against expected thresholds and saves the path to the resulting JSON to a variable.
+
+include::partial$lighthouse-local-preconditions.adoc[]
+
+[source,gherkin]
+----
+When I perform local Lighthouse scan of `$webPageUrl` page with options `$options` and save result path to $scopes variable `$variableName`:$metricsValidations
+----
+
+* `$webPageUrl` - The page URL to perform scan on.
+* `$options` - The https://github.com/GoogleChrome/lighthouse/blob/main/readme.md#cli-options[Lighthouse CLI options], please note that *Output* options are prohibited from use.
+include::partial$lighthouse-metrics-validations.adoc[]
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to save resulting JSON.
+
+include::partial$lighthouse-local-tips.adoc[]
+
+.Perform Lighthouse scan
+[source]
+----
+When I perform local Lighthouse scan of `https://site.com/` page with options `--only-categories=performance` and save result path to scenario variable `resultPath`:
 |metric                  |rule        |threshold|
 |First Contentful Paint  |LESS_THAN   |500      |
 |Largest Contentful Paint|LESS_THAN   |500      |
