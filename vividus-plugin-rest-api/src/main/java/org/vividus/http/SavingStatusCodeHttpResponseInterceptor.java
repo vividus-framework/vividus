@@ -24,18 +24,11 @@ import org.apache.hc.core5.http.protocol.HttpContext;
 public class SavingStatusCodeHttpResponseInterceptor implements HttpResponseInterceptor
 {
     private HttpTestContext httpTestContext;
-    private HttpContext httpContext;
 
     @Override
     public void process(HttpResponse response, EntityDetails entity, HttpContext context)
     {
-        // Reset status codes on new request
-        if (httpContext != null && !httpContext.equals(context))
-        {
-            httpTestContext.resetStatusCodes();
-        }
-        httpContext = context;
-        httpTestContext.addStatusCode(response.getCode());
+        httpTestContext.recordStatusCodeData(response.getCode(), context);
     }
 
     public void setHttpTestContext(HttpTestContext httpTestContext)

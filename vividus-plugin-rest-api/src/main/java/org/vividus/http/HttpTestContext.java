@@ -24,6 +24,7 @@ import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.json.JsonContext;
 import org.vividus.testcontext.TestContext;
@@ -64,14 +65,16 @@ public class HttpTestContext implements JsonContext
         getData().connectionDetails = connectionDetails;
     }
 
-    public void addStatusCode(Integer statusCode)
+    public void recordStatusCodeData(Integer statusCode, HttpContext context)
     {
-        getData().statusCodes.add(statusCode);
-    }
-
-    public void resetStatusCodes()
-    {
-        getData().statusCodes = new ArrayList<>();
+        HttpTestContextData data = getData();
+        // Reset status codes on new request
+        if (data.httpContext != null && !data.httpContext.equals(context))
+        {
+            data.statusCodes = new ArrayList<>();
+        }
+        data.httpContext = context;
+        data.statusCodes.add(statusCode);
     }
 
     public void putResponse(HttpResponse response)
@@ -155,5 +158,6 @@ public class HttpTestContext implements JsonContext
         private HttpResponse response;
         private Optional<String> jsonElement = Optional.empty();
         private RequestConfig requestConfig;
+        private HttpContext httpContext;
     }
 }

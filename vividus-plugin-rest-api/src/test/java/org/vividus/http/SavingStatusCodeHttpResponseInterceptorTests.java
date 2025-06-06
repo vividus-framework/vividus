@@ -16,9 +16,6 @@
 
 package org.vividus.http;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +33,7 @@ class SavingStatusCodeHttpResponseInterceptorTests
     private static final int STATUS_CODE = 301;
 
     @Mock private HttpTestContext httpTestContext;
-
+    @Mock private HttpContext context;
     @Mock private HttpResponse response;
 
     @InjectMocks private SavingStatusCodeHttpResponseInterceptor interceptor;
@@ -44,32 +41,8 @@ class SavingStatusCodeHttpResponseInterceptorTests
     @Test
     void shouldSaveStatusCodeOnNewContext()
     {
-        HttpContext context = mock(HttpContext.class);
         when(response.getCode()).thenReturn(STATUS_CODE);
         interceptor.process(response, null, context);
-        verify(httpTestContext).addStatusCode(STATUS_CODE);
-        verify(httpTestContext, never()).resetStatusCodes();
-    }
-
-    @Test
-    void shouldSaveStatusCodeOnSameContext()
-    {
-        HttpContext context = mock(HttpContext.class);
-        when(response.getCode()).thenReturn(STATUS_CODE);
-        interceptor.process(response, null, context);
-        interceptor.process(response, null, context);
-        verify(httpTestContext, times(2)).addStatusCode(STATUS_CODE);
-        verify(httpTestContext, never()).resetStatusCodes();
-    }
-
-    @Test
-    void shouldResetStatusCodesOnNewContext()
-    {
-        HttpContext context = mock(HttpContext.class);
-        HttpContext anotherContext = mock(HttpContext.class);
-        when(response.getCode()).thenReturn(STATUS_CODE);
-        interceptor.process(response, null, context);
-        interceptor.process(response, null, anotherContext);
-        verify(httpTestContext).resetStatusCodes();
+        verify(httpTestContext).recordStatusCodeData(STATUS_CODE, context);
     }
 }

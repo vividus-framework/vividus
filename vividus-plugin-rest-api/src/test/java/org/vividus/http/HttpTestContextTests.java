@@ -32,6 +32,7 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.junit.jupiter.api.Test;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.testcontext.SimpleTestContext;
@@ -151,27 +152,30 @@ class HttpTestContextTests
     }
 
     @Test
-    void testAddStatusCode()
+    void testRecordStatusCodeData()
     {
         int statusCode = 301;
-        httpTestContext.addStatusCode(statusCode);
+        httpTestContext.recordStatusCodeData(statusCode, null);
         assertEquals(List.of(statusCode), httpTestContext.getStatusCodes());
     }
 
     @Test
     void testMultipleStatusCodes()
     {
-        httpTestContext.addStatusCode(301);
-        httpTestContext.addStatusCode(302);
+        HttpContext context = mock(HttpContext.class);
+        httpTestContext.recordStatusCodeData(301, context);
+        httpTestContext.recordStatusCodeData(302, context);
         assertEquals(List.of(301, 302), httpTestContext.getStatusCodes());
     }
 
     @Test
-    void testResetStatusCodes()
+    void testRecordStatusCodeDataWithReset()
     {
-        httpTestContext.addStatusCode(301);
-        httpTestContext.resetStatusCodes();
-        assertThat(httpTestContext.getStatusCodes(), empty());
+        HttpContext context = mock(HttpContext.class);
+        httpTestContext.recordStatusCodeData(301, context);
+        HttpContext newContext = mock(HttpContext.class);
+        httpTestContext.recordStatusCodeData(302, newContext);
+        assertEquals(List.of(302), httpTestContext.getStatusCodes());
     }
 
     @Test
