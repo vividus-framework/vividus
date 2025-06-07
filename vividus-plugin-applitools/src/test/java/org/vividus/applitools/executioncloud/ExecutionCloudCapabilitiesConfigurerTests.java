@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,18 @@
 package org.vividus.applitools.executioncloud;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
+import org.jbehave.core.model.Meta;
+import org.jbehave.core.model.Story;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -34,6 +38,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.context.RunContext;
 import org.vividus.model.RunningStory;
+import org.vividus.selenium.ControllingMetaTag;
 import org.vividus.selenium.event.WebDriverCreateEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -81,5 +86,24 @@ class ExecutionCloudCapabilitiesConfigurerTests
             "appName", APP_NAME,
             "batch", Map.of("name", RUN_NAME)
         ));
+    }
+
+    @Test
+    void shouldFailIfTunnelingIsEnabled()
+    {
+        RunningStory runningStory = mock();
+        when(runContext.getRootRunningStory()).thenReturn(runningStory);
+        Story story = mock();
+        when(runningStory.getStory()).thenReturn(story);
+        Meta meta = new Meta(List.of(ControllingMetaTag.TUNNEL.name().toLowerCase()));
+        when(story.getMeta()).thenReturn(meta);
+
+        ExecutionCloudCapabilitiesConfigurer configurer = new ExecutionCloudCapabilitiesConfigurer(API_KEY,
+                URI.create(SERVER_URI), APP_NAME, RUN_NAME, runContext);
+        DesiredCapabilities capabilities = new DesiredCapabilities();
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> configurer.configure(capabilities));
+        assertEquals("ExecutionCloud doesn't support tunneling capabilities.", thrown.getMessage());
     }
 }

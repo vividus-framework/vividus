@@ -89,7 +89,9 @@ If set to zero, waiting is disabled.
 a|`true` +
 `false`
 |`false`
-|Enables https://wiki.saucelabs.com/display/DOCS/Sauce+Connect+Proxy[Sauce Connect Proxy]
+a|Enables https://wiki.saucelabs.com/display/DOCS/Sauce+Connect+Proxy[Sauce Connect Proxy]
+
+The https://wiki.saucelabs.com/display/DOCS/Sauce+Connect+Proxy[Sauce Connect Proxy] can also be enabled at story level by using `@tunnel` meta tag.
 
 |`saucelabs.sauce-connect.use-latest-version`
 a|`true` +

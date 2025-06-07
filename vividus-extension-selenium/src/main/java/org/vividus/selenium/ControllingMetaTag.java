@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,11 +37,15 @@ public enum ControllingMetaTag
         {
             return meta.hasProperty(CapabilityType.PROXY);
         }
+    },
+    TUNNEL
+    {
+        private static final String TUNNEL_PROPERTY = "tunnel";
 
         @Override
-        protected void setCapability(DesiredCapabilities capabilities, Meta meta)
+        public boolean isContainedIn(Meta meta)
         {
-            // Nothing to do
+            return meta.hasProperty(TUNNEL_PROPERTY);
         }
     },
     CAPABILITY
@@ -69,7 +73,10 @@ public enum ControllingMetaTag
 
     public abstract boolean isContainedIn(Meta meta);
 
-    protected abstract void setCapability(DesiredCapabilities capabilities, Meta meta);
+    protected void setCapability(DesiredCapabilities capabilities, Meta meta)
+    {
+        // Nothing to do
+    }
 
     public static boolean isAnyContainedIn(Meta meta)
     {

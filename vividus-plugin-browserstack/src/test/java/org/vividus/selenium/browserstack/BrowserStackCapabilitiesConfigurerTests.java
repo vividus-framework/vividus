@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import org.jbehave.core.model.Meta;
+import org.jbehave.core.model.Story;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -56,6 +58,9 @@ class BrowserStackCapabilitiesConfigurerTests
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
 
         when(runContext.getRootRunningStory()).thenReturn(runningStory);
+        Story story = mock();
+        when(runningStory.getStory()).thenReturn(story);
+        when(story.getMeta()).thenReturn(new Meta());
         when(runningStory.getName()).thenReturn(name);
 
         configurer.configure(desiredCapabilities);

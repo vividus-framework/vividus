@@ -281,7 +281,7 @@ jobs:
           declare -a profiles=( chrome firefox edge )
           for profile in "${profiles[@]}"; do
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs \
-                                                  -Pvividus.configuration.suites=health_check \
+                                                  -Pvividus.configuration.suites=health_check/extended \
                                                   -Pvividus.configuration.profiles=saucelabs/web,web/desktop/${profile} \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                   -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
