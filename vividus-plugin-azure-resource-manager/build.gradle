@@ -7,7 +7,7 @@ dependencies {
     implementation project(':vividus-reporter')
     implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.50.0')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.0')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.1')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
