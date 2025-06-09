@@ -29,6 +29,7 @@ import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
@@ -311,7 +312,7 @@ public final class LighthouseSteps
                 results.add(performLocalLighthouseScan(resultsFile, webPageUrl, options));
             }
 
-            result = percentile(results, performanceConfig.getPercentile());
+            result = calculatePerformancePercentile(results, performanceConfig.getPercentile());
         }
 
         processLighthouseResult(result, metricsValidations);
@@ -459,17 +460,18 @@ public final class LighthouseSteps
             }
         }
 
-        return results.stream()
-                      .sorted(Comparator.comparing(this::getPerformanceScore))
-                      .collect(Collectors.collectingAndThen(Collectors.toList(),
-                              r -> percentile(r, unwrapped.getPercentile())));
+        return calculatePerformancePercentile(results, unwrapped.getPercentile());
     }
 
     @SuppressWarnings("MagicNumber")
-    private static LighthouseResultV5 percentile(List<LighthouseResultV5> results, double percentile)
+    private LighthouseResultV5 calculatePerformancePercentile(Collection<LighthouseResultV5> results, double percentile)
     {
-        int index = (int) Math.ceil(percentile / 100 * results.size());
-        return results.get(index - 1);
+        List<LighthouseResultV5> sortedResults = results.stream()
+                .sorted(Comparator.comparing(this::getPerformanceScore))
+                .toList();
+
+        int index = (int) Math.ceil(percentile / 100 * sortedResults.size());
+        return sortedResults.get(index - 1);
     }
 
     private LighthouseCategoryV5 getPerformance(LighthouseResultV5 result)
