@@ -28,22 +28,24 @@ import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -63,12 +65,14 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.context.VariableContext;
 import org.vividus.lighthouse.model.MetricRule;
 import org.vividus.lighthouse.model.ScanType;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.shell.ShellCommandExecutor;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.wait.MaxTimesBasedWaiter;
+import org.vividus.variable.VariableScope;
 
 public final class LighthouseSteps
 {
@@ -99,6 +103,7 @@ public final class LighthouseSteps
     private final IAttachmentPublisher attachmentPublisher;
     private final ISoftAssert softAssert;
     private final ShellCommandExecutor commandExecutor;
+    private final VariableContext variableContext;
     private final PagespeedInsights pagespeedInsights;
     private final JsonFactory jsonFactory;
 
@@ -111,10 +116,12 @@ public final class LighthouseSteps
     private final Lock lighthouseInstallLock = new ReentrantLock();
     private final AtomicBoolean lighthouseInstalled = new AtomicBoolean(false);
 
+    @SuppressWarnings("paramNum")
     public LighthouseSteps(String applicationName, String apiKey, List<String> categories,
             int acceptableScorePercentageDelta, Optional<PerformanceValidationConfiguration> configuration,
             String outputDirectory, IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert,
-            ShellCommandExecutor commandExecutor) throws GeneralSecurityException, IOException
+            ShellCommandExecutor commandExecutor, VariableContext variableContext)
+            throws GeneralSecurityException, IOException
     {
         boolean hasPerformance = categories.contains("performance");
         configuration.filter(c -> hasPerformance).ifPresent(PerformanceValidationConfiguration::validate);
@@ -127,6 +134,7 @@ public final class LighthouseSteps
         this.attachmentPublisher = attachmentPublisher;
         this.softAssert = softAssert;
         this.commandExecutor = commandExecutor;
+        this.variableContext = variableContext;
         this.pagespeedInsights = new PagespeedInsights.Builder(
                 GoogleNetHttpTransport.newTrustedTransport(),
                 GsonFactory.getDefaultInstance(),
@@ -287,6 +295,49 @@ public final class LighthouseSteps
     public void performLocalLighthouseScan(String webPageUrl, String options, List<MetricRule> metricsValidations)
             throws IOException
     {
+        performLocalLighthouseScan(webPageUrl, options, metricsValidations, r -> { });
+    }
+
+    /**
+     * Performs local Lighthouse scan of the specified web page and validates performance metrics against expected
+     * thresholds and saves the path to the resulted JSON into a variable.
+     * <br>
+     * <br>
+     * <b>IMPORTANT</b>: The step can be used only on unix-like operating systems.
+     * <br>
+     * <br>
+     * Pre-requisite software:
+     * <ul>
+     * <li>NodeJS</li>
+     * <li>Google Chrome</li>
+     * </ul>
+     *
+     * @param webPageUrl         The web page URL to perform scan on.
+     * @param options            The Lighthouse CLI options.
+     * @param metricsValidations The metrics validations.
+     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     * <i>Available scopes:</i>
+     * <ul>
+     * <li><b>STEP</b> - the variable will be available only within the step,
+     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     * <li><b>STORY</b> - the variable will be available within the whole story,
+     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * </ul>
+     * @param variableName A name under which the path should be saved
+     * @throws IOException       If an I/O exception of some sort has occurred
+     */
+    @When(value = "I perform local Lighthouse scan of `$webPageUrl` page with options `$options` and save result path "
+            + "to $scopes variable `$variableName`:$metricsValidations", priority = 1)
+    public void performLocalLighthouseScanAndSavePath(String webPageUrl, String options, Set<VariableScope> scopes,
+            String variableName, List<MetricRule> metricsValidations) throws IOException
+    {
+        performLocalLighthouseScan(webPageUrl, options, metricsValidations,
+                r -> variableContext.putVariable(scopes, variableName, r.toString()));
+    }
+
+    private void performLocalLighthouseScan(String webPageUrl, String options, List<MetricRule> metricsValidations,
+            Consumer<Path> consumer) throws IOException
+    {
         LIGHTHOUSE_PROHIBITED_OPTIONS.forEach(o -> isTrue(!options.contains(o), "The %s option is not allowed.", o));
 
         installLighthouse();
@@ -296,24 +347,31 @@ public final class LighthouseSteps
                 .resolve(String.valueOf(instant.getEpochSecond()) + instant.getNano());
         Files.createDirectories(baseDirectory);
 
+        Path resultPath;
         LighthouseResultV5 result;
         if (configuration.isEmpty())
         {
-            result = performLocalLighthouseScan(baseDirectory.resolve("lighthouse-scan.json"), webPageUrl, options);
+            resultPath = baseDirectory.resolve("lighthouse-scan.json");
+            result = performLocalLighthouseScan(resultPath, webPageUrl, options);
         }
         else
         {
             PerformanceValidationConfiguration performanceConfig = configuration.get();
-            List<LighthouseResultV5> results = new ArrayList<>();
+            int measurementsNumber = performanceConfig.measurementsNumber;
+            Map<LighthouseResultV5, Path> results = new IdentityHashMap<>(measurementsNumber);
 
-            for (int iteration = 0; iteration < performanceConfig.measurementsNumber; iteration++)
+            for (int iteration = 0; iteration < measurementsNumber; iteration++)
             {
                 Path resultsFile = baseDirectory.resolve("lighthouse-scan-%s.json".formatted(iteration + 1));
-                results.add(performLocalLighthouseScan(resultsFile, webPageUrl, options));
+                LighthouseResultV5 scanResult = performLocalLighthouseScan(resultsFile, webPageUrl, options);
+                results.put(scanResult, resultsFile);
             }
 
-            result = calculatePerformancePercentile(results, performanceConfig.getPercentile());
+            result = calculatePerformancePercentile(results.keySet(), performanceConfig.getPercentile());
+            resultPath = results.get(result);
         }
+
+        consumer.accept(resultPath);
 
         processLighthouseResult(result, metricsValidations);
     }
