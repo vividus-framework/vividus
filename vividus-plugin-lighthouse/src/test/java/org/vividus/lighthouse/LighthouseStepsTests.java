@@ -40,6 +40,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -102,6 +105,9 @@ import org.vividus.steps.ComparisonRule;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.Sleeper;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+
 @SuppressWarnings("MethodCount")
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class LighthouseStepsTests
@@ -132,6 +138,9 @@ class LighthouseStepsTests
     private static final String LIGHTHOUSE_OPTIONS = "--only-categories=performance --preset=desktop";
     private static final String LIGHTHOUSE_EXECUTABLE = "./node_modules/lighthouse/cli/index.js";
     private static final String ERROR = "error";
+    private static final String LIGHTHOUSE_SCAN_FILE = "lighthouse-scan.json";
+    private static final String LIGHTHOUSE_SCAN_IDX_FILE = "lighthouse-scan-%s.json";
+    private static final String SCAN_LOG = "Starting Lighthouse scan: {}";
 
     @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private ISoftAssert softAssert;
@@ -542,50 +551,93 @@ class LighthouseStepsTests
         });
     }
 
-    static Stream<Optional<PerformanceValidationConfiguration>> validationConfigs()
-    {
-        return Stream.of(
-            Optional.empty(),
-            createConfiguration(1, 50)
-        );
-    }
-
-    @MethodSource("validationConfigs")
-    @ParameterizedTest
-    void shouldPerformLocalLighthouseScan(Optional<PerformanceValidationConfiguration> config,
-            @TempDir Path outputDirectory) throws Exception
+    @Test
+    void shouldPerformLocalLighthouseScanSingleRun(@TempDir Path outputDirectory) throws Exception
     {
         mockLighthouseInstall(0);
 
         FileProcessResult lighthouseResult = mock();
         when(lighthouseResult.getExitValue()).thenReturn(0);
-        doAnswer(a ->
-        {
-            String lighthouseScan = ResourceUtils.loadResource(getClass(), "lighthouse-scan.json");
-            Files.writeString(locateResultsFile(outputDirectory), lighthouseScan + System.lineSeparator(),
-                    StandardCharsets.UTF_8);
-            return lighthouseResult;
-        }).when(commandExecutor).executeCommand(argThat(arg -> arg.toString().contains(LIGHTHOUSE_EXECUTABLE)));
+        mockExecuteCommand(lighthouseResult, outputDirectory, LIGHTHOUSE_SCAN_FILE, 1);
         mockRun();
 
-        LighthouseSteps steps = createSteps(List.of(PERFORMANCE_CATEGORY), 0, config, outputDirectory.toString());
+        LighthouseSteps steps = createSteps(List.of(PERFORMANCE_CATEGORY), 0, Optional.empty(),
+                outputDirectory.toString());
 
         MetricRule perfScoreRule = createRule(PERF_SCORE_METRIC, 85, ComparisonRule.GREATER_THAN);
         steps.performLocalLighthouseScan(URL, LIGHTHOUSE_OPTIONS, List.of(perfScoreRule));
 
         validateMetric(DESKTOP_STRATEGY, perfScoreRule, alignScore(new BigDecimal(1)), GREATER_VALUE_FORMAT);
         verifyNoMoreInteractions(softAssert);
-        Path resultsFile = locateResultsFile(outputDirectory);
-        String arg = getLighthouseExec(resultsFile);
-        Files.delete(resultsFile);
+        String arg = getExecArg(outputDirectory, LIGHTHOUSE_SCAN_FILE);
 
         steps.performLocalLighthouseScan(URL, LIGHTHOUSE_OPTIONS, List.of(perfScoreRule));
 
-        String scanLog = "Starting Lighthouse scan: {}";
         assertThat(logger.getLoggingEvents(), is(List.of(
-            info(scanLog, arg),
-            info(scanLog, getLighthouseExec(locateResultsFile(outputDirectory)))
+            info(SCAN_LOG, arg),
+            info(SCAN_LOG, getLighthouseExec(locateResultsFile(outputDirectory, LIGHTHOUSE_SCAN_FILE)))
         )));
+    }
+
+    @Test
+    void shouldPerformLocalLighthouseScanMultipleMeasurements(@TempDir Path outputDirectory) throws Exception
+    {
+        mockLighthouseInstall(0);
+
+        FileProcessResult lighthouseResult = mock();
+        when(lighthouseResult.getExitValue()).thenReturn(0);
+        mockExecuteCommand(lighthouseResult, outputDirectory, LIGHTHOUSE_SCAN_IDX_FILE.formatted(1), 1);
+        mockExecuteCommand(lighthouseResult, outputDirectory, LIGHTHOUSE_SCAN_IDX_FILE.formatted(2), 0.25f);
+        mockRun();
+
+        LighthouseSteps steps = createSteps(List.of(PERFORMANCE_CATEGORY), 0, createConfiguration(2, 90),
+                outputDirectory.toString());
+
+        MetricRule perfScoreRule = createRule(PERF_SCORE_METRIC, 85, ComparisonRule.GREATER_THAN);
+        steps.performLocalLighthouseScan(URL, LIGHTHOUSE_OPTIONS, List.of(perfScoreRule));
+
+        validateMetric(DESKTOP_STRATEGY, perfScoreRule, alignScore(new BigDecimal(1)), GREATER_VALUE_FORMAT);
+        verifyNoMoreInteractions(softAssert);
+        String arg1 = getExecArg(outputDirectory, LIGHTHOUSE_SCAN_IDX_FILE.formatted(1));
+        String arg2 = getExecArg(outputDirectory, LIGHTHOUSE_SCAN_IDX_FILE.formatted(2));
+
+        steps.performLocalLighthouseScan(URL, LIGHTHOUSE_OPTIONS, List.of(perfScoreRule));
+
+        assertThat(logger.getLoggingEvents(), is(List.of(
+            info(SCAN_LOG, arg1),
+            info(SCAN_LOG, arg2),
+            info(SCAN_LOG,
+                    getLighthouseExec(locateResultsFile(outputDirectory, LIGHTHOUSE_SCAN_IDX_FILE.formatted(1)))),
+            info(SCAN_LOG, getLighthouseExec(
+                    locateResultsFile(outputDirectory, LIGHTHOUSE_SCAN_IDX_FILE.formatted(2))))
+        )));
+    }
+
+    private void mockExecuteCommand(FileProcessResult result, Path outputDir, String filename, float score)
+            throws IOException
+    {
+        doAnswer(a ->
+        {
+            String lighthouseScanTemplate = ResourceUtils.loadResource(getClass(), "lighthouse-scan-template.ftl");
+            try (Reader reader = new StringReader(lighthouseScanTemplate); StringWriter out = new StringWriter())
+            {
+                Template template = new Template("lighthouseScanTemplate", reader,
+                        new Configuration(Configuration.VERSION_2_3_34));
+                template.process(Map.of(PERF_SCORE_METRIC, score), out);
+                Files.writeString(locateResultsFile(outputDir, filename), out.toString() + System.lineSeparator(),
+                        StandardCharsets.UTF_8);
+            }
+            return result;
+        }).when(commandExecutor)
+                .executeCommand(argThat(arg -> arg.contains(LIGHTHOUSE_EXECUTABLE) && arg.contains(filename)));
+    }
+
+    private String getExecArg(Path dir, String file) throws IOException
+    {
+        Path resultsFile = locateResultsFile(dir, file);
+        String arg = getLighthouseExec(resultsFile);
+        Files.delete(resultsFile);
+        return arg;
     }
 
     private String getLighthouseExec(Path resultsFile)
@@ -594,9 +646,9 @@ class LighthouseStepsTests
                 LIGHTHOUSE_OPTIONS);
     }
 
-    private Path locateResultsFile(Path outputDirectory) throws IOException
+    private Path locateResultsFile(Path outputDirectory, String filename) throws IOException
     {
-        return Files.walk(outputDirectory).filter(p -> p.toString().endsWith(".json")).findFirst().get();
+        return Files.walk(outputDirectory).filter(p -> p.getFileName().endsWith(filename)).findFirst().get();
     }
 
     @ValueSource(strings = { "--output-path", "--output", "--view" })

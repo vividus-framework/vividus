@@ -2455,7 +2455,7 @@
         }
       ],
       "id": "performance",
-      "score": 1
+      "score": ${performanceScore}
     }
   },
   "categoryGroups": {
