@@ -1,0 +1,8 @@
+[TIP]
+.Install Chrome in CI environment
+====
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+apt install -y ./google-chrome-stable_current_amd64.deb
+====
+
+TIP: Steps to install NodeJS in CI environment can be found https://nodejs.org/en/download[here]
