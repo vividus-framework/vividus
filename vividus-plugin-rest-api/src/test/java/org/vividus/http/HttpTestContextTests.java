@@ -152,10 +152,10 @@ class HttpTestContextTests
     }
 
     @Test
-    void testRecordStatusCodeData()
+    void testAddStatusCodeToChain()
     {
         int statusCode = 301;
-        httpTestContext.recordStatusCodeData(statusCode, null);
+        httpTestContext.addStatusCodeToChain(statusCode, null);
         assertEquals(List.of(statusCode), httpTestContext.getStatusCodes());
     }
 
@@ -163,18 +163,18 @@ class HttpTestContextTests
     void testMultipleStatusCodes()
     {
         HttpContext context = mock(HttpContext.class);
-        httpTestContext.recordStatusCodeData(301, context);
-        httpTestContext.recordStatusCodeData(302, context);
+        httpTestContext.addStatusCodeToChain(301, context);
+        httpTestContext.addStatusCodeToChain(302, context);
         assertEquals(List.of(301, 302), httpTestContext.getStatusCodes());
     }
 
     @Test
-    void testRecordStatusCodeDataWithReset()
+    void testAddStatusCodeToChainWithReset()
     {
         HttpContext context = mock(HttpContext.class);
-        httpTestContext.recordStatusCodeData(301, context);
+        httpTestContext.addStatusCodeToChain(301, context);
         HttpContext newContext = mock(HttpContext.class);
-        httpTestContext.recordStatusCodeData(302, newContext);
+        httpTestContext.addStatusCodeToChain(302, newContext);
         assertEquals(List.of(302), httpTestContext.getStatusCodes());
     }
 

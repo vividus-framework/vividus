@@ -8,7 +8,12 @@ Then I validate HTTP redirects:
 |startUrl                              |endUrl                              |redirectsNumber |
 |${vividus-test-site-url}/api/redirect |${vividus-test-site-url}/index.html |1               |
 
-Scenario: Step verification "Then I validate HTTP redirects: $expectedRedirects" without redirects number
+Scenario: Step verification "Then I validate HTTP redirects: $expectedRedirects" with status code
+Then I validate HTTP redirects:
+|startUrl                              |endUrl                              |statusCodes |
+|${vividus-test-site-url}/api/redirect |${vividus-test-site-url}/index.html |302         |
+
+Scenario: Step verification "Then I validate HTTP redirects: $expectedRedirects" without optional parameters
 Then I validate HTTP redirects:
 |startUrl                              |endUrl                              |
 |${vividus-test-site-url}/api/redirect |${vividus-test-site-url}/index.html |

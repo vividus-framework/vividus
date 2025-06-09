@@ -28,7 +28,7 @@ public class SavingStatusCodeHttpResponseInterceptor implements HttpResponseInte
     @Override
     public void process(HttpResponse response, EntityDetails entity, HttpContext context)
     {
-        httpTestContext.recordStatusCodeData(response.getCode(), context);
+        httpTestContext.addStatusCodeToChain(response.getCode(), context);
     }
 
     public void setHttpTestContext(HttpTestContext httpTestContext)

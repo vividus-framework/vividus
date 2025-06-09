@@ -324,10 +324,12 @@ class RedirectValidationStepsTests
     @Test
     void shouldFailValidationWhenRedirectsNumberAndStatusCodesSpecified()
     {
+        List<Integer> statusCodes = List.of(STATUS_CODE);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> redirectValidationSteps.validateRedirects(initParameters(REDIRECT_URL, 1, List.of(STATUS_CODE))));
-        assertEquals("The 'redirectsNumber' and 'statusCodes' can't be specified simultaneously",
-                exception.getMessage());
+                () -> redirectValidationSteps.validateRedirects(initParameters(REDIRECT_URL, 1, statusCodes)));
+        assertEquals(String.format("The 'redirectsNumber' and 'statusCodes' can not be specified simultaneously,"
+                + " but found redirectsNumber=%s and statusCodes=%s",
+                1, statusCodes), exception.getMessage());
     }
 
     private List<RedirectValidationState> verifyAttachmentAndCaptureResult()

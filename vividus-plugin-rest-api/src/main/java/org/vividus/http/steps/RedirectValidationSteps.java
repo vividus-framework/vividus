@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.Then;
 import org.vividus.http.HttpRedirectsProvider;
@@ -59,7 +60,6 @@ public class RedirectValidationSteps
      * <td><b>startUrl</b></td>
      * <td><b>endUrl</b></td>
      * <td><b>redirectsNumber</b></td>
-     * <td><b>statusCode</b></td>
      * </tr>
      * </thead>
      * <tbody>
@@ -67,7 +67,6 @@ public class RedirectValidationSteps
      * <td>https://example.com/redirect</td>
      * <td>https://example.com/get-response</td>
      * <td>1</td>
-     * <td>301</td>
      * </tr>
      * </tbody>
      * </table>
@@ -79,7 +78,7 @@ public class RedirectValidationSteps
      * <li><b>statusCodes</b> - The comma-separated sequence of expected HTTP status codes of the redirects
      * (e.g. 301,302) (optional)</li>
      * </ul>
-     * Note: `redirectsNumber` and `statusCodes` can't be specified simultaneously.
+     * Note: `redirectsNumber` and `statusCodes` can not be specified simultaneously.
      */
     @Then("I validate HTTP redirects:$expectedRedirects")
     public void validateRedirects(List<ExpectedRedirect> expectedRedirects)
@@ -192,11 +191,10 @@ public class RedirectValidationSteps
     private void validateStepParameters(List<ExpectedRedirect> expectedRedirects)
     {
         expectedRedirects.forEach(e -> {
-            if (null != e.getRedirectsNumber() && !e.getStatusCodes().isEmpty())
-            {
-                throw new IllegalArgumentException(
-                    "The 'redirectsNumber' and 'statusCodes' can't be specified simultaneously");
-            }
+            Validate.isTrue(null == e.getRedirectsNumber() || e.getStatusCodes().isEmpty(),
+                    "The 'redirectsNumber' and 'statusCodes' can not be specified simultaneously, but found "
+                            + "redirectsNumber=%s and statusCodes=%s",
+                    e.getRedirectsNumber(), e.getStatusCodes());
         });
     }
 

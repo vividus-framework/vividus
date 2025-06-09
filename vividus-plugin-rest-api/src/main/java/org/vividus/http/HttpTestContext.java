@@ -65,7 +65,7 @@ public class HttpTestContext implements JsonContext
         getData().connectionDetails = connectionDetails;
     }
 
-    public void recordStatusCodeData(Integer statusCode, HttpContext context)
+    public void addStatusCodeToChain(Integer statusCode, HttpContext context)
     {
         HttpTestContextData data = getData();
         // Reset status codes on new request

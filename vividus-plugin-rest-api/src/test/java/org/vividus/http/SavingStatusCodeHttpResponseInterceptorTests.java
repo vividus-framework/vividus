@@ -43,6 +43,6 @@ class SavingStatusCodeHttpResponseInterceptorTests
     {
         when(response.getCode()).thenReturn(STATUS_CODE);
         interceptor.process(response, null, context);
-        verify(httpTestContext).recordStatusCodeData(STATUS_CODE, context);
+        verify(httpTestContext).addStatusCodeToChain(STATUS_CODE, context);
     }
 }
