@@ -77,7 +77,15 @@
             <bean class="org.vividus.http.client.HttpClient"
                   factory-bean="httpClientFactory"
                   factory-method="buildHttpClient">
-                <constructor-arg ref="redirectsHttpClientConfig" />
+                <constructor-arg>
+                    <bean parent="redirectsHttpClientConfig">
+                        <property name="lastResponseInterceptor">
+                            <bean class="org.vividus.http.SavingStatusCodeHttpResponseInterceptor">
+                                <property name="httpTestContext" ref="httpTestContext" />
+                            </bean>
+                        </property>
+                    </bean>
+                </constructor-arg>
             </bean>
         </property>
     </bean>
