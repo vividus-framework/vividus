@@ -169,3 +169,26 @@ When I perform local Lighthouse scan of `https://site.com/` page with options `-
 |Cumulative Layout Shift |LESS_THAN   |100      |
 |Speed Index             |LESS_THAN   |1500     |
 ----
+
+=== Generate Lighthouse results diff
+
+Generates comparison diff between two Lighthouse JSON results. The diff example can be found https://googlechrome.github.io/lighthouse-ci/difftool/?baseReport=https://googlechrome.github.io/lighthouse-ci/packages/server/test/fixtures/lh-5-6-0-verge-a.json&compareReport=https://googlechrome.github.io/lighthouse-ci/packages/server/test/fixtures/lh-5-6-0-verge-b.json[here].
+
+[source,gherkin]
+----
+When I generate Lighthouse diff from comparison of baseline at path `$baselineJsonResultPath` and checkpoint at path `$checkpointJsonResultPath`
+----
+
+* `$baselineJsonResultPath` - The xref:ROOT:glossary.adoc#_resource[resource name] or the path of file containing baseline Lighthouse JSON results.
+* `$checkpointJsonResultPath` - The xref:ROOT:glossary.adoc#_resource[resource name] or the path of file containing checkpoint Lighthouse JSON results.
+
+[TIP]
+====
+You can get Lighthouse JSON results by downloading it from https://developer.chrome.com/docs/lighthouse/overview#json[Lighthouse Viewer as JSON] or by using <<_perform_local_lighthouse_scan_with_result_saving>> step to save JSON results path to a variable.
+====
+
+.Generate Lighthouse results diff between two releases
+[source]
+----
+When I generate Lighthouse diff from comparison of baseline at path `/reports/1.33.0-lighthouse.json` and checkpoint at path `/reports/1.34.0-lighthouse.json`
+----

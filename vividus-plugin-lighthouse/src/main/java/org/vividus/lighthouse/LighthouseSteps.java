@@ -71,6 +71,7 @@ import org.vividus.lighthouse.model.ScanType;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.shell.ShellCommandExecutor;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.wait.MaxTimesBasedWaiter;
 import org.vividus.variable.VariableScope;
@@ -266,12 +267,27 @@ public final class LighthouseSteps
                         strategy, categoryKey, scoreDecrease));
             }));
 
-            // Its expected to use .ftl file format for attachments, but for the sake of viewer's build process
-            // simplification in this place we use .html file
-            attachmentPublisher.publishAttachment(
-                    "/allure-customization/webjars/vividus-lighthouse-viewer-adaptation/index.html",
-                    Map.of("baseline", jsonFactory.toString(baseline), "checkpoint", jsonFactory.toString(checkpoint)),
-                    String.format("[%s] Lighthouse reports comparison", strategy));
+            publishDiff(baseline, checkpoint, String.format("[%s] Lighthouse reports comparison", strategy));
+        }
+    }
+
+    /**
+     * Generates comparison diff between two Lighthouse JSON results.
+     *
+     * @param baselineJsonResultPath   The resource name or the path of file containing baseline Lighthouse JSON
+     * results.
+     * @param checkpointJsonResultPath The resource name or the path of file containing checkpoint Lighthouse JSON
+     * results.
+     * @throws IOException             if an I/O exception of some sort has occurred
+     */
+    @When("I generate Lighthouse diff from comparison of baseline at path `$baselineJsonResultPath` and checkpoint at "
+            + "path `$checkpointJsonResultPath`")
+    public void generateDiff(String baselineJsonResultPath, String checkpointJsonResultPath) throws IOException
+    {
+        try (InputStream baselineStream = ResourceUtils.loadResourceOrFileAsStream(baselineJsonResultPath);
+                InputStream checkpointStream = ResourceUtils.loadResourceOrFileAsStream(checkpointJsonResultPath))
+        {
+            publishDiff(deserialize(baselineStream), deserialize(checkpointStream), "Lighthouse reports comparison");
         }
     }
 
@@ -425,9 +441,25 @@ public final class LighthouseSteps
 
         try (InputStream stream = Files.newInputStream(outputPath))
         {
-            return pagespeedInsights.getObjectParser().parseAndClose(stream, StandardCharsets.UTF_8,
-                    LighthouseResultV5.class);
+            return deserialize(stream);
         }
+    }
+
+    private LighthouseResultV5 deserialize(InputStream stream) throws IOException
+    {
+        return pagespeedInsights.getObjectParser().parseAndClose(stream, StandardCharsets.UTF_8,
+                LighthouseResultV5.class);
+    }
+
+    private void publishDiff(LighthouseResultV5 baseline, LighthouseResultV5 checkpoint, String title)
+            throws IOException
+    {
+        // Its expected to use .ftl file format for attachments, but for the sake of viewer's build process
+        // simplification in this place we use .html file
+        attachmentPublisher.publishAttachment(
+                "/allure-customization/webjars/vividus-lighthouse-viewer-adaptation/index.html",
+                Map.of("baseline", jsonFactory.toString(baseline), "checkpoint", jsonFactory.toString(checkpoint)),
+                title);
     }
 
     private Map<String, Integer> getCategoryScores(LighthouseResultV5 result)
