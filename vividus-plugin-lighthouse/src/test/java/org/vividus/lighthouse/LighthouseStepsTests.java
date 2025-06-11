@@ -113,6 +113,9 @@ import org.vividus.variable.VariableScope;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import net.javacrumbs.jsonunit.JsonAssert;
+import net.javacrumbs.jsonunit.core.Option;
 
 @SuppressWarnings("MethodCount")
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -551,12 +554,25 @@ class LighthouseStepsTests
                         + "percent");
                 verifyNoMoreInteractions(softAssert);
 
-                verify(attachmentPublisher).publishAttachment(
-                        "/allure-customization/webjars/vividus-lighthouse-viewer-adaptation/index.html",
-                        Map.of("baseline", RESULT_AS_STRING, "checkpoint", RESULT_AS_STRING),
-                        "[desktop] Lighthouse reports comparison");
+                verifyViewerPublishing(RESULT_AS_STRING, RESULT_AS_STRING, "[desktop] Lighthouse reports comparison");
             }
         });
+    }
+
+    @SuppressWarnings("unchecked")
+    private void verifyViewerPublishing(String baselineValue, String checkpointValue, String title)
+    {
+        ArgumentCaptor<Object> modelCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(attachmentPublisher).publishAttachment(
+                eq("/allure-customization/webjars/vividus-lighthouse-viewer-adaptation/index.html"),
+                modelCaptor.capture(),
+                eq(title));
+
+        net.javacrumbs.jsonunit.core.Configuration config = net.javacrumbs.jsonunit.core.Configuration
+                .empty().withTolerance(0).withOptions(Option.IGNORING_ARRAY_ORDER);
+        Map<String, String> model = (Map<String, String>) modelCaptor.getValue();
+        JsonAssert.assertJsonEquals(baselineValue, model.get("baseline"), config);
+        JsonAssert.assertJsonEquals(checkpointValue, model.get("checkpoint"), config);
     }
 
     @Test
@@ -652,23 +668,43 @@ class LighthouseStepsTests
         )));
     }
 
+    @Test
+    void shouldGenerateDiff(@TempDir Path dir) throws Exception
+    {
+        Path jsonPath = dir.resolve("result.json");
+        writeLighthouseTemplate(jsonPath, Map.of(PERF_SCORE_METRIC, 0.50));
+
+        LighthouseSteps steps = createSteps(List.of(PERFORMANCE_CATEGORY), 0, Optional.empty());
+
+        String pathAsString = jsonPath.toString();
+        steps.generateDiff(pathAsString, pathAsString);
+
+        byte[] bytes = ResourceUtils.loadResourceOrFileAsByteArray(pathAsString);
+        String result = new String(bytes, StandardCharsets.UTF_8);
+        verifyViewerPublishing(result, result, "Lighthouse reports comparison");
+    }
+
     private void mockExecuteCommand(FileProcessResult result, Path outputDir, String filename, float score)
             throws IOException
     {
         doAnswer(a ->
         {
-            String lighthouseScanTemplate = ResourceUtils.loadResource(getClass(), "lighthouse-scan-template.ftl");
-            try (Reader reader = new StringReader(lighthouseScanTemplate); StringWriter out = new StringWriter())
-            {
-                Template template = new Template("lighthouseScanTemplate", reader,
-                        new Configuration(Configuration.VERSION_2_3_34));
-                template.process(Map.of(PERF_SCORE_METRIC, score), out);
-                Files.writeString(locateResultsFile(outputDir, filename), out.toString() + System.lineSeparator(),
-                        StandardCharsets.UTF_8);
-            }
+            writeLighthouseTemplate(locateResultsFile(outputDir, filename), Map.of(PERF_SCORE_METRIC, score));
             return result;
         }).when(commandExecutor)
                 .executeCommand(argThat(arg -> arg.contains(LIGHTHOUSE_EXECUTABLE) && arg.contains(filename)));
+    }
+
+    private void writeLighthouseTemplate(Path path, Object dataModel) throws IOException, TemplateException
+    {
+        String lighthouseScanTemplate = ResourceUtils.loadResource(getClass(), "lighthouse-scan-template.ftl");
+        try (Reader reader = new StringReader(lighthouseScanTemplate); StringWriter out = new StringWriter())
+        {
+            Template template = new Template("lighthouseScanTemplate", reader,
+                    new Configuration(Configuration.VERSION_2_3_34));
+            template.process(dataModel, out);
+            Files.writeString(path, out.toString() + System.lineSeparator(), StandardCharsets.UTF_8);
+        }
     }
 
     private String getExecArg(Path dir, String file) throws IOException

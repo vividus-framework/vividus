@@ -30,7 +30,7 @@ When I perform local Lighthouse scan of `${vividus-test-site-url}` page with opt
 
 
 Scenario: Step verification: When I perform local Lighthouse scan of `$webPageUrl` page with options `$options` and save result path to $scopes variable `$variableName`:$metricsValidations
-When I perform local Lighthouse scan of `${vividus-test-site-url}` page with options `--only-categories=performance --preset=desktop --chrome-flags="--no-sandbox --headless --disable-dev-shm-usage"` and save result path to scenario variable `resultPath`:
+When I perform local Lighthouse scan of `${vividus-test-site-url}` page with options `--only-categories=performance --preset=desktop --chrome-flags="--no-sandbox --headless --disable-dev-shm-usage"` and save result path to story variable `resultPath`:
 |metric                  |rule        |threshold|
 |First Contentful Paint  |LESS_THAN   |2500     |
 |Largest Contentful Paint|LESS_THAN   |2500     |
@@ -38,3 +38,7 @@ When I perform local Lighthouse scan of `${vividus-test-site-url}` page with opt
 |Cumulative Layout Shift |LESS_THAN   |500      |
 |Speed Index             |LESS_THAN   |1500     |
 Then `${resultPath}` matches `.*\.json`
+
+
+Scenario: Step verification: When I generate Lighthouse diff from comparison of baseline at path `$baselineJsonResultPath` and checkpoint at path `$checkpointJsonResultPath`
+When I generate Lighthouse diff from comparison of baseline at path `${resultPath}` and checkpoint at path `${resultPath}`
