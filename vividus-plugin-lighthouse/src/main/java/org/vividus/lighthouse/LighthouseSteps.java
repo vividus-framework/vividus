@@ -71,6 +71,7 @@ import org.vividus.lighthouse.model.ScanType;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.shell.ShellCommandExecutor;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.util.wait.MaxTimesBasedWaiter;
 import org.vividus.variable.VariableScope;
 
@@ -104,6 +105,7 @@ public final class LighthouseSteps
     private final ISoftAssert softAssert;
     private final ShellCommandExecutor commandExecutor;
     private final VariableContext variableContext;
+    private final JsonUtils jsonUtils;
     private final PagespeedInsights pagespeedInsights;
     private final JsonFactory jsonFactory;
 
@@ -120,7 +122,7 @@ public final class LighthouseSteps
     public LighthouseSteps(String applicationName, String apiKey, List<String> categories,
             int acceptableScorePercentageDelta, Optional<PerformanceValidationConfiguration> configuration,
             String outputDirectory, IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert,
-            ShellCommandExecutor commandExecutor, VariableContext variableContext)
+            ShellCommandExecutor commandExecutor, VariableContext variableContext, JsonUtils jsonUtils)
             throws GeneralSecurityException, IOException
     {
         boolean hasPerformance = categories.contains("performance");
@@ -135,6 +137,7 @@ public final class LighthouseSteps
         this.softAssert = softAssert;
         this.commandExecutor = commandExecutor;
         this.variableContext = variableContext;
+        this.jsonUtils = jsonUtils;
         this.pagespeedInsights = new PagespeedInsights.Builder(
                 GoogleNetHttpTransport.newTrustedTransport(),
                 GsonFactory.getDefaultInstance(),
@@ -360,10 +363,13 @@ public final class LighthouseSteps
             int measurementsNumber = performanceConfig.measurementsNumber;
             Map<LighthouseResultV5, Path> results = new IdentityHashMap<>(measurementsNumber);
 
-            for (int iteration = 0; iteration < measurementsNumber; iteration++)
+            for (int resultIndex = 1; resultIndex <= measurementsNumber; resultIndex++)
             {
-                Path resultsFile = baseDirectory.resolve("lighthouse-scan-%s.json".formatted(iteration + 1));
+                Path resultsFile = baseDirectory.resolve("lighthouse-scan-%s.json".formatted(resultIndex));
                 LighthouseResultV5 scanResult = performLocalLighthouseScan(resultsFile, webPageUrl, options);
+                LOGGER.atInfo().addArgument(resultIndex)
+                        .addArgument(() -> jsonUtils.toPrettyJson(getMetrics(scanResult)))
+                        .log("Metrics for execution #{}:{}");
                 results.put(scanResult, resultsFile);
             }
 

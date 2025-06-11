@@ -108,6 +108,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.Sleeper;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
 import freemarker.template.Configuration;
@@ -146,6 +147,7 @@ class LighthouseStepsTests
     private static final String LIGHTHOUSE_SCAN_FILE = "lighthouse-scan.json";
     private static final String LIGHTHOUSE_SCAN_IDX_FILE = "lighthouse-scan-%s.json";
     private static final String SCAN_LOG = "Starting Lighthouse scan: {}";
+    private static final String METRICS_LOG = "Metrics for execution #{}:{}";
 
     @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private ISoftAssert softAssert;
@@ -632,13 +634,21 @@ class LighthouseStepsTests
 
         steps.performLocalLighthouseScan(URL, LIGHTHOUSE_OPTIONS, List.of(perfScoreRule));
 
+        String metrics = "{%n  \"cumulativeLayoutShift\" : 0,%n  \"firstContentfulPaint\" : 592,%n  "
+                + "\"totalBlockingTime\" : 0,%n  \"largestContentfulPaint\" : 592,%n  \"performanceScore\""
+                + " : %s,%n  \"timeToFirstByte\" : 893%n}";
+
         assertThat(logger.getLoggingEvents(), is(List.of(
             info(SCAN_LOG, arg1),
+            info(METRICS_LOG, 1, metrics.formatted(100)),
             info(SCAN_LOG, arg2),
+            info(METRICS_LOG, 2, metrics.formatted(25)),
             info(SCAN_LOG,
                     getLighthouseExec(locateResultsFile(outputDirectory, LIGHTHOUSE_SCAN_IDX_FILE.formatted(1)))),
+            info(METRICS_LOG, 1, metrics.formatted(100)),
             info(SCAN_LOG, getLighthouseExec(
-                    locateResultsFile(outputDirectory, LIGHTHOUSE_SCAN_IDX_FILE.formatted(2))))
+                    locateResultsFile(outputDirectory, LIGHTHOUSE_SCAN_IDX_FILE.formatted(2)))),
+            info(METRICS_LOG, 2, metrics.formatted(25))
         )));
     }
 
@@ -835,7 +845,7 @@ class LighthouseStepsTests
             Optional<PerformanceValidationConfiguration> configuration, String outputDirectory) throws Exception
     {
         return new LighthouseSteps(APP_NAME, API_KEY, categories, delta, configuration, outputDirectory,
-                attachmentPublisher, softAssert, commandExecutor, variableContext);
+                attachmentPublisher, softAssert, commandExecutor, variableContext, new JsonUtils());
     }
 
     private Pagespeedapi mockPagespeedapiCall(String strategy, ArrayMap<String, BigDecimal> metrics) throws IOException
