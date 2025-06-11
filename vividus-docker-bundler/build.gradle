@@ -84,7 +84,7 @@ dependencies {
     implementation(group: 'com.ibm.db2.jcc', name: 'db2jcc', version: 'db2jcc4')
     implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.46')
     implementation(group: 'com.h2database', name: 'h2', version: '2.3.232')
-    implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.24.0')
+    implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.24.2')
 }
 
 tasks.register('copyRuntimeLibs', Copy) {
