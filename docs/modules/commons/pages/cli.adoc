@@ -333,3 +333,112 @@ applitools.app-name=name
 web.driver.chrome.experimental-options={"prefs": {"profile": {"cookie_controls_mode": 0}}}
 batch-6.story.execution-timeout=PT15M
 ----
+
+== Find and fix formatting issues (Spotless checks)
+
+Spotless checks refer to code formatting and linting validations performed by the https://github.com/diffplug/spotless[Spotless], a tool designed to enforce consistent code quality standards. Spotless automates the formatting of files based on predefined rules and integrates with linting tools.
+
+Spotless offers a number of generic formatters (indentation correction, normalize line endings, enforce consistent EOF files, enforce file encoding, normalize quotes, remove debugging or unnecessary comments, sort imports/dependencies, etc.) that can help enforce consistent code hygiene in your project. These formatting rules are versatile and can be applied to any type of file, ensuring your codebase is clean and professional.
+
+=== Spotless in test automation
+
+For files like *.story, *.steps, *.table, commonly used in VIVIDUS, basic Spotless rules typically include:
+
+.Spotless rules
+[cols="1,2", options="header"]
+|===
+|Rule
+|Description
+
+|Trimming Trailing Whitespace
+|Removes any spaces or tabs at the end of lines.
+
+|Ensuring Newline at End of File
+|Guarantees that each file ends with a single newline.
+
+|Consistent Indentation
+|Enforces 4 spaces for indentation.
+
+|Normalizing Line Endings
+|Converts all line endings to LF (\n) for consistency across platforms.
+
+|===
+
+These rules help keep test files clean, readable, and consistent, reducing noise in version control and making collaboration easier.
+
+=== Key Spotless tasks
+
+The task validates that all files comply with the specified formatting rules.
+
+NOTE: This task is performed automatically during the build process and does not require any manual initiation.
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew spotlessCheck
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew spotlessCheck
+----
+======
+
+The task automatically formats files to conform to the defined rules.
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew spotlessApply
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew spotlessApply
+----
+======
+
+=== Build failure due to format violations
+
+If you execute the `build` task and encounter the following result:
+
+[source,shell]
+----
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':spotlessVividusCheck'.
+> The following files had format violations:
+      bin/main/story/web_app/Google Search.story
+          @@ -16,4 +16,3 @@
+           When·I·wait·until·element·located·by·`<search-button>`·appears
+           When·I·click·on·element·located·by·`<search-button>`
+           Then·number·of·elements·found·by·`linkUrlPart(https://docs.vividus.dev/vividus/)->filter.textPart(What·is·VIVIDUS·::·VIVIDUS)`·is·equal·to·`1`
+          -
+      src/main/resources/story/web_app/Google Search.story
+          @@ -16,4 +16,3 @@
+           When·I·wait·until·element·located·by·`<search-button>`·appears
+           When·I·click·on·element·located·by·`<search-button>`
+           Then·number·of·elements·found·by·`linkUrlPart(https://docs.vividus.dev/vividus/)->filter.textPart(What·is·VIVIDUS·::·VIVIDUS)`·is·equal·to·`1`
+          -
+----
+
+You will also see a message in your shell like this:
+
+[source,shell]
+----
+Run './gradlew :spotlessApply' to fix these violations.
+----
+
+Review the changes that were applied after the suggested command execution and commit them to your repository.
+By following these steps, you will ensure your build is stable and successful.
