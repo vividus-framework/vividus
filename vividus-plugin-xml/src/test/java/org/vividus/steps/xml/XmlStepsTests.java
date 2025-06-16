@@ -66,6 +66,15 @@ class XmlStepsTests
     }
 
     @Test
+    void shouldSaveNumberOfElements() throws XPathExpressionException
+    {
+        Set<VariableScope> scopes = Set.of(VariableScope.STEP);
+        String name = "number";
+        xmlValidationSteps.saveNumberOfElements("//test", XML, scopes, name);
+        verify(variableContext).putVariable(scopes, name, 1);
+    }
+
+    @Test
     @SuppressWarnings("unchecked")
     void shouldValidateXmlElementExistenceByXpath() throws SAXException, IOException
     {

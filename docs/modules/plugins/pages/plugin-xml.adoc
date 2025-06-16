@@ -92,9 +92,44 @@ When I transform XML `
 Then `${artists}` is equal to `* Joe Cocker * Bob Dylan * Bonnie Tyler`
 ----
 
+=== Save number of elements
+
+Save number of elements by XPath from XML to a variable
+
+[source,gherkin]
+----
+When I save number of elements found by xpath `$xpath` in XML `$xml` to $scopes variable `$variableName`
+----
+
+* `$xpath` - The {xpath}.
+* `$xml` - The {xml}.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store a result.
+
+.Check a message contains heading element
+[source,gherkin]
+----
+When I save number of elements found by xpath `/message/heading` in XML `
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+  <to>Bob</to>
+  <from>Alice</from>
+  <heading>Reminder</heading>
+  <body>Don't forget to fill TJ gaps for this week</body>
+</message>` to scenario variable `headings`
+Then `${headings}` is equal to `1`
+----
+
 === Check element existence
 
 Checks if XML document contains element by {xpath}.
+
+_Step is deprecated and will be removed in VIVIDUS 0.8.0, please use the following sequence of steps as a replacement_:
+[source,gherkin]
+----
+When I save number of elements found by xpath `$xpath` in XML `$xml` to $scopes variable `$variableName`
+Then `$variable1` is $comparisonRule `$variable2`
+----
 
 [source,gherkin]
 ----

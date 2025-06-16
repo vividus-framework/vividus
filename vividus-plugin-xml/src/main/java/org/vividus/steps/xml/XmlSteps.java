@@ -84,12 +84,39 @@ public class XmlSteps
      * @param xpath XPath
      * @throws IOException If an I/O error has occurred
      * @throws SAXException If an XML processing error has occurred
+     * @deprecated Use combination of the following steps:
+     * "When I save number of elements found by xpath `$xpath` in XML `$xml` to $scopes variable `$variableName`",
+     * "Then `$variable1` is $comparisonRule `$variable2`"
      */
+    @Deprecated(since = "0.6.14", forRemoval = true)
     @Then("XML `$xml` contains element by xpath `$xpath`")
     public void doesElementExistByXpath(String xml, String xpath) throws SAXException, IOException
     {
         Document doc = XmlUtils.convertToDocument(xml);
         softAssert.assertThat("XML has element with XPath: " + xpath, doc, hasXPath(xpath));
+    }
+
+    /**
+     * Save number of elements by xpath from XML to a variable
+     * @param xml XML
+     * @param xpath XPath locator
+     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     * <i>Available scopes:</i>
+     * <ul>
+     * <li><b>STEP</b> - the variable will be available only within the step,
+     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     * <li><b>STORY</b> - the variable will be available within the whole story,
+     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * </ul>
+     * @param variableName Name of variable
+     * @throws XPathExpressionException If an XPath expression error has occurred
+     */
+    @When("I save number of elements found by xpath `$xpath` in XML `$xml` to $scopes variable `$variableName`")
+    public void saveNumberOfElements(String xpath, String xml, Set<VariableScope> scopes, String variableName)
+            throws XPathExpressionException
+    {
+        int numberOfElements = XmlUtils.getNumberOfElements(xml, xpath);
+        variableContext.putVariable(scopes, variableName, numberOfElements);
     }
 
     /**

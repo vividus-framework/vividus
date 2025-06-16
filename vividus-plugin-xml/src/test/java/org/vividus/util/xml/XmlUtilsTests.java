@@ -49,6 +49,12 @@ class XmlUtilsTests
             + "</xs:schema>";
 
     @Test
+    void shouldGetNumberOfElements() throws XPathExpressionException
+    {
+        assertEquals(2, XmlUtils.getNumberOfElements(XML, "//data"));
+    }
+
+    @Test
     void shouldReturnXmlByXpath() throws XPathExpressionException
     {
         assertEquals(Optional.of("value1"), XmlUtils.getXmlByXpath(XML, "//data/text()"));
