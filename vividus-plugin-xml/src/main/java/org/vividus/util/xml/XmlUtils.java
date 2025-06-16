@@ -97,14 +97,30 @@ public final class XmlUtils
      */
     public static Optional<String> getXmlByXpath(String xml, String xpath) throws XPathExpressionException
     {
+        Node singleNode = getNodes(xml, xpath).item(0);
+        Properties outputProperties = new Properties();
+        outputProperties.setProperty(OutputKeys.OMIT_XML_DECLARATION, YES);
+        return transform(new DOMSource(singleNode), outputProperties);
+    }
+
+    /**
+     * Get number of elements by XPath from the XML
+     * @param xml XML
+     * @param xpath xpath
+     * @return number of elements by XPath
+     * @throws XPathExpressionException If an XPath expression error has occurred
+     */
+    public static int getNumberOfElements(String xml, String xpath) throws XPathExpressionException
+    {
+        return getNodes(xml, xpath).getLength();
+    }
+
+    private static NodeList getNodes(String xml, String xpath) throws XPathExpressionException
+    {
         synchronized (XPATH_FACTORY)
         {
             InputSource source = createInputSource(xml);
-            NodeList nodeList = (NodeList) XPATH_FACTORY.newXPath().evaluate(xpath, source, XPathConstants.NODESET);
-            Node singleNode = nodeList.item(0);
-            Properties outputProperties = new Properties();
-            outputProperties.setProperty(OutputKeys.OMIT_XML_DECLARATION, YES);
-            return transform(new DOMSource(singleNode), outputProperties);
+            return (NodeList) XPATH_FACTORY.newXPath().evaluate(xpath, source, XPathConstants.NODESET);
         }
     }
 
