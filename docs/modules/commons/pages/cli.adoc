@@ -334,15 +334,14 @@ web.driver.chrome.experimental-options={"prefs": {"profile": {"cookie_controls_m
 batch-6.story.execution-timeout=PT15M
 ----
 
-== Find and fix formatting issues (Spotless checks)
+== Find and fix formatting issues
+https://github.com/diffplug/spotless[Spotless] checks refer to formatting and linting validations to enforce consistent
+code quality standards. Spotless automates the formatting of files based on predefined rules and integrates with linting
+tools. It offers a number of generic formatters (indentation correction, normalize line endings, enforce consistent EOF
+files, enforce file encoding, etc.) that help keep test files clean, readable, and consistent, reducing noise in version
+control and making collaboration easier.
 
-Spotless checks refer to code formatting and linting validations performed by the https://github.com/diffplug/spotless[Spotless], a tool designed to enforce consistent code quality standards. Spotless automates the formatting of files based on predefined rules and integrates with linting tools.
-
-Spotless offers a number of generic formatters (indentation correction, normalize line endings, enforce consistent EOF files, enforce file encoding, normalize quotes, remove debugging or unnecessary comments, sort imports/dependencies, etc.) that can help enforce consistent code hygiene in your project. These formatting rules are versatile and can be applied to any type of file, ensuring your codebase is clean and professional.
-
-=== Spotless in test automation
-
-For files like *.story, *.steps, *.table, commonly used in VIVIDUS, basic Spotless rules typically include:
+For files like `*.story`, `*.steps`, `*.table`, commonly used in VIVIDUS, the following Spotless rules are applied by default:
 
 .Spotless rules
 [cols="1,2", options="header"]
@@ -364,13 +363,11 @@ For files like *.story, *.steps, *.table, commonly used in VIVIDUS, basic Spotle
 
 |===
 
-These rules help keep test files clean, readable, and consistent, reducing noise in version control and making collaboration easier.
-
-=== Key Spotless tasks
+=== Spotless tasks
 
 The task validates that all files comply with the specified formatting rules.
 
-NOTE: This task is performed automatically during the build process and does not require any manual initiation.
+NOTE: This task is executed automatically during the build process and does not require manual invocation.
 
 [tabs]
 ======
@@ -408,37 +405,34 @@ gradlew spotlessApply
 ----
 ======
 
-=== Build failure due to format violations
+=== Fixing Spotless violations
 
-If you execute the `build` task and encounter the following result:
+If the `build` task is failed and the result like the following is shown in the console output, it means that some files
+do not comply with the Spotless rules.
 
 [source,shell]
 ----
+> Task :spotlessVividusCheck FAILED
+
 FAILURE: Build failed with an exception.
 
 * What went wrong:
 Execution failed for task ':spotlessVividusCheck'.
 > The following files had format violations:
-      bin/main/story/web_app/Google Search.story
-          @@ -16,4 +16,3 @@
-           When·I·wait·until·element·located·by·`<search-button>`·appears
-           When·I·click·on·element·located·by·`<search-button>`
-           Then·number·of·elements·found·by·`linkUrlPart(https://docs.vividus.dev/vividus/)->filter.textPart(What·is·VIVIDUS·::·VIVIDUS)`·is·equal·to·`1`
-          -
       src/main/resources/story/web_app/Google Search.story
-          @@ -16,4 +16,3 @@
-           When·I·wait·until·element·located·by·`<search-button>`·appears
-           When·I·click·on·element·located·by·`<search-button>`
+          @@ -13,8 +13,6 @@
+           |·step··········································|
+           |·When·I·click·on·element·located·by·`xpath(.)`·|
+           When·I·enter·`VIVIDUS·test·automation`·in·field·located·by·`<search-input-field>`
+          -When·I·wait·until·element·located·by·`<search-button>`·appears·
+          -When·I·click·on·element·located·by·`<search-button>`\t
+          +When·I·wait·until·element·located·by·`<search-button>`·appears
+          +When·I·click·on·element·located·by·`<search-button>`
            Then·number·of·elements·found·by·`linkUrlPart(https://docs.vividus.dev/vividus/)->filter.textPart(What·is·VIVIDUS·::·VIVIDUS)`·is·equal·to·`1`
           -
+          -
+  Run './gradlew :spotlessApply' to fix these violations.
 ----
 
-You will also see a message in your shell like this:
-
-[source,shell]
-----
-Run './gradlew :spotlessApply' to fix these violations.
-----
-
-Review the changes that were applied after the suggested command execution and commit them to your repository.
-By following these steps, you will ensure your build is stable and successful.
+You can fix the violations manually or automatically by running the `spotlessApply` task. After fixing, review
+the changes and commit them to your repository. Following these steps will help keep your build stable and successful.
