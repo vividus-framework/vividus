@@ -76,7 +76,13 @@ Then the context element has the CSS property 'color'='rgba(0, 0, 0, 1)'
 Scenario: Step verification context element has CSS property `$cssName` with value that $comparisonRule `$cssValue`
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
 When I change context to element located by `xpath(.//*[@title='Text input section'])`
-Then context element has CSS property `color` with value that is equal to `rgba(0, 0, 0, 1)`
+Then context element has CSS property `<name>` with value that is equal to `<value>`
+Examples:
+|name            |value                 |
+|color           |rgba(0, 0, 0, 1)      |
+|color           |rgb(0, 0, 0)          |
+|background-color|rgba(0, 0,0,0)        |
+|lighting-color  |rgba(255, 255, 255, 1)|
 
 Scenario: Deprecated step verification Then the context element has the CSS property '$cssName' containing '$cssValue'
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
