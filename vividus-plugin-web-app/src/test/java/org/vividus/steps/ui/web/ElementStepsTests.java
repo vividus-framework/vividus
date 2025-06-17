@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -69,7 +71,7 @@ import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.validation.ScrollValidations;
 import org.vividus.variable.VariableScope;
 
-@SuppressWarnings({ "checkstyle:MethodCount", "PMD.UnnecessaryBooleanAssertion", "PMD.CouplingBetweenObjects" })
+@SuppressWarnings({ "checkstyle:MethodCount", "PMD.UnnecessaryBooleanAssertion" })
 @ExtendWith(MockitoExtension.class)
 class ElementStepsTests
 {
@@ -101,8 +103,6 @@ class ElementStepsTests
     private static final String ELEMENT_WITH_CSS_PROPERTY = "The element to get the CSS property value";
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
     private static final String ELEMENT_TO_CHECK = "Element to check";
-    private static final String ELEMENT_IN_VIEWPORT = "Element is in viewport";
-    private static final String ELEMENT_NOT_IN_VIEWPORT = "Element is not in viewport";
 
     @Mock private IBaseValidations baseValidations;
     @Mock private IWebDriverProvider webDriverProvider;
@@ -187,6 +187,28 @@ class ElementStepsTests
         elementSteps.doesElementHaveRightCss(CSS_NAME, StringComparisonRule.CONTAINS, CSS_PART_VALUE);
         verify(softAssert).assertThat(eq("Element css property value is"), eq(CSS_VALUE),
                 argThat(matcher -> matcher.toString().contains(CSS_PART_VALUE)));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "'rgb(0, 0, 0)',           'rgb(0, 0, 0)',          true,  1",
+        "'rgb(10, 10, 10)',        'rgba(10, 10, 10, 1)',   true,  1",
+        "'rgb(10, 10, 10)',        'rgba(10, 10, 10, 0.5)', false, 1",
+        "'rgb(10, 10, 10)',        'rgba(10, 10, 5, 1)',    false, 1",
+        "'rgba(255, 255, 255, 1)', 'rgb(255, 255, 255)',    true,  1",
+        "'rgba(1, 1, 1, 0)',       'rgba(1, 1, 1, 0)',      true,  1",
+        "'rgba(1, 1, 1, 1)',       'rgba(1, 1, 1, 1)',      true,  1",
+        "'rgba(0, 0, 0, 1)',        black,                  true,  0",
+        " white,                   'rgb(255, 255, 255)',    true,  0"
+    })
+    void testDoesElementHasRightCssColorValue(String expected, String actual, boolean result, int times)
+    {
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(webElement));
+        when(webElementActions.getCssValue(webElement, CSS_NAME)).thenReturn(actual);
+        elementSteps.doesElementHaveRightCss(CSS_NAME, StringComparisonRule.IS_EQUAL_TO, expected);
+        String description = String.format("The value of CSS property 'cssName'"
+                + " [Expected: '%s' Actual: was '%s']", expected, actual);
+        verify(softAssert, times(times)).recordAssertion(eq(result), eq(description));
     }
 
     @Test

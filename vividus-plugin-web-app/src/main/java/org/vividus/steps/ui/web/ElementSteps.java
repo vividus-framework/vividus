@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.Matcher;
@@ -58,6 +59,9 @@ import org.vividus.variable.VariableScope;
 @TakeScreenshotOnFailure
 public class ElementSteps implements ResourceLoaderAware
 {
+    private static final String ALPHA_OPAQUE = "1";
+    private static final Pattern RGBA_PATTERN = Pattern.compile("rgba\\((\\d+,\\d+,\\d+),(\\d?\\.?\\d+)\\)");
+    private static final String RGB = "rgb";
     private static final String THE_NUMBER_OF_FOUND_ELEMENTS = "The number of found elements";
     private static final String FILE_EXISTS_MESSAGE_FORMAT = "File %s exists";
     private static final String ELEMENT_CSS_CONTAINING_VALUE = "Element has CSS property '%s' containing value '%s'";
@@ -216,19 +220,56 @@ public class ElementSteps implements ResourceLoaderAware
     }
 
     /**
-     * Checks that the context <b>element</b> has an expected <b>CSS property</b>
+     * Checks that the context <b>element</b> has an expected <b>CSS property</b>.
+     * <p>
+     * If the comparison rule is <b>{@code IS_EQUAL_TO}</b> and both the actual and expected CSS values
+     * are colors in RGB or RGBA format (with an <b>alpha channel of 1</b> in RGBA [{@code rgba(r,g,b,1)}]),
+     * then both values are normalized to the RGB [{@code rgb(r,g,b)}] format before the comparison.
+     * <p>
+     * Normalization is <b>not performed</b> for other comparison rules or color representations.
      * @param cssName A name of the <b>CSS property</b>
-     * @param comparisonRule is equal to, contains, does not contain
+     * @param comparisonRule is equal to, contains, does not contain, matches
      * @param cssValue An expected value of <b>CSS property</b>
      */
     @Then("context element has CSS property `$cssName` with value that $comparisonRule `$cssValue`")
     public void doesElementHaveRightCss(String cssName, StringComparisonRule comparisonRule, String cssValue)
     {
         uiContext.getSearchContext(WebElement.class).ifPresent(element -> {
-            Matcher<String> matcher = comparisonRule.createMatcher(cssValue);
             String actualCssValue = webElementActions.getCssValue(element, cssName);
-            descriptiveSoftAssert.assertThat("Element css property value is", actualCssValue, matcher);
+
+            boolean rgbComparison = StringComparisonRule.IS_EQUAL_TO.equals(comparisonRule)
+                    && cssValue.trim().startsWith(RGB) && actualCssValue.trim().startsWith(RGB);
+
+            if (rgbComparison)
+            {
+                String normalizedExpected = normalizeToRGB(cssValue);
+                String normalizedActual = normalizeToRGB(actualCssValue);
+                descriptiveSoftAssert.recordAssertion(normalizedExpected.equals(normalizedActual),
+                        String.format("The value of CSS property '%s' [Expected: '%s' Actual: was '%s']",
+                                cssName, cssValue, actualCssValue));
+            }
+            else
+            {
+                Matcher<String> matcher = comparisonRule.createMatcher(cssValue);
+                descriptiveSoftAssert.assertThat("Element css property value is", actualCssValue, matcher);
+            }
         });
+    }
+
+    private String normalizeToRGB(String colorValue)
+    {
+        String input = colorValue.replace(" ", "");
+        java.util.regex.Matcher matcher = RGBA_PATTERN.matcher(input);
+
+        if (matcher.matches())
+        {
+            String alpha = matcher.group(2);
+            if (ALPHA_OPAQUE.equals(alpha))
+            {
+                return String.format("rgb(%s)", matcher.group(1));
+            }
+        }
+        return input;
     }
 
     /**
