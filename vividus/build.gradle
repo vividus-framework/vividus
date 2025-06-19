@@ -124,6 +124,9 @@ dependencies {
     integrationTestImplementation project(':vividus-plugin-winrm')
     integrationTestImplementation project(':vividus-plugin-xml')
     integrationTestImplementation project(':vividus-plugin-yaml')
+    integrationTestImplementation(project(':vividus-mcp-server')) {
+        exclude module: 'vividus'
+    }
     integrationTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.1')
     integrationTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     integrationTestRuntimeOnly('org.junit.platform:junit-platform-launcher')
