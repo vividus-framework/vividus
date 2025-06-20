@@ -7,4 +7,6 @@
        default-lazy-init="false">
 
        <bean class="org.vividus.mcp.VividusMcpServer"/>
+
+       <bean class="org.vividus.mcp.tool.GetAllStepsVividusTool"/>
 </beans>
