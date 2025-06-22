@@ -11,7 +11,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation platform(group: 'org.springframework.kafka', name: 'spring-kafka-bom', version: '3.3.6')
+    implementation platform(group: 'org.springframework.kafka', name: 'spring-kafka-bom', version: '3.3.7')
     implementation(group: 'org.springframework.kafka', name: 'spring-kafka')
 
     // 'spring-kafka' uses 'kafka-clients' 3.8.1, but it is needed to use 3.9.1
