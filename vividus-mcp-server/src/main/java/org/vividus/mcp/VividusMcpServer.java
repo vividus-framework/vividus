@@ -18,15 +18,15 @@ package org.vividus.mcp;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.function.Predicate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.vividus.runner.StepsCollector;
-import org.vividus.runner.StepsCollector.Step;
+import org.vividus.mcp.tool.VividusTool;
+import org.vividus.mcp.tool.VividusToolParameters;
 
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
+import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
@@ -35,37 +35,16 @@ public class VividusMcpServer
 {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private final List<VividusTool> tools;
+
+    public VividusMcpServer(List<VividusTool> tools)
+    {
+        this.tools = tools;
+    }
+
     public void startSyncServer()
     {
-        McpServerFeatures.SyncToolSpecification steps = new McpServerFeatures.SyncToolSpecification(
-                new McpSchema.Tool("vividus_get_all_steps",
-                    "Get a list of available VIVIDUS automation tool steps including their syntax and parameters. "
-                    + "When a user asks for a list of steps provide exact steps without generalization.", """
-                {
-                  "type" : "object",
-                  "id" : "urn:jsonschema:Operation",
-                  "properties" : {},
-                  "required" : [],
-                  "additionalProperties" : false
-                }
-                """),
-                (exchange, args) ->
-                {
-                    try
-                    {
-                        List<StepInfo> infos = StepsCollector.getSteps().stream()
-                                .filter(Predicate.not(Step::isDeprecated))
-                                .map(s -> new StepInfo(s.getStartingWord() + " " + s.getPattern(), s.getLocation()))
-                                .toList();
-
-                        String infosAsString = objectMapper.writeValueAsString(infos);
-                        return new McpSchema.CallToolResult(infosAsString, false);
-                    }
-                    catch (IOException e)
-                    {
-                        return new McpSchema.CallToolResult(e.getMessage(), true);
-                    }
-                });
+        List<SyncToolSpecification> toolSpecs = tools.stream().map(this::asToolSpecification).toList();
 
         McpServerTransportProvider transportProvider = new StdioServerTransportProvider(objectMapper);
         McpServer.sync(transportProvider)
@@ -73,8 +52,26 @@ public class VividusMcpServer
                  .capabilities(McpSchema.ServerCapabilities.builder()
                      .tools(true)
                      .build())
-                 .tools(steps)
+                 .tools(toolSpecs)
                  .build();
+    }
+
+    private McpServerFeatures.SyncToolSpecification asToolSpecification(VividusTool tool)
+    {
+        VividusToolParameters params = tool.getParameters();
+        return new McpServerFeatures.SyncToolSpecification(
+                new McpSchema.Tool(params.name(), params.description(), params.schema()), (exchange, args) ->
+                {
+                    try
+                    {
+                        String content = objectMapper.writeValueAsString(tool.getContent());
+                        return new McpSchema.CallToolResult(content, false);
+                    }
+                    catch (IOException e)
+                    {
+                        return new McpSchema.CallToolResult(e.getMessage(), true);
+                    }
+                });
     }
 
     public static class StepInfo
