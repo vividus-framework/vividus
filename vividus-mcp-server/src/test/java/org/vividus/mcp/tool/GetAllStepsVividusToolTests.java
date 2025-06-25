@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.vividus.mcp.VividusMcpServer.StepInfo;
+import org.vividus.mcp.tool.GetAllStepsVividusTool.GetAllStepsResponse;
 import org.vividus.runner.StepsCollector;
 import org.vividus.runner.StepsCollector.Step;
 
@@ -53,9 +54,12 @@ class GetAllStepsVividusToolTests
         {
             stepCollector.when(StepsCollector::getSteps).thenReturn(Set.of(step, deprecatedStep));
 
-            List<StepInfo> content = (List<StepInfo>) tool.getContent();
-            assertThat(content, hasSize(1));
-            StepInfo stepInfo = content.get(0);
+            GetAllStepsResponse response = (GetAllStepsResponse) tool.getContent();
+            assertThat(response.expressions().keySet(), hasSize(1));
+            assertThat(response.stepParameters().keySet(), hasSize(5));
+            List<StepInfo> stepInfos = response.steps();
+            assertThat(stepInfos, hasSize(1));
+            StepInfo stepInfo = stepInfos.get(0);
             assertEquals("When I perform action", stepInfo.getName());
             assertEquals(module, stepInfo.getModule());
         }
