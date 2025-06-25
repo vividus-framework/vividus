@@ -16,14 +16,21 @@
 
 package org.vividus.mcp.tool;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import org.vividus.mcp.VividusMcpServer.StepInfo;
 import org.vividus.runner.StepsCollector;
 import org.vividus.runner.StepsCollector.Step;
+import org.vividus.util.ResourceUtils;
+import org.vividus.util.json.JsonUtils;
 
 public class GetAllStepsVividusTool implements VividusTool
 {
+    private final JsonUtils jsonUtils = new JsonUtils();
+
     @Override
     public VividusToolParameters getParameters()
     {
@@ -46,9 +53,26 @@ public class GetAllStepsVividusTool implements VividusTool
     @Override
     public Object getContent()
     {
-        return StepsCollector.getSteps().stream()
+        List<StepInfo> steps = StepsCollector.getSteps().stream()
                 .filter(Predicate.not(Step::isDeprecated))
                 .map(s -> new StepInfo(s.getStartingWord() + " " + s.getPattern(), s.getLocation()))
                 .toList();
+
+        return new GetAllStepsResponse(steps, readJsonResourceAsMap("parameters.json"),
+                readJsonResourceAsMap("expressions.json"));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, String> readJsonResourceAsMap(String resource)
+    {
+        String json = ResourceUtils.loadResource(resource);
+        return jsonUtils.toObject(json, HashMap.class);
+    }
+
+    public record GetAllStepsResponse(
+        List<StepInfo> steps,
+        Map<String, String> stepParameters,
+        Map<String, String> expressions)
+    {
     }
 }
