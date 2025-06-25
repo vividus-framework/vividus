@@ -50,7 +50,8 @@ class LocatorConverterTests
 {
     private static final String VALUE = "value";
     private static final String INVALID_LOCATOR_MESSAGE = "Invalid locator format. "
-            + "Expected matches [(?:By\\.)?([a-zA-Z.-]+)\\((.*)\\)(:(.*))?] Actual: [";
+            + "Expected matches [(?:By\\.)?([a-zA-Z.-]+)\\((.*?)\\)(:([a-zA-Z]*))?"
+            + "(?:->filter\\.((?:[a-zA-Z]+\\([^\\)]+\\)(?:\\.[a-zA-Z]+\\([^\\)]+\\))*)?))?$] Actual: [";
     private static final char CLOSING_BRACKET = ']';
     private static final String INVALID_LOCATOR = "To>xpath(.a)";
     private static final String SEARCH = "search";
@@ -247,6 +248,17 @@ class LocatorConverterTests
         Locator locatorClassName = new Locator(TestLocatorType.SEARCH, VALUE + 2);
         assertEquals(new HashSet<>(Arrays.asList(locatorId, locatorClassName)),
                 locatorConverter.convertToLocatorSet("By.search(value1), By.search(value2)"));
+    }
+
+    @Test
+    void testInnerLocators()
+    {
+        String locator = "By.search(xpath(//div)>>leftOf(id(elementId):a->filter.textPart(abc)))";
+        String actual = "xpath(//div)>>leftOf(id(elementId):a->filter.textPart(abc))";
+        lenient().when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
+        lenient().when(service.getFilterLocatorTypes()).thenReturn(Set.of(TestLocatorType.FILTER));
+        assertEquals(createAttributes(TestLocatorType.SEARCH, actual, Visibility.VISIBLE),
+                locatorConverter.convertToLocator(locator));
     }
 
     private static Locator createAttributes(LocatorType type, String value, Visibility elementType)
