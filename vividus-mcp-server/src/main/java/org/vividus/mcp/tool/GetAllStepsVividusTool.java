@@ -55,6 +55,7 @@ public class GetAllStepsVividusTool implements VividusTool
     {
         List<StepInfo> steps = StepsCollector.getSteps().stream()
                 .filter(Predicate.not(Step::isDeprecated))
+                .filter(s -> !s.getPattern().contains("debug"))
                 .map(s -> new StepInfo(s.getStartingWord() + " " + s.getPattern(), s.getLocation()))
                 .toList();
 

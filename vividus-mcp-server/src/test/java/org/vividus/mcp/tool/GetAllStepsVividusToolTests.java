@@ -47,12 +47,15 @@ class GetAllStepsVividusToolTests
         String module = "module";
         when(step.getLocation()).thenReturn(module);
 
+        Step debugStep = mock();
+        when(debugStep.getPattern()).thenReturn("I debug");
+
         Step deprecatedStep = mock();
         when(deprecatedStep.isDeprecated()).thenReturn(true);
 
         try (MockedStatic<StepsCollector> stepCollector = Mockito.mockStatic(StepsCollector.class))
         {
-            stepCollector.when(StepsCollector::getSteps).thenReturn(Set.of(step, deprecatedStep));
+            stepCollector.when(StepsCollector::getSteps).thenReturn(Set.of(step, deprecatedStep, debugStep));
 
             GetAllStepsResponse response = (GetAllStepsResponse) tool.getContent();
             assertThat(response.expressions().keySet(), hasSize(1));
