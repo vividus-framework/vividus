@@ -110,6 +110,10 @@ Then context element is in focus
 When I press ${car-brand} on keyboard
 When I reset context
 Then text `${car-brand}` exists
+!-- Dynamic focus element
+When I enter `a` in field located by `id(text)`
+When I press bcde on keyboard
+Then text `abcde` exists
 
 Scenario: Steps verification: "When I set focus on context element", "Then context element is $focusState", "When I press $keys on keyboard"
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
