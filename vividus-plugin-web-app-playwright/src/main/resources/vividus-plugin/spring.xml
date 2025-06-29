@@ -83,6 +83,7 @@
     <bean id="actionsSequenceSteps" class="org.vividus.ui.web.playwright.steps.ActionsSequenceSteps" />
     <bean id="browserSteps" class="org.vividus.ui.web.playwright.steps.BrowserSteps" />
     <bean id="screenshotTakingSteps" class="org.vividus.ui.steps.ScreenshotTakingSteps" />
+    <bean id="mobileEmulationSteps" class="org.vividus.ui.web.playwright.steps.devtools.MobileEmulationSteps" />
 
     <util:list id="stepBeanNames-WebPlaywrightUi" value-type="java.lang.String">
         <idref bean="cookieSteps" />
@@ -102,6 +103,7 @@
         <idref bean="actionsSequenceSteps" />
         <idref bean="browserSteps" />
         <idref bean="screenshotTakingSteps" />
+        <idref bean="mobileEmulationSteps" />
     </util:list>
 
     <util:list id="stepBeanNames-Playwright-Hooks">

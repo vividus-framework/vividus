@@ -709,3 +709,46 @@ When I execute sequence of actions:
 include::partial$common-web-app-browser-steps.adoc[]
 
 include::partial$common-ui-screenshot-steps.adoc[]
+
+=== Mobile Emulation
+
+==== Emulate mobile device
+
+Emulates mobile device using the provided configuration.
+
+IMPORTANT: The step is only supported by Chrome browser.
+
+[source,gherkin]
+----
+When I emulate mobile device with configuration:`$jsonConfiguration`
+----
+
+* `$jsonConfiguration` - The JSON containing https://chromedevtools.github.io/devtools-protocol/tot/Emulation/#method-setDeviceMetricsOverride[device metrics] to override.
+
+.Emulate iPhone 14 Pro Max
+[source,gherkin]
+----
+When I emulate mobile device with configuration:`{
+    "width": 430,
+    "height": 932,
+    "deviceScaleFactor": 3,
+    "mobile": true
+}`
+----
+
+==== Reset mobile device emulation
+
+Resets the mobile device emulation returning the browser to its initial state.
+
+IMPORTANT: The step is only supported by Chrome browser.
+
+[source,gherkin]
+----
+When I reset mobile device emulation
+----
+
+.Resets device metrics to defaults
+[source,gherkin]
+----
+When I reset mobile device emulation
+----
