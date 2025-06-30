@@ -125,16 +125,11 @@ class ProxyStepsTests
         verifyNoInteractions(attachmentPublisher);
     }
 
-    @ParameterizedTest
-    @CsvSource({
-            "GET,  200",
-            "POST, 302"
-    })
-    void checkHarEntryExistenceWithHttpMethodAndUrlPatternNoCalls(HttpMethod httpMethodInHar, int statusCode)
-            throws IOException
+    @Test
+    void checkHarEntryExistenceWithHttpMethodAndUrlPatternNoCalls() throws IOException
     {
         HttpMethod httpMethod = HttpMethod.POST;
-        mockHar(httpMethodInHar, statusCode);
+        mockHar(HttpMethod.GET, 200);
         String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod, URL);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.URL,
                 Set.of(VariableScope.SCENARIO), VARIABLE_NAME);

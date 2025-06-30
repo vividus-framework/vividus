@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import com.browserup.bup.util.HttpMessageInfo;
 import com.browserup.harreader.filter.HarLogFilter;
 
-import org.apache.hc.core5.http.HttpStatus;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -308,8 +307,7 @@ public class ProxySteps
     {
         return HarLogFilter.findEntries(proxy.getRecordedData().getLog(), urlPattern)
                 .stream()
-                .filter(entry -> entry.getResponse().getStatus() != HttpStatus.SC_MOVED_TEMPORARILY
-                        && httpMethods.contains(entry.getRequest().getMethod()))
+                .filter(entry -> httpMethods.contains(entry.getRequest().getMethod()))
                 .toList();
     }
 
