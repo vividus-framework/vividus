@@ -1,0 +1,57 @@
+= How to use VIVIDUS MCP server to create automated scenarios
+
+The VIVIDUS MCP server exposes core VIVIDUS functionalities to LLMs via the MCP protocol, enabling generation of automated
+test scenarios leveraging those capabilities.
+
+IMPORTANT: LLM will access only those steps that are available from plugins included into your test project.
+
+== Pre-requisites
+
+. Copy the below line to `dependencies` section of the project `build.gradle` file in your test project
++
+[IMPORTANT]
+Please make sure to use the same version for all VIVIDUS dependencies.
++
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-mcp-server')
+----
+
+== Providers
+
+=== Claude Desktop
+
+Claude is a next generation AI assistant built by Anthropic and trained to be safe, accurate, and secure to help you do your best work.
+
+. Install https://claude.ai/download[Claude Desktop]
+. Open `Claude Desktop` and navigate to `Developer` tab in application `Settings`
+. Click `Edit Config` which opens `claude_desktop_config.json` file that contains MCP server configs
+. Add the following JSON into `claude_desktop_config.json` file and save it
++
+.claude_desktop_config.json
+[source,json]
+----
+{
+    "mcpServers": {
+        "vividus-mcp-server": {
+            "command": "/Users/Bob/Workspace/vividus-sample-tests/gradlew", <1>
+            "args": [
+                "startMcpServer",
+                "-q",
+                "-p",
+                "/Users/Bob/Workspace/vividus-sample-tests" <2>
+            ]
+        },
+        "playwright": {
+            "command": "npx",
+            "args": [
+                "@playwright/mcp"
+            ]
+        }
+    }
+}
+----
+<1> [Mandatory] Absolute path to the `gradlew` execulable contained in the tests folder
+<2> [Mandatory] Absolute path to the tests folder
+. Restart `Claude Desktop` application
