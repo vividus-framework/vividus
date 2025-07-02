@@ -27,17 +27,26 @@ import org.vividus.runner.StepsCollector.Step;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonUtils;
 
-public class GetAllStepsVividusTool implements VividusTool
+public class GetAllFeaturesVividusTool implements VividusTool
 {
     private final JsonUtils jsonUtils = new JsonUtils();
 
+    @SuppressWarnings("LineLength")
     @Override
     public VividusToolParameters getParameters()
     {
         return new VividusToolParameters(
-            "vividus_get_all_steps",
-            "Get a list of available VIVIDUS automation tool steps including their syntax and parameters. "
-                + "When a user asks for a list of steps provide exact steps without generalization.",
+            "vividus_get_all_features",
+            """
+            Return a list of available VIVIDUS automation tool features. CRITICAL CONSTRAINTS:
+            * exact syntax of steps, step parameters and expressions must be preserved.
+            * do NOT create, modify, or assume any steps that are not explicitly listed.
+            * all the parameter values for steps must be must be extracted from web page to preserve letter case and not from the user input.
+            * caseInsensitiveText locator strategy must be used for any web element interactions involving text.
+            * cssSelector locator strategy must use standard CSS selector.
+            * all steps that accept locator and contain substeps are contextual, meaning that locators in substeps must be build relatively to the parent locator.
+            * when a user asks for a list of steps provide exact steps without generalization.
+            """,
             """
             {
               "type" : "object",
@@ -59,7 +68,7 @@ public class GetAllStepsVividusTool implements VividusTool
                 .map(s -> new StepInfo(s.getStartingWord() + " " + s.getPattern(), s.getLocation()))
                 .toList();
 
-        return new GetAllStepsResponse(steps, readJsonResourceAsMap("parameters.json"),
+        return new GetAllFeaturesResponse(steps, readJsonResourceAsMap("parameters.json"),
                 readJsonResourceAsMap("expressions.json"));
     }
 
@@ -70,7 +79,7 @@ public class GetAllStepsVividusTool implements VividusTool
         return jsonUtils.toObject(json, HashMap.class);
     }
 
-    public record GetAllStepsResponse(
+    public record GetAllFeaturesResponse(
         List<StepInfo> steps,
         Map<String, String> stepParameters,
         Map<String, String> expressions)

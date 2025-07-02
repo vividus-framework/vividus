@@ -8,5 +8,5 @@
 
        <bean class="org.vividus.mcp.VividusMcpServer"/>
 
-       <bean class="org.vividus.mcp.tool.GetAllStepsVividusTool"/>
+       <bean class="org.vividus.mcp.tool.GetAllFeaturesVividusTool"/>
 </beans>

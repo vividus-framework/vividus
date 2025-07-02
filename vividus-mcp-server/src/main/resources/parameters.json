@@ -1,5 +1,5 @@
 {
-    "locator": "A locator is a method used to identify an element on a web page. The element identification pattern is <strategy>(<value>), where strategy is either xpath, id, or name, and value is the corresponding locator value.",
+    "locator": "A locator is a method used to identify an element on a web page. The element identification pattern is <strategy>(<value>), where strategy is either cssSelector, xpath, id, caseInsensitiveText or name, and value is the corresponding locator value.",
     "scopes": "A scope defines variable availability. Allowed scopes are step, scenario, story, next_batches.",
     "headers": "A table containing name and value columns.",
     "comparisonRule": "A general rule. Allowed rules are less_than, less_than_or_equal_to, greater_than, greater_than_or_equal_to, equal_to, not_equal_to.",
