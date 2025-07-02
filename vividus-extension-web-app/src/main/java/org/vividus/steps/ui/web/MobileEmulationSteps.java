@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,18 @@
  * limitations under the License.
  */
 
-package org.vividus.steps.ui.web.devtools;
-
-import java.util.Map;
-
-import com.google.common.eventbus.EventBus;
+package org.vividus.steps.ui.web;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.ui.web.action.CdpActions;
-import org.vividus.ui.web.event.DeviceMetricsOverrideEvent;
-import org.vividus.util.json.JsonUtils;
+import org.vividus.ui.web.cdp.CdpClient;
 
 public class MobileEmulationSteps
 {
-    private final CdpActions cdpActions;
-    private final JsonUtils jsonUtils;
-    private final EventBus eventBus;
+    private final CdpClient cdpClient;
 
-    public MobileEmulationSteps(CdpActions cdpActions, JsonUtils jsonUtils, EventBus eventBus)
+    public MobileEmulationSteps(CdpClient cdpClient)
     {
-        this.cdpActions = cdpActions;
-        this.jsonUtils = jsonUtils;
-        this.eventBus = eventBus;
+        this.cdpClient = cdpClient;
     }
 
     /**
@@ -47,13 +37,10 @@ public class MobileEmulationSteps
      *
      * @param jsonConfiguration The JSON containing device metrics to override.
      */
-    @SuppressWarnings("unchecked")
     @When("I emulate mobile device with configuration:`$jsonConfiguration`")
     public void overrideDeviceMetrics(String jsonConfiguration)
     {
-        cdpActions.executeCdpCommand("Emulation.setDeviceMetricsOverride",
-                jsonUtils.toObject(jsonConfiguration, Map.class));
-        eventBus.post(new DeviceMetricsOverrideEvent());
+        cdpClient.executeCdpCommand("Emulation.setDeviceMetricsOverride", jsonConfiguration);
     }
 
     /**
@@ -66,7 +53,6 @@ public class MobileEmulationSteps
     @When("I reset mobile device emulation")
     public void clearDeviceMetrics()
     {
-        cdpActions.executeCdpCommand("Emulation.clearDeviceMetricsOverride", Map.of());
-        eventBus.post(new DeviceMetricsOverrideEvent());
+        cdpClient.executeCdpCommand("Emulation.clearDeviceMetricsOverride");
     }
 }

@@ -20,7 +20,10 @@
 
     <bean id="webStorageSteps" class="org.vividus.steps.ui.web.WebStorageSteps" />
 
+    <bean id="mobileEmulationSteps" class="org.vividus.steps.ui.web.MobileEmulationSteps" />
+
     <util:list id="stepBeanNames-WebApp" value-type="java.lang.String">
         <idref bean="webStorageSteps" />
+        <idref bean="mobileEmulationSteps"/>
     </util:list>
 </beans>

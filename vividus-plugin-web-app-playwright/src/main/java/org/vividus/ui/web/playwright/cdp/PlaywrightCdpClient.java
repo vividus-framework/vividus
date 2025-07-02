@@ -14,54 +14,51 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.playwright.steps.devtools;
+package org.vividus.ui.web.playwright.cdp;
+
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.microsoft.playwright.Page;
 
-import org.jbehave.core.annotations.When;
+import org.vividus.ui.web.cdp.CdpClient;
 import org.vividus.ui.web.playwright.BrowserContextProvider;
 import org.vividus.ui.web.playwright.UiContext;
 
-public class MobileEmulationSteps
+public class PlaywrightCdpClient implements CdpClient
 {
     private static final Gson GSON = new Gson();
 
     private final BrowserContextProvider browserContextProvider;
     private final UiContext uiContext;
 
-    public MobileEmulationSteps(BrowserContextProvider browserContextProvider, UiContext uiContext)
+    public PlaywrightCdpClient(BrowserContextProvider browserContextProvider, UiContext uiContext)
     {
         this.browserContextProvider = browserContextProvider;
         this.uiContext = uiContext;
     }
 
-    /**
-     * Emulates mobile device using the provided configuration.
-     * <p>
-     * <strong>The step is only supported by Chrome browser.</strong>
-     * </p>
-     * @param jsonConfiguration The JSON containing device metrics to override.
-     */
-    @When("I emulate mobile device with configuration:`$jsonConfiguration`")
-    public void overrideDeviceMetrics(String jsonConfiguration)
+    @Override
+    public void executeCdpCommand(String command)
     {
-        JsonObject args = GSON.fromJson(jsonConfiguration, JsonObject.class);
         Page page = uiContext.getCurrentPage();
-        browserContextProvider.getCdpSession(page).send("Emulation.setDeviceMetricsOverride", args);
+        browserContextProvider.getCdpSession(page).send(command);
     }
 
-    /**
-     * Resets the mobile device emulation returning the browser to its initial state.
-     * <p>
-     * <strong>The step is only supported by Chrome browser.</strong>
-     * </p>
-     */
-    @When("I reset mobile device emulation")
-    public void clearDeviceMetrics()
+    @Override
+    public void executeCdpCommand(String command, String argsAsJsonString)
     {
+        JsonObject args = GSON.fromJson(argsAsJsonString, JsonObject.class);
         Page page = uiContext.getCurrentPage();
-        browserContextProvider.getCdpSession(page).send("Emulation.clearDeviceMetricsOverride");
+        browserContextProvider.getCdpSession(page).send(command, args);
+    }
+
+    @Override
+    public void executeCdpCommand(String command, Map<String, Object> parameters)
+    {
+        JsonObject args = GSON.toJsonTree(parameters).getAsJsonObject();
+        Page page = uiContext.getCurrentPage();
+        browserContextProvider.getCdpSession(page).send(command, args);
     }
 }

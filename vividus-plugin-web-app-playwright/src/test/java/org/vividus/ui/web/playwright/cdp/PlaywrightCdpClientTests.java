@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.playwright.steps.devtools;
+package org.vividus.ui.web.playwright.cdp;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Map;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.playwright.CDPSession;
 import com.microsoft.playwright.Page;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,42 +37,49 @@ import org.vividus.ui.web.playwright.BrowserContextProvider;
 import org.vividus.ui.web.playwright.UiContext;
 
 @ExtendWith(MockitoExtension.class)
-public class MobileEmulationStepsTests
+class PlaywrightCdpClientTests
 {
     @Mock private BrowserContextProvider browserContextProvider;
     @Mock private UiContext uiContext;
-    @InjectMocks private MobileEmulationSteps mobileEmulationSteps;
+    @Mock private Page page;
+    @Mock private CDPSession cdpSession;
+    @InjectMocks private PlaywrightCdpClient cdpClient;
 
-    @Test
-    void shouldOverrideDeviceMetrics()
+    @BeforeEach
+    void setUp()
     {
-        Page page = mock();
         when(uiContext.getCurrentPage()).thenReturn(page);
-        CDPSession cdpSession =  mock(CDPSession.class);
         when(browserContextProvider.getCdpSession(page)).thenReturn(cdpSession);
-
-        String metrics = """
-            {
-                "width": 430,
-                "height": 932,
-                "deviceScaleFactor": 3,
-                "mobile": true
-            }
-            """;
-        mobileEmulationSteps.overrideDeviceMetrics(metrics);
-        JsonObject expectedArgs = JsonParser.parseString(metrics).getAsJsonObject();
-        verify(cdpSession).send(eq("Emulation.setDeviceMetricsOverride"), eq(expectedArgs));
     }
 
     @Test
-    void shouldClearDeviceMetrics()
+    void shouldExecuteCdpCommandWithArgsString()
     {
-        Page page = mock();
-        when(uiContext.getCurrentPage()).thenReturn(page);
-        CDPSession cdpSession =  mock(CDPSession.class);
-        when(browserContextProvider.getCdpSession(page)).thenReturn(cdpSession);
+        String command = "Emulation.setAutoDarkModeOverride";
+        String argsAsJsonString = "{\"enabled\": true}";
+        cdpClient.executeCdpCommand(command, argsAsJsonString);
 
-        mobileEmulationSteps.clearDeviceMetrics();
-        verify(cdpSession).send(eq("Emulation.clearDeviceMetricsOverride"));
+        JsonObject expectedArgs = JsonParser.parseString(argsAsJsonString).getAsJsonObject();
+        verify(cdpSession).send(eq(command), eq(expectedArgs));
+    }
+
+    @Test
+    void shouldExecuteCdpCommandWithArgsMap()
+    {
+        String key = "value";
+        String command = "Emulation.setScriptExecutionDisabled";
+        cdpClient.executeCdpCommand(command, Map.of(key, true));
+
+        JsonObject expectedArgs = new JsonObject();
+        expectedArgs.addProperty(key, true);
+        verify(cdpSession).send(eq(command), eq(expectedArgs));
+    }
+
+    @Test
+    void shouldExecuteCdpCommandWithNoArgs()
+    {
+        String command = "Emulation.clearDeviceMetricsOverride";
+        cdpClient.executeCdpCommand(command);
+        verify(cdpSession).send(eq(command));
     }
 }
