@@ -58,5 +58,5 @@ dependencies {
     implementation(group: 'com.h2database', name: 'h2', version: '2.3.232')
 
     // Zstd decompression support, need to add explicitly as it's not a transitive dependency of netty out-of-the-box
-    implementation(group: 'com.github.luben', name: 'zstd-jni', version: '1.5.7-3')
+    implementation(group: 'com.github.luben', name: 'zstd-jni', version: '1.5.7-4')
 }
