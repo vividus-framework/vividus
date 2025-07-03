@@ -19,6 +19,7 @@ package org.vividus.steps.xml;
 import static org.hamcrest.xml.HasXPath.hasXPath;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.xml.xpath.XPathExpressionException;
@@ -48,7 +49,7 @@ public class XmlSteps
     }
 
     /**
-     * Save XML data by XPath to the variable
+     * Save XML data by XPath to the variable. The step fails if input XML document is not well formed.
      * @param xpath XPath locator
      * @param xml XML
      * @param scopes The set of variable scopes (comma separated list of scopes e.g.: STORY, NEXT_BATCHES)
@@ -59,8 +60,11 @@ public class XmlSteps
     public void saveDataByXpath(String xpath, String xml, Set<VariableScope> scopes, String variableName)
             throws XPathExpressionException
     {
-        XmlUtils.getXmlByXpath(xml, xpath).ifPresent(
-            data -> variableContext.putVariable(scopes, variableName, data));
+        if (isXmlWellFormed(xml))
+        {
+            XmlUtils.getXmlByXpath(xml, xpath)
+                    .ifPresent(data -> variableContext.putVariable(scopes, variableName, data));
+        }
     }
 
     /**
@@ -79,7 +83,7 @@ public class XmlSteps
     }
 
     /**
-     * Checks if xml contains element by XPath
+     * Checks if xml contains element by XPath. The step fails if input XML document is not well formed.
      * @param xml XML
      * @param xpath XPath
      * @throws IOException If an I/O error has occurred
@@ -92,12 +96,12 @@ public class XmlSteps
     @Then("XML `$xml` contains element by xpath `$xpath`")
     public void doesElementExistByXpath(String xml, String xpath) throws SAXException, IOException
     {
-        Document doc = XmlUtils.convertToDocument(xml);
-        softAssert.assertThat("XML has element with XPath: " + xpath, doc, hasXPath(xpath));
+        getDocument(xml)
+                .ifPresent(doc -> softAssert.assertThat("XML has element with XPath: " + xpath, doc, hasXPath(xpath)));
     }
 
     /**
-     * Save number of elements by xpath from XML to a variable
+     * Save number of elements by xpath from XML to a variable. The step fails if input XML document is not well formed.
      * @param xml XML
      * @param xpath XPath locator
      * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
@@ -115,18 +119,26 @@ public class XmlSteps
     public void saveNumberOfElements(String xpath, String xml, Set<VariableScope> scopes, String variableName)
             throws XPathExpressionException
     {
-        int numberOfElements = XmlUtils.getNumberOfElements(xml, xpath);
-        variableContext.putVariable(scopes, variableName, numberOfElements);
+        if (isXmlWellFormed(xml))
+        {
+            int numberOfElements = XmlUtils.getNumberOfElements(xml, xpath);
+            variableContext.putVariable(scopes, variableName, numberOfElements);
+        }
     }
 
     /**
-     * Checks if XML is equal to expected XML
+     * Checks if XML is equal to expected XML. The step fails if any of the input XML documents is not well formed.
      * @param xml XML
      * @param expectedXml Expected XML
      */
     @Then("XML `$xml` is equal to `$expectedXml`")
     public void compareXmls(String xml, String expectedXml)
     {
+        if (!isXmlWellFormed(xml) || !isXmlWellFormed(expectedXml))
+        {
+            return;
+        }
+
         Diff diff = DiffBuilder.compare(expectedXml).withTest(xml)
                 .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes))
                 .ignoreWhitespace()
@@ -171,14 +183,27 @@ public class XmlSteps
     @Then("XML `$xml` is well formed")
     public void validateXmlIsWellFormed(String xml)
     {
+        if (isXmlWellFormed(xml))
+        {
+            softAssert.recordPassedAssertion("The XML document is well formed");
+        }
+    }
+
+    private boolean isXmlWellFormed(String xml)
+    {
+        return getDocument(xml).isPresent();
+    }
+
+    private Optional<Document> getDocument(String xml)
+    {
         try
         {
-            XmlUtils.convertToDocument(xml);
-            softAssert.recordPassedAssertion("The XML document is well formed");
+            return Optional.of(XmlUtils.convertToDocument(xml));
         }
         catch (SAXException | IOException e)
         {
             softAssert.recordFailedAssertion(e);
+            return Optional.empty();
         }
     }
 }

@@ -18,7 +18,9 @@ package org.vividus.steps.xml;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.io.IOException;
 import java.util.Set;
@@ -29,23 +31,29 @@ import javax.xml.xpath.XPathExpressionException;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
-import org.vividus.util.xml.XmlUtils;
 import org.vividus.variable.VariableScope;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xmlunit.builder.DiffBuilder;
 
 @ExtendWith(MockitoExtension.class)
 class XmlStepsTests
 {
     private static final String XML = "<test>data</test>";
-    private static final String XPATH = "//test/text()";
+    private static final String TEST_XPATH = "//test";
+    private static final String XPATH = TEST_XPATH + "/text()";
+    private static final String NAME = "name";
 
     @Mock
     private VariableContext variableContext;
@@ -60,26 +68,46 @@ class XmlStepsTests
     void shouldSaveDataByXpathIntoScopeVariable() throws XPathExpressionException
     {
         Set<VariableScope> scopes = Set.of(VariableScope.STEP);
-        String name = "name";
-        xmlValidationSteps.saveDataByXpath(XPATH, XML, scopes, name);
-        verify(variableContext).putVariable(scopes, name, "data");
+        xmlValidationSteps.saveDataByXpath(XPATH, XML, scopes, NAME);
+        verify(variableContext).putVariable(scopes, NAME, "data");
+    }
+
+    @Test
+    void shouldNotSaveDataByXpathIntoScopeVariableIfXmlIsNotWellFormed() throws XPathExpressionException
+    {
+        xmlValidationSteps.saveDataByXpath(XPATH, NAME, Set.of(VariableScope.STEP), NAME);
+        verifyNoInteractions(variableContext);
     }
 
     @Test
     void shouldSaveNumberOfElements() throws XPathExpressionException
     {
         Set<VariableScope> scopes = Set.of(VariableScope.STEP);
-        String name = "number";
-        xmlValidationSteps.saveNumberOfElements("//test", XML, scopes, name);
-        verify(variableContext).putVariable(scopes, name, 1);
+        xmlValidationSteps.saveNumberOfElements(TEST_XPATH, XML, scopes, NAME);
+        verify(variableContext).putVariable(scopes, NAME, 1);
+    }
+
+    @Test
+    void shouldNotSaveNumberOfElementsIfXmlIsNotWellFormed() throws XPathExpressionException
+    {
+        xmlValidationSteps.saveNumberOfElements(TEST_XPATH, NAME, Set.of(VariableScope.STEP), NAME);
+        verifyNoInteractions(variableContext);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void shouldValidateXmlElementExistenceByXpath() throws SAXException, IOException
     {
-        Document doc = XmlUtils.convertToDocument(XML);
-        softAssert.assertThat(eq("XML has element with XPath: " + XPATH), eq(doc), any(Matcher.class));
+        xmlValidationSteps.doesElementExistByXpath(XML, XPATH);
+        verify(softAssert).assertThat(eq("XML has element with XPath: " + XPATH), any(Document.class),
+                any(Matcher.class));
+    }
+
+    @Test
+    void shouldNotValidateXmlElementExistenceByXpathIfXmlIsNotWellFormed() throws SAXException, IOException
+    {
+        xmlValidationSteps.doesElementExistByXpath(NAME, XPATH);
+        verify(softAssert, never()).assertThat(any(), any(), any());
     }
 
     @Test
@@ -95,6 +123,20 @@ class XmlStepsTests
         verify(softAssert).recordFailedAssertion("Expected text value 'value' but was 'diffValue' - comparing "
                 + "<data ...>value</data> at /test[1]/data[1]/text()[1] to <data ...>diffValue</data> at "
                 + "/test[1]/data[1]/text()[1] (DIFFERENT)" + System.lineSeparator());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "<test>data</test>, invalid_xml",
+        "invalid_xml, <test>data</test>"
+    })
+    void shouldNotCompareXmls(String left, String right)
+    {
+        try (MockedStatic<DiffBuilder> diffBuilder = Mockito.mockStatic(DiffBuilder.class))
+        {
+            xmlValidationSteps.compareXmls(left, right);
+            diffBuilder.verifyNoInteractions();
+        }
     }
 
     @Test

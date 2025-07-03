@@ -14,7 +14,7 @@ include::partial$plugin-installation.adoc[]
 
 === Save data by XPath
 
-Saves XML data by XPath to a variable.
+Saves XML data by XPath to a variable. The step fails if input XML document is not well formed.
 
 [source,gherkin]
 ----
@@ -94,7 +94,7 @@ Then `${artists}` is equal to `* Joe Cocker * Bob Dylan * Bonnie Tyler`
 
 === Save number of elements
 
-Save number of elements by XPath from XML to a variable
+Save number of elements by XPath from XML to a variable. The step fails if input XML document is not well formed.
 
 [source,gherkin]
 ----
@@ -122,7 +122,7 @@ Then `${headings}` is equal to `1`
 
 === Check element existence
 
-Checks if XML document contains element by {xpath}.
+Checks if XML document contains element by {xpath}. The step fails if input XML document is not well formed.
 
 _Step is deprecated and will be removed in VIVIDUS 0.8.0, please use the following sequence of steps as a replacement_:
 [source,gherkin]
@@ -155,7 +155,7 @@ Then XML `
 
 === Compare XML documents
 
-Checks if XML document is equal to expected XML document.
+Checks if XML document is equal to expected XML document. The step fails if any of the input XML documents is not well formed.
 
 [source,gherkin]
 ----
