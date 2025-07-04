@@ -13,7 +13,7 @@ if not exist "%VIVIDUS_BUILD_SYSTEM_HOME%" (
     call :setpropertyvalue buildSystemRootDir , VIVIDUS_BUILD_SYSTEM_HOME
 )
 set GRADLEW_PATH=%VIVIDUS_BUILD_SYSTEM_HOME%\%buildSystemVersion%\gradlew.bat
-if exist "%GRADLEW_PATH%" goto call
+if exist "%GRADLEW_PATH%" goto checkprojectdir
 set ERROR_MSG=Couldn't find %GRADLEW_PATH%. Neither environment variable "VIVIDUS_BUILD_SYSTEM_HOME" is set nor embedded build system is synced
 
 :fail
@@ -25,8 +25,18 @@ echo or
 echo clone this repo recursively: git clone --recursive <git-repository-url>
 exit /b 1
 
-:call
-@CALL "%GRADLEW_PATH%" %*
+:checkprojectdir
+set "PROJECT_DIR_PROVIDED=false"
+for %%i in (%*) do (
+    if "%%i"=="--project-dir" set "PROJECT_DIR_PROVIDED=true"
+    if "%%i"=="-p" set "PROJECT_DIR_PROVIDED=true"
+)
+
+if "%PROJECT_DIR_PROVIDED%"=="true" (
+    @CALL "%GRADLEW_PATH%" %*
+) else (
+    @CALL "%GRADLEW_PATH%" --project-dir "%~dp0" %*
+)
 exit /b %ERRORLEVEL%
 
 :setpropertyvalue
