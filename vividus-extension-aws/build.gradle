@@ -6,7 +6,7 @@ dependencies {
     api(group: 'org.vividus', name: 'jbehave-core', version: versions.jbehave)
     implementation project(':vividus-test-context')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.2')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.3')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '3.0')
