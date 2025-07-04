@@ -73,7 +73,6 @@
     <bean id="webElementActions" class="org.vividus.ui.web.action.WebElementActions" />
     <bean id="windowsActions" class="org.vividus.ui.web.action.WindowsActions" />
     <bean class="org.vividus.ui.web.action.FrameActions" />
-    <bean class="org.vividus.ui.web.action.CdpActions" />
 
     <bean class="org.vividus.ui.web.action.WebWaitActions" parent="waitActions">
         <property name="pageStartsToLoadTimeout" value="${web.wait.page-starts-to-load-timeout}" />
@@ -172,6 +171,8 @@
 
     <bean class="org.vividus.ui.web.performance.PerformanceMetrics" />
 
+    <bean class="org.vividus.ui.web.cdp.SeleniumCdpClient" />
+
     <bean id="webDriverSetupSteps" class="org.vividus.steps.WebDriverSetupSteps">
         <constructor-arg index="0" value="${web-application.session-scope}" />
     </bean>
@@ -203,7 +204,6 @@
     <bean id="actionsSequenceSteps" class="org.vividus.steps.ui.web.ActionsSequenceSteps" />
     <bean id="browserSteps" class="org.vividus.steps.ui.web.BrowserSteps" />
     <bean id="performanceSteps" class="org.vividus.steps.ui.web.PerformanceSteps" />
-    <bean id="mobileEmulationSteps" class="org.vividus.steps.ui.web.devtools.MobileEmulationSteps" />
     <bean id="geolocationEmulationSteps" class="org.vividus.steps.ui.web.devtools.GeolocationEmulationSteps" />
     <bean id="browserPermissionsSteps" class="org.vividus.steps.ui.web.bidi.BrowserPermissionsSteps" />
     <bean id="scriptSteps" class="org.vividus.steps.ui.web.ScriptSteps" />
@@ -291,7 +291,6 @@
         <idref bean="performanceSteps" />
         <idref bean="windowSteps" />
         <idref bean="browserSteps" />
-        <idref bean="mobileEmulationSteps" />
         <idref bean="geolocationEmulationSteps" />
         <idref bean="browserPermissionsSteps" />
     </util:list>

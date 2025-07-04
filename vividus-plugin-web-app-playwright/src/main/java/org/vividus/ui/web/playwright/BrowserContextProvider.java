@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Optional;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType.LaunchOptions;
+import com.microsoft.playwright.CDPSession;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.Tracing;
@@ -36,6 +37,7 @@ public class BrowserContextProvider
     private static final Logger LOGGER = LoggerFactory.getLogger(BrowserContextProvider.class);
     private static final Class<BrowserContext> BROWSER_CONTEXT_KEY = BrowserContext.class;
     private static final Class<PlaywrightContext> PLAYWRIGHT_CONTEXT_KEY = PlaywrightContext.class;
+    private static final Class<CDPSession> CDP_SESSION_KEY = CDPSession.class;
 
     private final BrowserType browserType;
     private final LaunchOptions launchOptions;
@@ -72,6 +74,15 @@ public class BrowserContextProvider
             long browserContextTimeout = browserContextConfiguration.getTimeout().toMillis();
             browserContext.setDefaultTimeout(browserContextTimeout);
             return browserContext;
+        });
+    }
+
+    public CDPSession getCdpSession(Page page)
+    {
+        return testContext.get(CDP_SESSION_KEY, () -> {
+            CDPSession cdpSession = page.context().newCDPSession(page);
+            page.onClose(p -> cdpSession.detach());
+            return cdpSession;
         });
     }
 

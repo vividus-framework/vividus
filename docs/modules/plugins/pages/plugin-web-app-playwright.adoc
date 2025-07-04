@@ -709,3 +709,5 @@ When I execute sequence of actions:
 include::partial$common-web-app-browser-steps.adoc[]
 
 include::partial$common-ui-screenshot-steps.adoc[]
+
+include::partial$common-web-app-mobile-emulation-steps.adoc[]

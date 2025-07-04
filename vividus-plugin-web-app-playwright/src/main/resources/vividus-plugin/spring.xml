@@ -66,6 +66,8 @@
 
     <bean class="org.vividus.ui.web.playwright.screenshot.PlaywrightScreenshotTaker" />
 
+    <bean class="org.vividus.ui.web.playwright.cdp.PlaywrightCdpClient" />
+
     <bean id="cookieSteps" class="org.vividus.ui.web.playwright.steps.PlaywrightCookieSteps" />
     <bean id="elementSteps" class="org.vividus.ui.web.playwright.steps.ElementSteps" />
     <bean id="fieldSteps" class="org.vividus.ui.web.playwright.steps.FieldSteps" />
