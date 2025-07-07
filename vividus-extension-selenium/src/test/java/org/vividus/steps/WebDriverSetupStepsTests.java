@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,16 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.RunContext;
@@ -43,32 +47,40 @@ class WebDriverSetupStepsTests
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private RunContext runContext;
 
+    static Stream<Consumer<WebDriverSetupSteps>> scenarioHooks()
+    {
+        return Stream.of(
+                WebDriverSetupSteps::beforeScenario,
+                WebDriverSetupSteps::afterScenario
+        );
+    }
+
+    @MethodSource("scenarioHooks")
+    @ParameterizedTest
+    void shouldStopWebDriverInScenarioHookIfScenarioMetaContainsControllingMeta(Consumer<WebDriverSetupSteps> test)
+    {
+        var steps = new WebDriverSetupSteps(WebDriverSessionScope.STORY, webDriverProvider, runContext);
+        prepareRunningScenario(createMetaWithControllingTag());
+
+        test.accept(steps);
+
+        verify(webDriverProvider).end();
+        verifyNoMoreInteractions(runContext, webDriverProvider);
+    }
+
     @Test
     void shouldNotStopWebDriverInBeforeScenarioIfScenarioMetaDoesNotContainControllingMeta()
     {
-        WebDriverSetupSteps steps = new WebDriverSetupSteps(WebDriverSessionScope.SCENARIO, webDriverProvider,
-                runContext);
+        var steps = new WebDriverSetupSteps(WebDriverSessionScope.SCENARIO, webDriverProvider, runContext);
         prepareRunningScenario(new Meta());
         steps.beforeScenario();
         verifyNoMoreInteractions(runContext, webDriverProvider);
     }
 
     @Test
-    void shouldStopWebDriverInBeforeScenarioIfScenarioMetaContainsControllingMeta()
-    {
-        WebDriverSetupSteps steps = new WebDriverSetupSteps(WebDriverSessionScope.SCENARIO, webDriverProvider,
-                runContext);
-        prepareRunningScenario(createMetaWithControllingTag());
-        steps.beforeScenario();
-        verify(webDriverProvider).end();
-        verifyNoMoreInteractions(runContext, webDriverProvider);
-    }
-
-    @Test
     void shouldNotStopWebDriverInBeforeStoryIfStoryMetaDoesNotContainControllingMeta()
     {
-        WebDriverSetupSteps steps = new WebDriverSetupSteps(WebDriverSessionScope.SCENARIO, webDriverProvider,
-                runContext);
+        var steps = new WebDriverSetupSteps(WebDriverSessionScope.SCENARIO, webDriverProvider, runContext);
         prepareRunningStory(new Meta());
         steps.beforeStory();
         verifyNoMoreInteractions(runContext, webDriverProvider);
@@ -77,8 +89,7 @@ class WebDriverSetupStepsTests
     @Test
     void shouldStopWebDriverInBeforeStoryIfStoryMetaContainsControllingMeta()
     {
-        WebDriverSetupSteps steps = new WebDriverSetupSteps(WebDriverSessionScope.SCENARIO, webDriverProvider,
-                runContext);
+        var steps = new WebDriverSetupSteps(WebDriverSessionScope.SCENARIO, webDriverProvider, runContext);
         prepareRunningStory(createMetaWithControllingTag());
         steps.beforeStory();
         verify(webDriverProvider).end();
@@ -86,10 +97,10 @@ class WebDriverSetupStepsTests
     }
 
     @Test
-    void shouldNotStopWebDriverInAfterScenario()
+    void shouldNotStopWebDriverInAfterScenarioIfScenarioMetaDoesNotContainControllingMeta()
     {
-        WebDriverSetupSteps steps = new WebDriverSetupSteps(WebDriverSessionScope.STORY, webDriverProvider,
-                runContext);
+        var steps = new WebDriverSetupSteps(WebDriverSessionScope.STORY, webDriverProvider, runContext);
+        prepareRunningScenario(new Meta());
         steps.afterScenario();
         verifyNoInteractions(webDriverProvider);
     }
@@ -97,8 +108,7 @@ class WebDriverSetupStepsTests
     @Test
     void shouldStopWebDriverInAfterStory()
     {
-        WebDriverSetupSteps steps = new WebDriverSetupSteps(WebDriverSessionScope.STORY, webDriverProvider,
-                runContext);
+        var steps = new WebDriverSetupSteps(WebDriverSessionScope.STORY, webDriverProvider, runContext);
         steps.afterStory();
         verify(webDriverProvider).end();
         verifyNoMoreInteractions(webDriverProvider);
@@ -107,8 +117,7 @@ class WebDriverSetupStepsTests
     @Test
     void shouldStopWebDriverInAfterScenario()
     {
-        WebDriverSetupSteps steps = new WebDriverSetupSteps(WebDriverSessionScope.SCENARIO, webDriverProvider,
-                runContext);
+        var steps = new WebDriverSetupSteps(WebDriverSessionScope.SCENARIO, webDriverProvider, runContext);
         steps.afterScenario();
         verify(webDriverProvider).end();
         verifyNoMoreInteractions(webDriverProvider);
@@ -117,8 +126,7 @@ class WebDriverSetupStepsTests
     @Test
     void shouldNotStopWebDriverInAfterStory()
     {
-        WebDriverSetupSteps steps = new WebDriverSetupSteps(WebDriverSessionScope.SCENARIO, webDriverProvider,
-                runContext);
+        var steps = new WebDriverSetupSteps(WebDriverSessionScope.SCENARIO, webDriverProvider, runContext);
         steps.afterStory();
         verifyNoInteractions(webDriverProvider);
     }
@@ -126,7 +134,7 @@ class WebDriverSetupStepsTests
     @Test
     void shouldNotAllowToSetNullSessionScope()
     {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        var exception = assertThrows(IllegalArgumentException.class,
             () -> new WebDriverSetupSteps(null, webDriverProvider, runContext));
         assertEquals("Application session scope is not set", exception.getMessage());
     }
@@ -138,7 +146,7 @@ class WebDriverSetupStepsTests
 
     private void prepareRunningStory(Meta meta)
     {
-        RunningStory runningStory = new RunningStory();
+        var runningStory = new RunningStory();
         runningStory.setStory(new Story(null, null, meta, null, null));
 
         when(runContext.getRunningStory()).thenReturn(runningStory);
@@ -146,9 +154,10 @@ class WebDriverSetupStepsTests
 
     private void prepareRunningScenario(Meta scenarioMeta)
     {
-        RunningScenario runningScenario = new RunningScenario();
+        var runningScenario = new RunningScenario();
         runningScenario.setScenario(new Scenario(null, scenarioMeta));
-        RunningStory runningStory = new RunningStory();
+
+        var runningStory = new RunningStory();
         runningStory.setRunningScenario(runningScenario);
 
         when(runContext.getRunningStory()).thenReturn(runningStory);
