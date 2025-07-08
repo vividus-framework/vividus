@@ -198,7 +198,7 @@ class ElementStepsTests
         "'rgb(10, 10, 10)',        'rgba(10, 10, 5, 1)',    false",
         "'rgba(255, 255, 255, 1)', 'rgb(255, 255, 255)',    true",
         "'rgba(1, 1, 1, 0)',       'rgba(1, 1, 1, 0)',      true",
-        "'rgba(1, 1, 1, 1)',       'rgba(1, 1, 1, 1)',      true"
+        "'rgba(1, 1, 1, 1.0)',     'rgba(1, 1, 1, 1)',      true"
     })
     void shouldNormalizeRgbColorsDuringCssCheck(String expected, String actual, boolean result)
     {

@@ -59,9 +59,10 @@ import org.vividus.variable.VariableScope;
 @TakeScreenshotOnFailure
 public class ElementSteps implements ResourceLoaderAware
 {
-    private static final String ALPHA_OPAQUE = "1";
-    private static final Pattern RGBA_PATTERN = Pattern.compile("rgba\\((\\d+,\\d+,\\d+),(\\d?\\.?\\d+)\\)");
-    private static final String RGB = "rgb";
+    private static final Pattern RGB_PATTERN = Pattern.compile("^\\s*rgb");
+    private static final Pattern RGBA_OPAQUE_COLOR_PATTERN = Pattern.compile(
+            "rgba\\((\\d{1,3}),\\s*(\\d{1,3}),\\s*(\\d{1,3}),\\s*1(\\.0+)?\\s*\\)");
+
     private static final String THE_NUMBER_OF_FOUND_ELEMENTS = "The number of found elements";
     private static final String FILE_EXISTS_MESSAGE_FORMAT = "File %s exists";
     private static final String ELEMENT_CSS_CONTAINING_VALUE = "Element has CSS property '%s' containing value '%s'";
@@ -223,53 +224,43 @@ public class ElementSteps implements ResourceLoaderAware
      * Checks that the context <b>element</b> has an expected <b>CSS property</b>.
      * <p>
      * If the comparison rule is <b>{@code IS_EQUAL_TO}</b> and both the actual and expected CSS values
-     * are colors in RGB or RGBA format (with an <b>alpha channel of 1</b> in RGBA [{@code rgba(r,g,b,1)}]),
-     * then both values are normalized to the RGB [{@code rgb(r,g,b)}] format before the comparison.
+     * are colors in RGB or RGBA format (with an <b>alpha channel of 1</b> in RGBA {@code rgba(r, g, b, 1)}),
+     * then both values are normalized to the RGB {@code rgb(r, g, b)} format before the comparison.
      * <p>
-     * Normalization is <b>not performed</b> for other comparison rules or color representations.
-     * @param cssName A name of the <b>CSS property</b>
-     * @param comparisonRule is equal to, contains, does not contain, matches
-     * @param cssValue An expected value of <b>CSS property</b>
+     * The normalization is <b>not performed</b> for other comparison rules or color representations.
+     *
+     * @param cssName          A name of the <b>CSS property</b>
+     * @param comparisonRule   is equal to, contains, does not contain, matches
+     * @param expectedCssValue An expected value of <b>CSS property</b>
      */
-    @Then("context element has CSS property `$cssName` with value that $comparisonRule `$cssValue`")
-    public void doesElementHaveRightCss(String cssName, StringComparisonRule comparisonRule, String cssValue)
+    @Then("context element has CSS property `$cssName` with value that $comparisonRule `$expectedCssValue`")
+    public void doesElementHaveRightCss(String cssName, StringComparisonRule comparisonRule, String expectedCssValue)
     {
         uiContext.getSearchContext(WebElement.class).ifPresent(element -> {
             String actualCssValue = webElementActions.getCssValue(element, cssName);
 
-            boolean rgbComparison = StringComparisonRule.IS_EQUAL_TO.equals(comparisonRule)
-                    && cssValue.trim().startsWith(RGB) && actualCssValue.trim().startsWith(RGB);
+            boolean rgbColorsComparison = StringComparisonRule.IS_EQUAL_TO == comparisonRule
+                    && RGB_PATTERN.matcher(expectedCssValue).find() && RGB_PATTERN.matcher(actualCssValue).find();
 
-            if (rgbComparison)
+            if (rgbColorsComparison)
             {
-                String normalizedExpected = normalizeToRGB(cssValue);
-                String normalizedActual = normalizeToRGB(actualCssValue);
+                String normalizedExpected = normalizeToRgb(expectedCssValue);
+                String normalizedActual = normalizeToRgb(actualCssValue);
                 descriptiveSoftAssert.recordAssertion(normalizedExpected.equals(normalizedActual),
                         String.format("The value of CSS property '%s' [Expected: '%s' Actual: was '%s']",
-                                cssName, cssValue, actualCssValue));
+                                cssName, expectedCssValue, actualCssValue));
             }
             else
             {
-                Matcher<String> matcher = comparisonRule.createMatcher(cssValue);
+                Matcher<String> matcher = comparisonRule.createMatcher(expectedCssValue);
                 descriptiveSoftAssert.assertThat("Element css property value is", actualCssValue, matcher);
             }
         });
     }
 
-    private String normalizeToRGB(String colorValue)
+    private String normalizeToRgb(String colorValue)
     {
-        String input = colorValue.replace(" ", "");
-        java.util.regex.Matcher matcher = RGBA_PATTERN.matcher(input);
-
-        if (matcher.matches())
-        {
-            String alpha = matcher.group(2);
-            if (ALPHA_OPAQUE.equals(alpha))
-            {
-                return String.format("rgb(%s)", matcher.group(1));
-            }
-        }
-        return input;
+        return RGBA_OPAQUE_COLOR_PATTERN.matcher(colorValue).replaceFirst("rgb($1, $2, $3)");
     }
 
     /**
