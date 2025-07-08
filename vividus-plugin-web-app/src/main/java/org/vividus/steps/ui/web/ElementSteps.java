@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.Matcher;
@@ -58,6 +59,10 @@ import org.vividus.variable.VariableScope;
 @TakeScreenshotOnFailure
 public class ElementSteps implements ResourceLoaderAware
 {
+    private static final Pattern RGB_PATTERN = Pattern.compile("^\\s*rgb");
+    private static final Pattern RGBA_OPAQUE_COLOR_PATTERN = Pattern.compile(
+            "rgba\\((\\d{1,3}),\\s*(\\d{1,3}),\\s*(\\d{1,3}),\\s*1(\\.0+)?\\s*\\)");
+
     private static final String THE_NUMBER_OF_FOUND_ELEMENTS = "The number of found elements";
     private static final String FILE_EXISTS_MESSAGE_FORMAT = "File %s exists";
     private static final String ELEMENT_CSS_CONTAINING_VALUE = "Element has CSS property '%s' containing value '%s'";
@@ -216,19 +221,46 @@ public class ElementSteps implements ResourceLoaderAware
     }
 
     /**
-     * Checks that the context <b>element</b> has an expected <b>CSS property</b>
-     * @param cssName A name of the <b>CSS property</b>
-     * @param comparisonRule is equal to, contains, does not contain
-     * @param cssValue An expected value of <b>CSS property</b>
+     * Checks that the context <b>element</b> has an expected <b>CSS property</b>.
+     * <p>
+     * If the comparison rule is <b>{@code IS_EQUAL_TO}</b> and both the actual and expected CSS values
+     * are colors in RGB or RGBA format (with an <i>alpha channel of 1</i> in RGBA {@code rgba(r, g, b, 1)}),
+     * then both values are normalized to the RGB {@code rgb(r, g, b)} format before the comparison.
+     * <p>
+     * The normalization is not performed for other comparison rules or color representations.
+     *
+     * @param cssName          A name of the <b>CSS property</b>
+     * @param comparisonRule   is equal to, contains, does not contain, matches
+     * @param expectedCssValue The expected value of the CSS property.
      */
-    @Then("context element has CSS property `$cssName` with value that $comparisonRule `$cssValue`")
-    public void doesElementHaveRightCss(String cssName, StringComparisonRule comparisonRule, String cssValue)
+    @Then("context element has CSS property `$cssName` with value that $comparisonRule `$expectedCssValue`")
+    public void doesElementHaveRightCss(String cssName, StringComparisonRule comparisonRule, String expectedCssValue)
     {
         uiContext.getSearchContext(WebElement.class).ifPresent(element -> {
-            Matcher<String> matcher = comparisonRule.createMatcher(cssValue);
             String actualCssValue = webElementActions.getCssValue(element, cssName);
-            descriptiveSoftAssert.assertThat("Element css property value is", actualCssValue, matcher);
+
+            boolean rgbColorsComparison = StringComparisonRule.IS_EQUAL_TO == comparisonRule
+                    && RGB_PATTERN.matcher(expectedCssValue).find() && RGB_PATTERN.matcher(actualCssValue).find();
+
+            if (rgbColorsComparison)
+            {
+                String normalizedExpected = normalizeToRgb(expectedCssValue);
+                String normalizedActual = normalizeToRgb(actualCssValue);
+                descriptiveSoftAssert.recordAssertion(normalizedExpected.equals(normalizedActual),
+                        String.format("The value of CSS property '%s' [Expected: '%s' Actual: was '%s']",
+                                cssName, expectedCssValue, actualCssValue));
+            }
+            else
+            {
+                Matcher<String> matcher = comparisonRule.createMatcher(expectedCssValue);
+                descriptiveSoftAssert.assertThat("Element css property value is", actualCssValue, matcher);
+            }
         });
+    }
+
+    private String normalizeToRgb(String colorValue)
+    {
+        return RGBA_OPAQUE_COLOR_PATTERN.matcher(colorValue).replaceFirst("rgb($1, $2, $3)");
     }
 
     /**
