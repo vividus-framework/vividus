@@ -79,7 +79,7 @@ Examples:
 | name             | value                  |
 | color            | rgba(0, 0, 0, 1)       |
 | color            | rgb(0, 0, 0)           |
-| background-color | rgba(0, 0,0,0)         |
+| background-color | rgba(0, 0, 0, 0)       |
 | lighting-color   | rgba(255, 255, 255, 1) |
 
 Scenario: Deprecated step verification Then the context element has the CSS property '$cssName' containing '$cssValue'
