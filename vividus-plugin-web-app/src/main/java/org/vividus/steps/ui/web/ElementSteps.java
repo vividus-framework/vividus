@@ -224,14 +224,14 @@ public class ElementSteps implements ResourceLoaderAware
      * Checks that the context <b>element</b> has an expected <b>CSS property</b>.
      * <p>
      * If the comparison rule is <b>{@code IS_EQUAL_TO}</b> and both the actual and expected CSS values
-     * are colors in RGB or RGBA format (with an <b>alpha channel of 1</b> in RGBA {@code rgba(r, g, b, 1)}),
+     * are colors in RGB or RGBA format (with an <i>alpha channel of 1</i> in RGBA {@code rgba(r, g, b, 1)}),
      * then both values are normalized to the RGB {@code rgb(r, g, b)} format before the comparison.
      * <p>
-     * The normalization is <b>not performed</b> for other comparison rules or color representations.
+     * The normalization is not performed for other comparison rules or color representations.
      *
      * @param cssName          A name of the <b>CSS property</b>
      * @param comparisonRule   is equal to, contains, does not contain, matches
-     * @param expectedCssValue An expected value of <b>CSS property</b>
+     * @param expectedCssValue The expected value of the CSS property.
      */
     @Then("context element has CSS property `$cssName` with value that $comparisonRule `$expectedCssValue`")
     public void doesElementHaveRightCss(String cssName, StringComparisonRule comparisonRule, String expectedCssValue)
