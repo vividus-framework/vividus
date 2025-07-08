@@ -103,6 +103,7 @@ class ElementStepsTests
     private static final String ELEMENT_WITH_CSS_PROPERTY = "The element to get the CSS property value";
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
     private static final String ELEMENT_TO_CHECK = "Element to check";
+    private static final String CSS_ASSERTION_MESSAGE = "Element css property value is";
 
     @Mock private IBaseValidations baseValidations;
     @Mock private IWebDriverProvider webDriverProvider;
@@ -185,30 +186,50 @@ class ElementStepsTests
     {
         mockWebElementCssValue();
         elementSteps.doesElementHaveRightCss(CSS_NAME, StringComparisonRule.CONTAINS, CSS_PART_VALUE);
-        verify(softAssert).assertThat(eq("Element css property value is"), eq(CSS_VALUE),
+        verify(softAssert).assertThat(eq(CSS_ASSERTION_MESSAGE), eq(CSS_VALUE),
                 argThat(matcher -> matcher.toString().contains(CSS_PART_VALUE)));
     }
 
     @ParameterizedTest
     @CsvSource({
-        "'rgb(0, 0, 0)',           'rgb(0, 0, 0)',          true,  1",
-        "'rgb(10, 10, 10)',        'rgba(10, 10, 10, 1)',   true,  1",
-        "'rgb(10, 10, 10)',        'rgba(10, 10, 10, 0.5)', false, 1",
-        "'rgb(10, 10, 10)',        'rgba(10, 10, 5, 1)',    false, 1",
-        "'rgba(255, 255, 255, 1)', 'rgb(255, 255, 255)',    true,  1",
-        "'rgba(1, 1, 1, 0)',       'rgba(1, 1, 1, 0)',      true,  1",
-        "'rgba(1, 1, 1, 1)',       'rgba(1, 1, 1, 1)',      true,  1",
-        "'rgba(0, 0, 0, 1)',        black,                  true,  0",
-        " white,                   'rgb(255, 255, 255)',    true,  0"
+        "'rgb(0, 0, 0)',           'rgb(0, 0, 0)',          true",
+        "'rgb(10, 10, 10)',        'rgba(10, 10, 10, 1)',   true",
+        "'rgb(10, 10, 10)',        'rgba(10, 10, 10, 0.5)', false",
+        "'rgb(10, 10, 10)',        'rgba(10, 10, 5, 1)',    false",
+        "'rgba(255, 255, 255, 1)', 'rgb(255, 255, 255)',    true",
+        "'rgba(1, 1, 1, 0)',       'rgba(1, 1, 1, 0)',      true",
+        "'rgba(1, 1, 1, 1)',       'rgba(1, 1, 1, 1)',      true"
     })
-    void testDoesElementHasRightCssColorValue(String expected, String actual, boolean result, int times)
+    void shouldNormalizeRgbColorsDuringCssCheck(String expected, String actual, boolean result)
     {
+        WebElement webElement = mock();
         when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(webElement));
-        when(webElementActions.getCssValue(webElement, CSS_NAME)).thenReturn(actual);
-        elementSteps.doesElementHaveRightCss(CSS_NAME, StringComparisonRule.IS_EQUAL_TO, expected);
-        String description = String.format("The value of CSS property 'cssName'"
-                + " [Expected: '%s' Actual: was '%s']", expected, actual);
-        verify(softAssert, times(times)).recordAssertion(eq(result), eq(description));
+        var cssProperty = "color";
+        when(webElementActions.getCssValue(webElement, cssProperty)).thenReturn(actual);
+
+        elementSteps.doesElementHaveRightCss(cssProperty, StringComparisonRule.IS_EQUAL_TO, expected);
+
+        var description = String.format("The value of CSS property '%s' [Expected: '%s' Actual: was '%s']",
+                cssProperty, expected, actual);
+        verify(softAssert).recordAssertion(result, description);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "'rgba(0, 0, 0, 1)',  black",
+        " white,             'rgb(255, 255, 255)'"
+    })
+    void shouldNotNormalizeNonRgbColorsDuringCssCheck(String expected, String actual)
+    {
+        WebElement webElement = mock();
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(webElement));
+        var cssProperty = "background-color";
+        when(webElementActions.getCssValue(webElement, cssProperty)).thenReturn(actual);
+
+        elementSteps.doesElementHaveRightCss(cssProperty, StringComparisonRule.IS_EQUAL_TO, expected);
+
+        verify(softAssert).assertThat(eq(CSS_ASSERTION_MESSAGE), eq(actual),
+                argThat(matcher -> matcher.toString().contains(expected)));
     }
 
     @Test
