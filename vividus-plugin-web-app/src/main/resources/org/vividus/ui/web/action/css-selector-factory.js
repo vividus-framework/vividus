@@ -1,9 +1,9 @@
 function getCssSelectorForElement(element, selectorParts) {
     selectorParts = Array.isArray(selectorParts) ? selectorParts : [];
     if (isElementNode(element)) {
-        var identifier = buildElementIdentifier(element);
+        const identifier = buildElementIdentifier(element);
         selectorParts.unshift(identifier);
-        if (!element.id && element.parentNode) {
+        if (!isByIdCssSelector(identifier) && element.parentNode) {
             return getCssSelectorForElement(element.parentNode, selectorParts);
         }
     }
@@ -11,9 +11,13 @@ function getCssSelectorForElement(element, selectorParts) {
 }
 
 function buildElementIdentifier(element) {
-    if (element.id) {
-        return '#' + escapeSpecialChars(element.id);
+    // Even though the id attribute is expected to be unique according to specification, not everyone follows it. Detection
+    // of non-unique id attributes is not a goal of CSS selector factory, please consider usage of accessibility analyzers.
+    var elementId = element.id;
+    if (elementId.length > 0 && isUniqueId(elementId)) {
+        return buildByIdCssSelector(elementId);
     }
+
     var identifier = escapeColon(element.tagName.toLowerCase());
     if (!element.parentNode) {
         return identifier;
@@ -26,6 +30,18 @@ function buildElementIdentifier(element) {
     return identifier;
 }
 
+function isUniqueId(elementId) {
+    return document.querySelectorAll(buildByIdCssSelector(elementId)).length == 1;
+}
+
+function buildByIdCssSelector(elementId) {
+    return '#' + escapeSpecialChars(elementId);
+}
+
+function isByIdCssSelector(identifier) {
+    return identifier.startsWith('#');
+}
+
 function escapeSpecialChars(string) {
     var result = '';
     var first = string.charCodeAt(0);
@@ -33,7 +49,7 @@ function escapeSpecialChars(string) {
         result += '\\' + first.toString(16) + ' ';
         string = string.substring(1);
     }
-    result += string.replace(/(:| |'|\.|!)/g, '\\$1');
+    result += string.replace(/[:; '".!#?,()$%&*+/<=>@^`{|}~[\\\]]/g, '\\$&');
     return result;
 }
 

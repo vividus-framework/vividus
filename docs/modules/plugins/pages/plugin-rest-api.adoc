@@ -36,9 +36,23 @@ a|`true`
 |`false`
 |Enable logging of HTTP request/response headers and bodies (applied to the following content types only: `text/*`, `application/json`, `application/xml`)
 
+|`rest-api.http.cookie-store-level`
+a|`global` +
+`story` +
+`scenario` +
+`step`
+|`global`
+a|Configure the level of cookie storage:
+
+* `global` - cookies are stored globally and are accessible across the entire suite from all threads: cookies set in
+one scenario are available and reused in all subsequent scenarios and stories.
+* `story` - cookies are reused within the scope of a single story and are cleared upon its completion.
+* `scenario` - cookies are reused within the scope of a single scenario and are cleared upon its completion.
+* `step` - cookies are cleared after each executed step.
+
 |===
 
-See xref:ROOT:tests-configuration.adoc#_http_configuration[HTTP configuration] for more fine-grained control over the HTTP interactions.
+See xref:configuration:tests-configuration.adoc#_http_configuration[HTTP configuration] for more fine-grained control over the HTTP interactions.
 
 == Expressions
 
@@ -153,6 +167,46 @@ https://user@vividus.dev:vividus.dev/path/segment?a&b=c#fragment)}`
 |frag%20ment
 
 |===
+
+=== `decodeUri`
+
+Decodes percent-encoded URI into human-readable format.
+
+[source, subs="+quotes"]
+----
+#{decodeUri(*$uri*)}
+----
+
+* *`$uri`* - The URI to decode.
+
+.Decode URI from context link into human-readable format
+[source,gherkin]
+----
+When I save `href` attribute value of context element to scenario variable `href`
+Then `${href}` is equal to `https://example.com/path%20with%20spaces`
+Given I initialize scenario variable `decodedHref` with value `#{decodeUri(${href})}`
+Then `${decodedHref}` is equal to `https://example.com/path with spaces`
+----
+
+=== `generateCodeChallenge`
+
+https://oauth.net/2/pkce/[Proof Key for Code Exchange (PKCE)] - an extension of the OAuth 2.0 protocol that helps
+prevent code interception attacks. In scope of PKCE a new flow with three new parameters: code verifier, code challenge,
+code challenge method and dependencies between them was introduced. This expression helps to generate code challenge
+using SHA-256 hashing and base64 URL encoding for provided code verifier value.
+
+[source, subs="+quotes"]
+----
+#{generateCodeChallenge(*$codeVerifier*)}
+----
+
+* *`$codeVerifier`* - any string to generate code challenge
+
+.Generate code challenge by provided code verifier value
+[source,gherkin]
+----
+Given I initialize scenario variable `codeChallenge` with value `#{generateCodeChallenge(${codeVerifier})}`
+----
 
 == xref:commons:variables.adoc[Dynamic variables]
 
@@ -835,6 +889,8 @@ Actions performed by step:
 * if the GET status code is `200` then check is considered as `passed`, otherwise `failed`
 * if the target URL has already been checked then the check is considered as `skipped`
 
+NOTE: To attach the HTTP response body for HTTP calls with non-successful status codes, use the `resource-checker.publish-response-body` property.
+
 [source,gherkin]
 ----
 Then HTTP resources are valid:$resources
@@ -849,6 +905,36 @@ Then HTTP resources are valid:
 | url                                                         |
 | https://saucelabs.com                                       |
 | https://vividus-test-site-a92k.onrender.com/img/vividus.png |
+----
+
+=== Validate redirects
+
+Check that all URLs from xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] redirect to proper pages with correct redirects number. Validation fails if either actual final URL or number of redirects do not match the expected values.
+
+NOTE: The step throws the error in case if https://developer.mozilla.org/en-US/docs/Web/HTTP/Status[HTTP response status code] of checked URL out of range 200-207.
+
+[source,gherkin]
+----
+Then I validate HTTP redirects:$expectedRedirects
+----
+
+. `$expectedRedirects` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with redirect parameters containing the following columns:
+** [subs=+quotes]`*startUrl*` - The URL from which redirection starts.
+** [subs=+quotes]`*endUrl*` - The expected final URL to redirect to.
+** [subs=+quotes]`*redirectsNumber*` - The expected number of redirects between `startUrl` and `endUrl` (optional).
+** [subs=+quotes]`*statusCodes*` - The comma-separated sequence of expected HTTP status codes of the redirects (optional).
+
+NOTE: `redirectsNumber` and `statusCodes` can't be specified simultaneously.
+
+.Validate redirects
+[source,gherkin]
+----
+Then I validate HTTP redirects:
+|startUrl                    |endUrl                          |redirectsNumber |
+|http://example.com/redirect |http://example.com/get-response |1               |
+Then I validate HTTP redirects:
+|startUrl                    |endUrl                          |statusCodes |
+|http://example.com/redirect |http://example.com/get-response |301         |
 ----
 
 
@@ -894,6 +980,24 @@ When I execute HTTP GET request for resource with URL `https://httpbin.org/cooki
 When I change value of all HTTP cookies with name `cookieName` to `newCookieValue`
 When I save value of HTTP cookie with name `cookieName` to scenario variable `value`
 Then '${value}' is equal to 'newCookieValue'
+----
+
+=== Remove all HTTP cookies
+
+Removes all cookies from the HTTP context.
+
+[source,gherkin]
+----
+When I remove all HTTP cookies
+----
+
+.Clear the cookies from the previous HTTP response and proceed with the next request without including any cookies
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/cookies/set/cookieName/cookieValue`
+When I save value of HTTP cookie with name `cookieName` to scenario variable `value`
+When I remove all HTTP cookies
+When I execute HTTP GET request for resource with URL `https://httpbin.org/cookies/set/newCookieName/newCookieValue`
 ----
 
 == JSON Steps

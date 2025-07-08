@@ -1,154 +1,29 @@
 == Profiles
 
-Profiles allow to choose or parameterize browser that tests run on. See more details on the profiles and nesting strategy on the xref:ROOT:tests-configuration.adoc#_profiles[configuration page].
-
-Web-application plugin contains significant number of built-in profiles. They can be found after plugin installation by the following path in Eclipse IDE:
-[source, DIR]
-----
-Referenced Libraries -> vividus-plugin-web-app-X.Y.Z -> properties -> profile -> web
-----
-
-Let's go through the structure and review its content.
+The xref:configuration:tests-configuration.adoc#_profiles[profiles] allow to choose and/or parameterize browser that tests run on.
 
 === Desktop
 
-General place for web profiles. Each of the directory contains browser related properties. This is a place for adjustments for your browser. Add there any properties you need: screen resolution, path to driver or to a custom browser.
+The following profiles running desktop browsers are available out of the box:
 
-==== Configure driver path
-
-While executing tests on the local machine it is allowed to use custom browser
-driver. This approach first requires manually downloading the driver (See
-https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/#quick-reference[Quick Reference Section]
-for download links). The path to the downloaded binary should be configured
-using the following property:
-
-[source, properties]
-----
-web.driver.<browser>.driver-executable-path=/path/to/driver/executable
-----
-
-where `<browser>` is one of the following values:
-
-- `chrome`
-- `firefox`
-- `safari`
-- `iexplore`
-- `edge`
-- `opera`
-
-==== Configure browser path
-
-While executing tests on the local machine it is allowed to configure path to
-browser executable file. In general cases it's not required, installed browsers
-are found automatically (except Opera browser). Also, for example, if browser is
-not installed, but only downloaded and unpacked into some folder, the path to
-the downloaded binary should be configured using the following property:
-
-[source, properties]
-----
-web.driver.<browser>.binary-path=/path/to/custom/browser/executable
-----
-
-where `<browser>` is one of the following values:
-
-- `chrome`
-- `firefox`
-- `edge`
-- `opera`
-
-==== List of desktop profiles
-
-[cols="1a,3a", options="header"]
-|===
-|Profile
-|Example of properties
-
-.^|`web/desktop/chrome`
-|
-[source, properties]
-----
-selenium.grid.platform-name=Windows
-selenium.grid.platform-version=10
-web.driver.chrome.command-line-arguments=--disable-auto-reload
-----
-
-.^|`web/desktop/edge`
-|
-[source, properties]
-----
-selenium.grid.platform-name=macOS
-selenium.grid.platform-version=12.5
-selenium.grid.capabilities.browserName=MicrosoftEdge
-----
-
-.^|`web/desktop/firefox`
-|
-[source, properties]
-----
-selenium.grid.platform-name=Windows
-selenium.grid.platform-version=10
-web.driver.firefox.command-line-arguments=--turbo
-----
-
-.^|`web/desktop/iexplore`
+- `web/desktop/chrome`
+- `web/desktop/edge`
+- `web/desktop/firefox`
+- `web/desktop/iexplore`
++
 [WARNING]
 ====
 Since Internet Explorer 11 https://blogs.windows.com/windowsexperience/2022/06/15/internet-explorer-11-has-retired-and-is-officially-out-of-support-what-you-need-to-know/[has retired and is officially out of support],
 this profile is deprecated and will be removed in VIVIDUS 0.8.0.
 ====
-|
-[source, properties]
-----
-selenium.grid.capabilities.browserName=internet explorer
-web.driver.iexplore.command-line-arguments=-private
-selenium.grid.capabilities.iedriverVersion=3.141.0
-selenium.grid.platform-name=Windows
-selenium.grid.platform-version=7
-----
 
-.^|`web/desktop/opera`
-|
-[source, properties]
-----
-selenium.grid.screen-resolution=1920x1080
-selenium.grid.platform-name=Windows
-selenium.grid.platform-version=10
-----
-
+- `web/desktop/opera`
++
 NOTE: In order to run tests in Opera browser locally, it is required
 to configure <<_configure_browser_path,browser path>>.
 
-.^|`web/desktop/safari`
-|
-[source, properties]
-----
-selenium.grid.platform-name=macOS
-selenium.grid.platform-version=11.00
-----
+- `web/desktop/safari`
 
-|===
-
-==== Mobile emulation
-
-. Built-in devices
-+
-Chrome allows to emulate view on mobile devices using https://developer.chrome.com/docs/devtools/device-mode/[Device mode]. Such feature is reflected in `mobile_emulation` subdirectory in Profiles. Use device-name property to mention target device:
-+
-[source, properties]
-----
-web.driver.chrome.mobile-emulation.device-name=DEVICE_NAME
-----
-Available for emulation devices you can find in the https://developer.chrome.com/docs/devtools/device-mode/#device[Dimensions list] in chrome.
-
-. Custom devices
-+
-In case you need to use https://developer.chrome.com/docs/devtools/device-mode/#responsive[Responsive Viewport Mode] and set up your own device, update the screen resolution in the following properties:
-+
-[source, properties]
-----
-web.driver.chrome.mobile-emulation.width=1440
-web.driver.chrome.mobile-emulation.height=900
-----
 
 === Headless
 
@@ -178,65 +53,45 @@ NOTE: This property is ignored when custom CLI arguments are set using `web.driv
 - `web/headless/firefox`
 - `web/headless/edge`
 
+
+==== Mobile emulation
+
+. Built-in devices
++
+Chrome allows to emulate view on mobile devices using https://developer.chrome.com/docs/devtools/device-mode/[Device mode]. Such feature is reflected in `mobile_emulation` subdirectory in Profiles. Use device-name property to mention target device:
++
+[source, properties]
+----
+web.driver.chrome.mobile-emulation.device-name=DEVICE_NAME
+----
+Available for emulation devices you can find in the https://developer.chrome.com/docs/devtools/device-mode/#device[Dimensions list] in chrome.
+
+. Custom devices
++
+In case you need to use https://developer.chrome.com/docs/devtools/device-mode/#responsive[Responsive Viewport Mode] and set up your own device, update the screen resolution in the following properties:
++
+[source, properties]
+----
+web.driver.chrome.mobile-emulation.width=1440
+web.driver.chrome.mobile-emulation.height=900
+----
+
+
 === Docker
-The profile can be enabled by adding `web/docker` to `configuration.profiles` property. The profile should be used together with the browser profile.
+This profile should be used in conjuction with other browser profile.
 
-WARNING: Default selenium grid URL is set to `selenium.grid.url=http://localhost:4444/wd/hub`. Don't forget to modify it if your grid is running in a different location.
-
-.Run chrome in docker container
+.Use Chrome browser running in a docker container
 [source,properties]
 ----
 configuraiton.profiles=web/docker,web/desktop/chrome
 ----
 
+WARNING: Default Selenium grid URL is set to `selenium.grid.url=http://localhost:4444/wd/hub`. Don't forget to modify it if your grid is running in a different location.
 
-=== Phone
+=== Mobile web
 
-Contains phone related properties, for android and iOS devices.
+The following profiles running mobile browsers are available out of the box:
 
-[cols="1a,2a", options="header"]
-|===
-|Profile
-|Example of properties
-
-.^|`web/phone/android`
-|
-[source, properties]
-----
-selenium.grid.capabilities.platformName=Android
-selenium.grid.capabilities.platformVersion=12.0
-selenium.grid.capabilities.deviceOrientation=portrait
-selenium.grid.capabilities.appiumVersion=2.0.0
-----
-
-.^|`web/phone/ios`
-|
-[source, properties]
-----
-selenium.grid.capabilities.platformName=iOS
-selenium.grid.capabilities.platformVersion=16.2
-selenium.grid.capabilities.deviceOrientation=portrait
-selenium.grid.capabilities.appiumVersion=2.0.0
-----
-|===
-
-=== Tablet
-
-Similar to the xref:plugins:plugin-web-app.adoc#_phone[Phone] directory, but is designed for tablets properties.
-
-[cols="1a,2a", options="header"]
-|===
-|Profile
-|Example of properties
-
-.^|`web/tablet`
-|
-[source, properties]
-----
-selenium.grid.capabilities.platformName=iOS
-selenium.grid.capabilities.platformVersion=14.0
-selenium.grid.capabilities.deviceName=iPad
-selenium.grid.capabilities.deviceOrientation=landscape
-selenium.grid.capabilities.appiumVersion=1.21.1
-----
-|===
+- `web/phone/android`
+- `web/phone/iphone`
+- `web/tablet/ipad`

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
-import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.vividus.selenium.KeysManager;
 import org.vividus.ui.action.AtomicActionFactory;
+import org.vividus.ui.model.Point;
 
 public final class WebAtomicActionFactories
 {
@@ -89,7 +89,7 @@ public final class WebAtomicActionFactories
         public MoveByOffset()
         {
             super("MOVE_BY_OFFSET", Point.class,
-                    (Actions actions, Point arg) -> actions.moveByOffset(arg.getX(), arg.getY()));
+                    (Actions actions, Point arg) -> actions.moveByOffset(arg.x(), arg.y()));
         }
     }
 

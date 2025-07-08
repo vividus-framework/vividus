@@ -9,7 +9,7 @@
 
     <bean id="contextStartedEventListener" class="org.vividus.ContextStartedEventListener" />
 
-    <bean id="eventBus" class="com.google.common.eventbus.EventBus" />
+    <bean id="eventBus" class="org.vividus.eventbus.GlobalEventBus" factory-method="getEventBus" />
 
     <bean id="issueStateProvider" class="org.vividus.issue.IssueStateProvider" />
 
@@ -78,11 +78,13 @@
     <bean id="FILTERING" class="org.vividus.transformer.FilteringTableTransformer" />
     <bean id="INDEXING" class="org.vividus.transformer.IndexingTableTransformer" />
     <bean id="INNER_JOIN" class="org.vividus.transformer.InnerJoinTableTransformer" />
+    <bean id="LEFT_JOIN" class="org.vividus.transformer.LeftJoinTableTransformer" />
     <bean id="ITERATING" class="org.vividus.transformer.IteratingTableTransformer" />
     <bean id="JOINING" class="org.vividus.transformer.JoiningTableTransformer" />
     <bean id="MERGING" class="org.vividus.transformer.MergingTableTransformer" />
     <bean id="REPEATING" class="org.vividus.transformer.RepeatingTableTransformer" />
     <bean id="RESOLVING_EXPRESSIONS_EAGERLY" class="org.vividus.transformer.ResolvingExpressionsEagerlyTransformer" />
+    <bean id="RESOLVING_VARIABLES_EAGERLY" class="org.vividus.transformer.ResolvingVariablesEagerlyTransformer" />
     <bean id="RESOLVING_SELF_REFERENCES_EAGERLY" class="org.jbehave.core.model.TableTransformers.ResolvingSelfReferences">
         <constructor-arg index="0" ref="parameterControls" />
     </bean>

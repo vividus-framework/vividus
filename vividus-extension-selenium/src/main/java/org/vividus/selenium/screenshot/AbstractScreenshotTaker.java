@@ -24,7 +24,9 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.screenshot.ScreenshotFileNameGenerator;
 import org.vividus.ui.screenshot.ScreenshotParameters;
+import org.vividus.ui.screenshot.ScreenshotTaker;
 
 import pazone.ashot.AShot;
 import pazone.ashot.util.ImageTool;
@@ -33,12 +35,12 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotParameters>
         implements ScreenshotTaker, AshotScreenshotTaker<T>
 {
     private final IWebDriverProvider webDriverProvider;
-    private final IScreenshotFileNameGenerator screenshotFileNameGenerator;
+    private final ScreenshotFileNameGenerator screenshotFileNameGenerator;
     private final AshotFactory<T> ashotFactory;
     private final ScreenshotDebugger screenshotDebugger;
 
     protected AbstractScreenshotTaker(IWebDriverProvider webDriverProvider,
-            IScreenshotFileNameGenerator screenshotFileNameGenerator, AshotFactory<T> ashotFactory,
+            ScreenshotFileNameGenerator screenshotFileNameGenerator, AshotFactory<T> ashotFactory,
             ScreenshotDebugger screenshotDebugger)
     {
         this.webDriverProvider = webDriverProvider;

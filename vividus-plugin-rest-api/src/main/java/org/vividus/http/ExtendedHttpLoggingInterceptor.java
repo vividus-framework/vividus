@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,13 @@ import org.apache.hc.core5.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.spi.LoggingEventBuilder;
+import org.vividus.http.client.HttpClient;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.handler.HttpResponseHandler;
 
 public class ExtendedHttpLoggingInterceptor implements HttpRequestInterceptor, HttpResponseHandler
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpRequestExecutor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpClient.class);
 
     private static final String NEW_LINE = System.lineSeparator();
     private static final String HEADERS_FORMAT = String.format("%nHeaders:%n{}");

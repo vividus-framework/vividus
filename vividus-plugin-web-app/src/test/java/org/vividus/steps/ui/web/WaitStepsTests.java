@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.vividus.steps.ui.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.TargetLocator;
@@ -53,15 +55,15 @@ import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.State;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
+import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.WaitResult;
-import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IWebWaitActions;
+import org.vividus.ui.web.action.ScrollActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "PMD.CouplingBetweenObjects" })
 @ExtendWith(MockitoExtension.class)
 class WaitStepsTests
 {
@@ -81,29 +83,9 @@ class WaitStepsTests
     @Mock private IBaseValidations baseValidations;
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private TimeoutConfigurer timeoutConfigurer;
+    @Mock private ScrollActions<WebElement> scrollActions;
+    @Mock private ISearchActions searchActions;
     @InjectMocks private WaitSteps waitSteps;
-
-    @Test
-    void shouldElementByNameAppearsWithTimeout()
-    {
-        when(uiContext.getSearchContext()).thenReturn(webElement);
-        Locator locator = new Locator(WebLocatorType.ELEMENT_NAME, NAME);
-        IExpectedSearchContextCondition<WebElement> condition = mock();
-        when(expectedSearchActionsConditions.visibilityOfElement(locator)).thenReturn(condition);
-        waitSteps.waitForElementAppearance(locator, TIMEOUT);
-        verify(waitActions).wait(webElement, TIMEOUT, condition);
-    }
-
-    @Test
-    void shouldThrowAnExceptionInCaseOfIncorrectVisibilityUsedForAppearanceWait()
-    {
-        Locator locator = new Locator(WebLocatorType.ELEMENT_NAME, new SearchParameters(NAME, Visibility.ALL));
-        var iae = assertThrows(IllegalArgumentException.class,
-                () -> waitSteps.waitForElementAppearance(locator, TIMEOUT));
-        assertEquals("The step supports locators with VISIBLE visibility settings only, but the locator is "
-                + "`element name 'name' (visible or invisible)`", iae.getMessage());
-        verifyNoInteractions(expectedSearchActionsConditions, waitActions);
-    }
 
     @Test
     void testElementByNameDisappearsWithTimeout()
@@ -254,5 +236,43 @@ class WaitStepsTests
         when(options.timeouts()).thenReturn(timeouts);
         waitSteps.configurePageLoadTimeout(TIMEOUT);
         verify(timeoutConfigurer).configurePageLoadTimeout(TIMEOUT, timeouts);
+    }
+
+    @Test
+    void shouldWaitForElementAppearanceInViewportElementIsInViewport()
+    {
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        var locator = new Locator(WebLocatorType.BUTTON_NAME, NAME);
+        var conditionCaptor = ArgumentCaptor.forClass(IExpectedSearchContextCondition.class);
+
+        when(searchActions.findElement(locator)).thenReturn(Optional.of(webElement));
+        when(scrollActions.isElementInViewport(webElement)).thenReturn(true);
+
+        waitSteps.waitForElementAppearanceInViewport(locator);
+
+        verify(waitActions).wait(eq(webDriver), conditionCaptor.capture());
+        IExpectedSearchContextCondition<WebElement> condition = conditionCaptor.getValue();
+        WebElement elementInViewport = condition.apply(null);
+        assertEquals(webElement, elementInViewport);
+    }
+
+    @Test
+    void shouldWaitForElementAppearanceInViewportElementInNotInViewport()
+    {
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        var locator = new Locator(WebLocatorType.BUTTON_NAME, NAME);
+        var conditionCaptor = ArgumentCaptor.forClass(IExpectedSearchContextCondition.class);
+
+        StaleElementReferenceException sere = mock();
+        when(searchActions.findElement(locator)).thenThrow(sere).thenReturn(Optional.empty());
+
+        waitSteps.waitForElementAppearanceInViewport(locator);
+
+        verify(waitActions).wait(eq(webDriver), conditionCaptor.capture());
+        IExpectedSearchContextCondition<WebElement> condition = conditionCaptor.getValue();
+        assertNull(condition.apply(null));
+        assertNull(condition.apply(null));
+        assertEquals(String.format("element located by %s to be visible in viewport", locator), condition.toString());
+        verifyNoInteractions(scrollActions);
     }
 }

@@ -58,7 +58,7 @@ class ExamplesTableToRenderingBrowserInfoConverterTests
         String table = "|profile                |browser|viewportSize|deviceName|screenOrientation|" + System.lineSeparator()
                      + "|Desktop                |CHROME |820x640     |          |                 |" + System.lineSeparator()
                      + "|chrome_mobile_emulation|       |            |iPhone X  |PORTRAIT         |" + System.lineSeparator()
-                     + "|iOS                    |       |            |iPhone XS |LANDSCAPE        |" + System.lineSeparator();
+                     + "|iOS                    |       |            |iPhone 15 |LANDSCAPE        |" + System.lineSeparator();
         // CHECKSTYLE:ON
 
         List<IRenderingBrowserInfo> infos = List.of(converter.convertValue(createTable(table), null));
@@ -82,7 +82,7 @@ class ExamplesTableToRenderingBrowserInfoConverterTests
         {
             IosDeviceInfo iosInfo = (IosDeviceInfo) infos.get(2);
             assertAll(
-                () -> assertEquals(IosDeviceName.iPhone_XS.getName(), iosInfo.getDeviceName()),
+                () -> assertEquals(IosDeviceName.iPhone_15.getName(), iosInfo.getDeviceName()),
                 () -> assertEquals(ScreenOrientation.LANDSCAPE, iosInfo.getScreenOrientation())
             );
         });

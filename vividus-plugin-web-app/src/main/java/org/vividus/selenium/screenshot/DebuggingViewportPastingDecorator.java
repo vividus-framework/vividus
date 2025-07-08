@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,16 +53,18 @@ public class DebuggingViewportPastingDecorator extends HandlingSickyElementsView
     private Coords shootingArea;
     private transient ScreenshotDebugger screenshotDebugger;
     private final String scrollVerticallyScript;
+    private final int screenshotMaxHeight;
 
     public DebuggingViewportPastingDecorator(ShootingStrategy strategy, int stickyHeaderHeight,
-            int stickyFooterHeight) {
-        this(strategy, "window", stickyHeaderHeight, stickyFooterHeight);
+            int stickyFooterHeight, int screenshotMaxHeight) {
+        this(strategy, "window", stickyHeaderHeight, stickyFooterHeight, screenshotMaxHeight);
     }
 
     protected DebuggingViewportPastingDecorator(ShootingStrategy strategy, String target, int stickyHeaderHeight,
-            int stickyFooterHeight) {
+            int stickyFooterHeight, int screenshotMaxHeight) {
         super(strategy, stickyHeaderHeight, stickyFooterHeight);
         scrollVerticallyScript = String.format(SCROLL_Y_TEMPLATE, target);
+        this.screenshotMaxHeight = screenshotMaxHeight;
     }
 
     @Override
@@ -74,12 +76,15 @@ public class DebuggingViewportPastingDecorator extends HandlingSickyElementsView
             PageDimensions pageDimensions = getPageDimensions(wd);
             shootingArea = getShootingCoords(coordsSet, pageDimensions);
 
-            BufferedImage finalImage = new BufferedImage(pageDimensions.getViewportWidth(), shootingArea.height,
+            int imageHeight = screenshotMaxHeight == 0
+                    ? shootingArea.height
+                    : Math.min(shootingArea.height, screenshotMaxHeight);
+            BufferedImage finalImage = new BufferedImage(pageDimensions.getViewportWidth(), imageHeight,
                     BufferedImage.TYPE_3BYTE_BGR);
             Graphics2D graphics = finalImage.createGraphics();
 
             int viewportHeight = pageDimensions.getViewportHeight();
-            int scrollTimes = (int) Math.ceil(shootingArea.getHeight() / viewportHeight);
+            int scrollTimes = (int) Math.ceil((double) imageHeight / viewportHeight);
             for (int n = 0; n < scrollTimes; n++) {
                 scrollVertically(js, shootingArea.y + viewportHeight * n);
                 Sleeper.sleep(Duration.ofMillis(scrollTimeout));

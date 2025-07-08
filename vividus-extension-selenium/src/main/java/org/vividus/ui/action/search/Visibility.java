@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,9 @@
 
 package org.vividus.ui.action.search;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.vividus.ui.State;
 
-public enum Visibility
+public enum Visibility implements ElementVisibility
 {
     VISIBLE(State.VISIBLE, "visible"),
     INVISIBLE(State.NOT_VISIBLE, "invisible"),
@@ -50,23 +45,6 @@ public enum Visibility
 
     public static Visibility getElementType(String input)
     {
-        Validate.isTrue(StringUtils.isNotBlank(input), "Visibility type can not be empty. %s",
-                getExpectedVisibilityMessage());
-
-        String inputInUpperCase = input.toUpperCase().trim();
-        return Stream.of(values())
-                .filter(v -> v.name().startsWith(inputInUpperCase))
-                .findFirst()
-                .orElseThrow(() ->
-                new IllegalArgumentException(
-                        String.format("Illegal visibility type '%s'. %s", input, getExpectedVisibilityMessage())));
-    }
-
-    private static String getExpectedVisibilityMessage()
-    {
-        return Stream.of(values()).map(Visibility::name)
-                                  .map(String::toLowerCase)
-                                  .map(type -> StringUtils.wrap(type, '\''))
-                                  .collect(Collectors.joining(", ", "Expected one of ", ""));
+        return ElementVisibility.getElementType(input, Visibility.class);
     }
 }

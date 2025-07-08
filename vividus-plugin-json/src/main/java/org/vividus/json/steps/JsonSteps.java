@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,8 +240,8 @@ public class JsonSteps
      * @param jsonPath       The JSON path used to find JSON elements.
      * @param stepsToExecute ExamplesTable with steps to execute for each found JSON element.
      */
-    @When("I find $comparisonRule `$elementsNumber` JSON elements from `$json` by `$jsonPath` and for each element do"
-            + "$stepsToExecute")
+    @When(value = "I find $comparisonRule `$elementsNumber` JSON elements from `$json` by `$jsonPath` "
+            + "and for each element do$stepsToExecute", priority = 1)
     @Alias("I find $comparisonRule '$elementsNumber' JSON elements from '$json' by '$jsonPath' and for each element "
             + "do$stepsToExecute")
     public void executeStepsForFoundJsonElements(ComparisonRule comparisonRule, int elementsNumber, String json,
@@ -293,8 +293,8 @@ public class JsonSteps
      * @param expectedValue   The expected value of the variable.
      * @param stepsToExecute  ExamplesTable with steps to execute for each found JSON element.
      */
-    @When("I find $comparisonRule `$elementsNumber` JSON elements in `$json` by `$jsonPath` and until variable "
-            + "`$variableName` $variableMatcher `$expectedValue` for each element I do:$stepsToExecute")
+    @When(value = "I find $comparisonRule `$elementsNumber` JSON elements in `$json` by `$jsonPath` and until variable "
+            + "`$variableName` $variableMatcher `$expectedValue` for each element I do:$stepsToExecute", priority = 1)
     @Alias("I find $comparisonRule '$elementsNumber' JSON elements in '$json' by '$jsonPath' and until variable "
             + "'$variableName' $variableMatcher '$expectedValue' for each element I do:$stepsToExecute")
     public void executeStepsForFoundJsonElementsExpectingVariable(ComparisonRule comparisonRule, int elementsNumber,

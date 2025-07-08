@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
@@ -44,6 +45,7 @@ import java.util.List;
 
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.AuthenticationException;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpHead;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
@@ -82,8 +84,9 @@ class HttpClientTests
     private static final URI URI_TO_GO = URI.create(VIVIDUS_ORG);
 
     private static final String USER = "user";
-    private static final String PASSWORD = "pass";
+    private static final String PASSWORD = "pass%5E";
     private static final String BASIC_AUTH = USER + ":" + PASSWORD;
+    private static final String BASIC_AUTH_DECODED = URLDecoder.decode(BASIC_AUTH, StandardCharsets.UTF_8);
     private static final String SCHEME = "https";
     private static final String HOST = "www.vividus.org";
     private static final HttpHost HTTP_HOST = new HttpHost(SCHEME, HOST, 443);
@@ -162,7 +165,7 @@ class HttpClientTests
         var authScheme = authExchange.getAuthScheme();
         var authResponse = authScheme.generateAuthResponse(null, null, null);
         var expectedAuthResponse = "Basic " + Base64.getEncoder().encodeToString(
-                BASIC_AUTH.getBytes(StandardCharsets.UTF_8));
+                BASIC_AUTH_DECODED.getBytes(StandardCharsets.UTF_8));
         assertEquals(expectedAuthResponse, authResponse);
         assertNull(httpClientContext.getCredentialsProvider());
     }
@@ -199,8 +202,10 @@ class HttpClientTests
         var credentialsProvider = httpClientContext.getCredentialsProvider();
         assertInstanceOf(BasicCredentialsProvider.class, credentialsProvider);
         var credentials = credentialsProvider.getCredentials(new AuthScope(HTTP_HOST), null);
+        assertInstanceOf(UsernamePasswordCredentials.class, credentials);
         assertEquals(USER, credentials.getUserPrincipal().getName());
-        assertArrayEquals(PASSWORD.toCharArray(), credentials.getPassword());
+        String decodedPassword = URLDecoder.decode(PASSWORD, StandardCharsets.UTF_8);
+        assertArrayEquals(decodedPassword.toCharArray(), ((UsernamePasswordCredentials) credentials).getUserPassword());
     }
 
     @Test
@@ -233,7 +238,7 @@ class HttpClientTests
         var request = new HttpGet(URI_TO_GO);
         var context = HttpClientContext.create();
         RedirectLocations redirectLocations = mock();
-        context.setAttribute(HttpClientContext.REDIRECT_LOCATIONS, redirectLocations);
+        context.setRedirectLocations(redirectLocations);
         var responseHandlerMatcher = responseHandlerMatcher(GET, HttpStatus.SC_OK, mock());
         when(closeableHttpClient.execute(eq(httpHost), eq(request), eq(context),
                 argThat(responseHandlerMatcher))).thenReturn(new HttpResponse());

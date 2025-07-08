@@ -1,4 +1,8 @@
 === Proxy Steps
+
+IMPORTANT: The maximum size the HAR file being published on failure is 40 MB, in case of exceeding the limit
+and getting an error please re-structure the scenarios to include <<#_clear_the_recordings>> step.
+
 ==== Check the number of HTTP requests
 :proxy: This step requires proxy to be turned on. It can be done in properties or by switching on @proxy meta tag at the story level.
 :har-attached: In case of failure the full HTTP archive (HAR) is attached to the report.
@@ -113,8 +117,15 @@ If no HTTP request is sent and wait timeout is reached, then the step will fail.
 
 [source,gherkin]
 ----
+When I wait until HTTP $httpMethods request with URL pattern `$urlPattern` is captured
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.8.0)_:
+[source,gherkin]
+----
 When I wait until HTTP $httpMethods request with URL pattern `$urlPattern` exists in proxy log
 ----
+
 * `$httpMethods` - the "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
 * `$urlPattern` - the regular expression to match HTTP request URL
 
@@ -122,7 +133,7 @@ When I wait until HTTP $httpMethods request with URL pattern `$urlPattern` exist
 [source,gherkin,subs="attributes+"]
 ----
 {given-step}
-When I wait until HTTP GET or POST request with URL pattern `https://www.google.com/search?q=vividus` exists in proxy log
+When I wait until HTTP GET or POST request with URL pattern `https://www.google.com/search?q=vividus` is captured
 Then number of HTTP GET or POST requests with URL pattern `https://www.google.com/search?q=vividus` is equal to `1`
 ----
 
@@ -164,6 +175,12 @@ The step clears the HTTP requests and responses recorded by the proxy
 
 [source,gherkin]
 ----
+When I clear network recordings
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.8.0)_:
+[source,gherkin]
+----
 When I clear proxy log
 ----
 
@@ -171,7 +188,7 @@ When I clear proxy log
 [source,gherkin,subs="attributes+"]
 ----
 {given-step}
-When I clear proxy log
+When I clear network recordings
 Then number of HTTP GET requests with URL pattern 'https://www.google.com/search?q=vividus' is equal to `0`
 ----
 

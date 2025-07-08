@@ -35,7 +35,10 @@ Scenario: Verify step 'When I transform XML `$xml` with `$xslt` and save result 
 When I transform XML `${xml}` with `#{loadResource(note-to-string.xsl)}` and save result to scenario variable `result`
 Then `${result}` is equal to `Tove > Jani;`
 
-Scenario: Verify step 'Then XML `$xml` contains element by xpath `$xpath`'
+Scenario: Verify step: 'Then XML `$xml` contains element by xpath `$xpath`', 'When I save number of elements found by xpath `$xpath` in XML `$xml` to $scopes variable `$variableName`'
+When I save number of elements found by xpath `/note[from = "Jani"]` in XML `${xml}` to scenario variable `notesFromJani`
+Then `${notesFromJani}` is equal to `1`
+!-- Deprecated
 Then XML `${xml}` contains element by xpath `/note[from = "Jani"]`
 
 Scenario: Verify step 'Then XML `$xml` is valid against XSD `$xsd`'

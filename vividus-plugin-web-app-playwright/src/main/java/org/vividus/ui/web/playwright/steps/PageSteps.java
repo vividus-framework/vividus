@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.ui.web.playwright.steps;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 
 import com.microsoft.playwright.Page;
@@ -65,8 +66,45 @@ public class PageSteps
     @Given("I am on page with URL `$pageUrl`")
     public void openPage(String pageUrl)
     {
-        uiContext.reset();
-        Optional.ofNullable(uiContext.getCurrentPage()).orElseGet(this::openNewTab).navigate(pageUrl);
+        Optional.ofNullable(uiContext.getCurrentPage()).orElseGet(this::openNewPage).navigate(pageUrl);
+    }
+
+    /**
+     * Opens a new browser tab and switches the focus for future commands to this tab.
+     */
+    @When("I open new tab")
+    public void openNewTab()
+    {
+        openNewPage();
+    }
+
+    /**
+     * Closes <b>current tab</b> and switches to the tab from which redirection to current tab was performed
+     * Actions performed at this step:
+     * <ul>
+     * <li>Receives all opened browser tabs
+     * <li>Closes current tab
+     * <li>Switches back to the last browser tab
+     * </ul>
+     */
+    @When("I close current tab")
+    public void closeCurrentTab()
+    {
+        Page currentPage = uiContext.getCurrentPage();
+        List<Page> pages = browserContextProvider.get().pages();
+        for (int i = pages.size() - 1; i >= 0; i--)
+        {
+            Page page = pages.get(i);
+            if (!page.equals(currentPage))
+            {
+                currentPage.close();
+                uiContext.reset();
+                uiContext.setCurrentPage(page);
+                break;
+            }
+        }
+        softAssert.recordAssertion(!browserContextProvider.get().pages().contains(currentPage),
+                "Current tab has been closed");
     }
 
     /**
@@ -75,7 +113,6 @@ public class PageSteps
     @When("I refresh page")
     public void refreshPage()
     {
-        uiContext.reset();
         uiContext.getCurrentPage().reload();
     }
 
@@ -85,7 +122,6 @@ public class PageSteps
     @When("I navigate back")
     public void navigateBack()
     {
-        uiContext.reset();
         uiContext.getCurrentPage().goBack();
     }
 
@@ -147,10 +183,17 @@ public class PageSteps
         softAssert.assertThat("Page title", uiContext.getCurrentPage().title(), comparisonRule.createMatcher(text));
     }
 
-    private Page openNewTab()
+    private Page openNewPage()
     {
+        uiContext.reset();
         Page page = browserContextProvider.get().newPage();
         uiContext.setCurrentPage(page);
+        page.onFrameNavigated(frame -> {
+            if (frame.parentFrame() == null)
+            {
+                uiContext.reset();
+            }
+        });
         return page;
     }
 }

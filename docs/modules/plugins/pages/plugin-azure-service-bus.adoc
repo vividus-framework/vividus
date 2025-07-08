@@ -52,6 +52,47 @@ When I send message to `$serviceBusKey` service bus with payload:`$payload`
 When I send message to `myProjectQueue` service bus with payload:`Hello World!`
 ----
 
+=== Send message with custom properties
+
+Send message with custom properties to the specified Azure Service Bus https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview#concepts[Queue
+ or Topic].
+
+[source,gherkin]
+----
+When I send message to `$serviceBusKey` service bus with payload:`$payload` and custom properties:$customProperties
+----
+
+* `$serviceBusKey` - The key associated with the Azure Service Bus connection configuration, will be used to find required properties values.
+* `$payload` - Message to send to the service bus.
+* `$customProperties` - The custom properties to set as xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
++
+[cols="1,2", options="header"]
+|===
+
+|Column Name
+|Description
+
+|`key`
+|the property name
+
+|`type`
+|the data type of the property (case-insensitive). Options include 'string', 'boolean', 'number'
+
+|`value`
+|the property value
+
+|===
+
+.Send message with custom properties to the Service Bus Queue
+[source,gherkin]
+----
+When I send message to `myProjectQueue` service bus with payload:`Hello World!` and custom properties:
+|key    |type   |value|
+|purpose|string |test |
+|flag   |boolean|true |
+|mode   |number |5    |
+----
+
 === Start consuming messages
 
 Starts Azure Service Bus consumer with the provided configuration to listen the specified

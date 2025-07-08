@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -267,7 +267,7 @@ class XrayFacadeTests
         when(jiraClientProvider.getByIssueKey(ISSUE_KEY)).thenReturn(jiraClient);
 
         Path regularFile = createRegularFile(directory);
-        xrayFacade.importTestExecution(testExecution, List.of(regularFile, directory));
+        xrayFacade.updateTestExecution(testExecution, List.of(regularFile, directory));
 
         String body = "{\"testExecutionKey\":\"TEST-0\",\"tests\":[{\"testKey\":\"test-1\",\"status\":\"PASS\"},"
                 + "{\"testKey\":\"test-2\",\"status\":\"FAIL\",\"examples\":[\"PASS\",\"FAIL\"]}]}";
@@ -322,7 +322,7 @@ class XrayFacadeTests
                 + ",\"key\":\"TEST-0\",\"self\":\"https://jira.com/rest/api/2/issue/01101\"}}");
 
         Path regularFile = createRegularFile(directory);
-        xrayFacade.importTestExecution(testExecution, List.of(regularFile));
+        xrayFacade.createTestExecution(testExecution, List.of(regularFile));
 
         verify(jiraClient).executePost(EXECUTION_IMPORT_ENDPOINT, body);
         assertThat(logger.getLoggingEvents(), is(List.of(
@@ -352,7 +352,7 @@ class XrayFacadeTests
         IOException thrown = mock(IOException.class);
         doThrow(thrown).when(jiraFacade).addAttachments(eq(ISSUE_KEY), any());
 
-        xrayFacade.importTestExecution(testExecution, List.of(directory));
+        xrayFacade.updateTestExecution(testExecution, List.of(directory));
 
         verify(jiraClient).executePost(EXECUTION_IMPORT_ENDPOINT, TEST_EXECUTION_REQUEST);
         assertThat(logger.getLoggingEvents(), is(List.of(
@@ -372,7 +372,7 @@ class XrayFacadeTests
         testExecution.setTests(List.of());
         when(jiraClientProvider.getByIssueKey(ISSUE_KEY)).thenReturn(jiraClient);
 
-        xrayFacade.importTestExecution(testExecution, List.of());
+        xrayFacade.updateTestExecution(testExecution, List.of());
 
         verify(jiraClient).executePost(EXECUTION_IMPORT_ENDPOINT, TEST_EXECUTION_REQUEST);
         assertThat(logger.getLoggingEvents(), is(List.of(

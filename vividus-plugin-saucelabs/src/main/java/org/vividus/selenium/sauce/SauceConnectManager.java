@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.vividus.selenium.sauce;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -25,11 +24,14 @@ import java.util.UUID;
 import com.saucelabs.ci.sauceconnect.SauceTunnelManager;
 import com.saucelabs.saucerest.DataCenter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.selenium.tunnel.TunnelManager;
 import org.vividus.testcontext.TestContext;
 
 public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SauceConnectManager.class);
     private static final Object KEY = SauceConnectDescriptor.class;
 
     private final String sauceLabsUsername;
@@ -75,8 +77,8 @@ public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
                 synchronized (sauceTunnelManager)
                 {
                     sauceTunnelManager.openConnection(sauceLabsUsername, sauceLabsAccessKey, sauceLabsDataCenter,
-                            sauceConnectDescriptor.getPort(), null, sauceConnectDescriptor.getOptions(), null,
-                            Boolean.TRUE, null);
+                            null, sauceConnectDescriptor.getOptions(), LOGGER, System.out, Boolean.TRUE,
+                            null, true);
                 }
             }
             catch (IOException e)
@@ -118,7 +120,7 @@ public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
     {
         synchronized (sauceTunnelManager)
         {
-            sauceTunnelManager.closeTunnelsForPlan(sauceLabsUsername, descriptor.getOptions(), null);
+            sauceTunnelManager.closeTunnelsForPlan(sauceLabsUsername, descriptor.getOptions(), LOGGER);
         }
     }
 
@@ -135,14 +137,12 @@ public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
     static final class SauceConnectDescriptor
     {
         private final String tunnelName;
-        private final int port;
         private final String options;
 
         SauceConnectDescriptor(SauceConnectOptions sauceConnectOptions) throws IOException
         {
             tunnelName = UUID.randomUUID().toString();
             options = sauceConnectOptions.build(tunnelName);
-            port = getFreePort();
         }
 
         String getTunnelName()
@@ -150,22 +150,9 @@ public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
             return tunnelName;
         }
 
-        int getPort()
-        {
-            return port;
-        }
-
         String getOptions()
         {
             return options;
-        }
-
-        private int getFreePort() throws IOException
-        {
-            try (ServerSocket socket = new ServerSocket(0))
-            {
-                return socket.getLocalPort();
-            }
         }
     }
 }

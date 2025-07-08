@@ -5,19 +5,20 @@ dependencies {
     implementation project(':vividus-reporter')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
-    api(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '3.2.7')
+    api(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '4.1.1')
     implementation(group: 'com.github.vividus-framework.JsonPath', name: 'json-path', version: versions.jsonPath)
     implementation(group: 'com.github.vividus-framework.JsonPath', name: 'json-path-assert', version: versions.jsonPath)
     implementation(group: 'com.flipkart.zjsonpatch', name: 'zjsonpatch', version: '0.4.16')
-    implementation platform(group: 'io.qameta.allure', name: 'allure-bom', version: '2.27.0')
+    implementation platform(group: 'io.qameta.allure', name: 'allure-bom', version: '2.29.0')
     implementation(group: 'io.qameta.allure', name: 'allure-jsonunit') {
         exclude (group: 'io.qameta.allure')
     }
-    implementation(group: 'com.networknt', name: 'json-schema-validator', version: '1.4.0');
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.2.0-jre')
+    implementation(group: 'com.networknt', name: 'json-schema-validator', version: '1.5.8');
+    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.8-jre')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.2')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.3')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.12.0')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
 }

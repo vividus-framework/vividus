@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,29 +24,28 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import com.saucelabs.ci.sauceconnect.SauceTunnelManager;
 import com.saucelabs.saucerest.DataCenter;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.verification.VerificationMode;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
 
-@RunWith(PowerMockRunner.class)
-public class SauceConnectManagerTests
+@ExtendWith(TestLoggerFactoryExtension.class)
+class SauceConnectManagerTests
 {
     private static final String OPTIONS = "options";
     private static final String USERNAME = "user%";
-    private static final String USERKEY = "key";
+    private static final String ACCESS_KEY = "key";
     private static final DataCenter DATA_CENTER = DataCenter.EU_CENTRAL;
 
     private SauceTunnelManager sauceTunnelManager;
@@ -54,53 +53,38 @@ public class SauceConnectManagerTests
 
     private final TestContext context = new SimpleTestContext();
 
-    @Before
-    public void before()
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(SauceConnectManager.class);
+
+    @BeforeEach
+    void beforeEach()
     {
         sauceTunnelManager = mock(SauceTunnelManager.class);
-        sauceConnectManager = new SauceConnectManager(USERNAME, USERKEY, DATA_CENTER, sauceTunnelManager, context);
+        sauceConnectManager = new SauceConnectManager(USERNAME, ACCESS_KEY, DATA_CENTER, sauceTunnelManager, context);
     }
 
     @Test
-    @PrepareForTest(SauceConnectManager.class)
-    public void testStart() throws Exception
+    void testStart() throws IOException
     {
-        mockSocket();
         var options = mock(SauceConnectOptions.class);
         when(options.build(anyString())).thenReturn(OPTIONS);
         sauceConnectManager.start(options);
-        verify(sauceTunnelManager).openConnection(USERNAME, USERKEY, DATA_CENTER, 1, null, OPTIONS, null, Boolean.TRUE,
-                null);
+        verify(sauceTunnelManager).openConnection(USERNAME, ACCESS_KEY, DATA_CENTER, null, OPTIONS, logger, System.out,
+                Boolean.TRUE, null, true);
     }
 
     @Test
-    @PrepareForTest(SauceConnectManager.class)
-    public void testStartWhenErrorAtPortAllocation() throws Exception
+    void testStartTwice() throws IOException
     {
-        var options = mock(SauceConnectOptions.class);
-        var ioException = new IOException();
-        whenNew(ServerSocket.class).withArguments(0).thenThrow(ioException);
-        var exception = assertThrows(IllegalStateException.class, () -> sauceConnectManager.start(options));
-        assertEquals(ioException, exception.getCause());
-    }
-
-    @Test
-    @PrepareForTest(SauceConnectManager.class)
-    public void testStartTwice() throws Exception
-    {
-        mockSocket();
         var options = startConnection();
         var tunnelName = sauceConnectManager.start(options);
-        verify(sauceTunnelManager, times(1)).openConnection(USERNAME, USERKEY, DATA_CENTER, 1, null, OPTIONS, null,
-                Boolean.TRUE, null);
+        verify(sauceTunnelManager, times(1)).openConnection(USERNAME, ACCESS_KEY, DATA_CENTER, null, OPTIONS, logger,
+                System.out, Boolean.TRUE, null, true);
         assertEquals(tunnelName, sauceConnectManager.start(options));
     }
 
     @Test
-    @PrepareForTest(SauceConnectManager.class)
-    public void testStartOneMoreConnectionWithingOneThreadIsNotAllowed() throws Exception
+    void testStartOneMoreConnectionWithingOneThreadIsNotAllowed() throws IOException
     {
-        mockSocket();
         startConnection();
         var options2 = mock(SauceConnectOptions.class);
         var exception = assertThrows(IllegalArgumentException.class, () -> sauceConnectManager.start(options2));
@@ -108,27 +92,23 @@ public class SauceConnectManagerTests
     }
 
     @Test
-    @PrepareForTest(SauceConnectManager.class)
-    public void testStop() throws Exception
+    void testStop() throws IOException
     {
-        mockSocket();
         startConnection();
         sauceConnectManager.stop();
         verifyStop(times(1));
     }
 
     @Test
-    public void testStopNotStarted()
+    void testStopNotStarted()
     {
         sauceConnectManager.stop();
         verifyStop(never());
     }
 
     @Test
-    @PrepareForTest(SauceConnectManager.class)
-    public void testStopTwice() throws Exception
+    void testStopTwice() throws IOException
     {
-        mockSocket();
         startConnection();
         sauceConnectManager.stop();
         sauceConnectManager.stop();
@@ -136,17 +116,15 @@ public class SauceConnectManagerTests
     }
 
     @Test
-    @PrepareForTest(SauceConnectManager.class)
-    public void testStartStopStart() throws Exception
+    void testStartStopStart() throws IOException
     {
-        mockSocket();
         var options = mock(SauceConnectOptions.class);
         when(options.build(anyString())).thenReturn(OPTIONS);
         sauceConnectManager.start(options);
         sauceConnectManager.stop();
         sauceConnectManager.start(options);
-        verify(sauceTunnelManager, times(2)).openConnection(USERNAME, USERKEY, DATA_CENTER, 1, null, OPTIONS, null,
-                Boolean.TRUE, null);
+        verify(sauceTunnelManager, times(2)).openConnection(USERNAME, ACCESS_KEY, DATA_CENTER, null, OPTIONS, logger,
+                System.out, Boolean.TRUE, null, true);
         verifyStop(times(1));
     }
 
@@ -155,20 +133,13 @@ public class SauceConnectManagerTests
         var options = mock(SauceConnectOptions.class);
         when(options.build(anyString())).thenReturn(OPTIONS);
         sauceConnectManager.start(options);
-        verify(sauceTunnelManager).openConnection(USERNAME, USERKEY, DATA_CENTER, 1, null, OPTIONS, null, Boolean.TRUE,
-                null);
+        verify(sauceTunnelManager).openConnection(USERNAME, ACCESS_KEY, DATA_CENTER, null, OPTIONS, logger, System.out,
+                Boolean.TRUE, null, true);
         return options;
     }
 
     private void verifyStop(VerificationMode mode)
     {
-        verify(sauceTunnelManager, mode).closeTunnelsForPlan(USERNAME, OPTIONS, null);
-    }
-
-    private void mockSocket() throws Exception
-    {
-        var socket = mock(ServerSocket.class);
-        whenNew(ServerSocket.class).withArguments(0).thenReturn(socket);
-        when(socket.getLocalPort()).thenReturn(1);
+        verify(sauceTunnelManager, mode).closeTunnelsForPlan(USERNAME, OPTIONS, logger);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,23 @@ import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.util.List;
+import java.util.function.Consumer;
 
 import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.Frame;
 import com.microsoft.playwright.Page;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,6 +51,7 @@ import org.vividus.ui.web.playwright.UiContext;
 class PageStepsTests
 {
     private static final String PAGE_URL = "https://docs.vividus.dev";
+    private static final String TAB_CLOSED = "Current tab has been closed";
 
     @Mock private BrowserContextProvider browserContextProvider;
     @Mock private UiContext uiContext;
@@ -60,9 +68,8 @@ class PageStepsTests
 
         pageSteps.openMainApplicationPage();
 
-        var ordered = inOrder(uiContext, page);
-        ordered.verify(uiContext).reset();
-        ordered.verify(page).navigate(PAGE_URL);
+        verify(page).navigate(PAGE_URL);
+        verifyNoMoreInteractions(page);
     }
 
     @Test
@@ -73,9 +80,8 @@ class PageStepsTests
 
         pageSteps.openPage(PAGE_URL);
 
-        var ordered = inOrder(uiContext, page);
-        ordered.verify(uiContext).reset();
-        ordered.verify(page).navigate(PAGE_URL);
+        verify(page).navigate(PAGE_URL);
+        verifyNoMoreInteractions(page);
     }
 
     @Test
@@ -88,11 +94,55 @@ class PageStepsTests
         when(browserContext.newPage()).thenReturn(page);
 
         pageSteps.openPage(PAGE_URL);
+        verifyInteractionsForNewPage(page, 1);
+    }
 
-        var ordered = inOrder(uiContext, page);
-        ordered.verify(uiContext).reset();
-        ordered.verify(uiContext).setCurrentPage(page);
-        ordered.verify(page).navigate(PAGE_URL);
+    @Test
+    void shouldOpenNewTab()
+    {
+        BrowserContext browserContext = mock();
+        when(browserContextProvider.get()).thenReturn(browserContext);
+        Page newTab = mock();
+        when(browserContext.newPage()).thenReturn(newTab);
+
+        pageSteps.openNewTab();
+        verifyInteractionsForNewPage(newTab, 0);
+    }
+
+    @Test
+    void shouldCloseCurrentTab()
+    {
+        Page currentTab = mock();
+        when(uiContext.getCurrentPage()).thenReturn(currentTab);
+
+        Page page1 = mock();
+        Page page2 = mock();
+        List<Page> allTabs = List.of(page1, page2, currentTab);
+
+        BrowserContext browserContext = mock();
+        when(browserContextProvider.get()).thenReturn(browserContext);
+        when(browserContext.pages()).thenReturn(allTabs).thenReturn(allTabs.subList(0, allTabs.size() - 2));
+
+        pageSteps.closeCurrentTab();
+        verify(currentTab).close();
+        verify(uiContext).reset();
+        verify(uiContext).setCurrentPage(page2);
+        verify(softAssert).recordAssertion(true, TAB_CLOSED);
+    }
+
+    @Test
+    void shouldNotCloseCurrentTabIfOnlyOneTabPresent()
+    {
+        Page currentTab = mock();
+        when(uiContext.getCurrentPage()).thenReturn(currentTab);
+
+        BrowserContext browserContext = mock();
+        when(browserContextProvider.get()).thenReturn(browserContext);
+        when(browserContext.pages()).thenReturn(List.of(currentTab));
+
+        pageSteps.closeCurrentTab();
+        verifyNoInteractions(currentTab);
+        verify(softAssert).recordAssertion(false, TAB_CLOSED);
     }
 
     @Test
@@ -103,9 +153,8 @@ class PageStepsTests
 
         pageSteps.refreshPage();
 
-        var ordered = inOrder(uiContext, page);
-        ordered.verify(uiContext).reset();
-        ordered.verify(page).reload();
+        verify(page).reload();
+        verifyNoMoreInteractions(page);
     }
 
     @Test
@@ -116,9 +165,8 @@ class PageStepsTests
 
         pageSteps.navigateBack();
 
-        var ordered = inOrder(uiContext, page);
-        ordered.verify(uiContext).reset();
-        ordered.verify(page).goBack();
+        verify(page).goBack();
+        verifyNoMoreInteractions(page);
     }
 
     @Test
@@ -130,9 +178,7 @@ class PageStepsTests
 
         pageSteps.openRelativeUrl("stats");
 
-        var ordered = inOrder(uiContext, page);
-        ordered.verify(uiContext).reset();
-        ordered.verify(uiContext.getCurrentPage()).navigate("https://example.com/path/stats");
+        verify(uiContext.getCurrentPage()).navigate("https://example.com/path/stats");
     }
 
     @Test
@@ -147,5 +193,24 @@ class PageStepsTests
 
         verify(softAssert).assertThat(eq("Page title"), eq(pageTitle),
                 argThat(argument -> argument.matches(pageTitle)));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void verifyInteractionsForNewPage(Page page, int navigateTimes)
+    {
+        ArgumentCaptor<Consumer<Frame>> frameConsumerCaptor = ArgumentCaptor.forClass(Consumer.class);
+        var ordered = inOrder(uiContext, page);
+        ordered.verify(uiContext).reset();
+        ordered.verify(uiContext).setCurrentPage(page);
+        ordered.verify(page).onFrameNavigated(frameConsumerCaptor.capture());
+        ordered.verify(page, times(navigateTimes)).navigate(PAGE_URL);
+        ordered.verifyNoMoreInteractions();
+        Consumer<Frame> frameConsumer = frameConsumerCaptor.getValue();
+        Frame frame = mock();
+        when(frame.parentFrame()).thenReturn(null).thenReturn(mock(Frame.class));
+        frameConsumer.accept(frame);
+        ordered.verify(uiContext).reset();
+        frameConsumer.accept(frame);
+        ordered.verifyNoMoreInteractions();
     }
 }

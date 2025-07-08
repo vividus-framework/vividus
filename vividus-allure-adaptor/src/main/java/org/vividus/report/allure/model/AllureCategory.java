@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.report.allure.model;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import io.qameta.allure.entity.Status;
 
@@ -24,12 +25,6 @@ public class AllureCategory
 {
     private String name;
     private List<Status> matchedStatuses;
-
-    public AllureCategory(String name, List<Status> matchedStatuses)
-    {
-        this.name = name;
-        this.matchedStatuses = matchedStatuses;
-    }
 
     public String getName()
     {
@@ -49,5 +44,11 @@ public class AllureCategory
     public void setMatchedStatuses(List<Status> matchedStatuses)
     {
         this.matchedStatuses = matchedStatuses;
+    }
+
+    public void setStatuses(String statuses)
+    {
+        this.matchedStatuses = Stream.of(statuses.split(",")).map(s -> Status.valueOf(s.strip().toUpperCase()))
+                .toList();
     }
 }

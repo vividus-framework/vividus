@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package org.vividus.spring;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.stream.Stream;
 
@@ -28,20 +29,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.eventbus.GlobalEventBus;
 
 @ExtendWith(MockitoExtension.class)
 class SubscriberRegisteringBeanPostProcessorTests
 {
     private static final String BEAN_NAME = "not-used";
 
-    @Mock
-    private EventBus eventBus;
-
-    @InjectMocks
-    private SubscriberRegisteringBeanPostProcessor beanPostProcessor;
+    private final SubscriberRegisteringBeanPostProcessor beanPostProcessor =
+            new SubscriberRegisteringBeanPostProcessor();
 
     static Stream<Object> subscribers()
     {
@@ -55,15 +52,23 @@ class SubscriberRegisteringBeanPostProcessorTests
     @ParameterizedTest
     void testProcessingSubscriberObject(Object bean)
     {
-        beanPostProcessor.postProcessAfterInitialization(bean, BEAN_NAME);
-        verify(eventBus).register(bean);
+        try (var globalEventBusStaticMock = mockStatic(GlobalEventBus.class))
+        {
+            EventBus eventBus = mock();
+            globalEventBusStaticMock.when(GlobalEventBus::getEventBus).thenReturn(eventBus);
+            beanPostProcessor.postProcessAfterInitialization(bean, BEAN_NAME);
+            verify(eventBus).register(bean);
+        }
     }
 
     @Test
     void testProcessingNonSubscriberObject()
     {
-        beanPostProcessor.postProcessAfterInitialization(new NonSubscriber(), BEAN_NAME);
-        verifyNoInteractions(eventBus);
+        try (var globalEventBusStaticMock = mockStatic(GlobalEventBus.class))
+        {
+            beanPostProcessor.postProcessAfterInitialization(new NonSubscriber(), BEAN_NAME);
+            globalEventBusStaticMock.verifyNoInteractions();
+        }
     }
 
     private static class Subscriber

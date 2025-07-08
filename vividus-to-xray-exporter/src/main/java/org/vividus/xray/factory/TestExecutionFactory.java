@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 import org.vividus.model.jbehave.AbstractStepsContainer;
 import org.vividus.model.jbehave.Scenario;
 import org.vividus.xray.configuration.XrayExporterOptions;
+import org.vividus.xray.configuration.XrayExporterOptions.TestExecutionOptions;
 import org.vividus.xray.model.TestExecution;
 import org.vividus.xray.model.TestExecutionInfo;
 import org.vividus.xray.model.TestExecutionItem;
@@ -42,17 +43,15 @@ public class TestExecutionFactory
     public TestExecution create(List<Entry<String, Scenario>> scenarios)
     {
         TestExecution testExecution = new TestExecution();
+        TestExecutionOptions testExecutionOptions = xrayExporterOptions.getTestExecutionOptions();
 
-        Optional.ofNullable(xrayExporterOptions.getTestExecutionKey())
+        Optional.ofNullable(testExecutionOptions.getKey())
                 .ifPresent(testExecution::setTestExecutionKey);
 
-        Optional.ofNullable(xrayExporterOptions.getTestExecutionSummary())
-                .ifPresent(summary ->
-                {
-                    TestExecutionInfo info = new TestExecutionInfo();
-                    info.setSummary(summary);
-                    testExecution.setInfo(info);
-                });
+        TestExecutionInfo info = new TestExecutionInfo();
+        info.setSummary(testExecutionOptions.getSummary());
+        info.setDescription(testExecutionOptions.getDescription());
+        testExecution.setInfo(info);
 
         List<TestExecutionItem> tests = scenarios.stream().map(TestExecutionFactory::createTestInfo).toList();
         testExecution.setTests(tests);

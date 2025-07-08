@@ -36,69 +36,7 @@ When I take screenshot and save it to folder `$screenshotFilePath`
 When I take screenshot and save it to file at path `${screenshot-directory}/start-page.png`
 ----
 
-=== Wait for element appearance
-
-Waits for appearance of the element by the locator.
-
-WARNING: It's forbidden to use <<_visibility_types>> in the locator.
-
-[source,gherkin]
-----
-When I wait until element located by `$locator` appears
-----
-
-* `$locator` - <<_locator>>.
-
-.Wait for appearance of the element with the specified name
-[source,gherkin]
-----
-When I wait until element located by `name(welcome-image)` appears
-----
-
-
-=== Wait for element disappearance
-
-Waits for disappearance of the element by the locator.
-
-NOTE: If the element doesn't exist on the page/context, the step will immediately complete successfully.
-Checking the element on the page (if needed) should be done in a separate step (e.g. <<_wait_for_element_appearance>> or xref:plugin-html.adoc#_validate_elements[Validate elements]).
-
-WARNING: It's forbidden to use <<_visibility_types>> in the locator.
-
-[source,gherkin]
-----
-When I wait until element located by `$locator` disappears
-----
-
-* `$locator` - <<_locator>>.
-
-.Wait for disappearance of the element with the specified name
-[source,gherkin]
-----
-When I wait until element located by `name(welcome-image)` disappears
-----
-
-
-=== Wait for element with specified state using polling interval
-
-Waits for an element with the specified state to be found using the specified timeout with polling interval.
-
-[source,gherkin]
-----
-When I wait `$duration` with `$pollingDuration` polling until element located by `$locator` becomes $state
-----
-
-* `$duration` - Total duration to wait in the {iso-date-format-link} format.
-* `$pollingDuration` - The duration to wait between search retries in the {iso-date-format-link} format.
-* `$locator` - The <<_locator,locator>> of the element to wait for state change.
-* `$state` - The element xref:parameters:state.adoc[state].
-
-.Verify that the element become invisible up to 10 times
-[source,gherkin]
-----
-When I wait `PT10S` with `PT1S` polling until element located by `id(element-to-hide)` becomes not visible
-----
-
+include::plugins:partial$ui-wait-element-state-steps.adoc[]
 
 === Wait for expected elements number
 
@@ -145,35 +83,6 @@ When I wait until element located by `$locator` stops moving
 [source,gherkin]
 ----
 When I wait until element located by `id(submitForm)` stops moving
-----
-
-=== Verify elements state
-
-Verifies if the number of elements located by locator matches the number
-condition and all of them are in the desired state.
-
-[IMPORTANT]
-If you describe number condition as equal to 5 in case if there are 10 elements by this locator and only 5 of them in the desired state. You will get two failed assertions.
-The first one about number condition violation. The second one about state check failure.
-
-[WARNING]
-In case when <<_visibility_types>> are used and checked state are equal (For an example ':i' and 'NOT_VISIBLE') exception will be thrown. In such cases please use step: <<_validate_elements_number>>.
-Contradictory visibility parameters (locator - ':i' and checked state - 'VISIBLE') are also not allowed.
-
-[source,gherkin]
-----
-Then number of $state elements found by `$locator` is $comparisonRule `$quantity`
-----
-
-* `$state` - xref:parameters:state.adoc[State]
-* `$locator` - <<_locator>>.
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-* `$quantity` - The expected number of elements.
-
-.Verify the number of elements in the state
-[source,gherkin]
-----
-Then number of VISIBLE elements found by `tagName(img)` is = `1`
 ----
 
 === Saves the attribute value of the context
@@ -226,32 +135,7 @@ Save the attribute value of the element
 When I save `innerText` attribute value of element located by `id(username)` to SCENARIO variable `username`
 ----
 
-
-=== Save number of elements
-
-Saves number of elements located by locator into a variable.
-
-[source,gherkin]
-----
-When I save number of elements located by `$locator` to $scopes variable `$variableName`
-----
-
-_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
-[source,gherkin]
-----
-When I save number of elements located `$locator` to $scopes variable `$variableName`
-----
-
-* `$locator` - <<_locator>>.
-* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The name of the variable to save the number of elements.
-
-.Save number of elements
-[source,gherkin]
-----
-When I save number of elements located by `tagName(a)` to scenario variable `numberOfLinks`
-Then `${numberOfLinks}` is equal to `1`
-----
+include::plugins:partial$ui-elements-quantity-steps.adoc[]
 
 include::plugins:partial$ui-size-and-coordinates-steps.adoc[]
 
@@ -281,28 +165,10 @@ Then element located by `$locator` exists for `$duration` duration
 Then element located by `id(banner)` exists for `PT5S` duration
 ----
 
-=== Wait until element has text matching regular expression
-
-Waits until an element with the specified locator has text that matches the provided https://www.regular-expressions.info/[regular expression].
-
-[source,gherkin]
-----
-When I wait until element located by `$locator` has text matching `$regex`
-----
-
-* `$locator` - The <<_locator>> of the element which text to check.
-* `$regex` - The https://www.regular-expressions.info/[regular expression] used to validate the text of the element.
-
-.The element should have text consisting of numbers only
-[source,gherkin]
-----
-When I wait until element located by `id(indicator)` has text matching `\d+`
-----
-
 === Verify elements order
 
 Gets a collection of elements by locator and checks that they are sorted by
-their text in the specified order. The collection should have more than 1
+their text in the specified order. The collection should have at least one
 element with not empty text, otherwise the step fails.
 
 [source,gherkin]
@@ -374,41 +240,40 @@ When I scan barcode from screen and save result to scenario variable `qrCodeLink
 Then `${qrCodeLink}` is equal to `https://www.example.com`
 ----
 
-=== Perform steps while elements exist
+include::plugins:partial$ui-elements-conditional-iteration-steps.adoc[]
 
-Executes the steps while the found elements exist.
+:javascript-executor-link: https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html[JavascriptExecutor]
 
-[IMPORTANT]
-To avoid infinite loops the iterationLimit parameter is used. If iteration's limit reached the step will fail.
+=== Execute JavaScript
+
+Executes passed JavaScript code on the opened page via {javascript-executor-link}.
+
+TIP: You can refer to search context element in JS code by using `arguments[0]` reference.
 
 [source,gherkin]
 ----
-When I find $comparisonRule `$number` elements `$locator` and while they exist do up to $iterationLimit iteration of$stepsToExecute
+When I execute javascript `$jsCode`
 ----
+* `$jsCode` - The JavaScript code.
 
-Alias:
+.Click on the link using JavaScript
 [source,gherkin]
 ----
-When I find $comparisonRule '$number' elements $locator and while they exist do up to $iterationLimit iteration of$stepsToExecute
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com`
+When I execute javascript `document.querySelector('a').click()`
 ----
 
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-* `$number` - The number of elements to find.
-* `$locator` - <<_locator>>.
-* `$iterationLimit` - The maximum number of iterations to perform.
-* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
-
-.Disable menus
+.Change color of context element using JavaScript
 [source,gherkin]
 ----
-When I find >= `0` elements `xpath(//*[@class='menu enabled'])` and while they exist do up to 10 iteration of
-|step                                            |
-|When I click on element located by `id(disable)`|
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com`
+When I change context to element located by `tagName(body)`
+When I execute javascript `arguments[0].style.color = 'red';`
 ----
 
 === Execute JavaScript with arguments
 
-Executes JavaScript via https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html[JavascriptExecutor]. Step executes the script either without any arguments or with `String` or `Object` argument types.
+Executes JavaScript via {javascript-executor-link}. Step executes the script either without any arguments or with `String` or `Object` argument types.
 
 [source,gherkin]
 ----
@@ -442,9 +307,11 @@ When I execute javascript `sauce:throttleCPU` with arguments:
 | {"rate" : 4} | object |
 ----
 
-==== Execute JavaScript and save result.
+=== Execute JavaScript and save result.
 
 https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html[Executes JavaScript] code and saves result into variable.
+
+TIP: You can refer to search context element in JS code by using `arguments[0]` reference.
 
 [source,gherkin]
 ----
@@ -460,4 +327,12 @@ When I execute javascript `$jsCode` and save result to $scopes variable `$variab
 Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
 When I execute javascript `return JSON.stringify(window.performance.timing)` and save result to scenario variable `timings`
 Then number of JSON elements from `${timings}` by JSON path `$.connectStart` is = 1
+----
+
+.Get size of context element using JavaScript
+[source,gherkin]
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com`
+When I change context to element located by `tagName(body)`
+When I execute javascript `return arguments[0].getBoundingClientRect();` and save result to scenario variable `clientRect`
 ----

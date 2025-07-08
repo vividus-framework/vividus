@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.vividus.visual.eyes.converter;
+
+import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -63,12 +65,14 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     private static final String ELEMENTS_TO_IGNORE_OPTION = "elementsToIgnore";
     private static final String AREAS_TO_IGNORE_OPTION = "areasToIgnore";
     private static final String ACCESSIBILITY_STANDARD_OPTION = "accessibilityStandard";
+    private static final String SCALE_RATIO = "scaleRatio";
+    private static final String PROPERTIES = "properties";
 
     private static final List<String> SUPPORTED_OPTIONS = List.of(BASELINE_NAME_OPTION, ACTION_OPTION,
             EXECUTE_API_KEY_OPTION, READ_API_KEY_OPTION, HOST_APP_OPTION, HOST_OS_OPTION, VIEWPORT_SIZE_OPTION,
             MATCH_LEVEL_OPTION, DISABLE_BROWSER_FETCHING, SERVER_URI_OPTION, APP_NAME_OPTION, BATCH_NAME_OPTION,
             BASELINE_ENV_NAME_OPTION, ELEMENTS_TO_IGNORE_OPTION, AREAS_TO_IGNORE_OPTION, ACCESSIBILITY_STANDARD_OPTION,
-            LAYOUT_BREAKPOINTS);
+            LAYOUT_BREAKPOINTS, SCALE_RATIO, PROPERTIES);
 
     private String executeApiKey;
     private String readApiKey;
@@ -111,7 +115,8 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
             VisualActionType action = params.valueAs(ACTION_OPTION, VisualActionType.class);
 
             ApplitoolsVisualCheck check = createCheck(batchName, baselineName, action);
-            Type targetType = new TypeLiteral<Set<Locator>>() { }.value;
+            Type locatorsType = new TypeLiteral<Set<Locator>>() { }.value;
+            Type propertiesType = new TypeLiteral<List<String>>() { }.value;
 
             configureEyes(
                 check,
@@ -126,9 +131,11 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
                 params.valueAs(APP_NAME_OPTION, String.class, appName),
                 params.valueAs(BASELINE_ENV_NAME_OPTION, String.class, baselineEnvName),
                 params.valueAs(READ_API_KEY_OPTION, String.class, readApiKey),
-                params.valueAs(ELEMENTS_TO_IGNORE_OPTION, targetType, Set.of()),
-                params.valueAs(AREAS_TO_IGNORE_OPTION, targetType, Set.of()),
-                params.valueAs(ACCESSIBILITY_STANDARD_OPTION, AccessibilitySettings.class, null)
+                params.valueAs(ELEMENTS_TO_IGNORE_OPTION, locatorsType, Set.of()),
+                params.valueAs(AREAS_TO_IGNORE_OPTION, locatorsType, Set.of()),
+                params.valueAs(ACCESSIBILITY_STANDARD_OPTION, AccessibilitySettings.class, null),
+                params.valueAs(SCALE_RATIO, Double.class, null),
+                params.valueAs(PROPERTIES, propertiesType, List.of())
             );
 
             return check;
@@ -140,7 +147,8 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     {
         ApplitoolsVisualCheck check = createCheck(batchName, baselineName, action);
         configureEyes(check, executeApiKey, hostApp, hostOS, viewportSize, matchLevel, disableBrowserFetching,
-                layoutBreakpoints, serverUri, appName, baselineEnvName, readApiKey, Set.of(), Set.of(), null);
+                layoutBreakpoints, serverUri, appName, baselineEnvName, readApiKey, Set.of(), Set.of(), null, null,
+                List.of());
         return check;
     }
 
@@ -153,8 +161,11 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     private void configureEyes(ApplitoolsVisualCheck check, String executeApiKey, String hostApp, String hostOS,
             Dimension viewportSize, MatchLevel matchLevel, Boolean disableBrowserFetching, Boolean layoutBreakpoints,
             URI serverUri, String appName, String baselineEnvName, String readApiKey, Set<Locator> elements,
-            Set<Locator> areas, AccessibilitySettings settings)
+            Set<Locator> areas, AccessibilitySettings settings, Double scaleRatio, List<String> properties)
     {
+        properties.forEach(prop -> isTrue(prop.matches("^(?!\s*=).+?=.*"), "The property defined in 'properties' "
+                + "field has invalid format, expected <not empty key>=<value> but got %s", prop));
+
         check.setScreenshotParameters(screenshotParametersFactory.create());
         check.setReadApiKey(readApiKey);
         check.setElementsToIgnore(elements);
@@ -175,7 +186,14 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
                 .setServerUrl(Optional.ofNullable(serverUri).map(URI::toString).orElse(null))
                 .setAppName(appName)
                 .setBaselineEnvName(baselineEnvName)
-                .setAccessibilityValidation(settings);
+                .setAccessibilityValidation(settings)
+                .setScaleRatio(scaleRatio);
+
+        properties.forEach(prop ->
+        {
+            String[] keyAndValue = prop.split("=", 2);
+            configuration.addProperty(keyAndValue[0], keyAndValue[1]);
+        });
 
         boolean saveTests = check.getAction() == VisualActionType.ESTABLISH;
         configuration.setSaveFailedTests(saveTests);

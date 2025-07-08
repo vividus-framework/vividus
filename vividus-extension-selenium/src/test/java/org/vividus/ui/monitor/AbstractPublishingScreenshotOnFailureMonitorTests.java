@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.vividus.ui.monitor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -38,7 +37,6 @@ import java.util.stream.Stream;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
-import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.Meta;
@@ -53,7 +51,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -62,11 +59,10 @@ import org.vividus.context.RunContext;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
 import org.vividus.report.ui.ImageCompressor;
-import org.vividus.reporter.event.AttachmentPublishEvent;
-import org.vividus.reporter.model.Attachment;
+import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.softassert.event.AssertionFailedEvent;
+import org.vividus.ui.screenshot.Screenshot;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class AbstractPublishingScreenshotOnFailureMonitorTests
@@ -80,7 +76,7 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
 
     @Mock private RunContext runContext;
     @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private EventBus eventBus;
+    @Mock private IAttachmentPublisher attachmentPublisher;
     @Spy  private ImageCompressor imageCompressor;
     @InjectMocks private TestPublishingScreenshotOnFailureMonitor monitor;
 
@@ -96,7 +92,7 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
     @AfterEach
     void afterEach()
     {
-        verifyNoMoreInteractions(eventBus, runContext, webDriverProvider);
+        verifyNoMoreInteractions(attachmentPublisher, runContext, webDriverProvider);
     }
 
     @TestFactory
@@ -185,15 +181,13 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
     void shouldTakeScreenshotOfSearchContext() throws NoSuchMethodException
     {
         enableScreenshotPublishing(true);
-        String title = "2019-03-07_19-11-38_898-Assertion_Failure-chrome-1440x836";
-        Screenshot screenshot = new Screenshot(title + ".png", new byte[] { 1 });
+        var title = "2019-03-07_19-11-38_898-Assertion_Failure-chrome-1440x836.png";
+        var screenshot = new Screenshot(title, new byte[] { 1 });
         TestPublishingScreenshotOnFailureMonitor spy = spy(monitor);
         doReturn(Optional.of(screenshot)).when(spy).takeScreenshot(ASSERTION_FAILURE);
         spy.onAssertionFailure(mock(AssertionFailedEvent.class));
-        verify(eventBus).post(argThat((ArgumentMatcher<AttachmentPublishEvent>) event -> {
-            Attachment attachment = event.attachment();
-            return Arrays.equals(screenshot.getData(), attachment.getContent()) && title.equals(attachment.getTitle());
-        }));
+        verify(spy).publishAttachment();
+        verify(attachmentPublisher).publishAttachment(screenshot.getData(), title);
         assertThat(logger.getLoggingEvents(), empty());
     }
 
@@ -315,10 +309,10 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
 
     static class TestPublishingScreenshotOnFailureMonitor extends AbstractPublishingScreenshotOnFailureMonitor
     {
-        TestPublishingScreenshotOnFailureMonitor(EventBus eventBus, RunContext runContext,
-                IWebDriverProvider webDriverProvider, ImageCompressor imageCompressor)
+        TestPublishingScreenshotOnFailureMonitor(RunContext runContext, IWebDriverProvider webDriverProvider,
+                IAttachmentPublisher attachmentPublisher, ImageCompressor imageCompressor)
         {
-            super(eventBus, runContext, webDriverProvider, imageCompressor);
+            super(runContext, webDriverProvider, attachmentPublisher, imageCompressor);
         }
 
         @Override

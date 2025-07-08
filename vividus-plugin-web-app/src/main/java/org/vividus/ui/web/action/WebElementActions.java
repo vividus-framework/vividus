@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,13 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebElement;
+import org.vividus.util.ResourceUtils;
 
 public class WebElementActions implements IWebElementActions
 {
     private static final char APOSTROPHE = '\'';
     private static final char QUOTE = '"';
+    private static final String ELEMENT_IN_VIEWPORT_SCRIPT = ResourceUtils.loadResource("check-element-in-viewport.js");
 
     private final WebJavascriptActions javascriptActions;
 
@@ -105,5 +107,11 @@ public class WebElementActions implements IWebElementActions
             return false;
         }
         return true;
+    }
+
+    @Override
+    public boolean isElementInViewport(WebElement element)
+    {
+        return javascriptActions.executeScript(ELEMENT_IN_VIEWPORT_SCRIPT, element);
     }
 }

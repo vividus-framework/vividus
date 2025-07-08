@@ -19,6 +19,7 @@ package org.vividus.http.client;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -102,13 +103,12 @@ public class HttpClient implements IHttpClient, AutoCloseable
 
         HttpClientContext internalContext = Optional.ofNullable(context).orElseGet(HttpClientContext::create);
 
-        String userInfo = request.getAuthority().getUserInfo();
-        if (userInfo != null)
+        Optional.ofNullable(request.getAuthority()).map(URIAuthority::getUserInfo).ifPresent(userInfo ->
         {
             HttpHost host = RoutingSupport.normalize(HttpHost.create(uri), DefaultSchemePortResolver.INSTANCE);
             configureBasicAuth(usePreemptiveBasicAuthIfAvailable, userInfo, host, internalContext);
             request.setAuthority(new URIAuthority(host));
-        }
+        });
 
         HttpClientResponseHandler<HttpResponse> responseHandler = response -> {
             HttpResponse httpResponse = new HttpResponse();
@@ -136,7 +136,7 @@ public class HttpClient implements IHttpClient, AutoCloseable
         HttpResponse httpResponse = httpHost == null ? closeableHttpClient.execute(request, internalContext,
                 responseHandler) : closeableHttpClient.execute(httpHost, request, internalContext, responseHandler);
         watch.stop();
-        httpResponse.setResponseTimeInMs(watch.getTime());
+        httpResponse.setResponseTimeInMs(watch.getDuration().toMillis());
         httpResponse.setRedirectLocations(internalContext.getRedirectLocations());
 
         for (HttpResponseHandler handler : httpResponseHandlers)
@@ -162,13 +162,14 @@ public class HttpClient implements IHttpClient, AutoCloseable
     private static void configureBasicAuth(boolean usePreemptiveBasicAuthIfAvailable, String plainUserInfo,
             HttpHost host, HttpClientContext internalContext)
     {
-        UserInfo userInfo = UriUtils.parseUserInfo(plainUserInfo);
+        String plainUserInfoDecoded = URLDecoder.decode(plainUserInfo, StandardCharsets.UTF_8);
+        UserInfo userInfo = UriUtils.parseUserInfo(plainUserInfoDecoded);
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(userInfo.user(),
                 userInfo.password().toCharArray());
         HttpHost normalizedHost = RoutingSupport.normalize(host, DefaultSchemePortResolver.INSTANCE);
         if (usePreemptiveBasicAuthIfAvailable)
         {
-            BasicScheme authScheme = new BasicScheme(StandardCharsets.UTF_8);
+            BasicScheme authScheme = new BasicScheme();
             authScheme.initPreemptive(credentials);
             internalContext.resetAuthExchange(normalizedHost, authScheme);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,22 +20,38 @@ import java.util.List;
 import java.util.Set;
 
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.WebElement;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.web.model.JsArgument;
 import org.vividus.steps.ui.web.model.JsArgumentType;
 import org.vividus.ui.action.JavascriptActions;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.variable.VariableScope;
 
 public class ExecuteScriptSteps extends AbstractExecuteScriptSteps
 {
     private final JavascriptActions javascriptActions;
+    private final IUiContext uiContext;
 
-    public ExecuteScriptSteps(JavascriptActions javascriptActions, VariableContext variableContext,
-            ISoftAssert softAssert)
+    public ExecuteScriptSteps(JavascriptActions javascriptActions, IUiContext uiContext,
+            VariableContext variableContext, ISoftAssert softAssert)
     {
         super(softAssert, variableContext);
         this.javascriptActions = javascriptActions;
+        this.uiContext = uiContext;
+    }
+
+    /**
+     * Executes passed JavaScript code on the opened page
+     *
+     * @param jsCode       JavaScript code
+     *                     (e.g. "document.querySelector('[name="vividus-logo"]').remove()")
+     */
+    @When("I execute javascript `$jsCode`")
+    public void executeJavascript(String jsCode)
+    {
+        executeScript(jsCode);
     }
 
     /**
@@ -54,10 +70,16 @@ public class ExecuteScriptSteps extends AbstractExecuteScriptSteps
      * @param jsCode       Code in javascript that returns some value as result
      *                     (e.g. var a=1; return a;)
      */
-    @When("I execute javascript `$jsCode` and save result to $scopes variable `$variableName`")
+    @When(value = "I execute javascript `$jsCode` and save result to $scopes variable `$variableName`", priority = 1)
     public void saveValueFromJS(String jsCode, Set<VariableScope> scopes, String variableName)
     {
-        assertAndSaveResult(() -> javascriptActions.executeScript(jsCode), scopes, variableName);
+        assertAndSaveResult(() -> executeScript(jsCode), scopes, variableName);
+    }
+
+    private Object executeScript(String jsCode)
+    {
+        Object args = uiContext.getOptionalSearchContext().filter(WebElement.class::isInstance).orElse(null);
+        return javascriptActions.executeScript(jsCode, args);
     }
 
     /**

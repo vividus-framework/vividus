@@ -46,5 +46,9 @@ Then `vividus` matches `[A-Z]+`
 !-- The next step should not be performed
 Then `true` is equal to `false`
 
+Scenario: Known issue status for Root story shouldn't be reset in Child story
+GivenStories: /story/integration/Precondition.story
+Then `failure` matches `\d+`
+
 Scenario: Should not be performed
 Then `failure` matches `\d+`

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,8 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.vividus.spring.SpelExpressionResolver;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public final class ConfigurationResolver
 {
@@ -78,7 +77,6 @@ public final class ConfigurationResolver
         this.properties = properties;
     }
 
-    @SuppressFBWarnings("SING_SINGLETON_GETTER_NOT_SYNCHRONIZED")
     public static ConfigurationResolver getInstance() throws IOException
     {
         if (instance != null)
@@ -144,13 +142,11 @@ public final class ConfigurationResolver
         deprecatedPropertiesHandler.removeDeprecated(properties);
         resolveSpelExpressions(properties, false);
 
-        try (VaultStoredPropertiesProcessor vaultProcessor = new VaultStoredPropertiesProcessor(properties))
+        try (PropertiesProcessor propertiesProcessor = new DelegatingPropertiesProcessor(
+                ServiceLoader.load(PropertiesProcessor.class)))
         {
-            PropertiesProcessor propertiesProcessor = new DelegatingPropertiesProcessor(List.of(
-                    new EncryptedPropertiesProcessor(properties), vaultProcessor
-            ));
-            new SystemPropertiesInitializer(propertiesProcessor).setSystemProperties(properties);
             properties = propertiesProcessor.processProperties(properties);
+            new SystemPropertiesInitializer(propertiesProcessor).setSystemProperties(properties);
         }
 
         instance = new ConfigurationResolver(properties);

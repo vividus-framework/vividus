@@ -1,0 +1,24 @@
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`leftTableJoinColumn`
+|the column name for matching in the left table
+
+|`rightTableJoinColumn`
+|the column name for matching in the right table
+
+|`tables`
+|xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]-s to join
+|===
+
+- `left` table is the first xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] declared in `tables` parameter,
+- `right` table is the second xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] declared in `tables` parameter or table body put under the transformer definition.
+
+[IMPORTANT]
+====
+* The number of used xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]-s must be equal to 2 (`left` and `right`).
+* The column names of input tables must be different (except the column names for matching).
+* If any of tables is empty - the resulting table will also be empty.
+====

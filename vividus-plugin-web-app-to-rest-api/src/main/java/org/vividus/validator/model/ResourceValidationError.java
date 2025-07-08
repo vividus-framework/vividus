@@ -18,7 +18,7 @@ package org.vividus.validator.model;
 
 import java.util.function.Consumer;
 
-import org.vividus.http.validation.model.CheckStatus;
+import org.vividus.http.validation.CheckStatus;
 
 public enum ResourceValidationError
 {
@@ -26,10 +26,10 @@ public enum ResourceValidationError
     UNREACHABLE_PAGE("Unable to get page with URL: %s"),
     MAIN_PAGE_IS_NOT_SET("Unable to resolve %s page since the main application page URL is not set"),
     INVALID_PAGE_URL("Invalid page URL: %s"),
-    EMPTY_HREF_SRC("Element doesn't contain href/src attributes",
-        "Element by selector %s doesn't contain href/src attributes"),
-    INVALID_HREF_SRC("Element has href/src attribute with invalid URL: %s",
-        "Element by selector %s has href/src attribute with invalid URL: %s"),
+    EMPTY_HREF_SRC("Element doesn't contain %s attributes",
+        "Element by selector %s doesn't contain %s attributes"),
+    INVALID_HREF_SRC("Element has %s attribute with invalid URL: %s",
+        "Element by selector %s has %s attribute with invalid URL: %s"),
     MISSING_JUMPLINK_TARGET("Jump link points to missing element with %s id or name",
             "Jump link by selector %s points to missing element with %s id or name");
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,10 @@
 
 package org.vividus.ui.monitor;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import org.jbehave.core.model.Scenario;
@@ -31,8 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.vividus.context.RunContext;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
-import org.vividus.reporter.event.AttachmentPublishEvent;
-import org.vividus.reporter.model.Attachment;
+import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.event.AssertionFailedEvent;
 
@@ -44,16 +41,16 @@ public abstract class AbstractPublishingAttachmentOnFailureMonitor extends NullS
 
     private final RunContext runContext;
     private final IWebDriverProvider webDriverProvider;
-    private final EventBus eventBus;
+    private final IAttachmentPublisher attachmentPublisher;
     private final String metaNameToSkipPublishing;
     private final String errorLogMessageOnFailure;
 
     protected AbstractPublishingAttachmentOnFailureMonitor(RunContext runContext, IWebDriverProvider webDriverProvider,
-            EventBus eventBus, String metaNameToSkipPublishing, String errorLogMessageOnFailure)
+            IAttachmentPublisher attachmentPublisher, String metaNameToSkipPublishing, String errorLogMessageOnFailure)
     {
         this.runContext = runContext;
         this.webDriverProvider = webDriverProvider;
-        this.eventBus = eventBus;
+        this.attachmentPublisher = attachmentPublisher;
         this.metaNameToSkipPublishing = metaNameToSkipPublishing;
         this.errorLogMessageOnFailure = errorLogMessageOnFailure;
     }
@@ -81,10 +78,10 @@ public abstract class AbstractPublishingAttachmentOnFailureMonitor extends NullS
         {
             try
             {
-                createAttachment().map(AttachmentPublishEvent::new).ifPresent(eventBus::post);
+                publishAttachment();
             }
             // CHECKSTYLE:OFF
-            catch (RuntimeException | IOException e)
+            catch (RuntimeException e)
             {
                 LOGGER.error(errorLogMessageOnFailure,  e);
             }
@@ -122,5 +119,10 @@ public abstract class AbstractPublishingAttachmentOnFailureMonitor extends NullS
 
     protected abstract boolean isPublishingEnabled(Method method);
 
-    protected abstract Optional<Attachment> createAttachment() throws IOException;
+    protected abstract void publishAttachment();
+
+    protected IAttachmentPublisher getAttachmentPublisher()
+    {
+        return attachmentPublisher;
+    }
 }

@@ -1,32 +1,18 @@
 project.description = 'VIVIDUS plugin for Sauce Labs'
 
-//https://github.com/powermock/powermock/issues/1094
-test {
-    jvmArgs = [
-        '--add-opens=java.base/java.lang=ALL-UNNAMED',
-        '--add-opens=java.base/java.net=ALL-UNNAMED',
-        '--add-opens=java.base/java.util=ALL-UNNAMED'
-    ]
-}
-
 dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-util')
     implementation project(':vividus-extension-selenium')
 
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.2.0-jre')
-    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.179') {
-        exclude module: 'slf4j-jdk14'
-    }
+    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.8-jre')
+    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '2.6')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.2')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.3')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testRuntimeOnly(group: 'org.junit.vintage', name: 'junit-vintage-engine')
-    testCompileOnly(group: 'junit', name: 'junit', version: '4.13.2')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.12.0')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
-    testImplementation(group: 'com.github.powermock.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
-    testImplementation(group: 'com.github.powermock.powermock', name: 'powermock-module-junit4', version: versions.powermock)
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
-    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.16.1')
+    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '4.0.4')
 }

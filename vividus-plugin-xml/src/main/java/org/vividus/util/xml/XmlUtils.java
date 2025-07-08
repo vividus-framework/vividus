@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.commons.pool2.BasePooledObjectFactory;
-import org.apache.commons.pool2.PooledObject;
-import org.apache.commons.pool2.impl.DefaultPooledObject;
-import org.vividus.util.pool.UnsafeGenericObjectPool;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -59,59 +55,37 @@ public final class XmlUtils
     private static final String EXTERNAL_PARAMETER_ENTITIES = "http://xml.org/sax/features/external-parameter-entities";
     private static final String EXTERNAL_GENERAL_ENTITIES = "http://xml.org/sax/features/external-general-entities";
 
-    private static final UnsafeGenericObjectPool<XPathFactory> XPATH_FACTORY = new UnsafeGenericObjectPool<>(
-            XPathFactory::newInstance);
-    private static final UnsafeGenericObjectPool<TransformerFactory> TRANSFORMER_FACTORY =
-            new UnsafeGenericObjectPool<>(TransformerFactory::newInstance);
-    private static final DocumentBuilderFactory DOCUMENT_BUILDER_FACTORY = DocumentBuilderFactory.newInstance();
-    private static final UnsafeGenericObjectPool<DocumentBuilder> DOCUMENT_BUILDER;
+    private static final XPathFactory XPATH_FACTORY = XPathFactory.newInstance();
+    private static final TransformerFactory TRANSFORMER_FACTORY = TransformerFactory.newInstance();
+    private static final DocumentBuilder DOCUMENT_BUILDER;
 
     static
     {
-        DOCUMENT_BUILDER_FACTORY.setNamespaceAware(true);
         try
         {
-            DOCUMENT_BUILDER_FACTORY.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            DOCUMENT_BUILDER_FACTORY.setFeature(EXTERNAL_GENERAL_ENTITIES, false);
-            DOCUMENT_BUILDER_FACTORY.setFeature(EXTERNAL_PARAMETER_ENTITIES, false);
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setNamespaceAware(true);
+            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            documentBuilderFactory.setFeature(EXTERNAL_GENERAL_ENTITIES, false);
+            documentBuilderFactory.setFeature(EXTERNAL_PARAMETER_ENTITIES, false);
+            DOCUMENT_BUILDER = documentBuilderFactory.newDocumentBuilder();
         }
         catch (ParserConfigurationException e)
         {
             throw new IllegalStateException(e);
         }
-        DOCUMENT_BUILDER = new UnsafeGenericObjectPool<>(new BasePooledObjectFactory<>()
-        {
-            @Override
-            public DocumentBuilder create() throws ParserConfigurationException
-            {
-                return DOCUMENT_BUILDER_FACTORY.newDocumentBuilder();
-            }
-
-            @Override
-            public PooledObject<DocumentBuilder> wrap(DocumentBuilder obj)
-            {
-                return new DefaultPooledObject<>(obj);
-            }
-        });
     }
 
     private XmlUtils()
     {
     }
 
-    public static Document convertToDocument(String xml)
+    public static Document convertToDocument(String xml) throws SAXException, IOException
     {
-        return DOCUMENT_BUILDER.apply(documentBuilder ->
+        synchronized (DOCUMENT_BUILDER)
         {
-            try
-            {
-                return documentBuilder.parse(createInputSource(xml));
-            }
-            catch (SAXException | IOException e)
-            {
-                throw new IllegalStateException(e.getMessage(), e);
-            }
-        });
+            return DOCUMENT_BUILDER.parse(createInputSource(xml));
+        }
     }
 
     /**
@@ -119,24 +93,35 @@ public final class XmlUtils
      * @param xml XML
      * @param xpath xpath
      * @return Search result
+     * @throws XPathExpressionException If an XPath expression error has occurred
      */
-    public static Optional<String> getXmlByXpath(String xml, String xpath)
+    public static Optional<String> getXmlByXpath(String xml, String xpath) throws XPathExpressionException
     {
-        return XPATH_FACTORY.apply(xPathFactory -> {
-            try
-            {
-                InputSource source = createInputSource(xml);
-                NodeList nodeList = (NodeList) xPathFactory.newXPath().evaluate(xpath, source, XPathConstants.NODESET);
-                Node singleNode = nodeList.item(0);
-                Properties outputProperties = new Properties();
-                outputProperties.setProperty(OutputKeys.OMIT_XML_DECLARATION, YES);
-                return transform(new DOMSource(singleNode), outputProperties);
-            }
-            catch (XPathExpressionException e)
-            {
-                throw new IllegalStateException(e.getMessage(), e);
-            }
-        });
+        Node singleNode = getNodes(xml, xpath).item(0);
+        Properties outputProperties = new Properties();
+        outputProperties.setProperty(OutputKeys.OMIT_XML_DECLARATION, YES);
+        return transform(new DOMSource(singleNode), outputProperties);
+    }
+
+    /**
+     * Get number of elements by XPath from the XML
+     * @param xml XML
+     * @param xpath xpath
+     * @return number of elements by XPath
+     * @throws XPathExpressionException If an XPath expression error has occurred
+     */
+    public static int getNumberOfElements(String xml, String xpath) throws XPathExpressionException
+    {
+        return getNodes(xml, xpath).getLength();
+    }
+
+    private static NodeList getNodes(String xml, String xpath) throws XPathExpressionException
+    {
+        synchronized (XPATH_FACTORY)
+        {
+            InputSource source = createInputSource(xml);
+            return (NodeList) XPATH_FACTORY.newXPath().evaluate(xpath, source, XPathConstants.NODESET);
+        }
     }
 
     public static void validateXmlAgainstXsd(String xml, String xsd) throws SAXException, IOException
@@ -152,11 +137,12 @@ public final class XmlUtils
     {
         StreamSource xmlSource = createStreamSource(xml);
         StreamSource xsltSource = createStreamSource(xslt);
-        TRANSFORMER_FACTORY.accept(transformerFactory ->
+
+        synchronized (TRANSFORMER_FACTORY)
         {
             try
             {
-                Transformer transformer = transformerFactory.newTransformer(xsltSource);
+                Transformer transformer = TRANSFORMER_FACTORY.newTransformer(xsltSource);
                 String transformedXml = transform(xmlSource, transformer);
                 transformedXmlConsumer.accept(transformedXml);
             }
@@ -164,7 +150,7 @@ public final class XmlUtils
             {
                 transformerExceptionConsumer.accept(e);
             }
-        });
+        }
     }
 
     /**
@@ -192,10 +178,11 @@ public final class XmlUtils
 
     private static Optional<String> transform(Source xmlSource, Properties outputProperties)
     {
-        return TRANSFORMER_FACTORY.apply(transformerFactory -> {
+        synchronized (TRANSFORMER_FACTORY)
+        {
             try
             {
-                Transformer transformer = transformerFactory.newTransformer();
+                Transformer transformer = TRANSFORMER_FACTORY.newTransformer();
                 transformer.setOutputProperties(outputProperties);
                 String result = transform(xmlSource, transformer);
                 return Optional.of(result);
@@ -204,7 +191,7 @@ public final class XmlUtils
             {
                 return Optional.empty();
             }
-        });
+        }
     }
 
     private static String transform(Source xmlSource, Transformer transformer) throws TransformerException

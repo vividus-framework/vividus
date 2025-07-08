@@ -7,7 +7,7 @@ configurations {
 }
 
  ext {
-     browserupProxyVersion = '2.2.16'
+     browserupProxyVersion = '3.2.0'
 }
 
  dependencies {
@@ -19,7 +19,7 @@ configurations {
      implementation project(':vividus-soft-assert')
      api project(':vividus-extension-ui')
 
-     api platform(group: 'org.seleniumhq.selenium', name: 'selenium-bom', version: '4.21.0')
+     api platform(group: 'org.seleniumhq.selenium', name: 'selenium-bom', version: '4.33.0')
      api(group: 'org.seleniumhq.selenium', name: 'selenium-api')
      api(group: 'org.seleniumhq.selenium', name: 'selenium-support')
      api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver')
@@ -35,18 +35,19 @@ configurations {
      implementation(group: 'com.google.zxing', name: 'javase')
 
      implementation(group: 'jakarta.inject', name: 'jakarta.inject-api', version: '2.0.1')
-     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.13')
+     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
      implementation(group: 'org.slf4j', name: 'slf4j-api')
-     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0')
-     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.1.7')
+     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0')
+     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.8')
      implementation(group: 'org.springframework', name: 'spring-core')
 
      compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
-     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.2')
+     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.3')
      testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
-     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.12.0')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '3.0')
+     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
      testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
      testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
  }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.vividus.excel.transformer;
 
-import static java.util.Map.entry;
 import static org.apache.commons.lang3.Validate.notBlank;
 
 import java.io.IOException;
@@ -44,6 +43,13 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
 {
     private static final String RANGE = "range";
 
+    private final boolean preserveCellFormatting;
+
+    public ExcelTableTransformer(boolean preserveCellFormatting)
+    {
+        this.preserveCellFormatting = preserveCellFormatting;
+    }
+
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
@@ -59,7 +65,7 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
             {
                 throw new IllegalArgumentException("Sheet with name '" + sheetName + "' does not exist");
             }
-            IExcelSheetParser excelSheetParser = new ExcelSheetParser(sheet.get());
+            IExcelSheetParser excelSheetParser = new ExcelSheetParser(sheet.get(), preserveCellFormatting);
             String column = properties.getProperties().getProperty("column");
             if (column != null)
             {
@@ -81,9 +87,12 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
 
     private List<String> extractData(IExcelSheetParser sheetParser, TableProperties properties)
     {
-        return processCompetingMandatoryProperties(properties,
-                entry(RANGE, range -> extractDataFromRange(sheetParser, properties, range)),
-                entry("addresses", addresses -> extractDataFromAddresses(sheetParser, addresses)));
+        Map.Entry<String, String> excelSource = processCompetingMandatoryProperties(properties.getProperties(),
+                RANGE, "addresses");
+        String excelSourceValue = excelSource.getValue();
+
+        return RANGE.equals(excelSource.getKey()) ? extractDataFromRange(sheetParser, properties, excelSourceValue)
+                : extractDataFromAddresses(sheetParser, excelSourceValue);
     }
 
     private List<String> extractDataFromRange(IExcelSheetParser sheetParser, TableProperties properties, String range)
@@ -124,7 +133,7 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
     private List<String> replaceLineBreaks(List<String> list, String lineBreakReplacement)
     {
         return list.stream()
-                     .map(e -> e.replace("\n", lineBreakReplacement))
+                     .map(e -> e == null ? e : e.replace("\n", lineBreakReplacement))
                      .toList();
     }
 }

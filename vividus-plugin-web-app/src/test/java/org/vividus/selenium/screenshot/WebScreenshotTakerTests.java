@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,8 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.screenshot.Screenshot;
+import org.vividus.ui.screenshot.ScreenshotFileNameGenerator;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 import org.vividus.util.ResourceUtils;
 
@@ -61,7 +63,7 @@ class WebScreenshotTakerTests
     private static final pazone.ashot.Screenshot SCREENSHOT = new pazone.ashot.Screenshot(IMAGE);
 
     @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
+    @Mock private ScreenshotFileNameGenerator screenshotFileNameGenerator;
     @Mock private IWebElementHighlighter webElementHighlighter;
     @Mock private AshotFactory<WebScreenshotParameters> ashotFactory;
     @Mock private ScreenshotDebugger screenshotDebugger;

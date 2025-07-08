@@ -1,5 +1,8 @@
 apply from: "${buildSystemPath}/vividus-test-subproject.gradle"
 project.description = 'VIVIDUS tests'
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+}
 
 tasks.publish.enabled = false
 
@@ -51,6 +54,9 @@ dependencies {
     implementation project(':vividus-plugin-xml')
     implementation project(':vividus-plugin-yaml')
 
-    implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.42')
-    implementation(group: 'com.h2database', name: 'h2', version: '2.2.224')
+    implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.46')
+    implementation(group: 'com.h2database', name: 'h2', version: '2.3.232')
+
+    // Zstd decompression support, need to add explicitly as it's not a transitive dependency of netty out-of-the-box
+    implementation(group: 'com.github.luben', name: 'zstd-jni', version: '1.5.7-4')
 }

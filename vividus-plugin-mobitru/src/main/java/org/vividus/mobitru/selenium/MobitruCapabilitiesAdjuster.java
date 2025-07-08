@@ -27,15 +27,18 @@ import org.vividus.selenium.DesiredCapabilitiesAdjuster;
 public class MobitruCapabilitiesAdjuster extends DesiredCapabilitiesAdjuster
 {
     private static final String APPIUM_UDID = "appium:udid";
-    private final MobitruFacade mobitruFacade;
 
     private final InstallApplicationOptions installApplicationOptions;
+    private final MobitruFacade mobitruFacade;
+    private final MobitruSessionInfoStorage mobitruSessionInfoStorage;
     private String appFileName;
 
-    public MobitruCapabilitiesAdjuster(InstallApplicationOptions installApplicationOptions, MobitruFacade mobitruFacade)
+    public MobitruCapabilitiesAdjuster(InstallApplicationOptions installApplicationOptions, MobitruFacade mobitruFacade,
+            MobitruSessionInfoStorage mobitruSessionInfoStorage)
     {
         this.installApplicationOptions = installApplicationOptions;
         this.mobitruFacade = mobitruFacade;
+        this.mobitruSessionInfoStorage = mobitruSessionInfoStorage;
     }
 
     @Override
@@ -46,6 +49,7 @@ public class MobitruCapabilitiesAdjuster extends DesiredCapabilitiesAdjuster
         {
             deviceId = mobitruFacade.takeDevice(desiredCapabilities);
             mobitruFacade.installApp(deviceId, appFileName, installApplicationOptions);
+            mobitruSessionInfoStorage.saveDeviceId(deviceId);
             Map<String, Object> capabilities = desiredCapabilities.asMap();
             if (capabilities.containsKey(APPIUM_UDID) || capabilities.containsKey("udid"))
             {

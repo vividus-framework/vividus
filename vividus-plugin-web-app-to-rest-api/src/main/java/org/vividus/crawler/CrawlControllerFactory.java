@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,17 +33,19 @@ import org.vividus.util.UriUtils.UserInfo;
 import org.vividus.util.property.IPropertyMapper;
 
 import crawlercommons.filters.basic.BasicURLNormalizer;
+import de.hshn.mi.crawler4j.frontier.HSQLDBFrontierConfiguration;
+import de.hshn.mi.crawler4j.url.HSQLDBWebURLFactory;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
-import edu.uci.ics.crawler4j.frontier.SleepycatFrontierConfiguration;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
-import edu.uci.ics.crawler4j.url.SleepycatWebURLFactory;
 
 public class CrawlControllerFactory implements ICrawlControllerFactory
 {
+    private static final int DB_POOL_SIZE = 10;
+
     private final Map<String, String> defaultCrawlConfig;
     private final IPropertyMapper propertyMapper;
 
@@ -68,10 +70,10 @@ public class CrawlControllerFactory implements ICrawlControllerFactory
             robotstxtConfig.setEnabled(false);
             PageFetcher pageFetcher = new PageFetcher(crawlConfig, normalizer);
             RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher,
-                    new SleepycatWebURLFactory());
+                    new HSQLDBWebURLFactory());
 
             return new CrawlController(crawlConfig, normalizer, pageFetcher, robotstxtServer,
-                    new SleepycatFrontierConfiguration(crawlConfig));
+                    new HSQLDBFrontierConfiguration(crawlConfig, DB_POOL_SIZE));
         }
         catch (Exception e)
         {

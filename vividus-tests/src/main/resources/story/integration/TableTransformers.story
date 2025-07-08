@@ -88,12 +88,21 @@ Examples:
 
 Scenario: Verify RESOLVING_EXPRESSIONS_EAGERLY transformer
 When I initialize story variable `table` with values:
-/data/with-replacing-transformer.table
-Then `${table[0].name}` is equal to `#{invalid(Name.firstName)}`
-When I initialize story variable `table-resolved` with values:
 {transformer=RESOLVING_EXPRESSIONS_EAGERLY}
-/data/with-replacing-transformer.table
-Then `${table-resolved[0].name}` is not equal to `#{invalid(Name.firstName)}`
+{transformer=FILTERING, column.name=^((?!generate).)*$}
+/data/with-expression.table
+Given I initialize scenario variable `tableSize` with value `#{evalGroovy(return table.size())}`
+Then `${tableSize}` is equal to `1`
+
+
+Scenario: Verify RESOLVING_VARIABLES_EAGERLY transformer
+Then `<city>` is equal to `Vancouver`
+Examples:
+{transformer=RESOLVING_VARIABLES_EAGERLY}
+|Meta:                |city     |
+|@locale in           |Mumbai   |
+|@locale ${userLocale}|Vancouver|
+|@locale lt           |Vilnius  |
 
 
 Scenario: Verify RESOLVING_SELF_REFERENCES_EAGERLY transformer chained
@@ -145,22 +154,6 @@ Examples:
 |ABCDEFGXYZU     |
 |jhbdahjabw      |
 |738162378613896 |
-
-Scenario: Verify FROM_EXCEL transformer
-Meta:
-    @issueId 647
-Then `<joined>` is equal to `line 1 line 2 line 3`
-Examples:
-{transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=Sheet1, addresses=A1, column=joined, \{lineBreakReplacement|VERBATIM\}= }
-
-Scenario: Check loading excel table with different data types using FROM_EXCEL transformer
-Meta:
-    @issueId 2908
-When I initialize scenario variable `expectedTable` with values:
-|StringValue|NumericValue|BooleanValue|FormulaValue|FormulaErrorValue|
-|City       |17.0        |false       |289.0       |                 |
-Then `${expectedTable}` is equal to table:
-{transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=DifferentTypes, range=A1:E2}
 
 Scenario: Verify ExamplesTable property value with space
 Meta:
@@ -316,7 +309,7 @@ When I initialize scenario variable `sitemapTransformerTable` with values:
 Then `${sitemapTransformerTable}` is equal to table:
 |sitemapUrl |
 
-Scenario: Verify INDEXING transformer ASCENDING order
+Scenario: Verify INDEXING transformer with ASCENDING order
 Then `<index>` is = `<expected>`
 Examples:
 {transformer=INDEXING, order=ASCENDING}
@@ -325,7 +318,16 @@ Examples:
 |1       |
 |2       |
 
-Scenario: Verify INDEXING transformer DESCENDING order
+Scenario: Verify INDEXING transformer starting from 1 with ASCENDING order
+Then `<index>` is = `<expected>`
+Examples:
+{transformer=INDEXING, order=ASCENDING, startIndex=1}
+|expected|
+|1       |
+|2       |
+|3       |
+
+Scenario: Verify INDEXING transformer with DESCENDING order
 Then `<index>` is = `<expected>`
 Examples:
 {transformer=INDEXING, order=DESCENDING}
@@ -333,6 +335,15 @@ Examples:
 |2       |
 |1       |
 |0       |
+
+Scenario: Verify INDEXING transformer staring from -5 with DESCENDING order
+Then `<index>` is = `<expected>`
+Examples:
+{transformer=INDEXING, order=DESCENDING, startIndex=-5}
+|expected|
+|-3      |
+|-4      |
+|-5      |
 
 Scenario: Verify INNER_JOIN transformer with empty table (should not be executed)
 Meta:
@@ -359,6 +370,21 @@ Then `${innerJoinTable}` is equal to table:
 |row13  |3     |row533 |row433 |row33  |row23  |
 |row133 |3     |row53  |row43  |row333 |row233 |
 |row133 |3     |row533 |row433 |row333 |row233 |
+
+Scenario: Verify LEFT_JOIN transformer with table body
+When I initialize scenario variable `leftJoinTable` with values:
+{transformer=LEFT_JOIN, leftTableJoinColumn=joinID, rightTableJoinColumn=joinID, tables=/data/for-inner-join-transformer.table}
+|joinID|column4|column5|
+|5     |row45  |row51  |
+|1     |row41  |row51  |
+|6     |row41  |row51  |
+Then `${leftJoinTable}` is equal to table:
+|column1|joinID|column5|column4|column3|column2|
+|row11  |1     |row51  |row41  |row31  |row21  |
+|row12  |2     |       |       |row32  |row22  |
+|row13  |3     |       |       |row33  |row23  |
+|row133 |3     |       |       |row333 |row233 |
+|row14  |4     |       |       |row34  |row24  |
 
 Scenario: Verify SORTING transformer with default order
 When I initialize scenario variable `sortingTable` with values:
@@ -502,3 +528,35 @@ Then `${documentTable}` is equal to table:
 |<a name="ElementName">Named anchor.</a>                                          |
 |<a href="#notFound">Link to unexistent element</a>                               |
 |<a href="#" title="Link title" onclick="onLinkClick(event)">Link with tooltip</a>|
+
+Scenario: Verify FROM_HTML transformer from resource
+When I initialize scenario variable `documentTable` with values:
+{transformer=FROM_HTML, column=col, path=/data/links.html, xpathSelector=//a/text()}
+Then `${documentTable}` is equal to table:
+|col                                        |
+|Link to an element                         |
+|Link to the anchor with name "ElementName" |
+|Named anchor.                              |
+|Link to unexistent element                 |
+|Link with tooltip                          |
+
+Scenario: Verify FROM_HTML transformer with JSOUP "abs:" prefix for Href attribute
+When I initialize scenario variable `absoluteUrls` with values:
+{transformer=FROM_HTML, column=url, variableName=pageSource, xpathSelector=//a[@href]/@abs:href, baseUri=${vividus-test-site-url}/links.html}
+Then `${absoluteUrls}` is equal to table:
+|url                                                                |
+|https://vividus-test-site-a92k.onrender.com/links.html#ElementId   |
+|https://vividus-test-site-a92k.onrender.com/links.html#ElementName |
+|https://vividus-test-site-a92k.onrender.com/links.html#notFound    |
+|https://vividus-test-site-a92k.onrender.com/links.html#            |
+
+Scenario: Verify loading of external tables chain
+When I initialize scenario variable `table` with values:
+/data/with-external-reference.table
+Then `${table[0].name}` matches `[A-Za-z]+`
+
+Scenario: Verify the order of applying transformers from external tables
+When I initialize scenario variable `table` with values:
+{transformer=REPLACING, replacing=to_replace3, replacement=value_to_check}
+/data/tables/with-transformer-2.table
+Then `${table[0].column}` is equal to `value_to_check`

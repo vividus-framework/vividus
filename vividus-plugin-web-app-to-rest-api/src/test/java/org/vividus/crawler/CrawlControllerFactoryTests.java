@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.vividus.databind.BasicHeadersDeserializer;
 import org.vividus.util.property.IPropertyMapper;
 import org.vividus.util.property.PropertyMapper;
 
-import edu.uci.ics.crawler4j.frontier.SleepycatFrontierConfiguration;
+import de.hshn.mi.crawler4j.frontier.HSQLDBFrontierConfiguration;
 
 class CrawlControllerFactoryTests
 {
@@ -51,7 +51,7 @@ class CrawlControllerFactoryTests
     @Test
     void shouldCreateCrawlController(@TempDir Path baseDirectory) throws URISyntaxException
     {
-        try (var frontier = mockConstruction(SleepycatFrontierConfiguration.class))
+        try (var frontier = mockConstruction(HSQLDBFrontierConfiguration.class))
         {
             var crawlStorage = baseDirectory.resolve(CRAWL_STORAGE_FOLDER_KEY);
             Integer socketTimeout = 10_000;
@@ -94,7 +94,7 @@ class CrawlControllerFactoryTests
     @Test
     void shouldCreateCrawlControllerWithoutUserInfo(@TempDir Path baseDirectory) throws URISyntaxException
     {
-        try (var ignored = mockConstruction(SleepycatFrontierConfiguration.class))
+        try (var ignored = mockConstruction(HSQLDBFrontierConfiguration.class))
         {
             var crawlStorage = baseDirectory.resolve(CRAWL_STORAGE_FOLDER_KEY);
 

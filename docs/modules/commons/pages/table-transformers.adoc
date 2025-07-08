@@ -17,6 +17,32 @@ corresponding plugins articles).
 |header n|value 1n| .... |value mn|
 ----
 
+== RESOLVING_VARIABLES_EAGERLY
+
+Normally the variable placeholders in xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]s are resolved prior to scenario execution,
+but there might be cases where the variable placeholders resolution is required during the processing of transformers chain.
+
+IMPORTANT: `RESOLVING_VARIABLES_EAGERLY` transformer supports only `NEXT_BATCHES` variables and global variables defined in properties.
+
+.Usage of RESOLVING_VARIABLES_EAGERLY transformer
+[source,gherkin]
+----
+{transformer=RESOLVING_VARIABLES_EAGERLY}
+{transformer=X}
+{transformer=Y}
+|value          |
+|${variable_ref}|
+----
+
+.Usage of RESOLVING_VARIABLES_EAGERLY transformer in conjuction with meta filtering
+[source,gherkin]
+----
+{transformer=RESOLVING_VARIABLES_EAGERLY}
+|Meta:             |value          |
+|@env ${currentEnv}|${variable_ref}|
+----
+
+
 == RESOLVING_EXPRESSIONS_EAGERLY
 
 `RESOLVING_EXPRESSIONS_EAGERLY` transformer processes expressions which are used inside xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] eagerly, i.e. at the table loading stage.
@@ -515,6 +541,80 @@ will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTabl
 |value1 |
 ----
 
+== INDEXING
+
+`INDEXING` transformer adds a column with the rows indices in the specified order.
+
+[cols="1,1,3", options="header"]
+|===
+|Parameter
+|Default value
+|Description
+
+|[subs=+quotes]`*order*`
+|
+|The indexing order: `ASCENDING` or `DESCENDING`.
+
+|`startIndex`
+|`0`
+|The start index. Negative integer numbers are allowed.
+|===
+
+
+.Usage of `INDEXING` transformer with `ASCENDING` order. The following transformer:
+[source,gherkin]
+----
+{transformer=INDEXING, order=ASCENDING}
+|key   |
+|value1|
+|value2|
+----
+
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
+
+[source,gherkin]
+----
+|key   |index|
+|value1|0    |
+|value2|1    |
+----
+
+.Usage of `INDEXING` transformer with `DESCENDING` order. The following transformer:
+[source,gherkin]
+----
+{transformer=INDEXING, order=DESCENDING}
+|key   |
+|value1|
+|value2|
+----
+
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
+
+[source,gherkin]
+----
+|key   |index|
+|value1|1    |
+|value2|0    |
+----
+
+.Usage of `INDEXING` transformer starting from `1` with `ASCENDING` order. The following transformer:
+[source,gherkin]
+----
+{transformer=INDEXING, order=ASCENDING, startIndex=1}
+|key   |
+|value1|
+|value2|
+----
+
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
+
+[source,gherkin]
+----
+|key   |index|
+|value1|1    |
+|value2|2    |
+----
+
 == JOINING
 
 `JOINING` transformer joins values from rows/columns of the table.
@@ -589,120 +689,59 @@ Examples:
 /test1.table
 ----
 
-== CARTESIAN_PRODUCT
+== LEFT_JOIN
 
-`CARTESIAN_PRODUCT` transformer creates a https://en.wikipedia.org/wiki/Cartesian_product[cartesian product] from several tables.
+The `LEFT_JOIN` transformer combines all rows from the left table with matching rows from the right table, and includes rows from the left table even if there are no matches in the right table.
 
-[cols="1,3", options="header"]
-|===
-|Parameter
-|Description
+include::partial$join-transformer.adoc[]
 
-|`tables`
-|paths to examples tables or transformers to create a cartesian product
-
-|===
-
-[IMPORTANT]
-====
-* headers of input tables must be different
-* number of input tables must be more than 1
-* if any of tables is empty - the resulting table will also be empty
-====
-
-.Usage of CARTESIAN_PRODUCT transformer
+.Usage of LEFT_JOIN transformer with two tables
 [source,gherkin]
 ----
-{transformer=CARTESIAN_PRODUCT, tables=story/tables/test1.table;story/tables/test2.table}
+{transformer=LEFT_JOIN, leftTableJoinColumn=ID, rightTableJoinColumn=ID, tables=/tables/customers.table;/tables/orders.table}
 ----
 
-.Usage of CARTESIAN_PRODUCT transformer with table body
+where xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] from /tables/customers.table:
+
 [source,gherkin]
 ----
-{transformer=CARTESIAN_PRODUCT, tables=/data/some-table.table}
-|column1|
-|value1 |
+|ID|Customer Name|Country  |
+|1 |Alice        |USA      |
+|2 |Bob          |Canada   |
+|3 |Charlie      |UK       |
+|4 |David        |Australia|
+|5 |Eva          |Germany  |
 ----
 
-.Usage of CARTESIAN_PRODUCT transformer with nested transformers
+and xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] from /tables/orders.table:
+
 [source,gherkin]
 ----
-{transformer=CARTESIAN_PRODUCT, tables=\{transformer=REPEATING\, times=100\};\{transformer=FROM_CSV\, csvPath=/data/csv.csv\}}
+|ID|Order ID|Order Amount|
+|1 |101     |150.00      |
+|3 |102     |200.00      |
+|5 |103     |250.00      |
+|5 |104     |300.00      |
 ----
 
-== INDEXING
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
 
-`INDEXING` transformer adds a column with the rows indices in the specified order. Indices are zero-based
-
-[cols="1,3", options="header"]
-|===
-|Parameter|Description
-
-|`order`|The mandatory indexing order: `ASCENDING` or `DESCENDING`.
-|===
-
-.ASCENDING order example
 [source,gherkin]
 ----
-{transformer=INDEXING, order=ASCENDING}
-|key   |
-|value |
-|value2|
-----
-
-.ASCENDING order resulting table
-[source,gherkin]
-----
-|key   |index|
-|value |0    |
-|value2|1    |
-----
-
-.DESCENDING order example
-[source,gherkin]
-----
-{transformer=INDEXING, order=DESCENDING}
-|key   |
-|value |
-|value2|
-----
-
-.DESCENDING order resulting table
-[source,gherkin]
-----
-|key   |index|
-|value |1    |
-|value2|0    |
+|Country  |ID|Order Amount|Customer Name|Order ID|
+|USA      |1 |150.00      |Alice        |101     |
+|Canada   |2 |            |Bob          |        |
+|UK       |3 |200.00      |Charlie      |102     |
+|Australia|4 |David       |             |        |
+|Germany  |5 |250.00      |Eva          |103     |
+|Germany  |5 |300.00      |Eva          |104     |
 ----
 
 == INNER_JOIN
 
 `INNER_JOIN` transformer combines rows from two tables whenever there are matching values between the columns.
 
-[cols="1,3", options="header"]
-|===
-|Parameter
-|Description
-
-|`leftTableJoinColumn`
-|the column name for matching in the left table
-
-|`rightTableJoinColumn`
-|the column name for matching in the right table
-
-|`tables`
-|xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]-s to join
-|===
-
-- `left` table is the first xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] declared in `tables` parameter,
-- `right` table is the second xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] declared in `tables` parameter or table body put under the transformer definition.
-
-[IMPORTANT]
-====
-* The number of used xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]-s must be equal to 2 (`left` and `right`).
-* The column names of input tables must be different (except the column names for matching).
-* If any of tables is empty - the resulting table will also be empty.
-====
+include::partial$join-transformer.adoc[]
 
 .Usage of INNER_JOIN transformer with table body
 [source,gherkin]
@@ -767,4 +806,45 @@ will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTabl
    column=joinID
  \}
 }
+----
+
+== CARTESIAN_PRODUCT
+
+`CARTESIAN_PRODUCT` transformer creates a https://en.wikipedia.org/wiki/Cartesian_product[cartesian product] from several tables.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`tables`
+|paths to examples tables or transformers to create a cartesian product
+
+|===
+
+[IMPORTANT]
+====
+* headers of input tables must be different
+* number of input tables must be more than 1
+* if any of tables is empty - the resulting table will also be empty
+====
+
+.Usage of CARTESIAN_PRODUCT transformer
+[source,gherkin]
+----
+{transformer=CARTESIAN_PRODUCT, tables=story/tables/test1.table;story/tables/test2.table}
+----
+
+.Usage of CARTESIAN_PRODUCT transformer with table body
+[source,gherkin]
+----
+{transformer=CARTESIAN_PRODUCT, tables=/data/some-table.table}
+|column1|
+|value1 |
+----
+
+.Usage of CARTESIAN_PRODUCT transformer with nested transformers
+[source,gherkin]
+----
+{transformer=CARTESIAN_PRODUCT, tables=\{transformer=REPEATING\, times=100\};\{transformer=FROM_CSV\, csvPath=/data/csv.csv\}}
 ----

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +19,33 @@ package org.vividus.lighthouse;
 import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -48,19 +60,30 @@ import com.google.api.services.pagespeedonline.v5.model.LighthouseAuditResultV5;
 import com.google.api.services.pagespeedonline.v5.model.LighthouseCategoryV5;
 import com.google.api.services.pagespeedonline.v5.model.LighthouseResultV5;
 
+import org.apache.tika.utils.FileProcessResult;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.context.VariableContext;
 import org.vividus.lighthouse.model.MetricRule;
 import org.vividus.lighthouse.model.ScanType;
 import org.vividus.reporter.event.IAttachmentPublisher;
+import org.vividus.shell.ShellCommandExecutor;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.util.ResourceUtils;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.util.wait.MaxTimesBasedWaiter;
+import org.vividus.variable.VariableScope;
 
 public final class LighthouseSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(LighthouseSteps.class);
+
+    private static final String LIGHTHOUSE_OUTPUT_PATH = "--output-path";
+    private static final String LIGHTHOUSE_OUTPUT = "--output";
+    private static final List<String> LIGHTHOUSE_PROHIBITED_OPTIONS = List.of(LIGHTHOUSE_OUTPUT_PATH, LIGHTHOUSE_OUTPUT,
+            "--view");
 
     private static final Map<String, Function<Categories, LighthouseCategoryV5>> CUSTOM_METRIC_FACTORIES = Map.of(
         "accessibilityScore", Categories::getAccessibility,
@@ -81,6 +104,9 @@ public final class LighthouseSteps
 
     private final IAttachmentPublisher attachmentPublisher;
     private final ISoftAssert softAssert;
+    private final ShellCommandExecutor commandExecutor;
+    private final VariableContext variableContext;
+    private final JsonUtils jsonUtils;
     private final PagespeedInsights pagespeedInsights;
     private final JsonFactory jsonFactory;
 
@@ -88,10 +114,16 @@ public final class LighthouseSteps
     private final List<String> categories;
     private final int acceptableScorePercentageDelta;
     private final Optional<PerformanceValidationConfiguration> configuration;
+    private final String outputDirectory;
 
+    private final Lock lighthouseInstallLock = new ReentrantLock();
+    private final AtomicBoolean lighthouseInstalled = new AtomicBoolean(false);
+
+    @SuppressWarnings("paramNum")
     public LighthouseSteps(String applicationName, String apiKey, List<String> categories,
             int acceptableScorePercentageDelta, Optional<PerformanceValidationConfiguration> configuration,
-            IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
+            String outputDirectory, IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert,
+            ShellCommandExecutor commandExecutor, VariableContext variableContext, JsonUtils jsonUtils)
             throws GeneralSecurityException, IOException
     {
         boolean hasPerformance = categories.contains("performance");
@@ -104,6 +136,9 @@ public final class LighthouseSteps
 
         this.attachmentPublisher = attachmentPublisher;
         this.softAssert = softAssert;
+        this.commandExecutor = commandExecutor;
+        this.variableContext = variableContext;
+        this.jsonUtils = jsonUtils;
         this.pagespeedInsights = new PagespeedInsights.Builder(
                 GoogleNetHttpTransport.newTrustedTransport(),
                 GsonFactory.getDefaultInstance(),
@@ -121,6 +156,7 @@ public final class LighthouseSteps
         this.categories = categories;
         this.acceptableScorePercentageDelta = acceptableScorePercentageDelta;
         this.configuration = configuration;
+        this.outputDirectory = outputDirectory;
     }
 
     /**
@@ -132,40 +168,46 @@ public final class LighthouseSteps
      * @throws IOException if an I/O exception of some sort has occurred
      */
     @When("I perform Lighthouse $scanType scan of `$webPageUrl` page:$metricsValidations")
-    public void performLighthouseScan(ScanType scanType, String webPageUrl,
-            List<MetricRule> metricsValidations) throws IOException
+    public void performLighthouseScan(ScanType scanType, String webPageUrl, List<MetricRule> metricsValidations)
+            throws IOException
     {
         for (String strategy : scanType.getStrategies())
         {
             LighthouseResultV5 result = executePagespeedTest(webPageUrl, strategy);
-
-            String resultAsString = jsonFactory.toString(result);
-
-            attachmentPublisher.publishAttachment("/org/vividus/lighthouse/lighthouse.ftl",
-                    Map.of("result", resultAsString),
-                    String.format("Lighthouse %s scan report for page: %s", strategy, webPageUrl));
-
-            Map<String, BigDecimal> metrics = getMetrics(result);
-
-            attachmentPublisher.publishAttachment(jsonFactory.toPrettyString(metrics).getBytes(StandardCharsets.UTF_8),
-                    strategy + "-metrics.json");
-
-            softAssert.runIgnoringTestFailFast(() -> metricsValidations.forEach(validation ->
-            {
-                String metricKey = validation.getMetric();
-                String processedMetricKey = metricKey.replaceAll("\\s*", "");
-
-                metrics.keySet().stream()
-                        .filter(m -> m.equalsIgnoreCase(processedMetricKey))
-                        .findFirst()
-                        .ifPresentOrElse(
-                            m -> softAssert.assertThat(String.format("[%s] %s", strategy, metricKey),
-                                metrics.get(m), validation.getRule().getComparisonRule(validation.getThreshold())),
-                            () -> softAssert.recordFailedAssertion(
-                                String.format("Unknown metric name '%s', available names are: %s", metricKey,
-                                        String.join(", ", metrics.keySet()))));
-            }));
+            processLighthouseResult(result, metricsValidations);
         }
+    }
+
+    private void processLighthouseResult(LighthouseResultV5 result, List<MetricRule> metricsValidations)
+            throws IOException
+    {
+        String resultAsString = jsonFactory.toString(result);
+
+        String formFactor = result.getConfigSettings().getFormFactor();
+        attachmentPublisher.publishAttachment("/org/vividus/lighthouse/lighthouse.ftl",
+                Map.of("result", resultAsString),
+                String.format("Lighthouse %s scan report for page: %s", formFactor, result.getRequestedUrl()));
+
+        Map<String, BigDecimal> metrics = getMetrics(result);
+
+        attachmentPublisher.publishAttachment(jsonFactory.toPrettyString(metrics).getBytes(StandardCharsets.UTF_8),
+                formFactor + "-metrics.json");
+
+        softAssert.runIgnoringTestFailFast(() -> metricsValidations.forEach(validation ->
+        {
+            String metricKey = validation.getMetric();
+            String processedMetricKey = metricKey.replaceAll("\\s*", "");
+
+            metrics.keySet().stream()
+                    .filter(m -> m.equalsIgnoreCase(processedMetricKey))
+                    .findFirst()
+                    .ifPresentOrElse(
+                        m -> softAssert.assertThat(String.format("[%s] %s", formFactor, metricKey),
+                            metrics.get(m), validation.getRule().getComparisonRule(validation.getThreshold())),
+                        () -> softAssert.recordFailedAssertion(
+                            String.format("Unknown metric name '%s', available names are: %s", metricKey,
+                                    String.join(", ", metrics.keySet()))));
+        }));
     }
 
     /**
@@ -225,13 +267,199 @@ public final class LighthouseSteps
                         strategy, categoryKey, scoreDecrease));
             }));
 
-            // Its expected to use .ftl file format for attachments, but for the sake of viewer's build process
-            // simplification in this place we use .html file
-            attachmentPublisher.publishAttachment(
-                    "/allure-customization/webjars/vividus-lighthouse-viewer-adaptation/index.html",
-                    Map.of("baseline", jsonFactory.toString(baseline), "checkpoint", jsonFactory.toString(checkpoint)),
-                    String.format("[%s] Lighthouse reports comparison", strategy));
+            publishDiff(baseline, checkpoint, String.format("[%s] Lighthouse reports comparison", strategy));
         }
+    }
+
+    /**
+     * Generates comparison diff between two Lighthouse JSON results.
+     *
+     * @param baselineJsonResultPath   The resource name or the path of file containing baseline Lighthouse JSON
+     * results.
+     * @param checkpointJsonResultPath The resource name or the path of file containing checkpoint Lighthouse JSON
+     * results.
+     * @throws IOException             if an I/O exception of some sort has occurred
+     */
+    @When("I generate Lighthouse diff from comparison of baseline at path `$baselineJsonResultPath` and checkpoint at "
+            + "path `$checkpointJsonResultPath`")
+    public void generateDiff(String baselineJsonResultPath, String checkpointJsonResultPath) throws IOException
+    {
+        try (InputStream baselineStream = ResourceUtils.loadResourceOrFileAsStream(baselineJsonResultPath);
+                InputStream checkpointStream = ResourceUtils.loadResourceOrFileAsStream(checkpointJsonResultPath))
+        {
+            publishDiff(deserialize(baselineStream), deserialize(checkpointStream), "Lighthouse reports comparison");
+        }
+    }
+
+    /**
+     * Performs local Lighthouse scan of the specified web page and validates performance metrics against expected
+     * thresholds.
+     * <br>
+     * <br>
+     * <b>IMPORTANT</b>: The step can be used only on unix-like operating systems.
+     * <br>
+     * <br>
+     * Pre-requisite software:
+     * <ul>
+     * <li>NodeJS</li>
+     * <li>Google Chrome</li>
+     * </ul>
+     *
+     * @param webPageUrl         The web page URL to perform scan on.
+     * @param options            The Lighthouse CLI options.
+     * @param metricsValidations The metrics validations.
+     * @throws IOException       If an I/O exception of some sort has occurred
+     */
+    @When("I perform local Lighthouse scan of `$webPageUrl` page with options `$options`:$metricsValidations")
+    public void performLocalLighthouseScan(String webPageUrl, String options, List<MetricRule> metricsValidations)
+            throws IOException
+    {
+        performLocalLighthouseScan(webPageUrl, options, metricsValidations, r -> { });
+    }
+
+    /**
+     * Performs local Lighthouse scan of the specified web page and validates performance metrics against expected
+     * thresholds and saves the path to the resulted JSON into a variable.
+     * <br>
+     * <br>
+     * <b>IMPORTANT</b>: The step can be used only on unix-like operating systems.
+     * <br>
+     * <br>
+     * Pre-requisite software:
+     * <ul>
+     * <li>NodeJS</li>
+     * <li>Google Chrome</li>
+     * </ul>
+     *
+     * @param webPageUrl         The web page URL to perform scan on.
+     * @param options            The Lighthouse CLI options.
+     * @param metricsValidations The metrics validations.
+     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     * <i>Available scopes:</i>
+     * <ul>
+     * <li><b>STEP</b> - the variable will be available only within the step,
+     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     * <li><b>STORY</b> - the variable will be available within the whole story,
+     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * </ul>
+     * @param variableName A name under which the path should be saved
+     * @throws IOException       If an I/O exception of some sort has occurred
+     */
+    @When(value = "I perform local Lighthouse scan of `$webPageUrl` page with options `$options` and save result path "
+            + "to $scopes variable `$variableName`:$metricsValidations", priority = 1)
+    public void performLocalLighthouseScanAndSavePath(String webPageUrl, String options, Set<VariableScope> scopes,
+            String variableName, List<MetricRule> metricsValidations) throws IOException
+    {
+        performLocalLighthouseScan(webPageUrl, options, metricsValidations,
+                r -> variableContext.putVariable(scopes, variableName, r.toString()));
+    }
+
+    private void performLocalLighthouseScan(String webPageUrl, String options, List<MetricRule> metricsValidations,
+            Consumer<Path> consumer) throws IOException
+    {
+        LIGHTHOUSE_PROHIBITED_OPTIONS.forEach(o -> isTrue(!options.contains(o), "The %s option is not allowed.", o));
+
+        installLighthouse();
+
+        Instant instant = Instant.now();
+        Path baseDirectory = Paths.get(outputDirectory)
+                .resolve(String.valueOf(instant.getEpochSecond()) + instant.getNano());
+        Files.createDirectories(baseDirectory);
+
+        Path resultPath;
+        LighthouseResultV5 result;
+        if (configuration.isEmpty())
+        {
+            resultPath = baseDirectory.resolve("lighthouse-scan.json");
+            result = performLocalLighthouseScan(resultPath, webPageUrl, options);
+        }
+        else
+        {
+            PerformanceValidationConfiguration performanceConfig = configuration.get();
+            int measurementsNumber = performanceConfig.measurementsNumber;
+            Map<LighthouseResultV5, Path> results = new IdentityHashMap<>(measurementsNumber);
+
+            for (int resultIndex = 1; resultIndex <= measurementsNumber; resultIndex++)
+            {
+                Path resultsFile = baseDirectory.resolve("lighthouse-scan-%s.json".formatted(resultIndex));
+                LighthouseResultV5 scanResult = performLocalLighthouseScan(resultsFile, webPageUrl, options);
+                LOGGER.atInfo().addArgument(resultIndex)
+                        .addArgument(() -> jsonUtils.toPrettyJson(getMetrics(scanResult)))
+                        .log("Metrics for execution #{}:{}");
+                results.put(scanResult, resultsFile);
+            }
+
+            result = calculatePerformancePercentile(results.keySet(), performanceConfig.getPercentile());
+            resultPath = results.get(result);
+        }
+
+        consumer.accept(resultPath);
+
+        processLighthouseResult(result, metricsValidations);
+    }
+
+    private void installLighthouse() throws IOException
+    {
+        if (lighthouseInstalled.get())
+        {
+            return;
+        }
+
+        try
+        {
+            lighthouseInstallLock.lock();
+
+            if (lighthouseInstalled.get())
+            {
+                return;
+            }
+
+            FileProcessResult npmInstallResult = commandExecutor
+                    .executeCommand("npm init -y && npm install lighthouse");
+            isTrue(npmInstallResult.getExitValue() == 0, "Failed to install Lighthouse:%n%s",
+                    npmInstallResult.getStderr());
+            this.lighthouseInstalled.set(true);
+        }
+        finally
+        {
+            lighthouseInstallLock.unlock();
+        }
+    }
+
+    private LighthouseResultV5 performLocalLighthouseScan(Path outputPath, String webPageUrl, String options)
+            throws IOException
+    {
+        Files.createFile(outputPath);
+
+        String command = "./node_modules/lighthouse/cli/index.js %s --output-path=\"%s\" --output=json %s"
+                .formatted(webPageUrl, outputPath, options.trim()).trim();
+        LOGGER.info("Starting Lighthouse scan: {}", command);
+
+        FileProcessResult lighthouseResult = commandExecutor.executeCommand(command);
+        isTrue(lighthouseResult.getExitValue() == 0, "Failed to perform Lighthouse scan:%n%s",
+                lighthouseResult.getStderr());
+
+        try (InputStream stream = Files.newInputStream(outputPath))
+        {
+            return deserialize(stream);
+        }
+    }
+
+    private LighthouseResultV5 deserialize(InputStream stream) throws IOException
+    {
+        return pagespeedInsights.getObjectParser().parseAndClose(stream, StandardCharsets.UTF_8,
+                LighthouseResultV5.class);
+    }
+
+    private void publishDiff(LighthouseResultV5 baseline, LighthouseResultV5 checkpoint, String title)
+            throws IOException
+    {
+        // Its expected to use .ftl file format for attachments, but for the sake of viewer's build process
+        // simplification in this place we use .html file
+        attachmentPublisher.publishAttachment(
+                "/allure-customization/webjars/vividus-lighthouse-viewer-adaptation/index.html",
+                Map.of("baseline", jsonFactory.toString(baseline), "checkpoint", jsonFactory.toString(checkpoint)),
+                title);
     }
 
     private Map<String, Integer> getCategoryScores(LighthouseResultV5 result)
@@ -328,17 +556,18 @@ public final class LighthouseSteps
             }
         }
 
-        return results.stream()
-                      .sorted(Comparator.comparing(this::getPerformanceScore))
-                      .collect(Collectors.collectingAndThen(Collectors.toList(),
-                              r -> percentile(r, unwrapped.getPercentile())));
+        return calculatePerformancePercentile(results, unwrapped.getPercentile());
     }
 
     @SuppressWarnings("MagicNumber")
-    private static LighthouseResultV5 percentile(List<LighthouseResultV5> results, double percentile)
+    private LighthouseResultV5 calculatePerformancePercentile(Collection<LighthouseResultV5> results, double percentile)
     {
-        int index = (int) Math.ceil(percentile / 100 * results.size());
-        return results.get(index - 1);
+        List<LighthouseResultV5> sortedResults = results.stream()
+                .sorted(Comparator.comparing(this::getPerformanceScore))
+                .toList();
+
+        int index = (int) Math.ceil(percentile / 100 * sortedResults.size());
+        return sortedResults.get(index - 1);
     }
 
     private LighthouseCategoryV5 getPerformance(LighthouseResultV5 result)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.openqa.selenium.WebElement;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+@SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
 public abstract class AbstractExpectedConditions<T> implements IExpectedConditions<T>
 {
     protected abstract List<WebElement> findElements(SearchContext searchContext, T searchCriteria);
@@ -49,7 +50,6 @@ public abstract class AbstractExpectedConditions<T> implements IExpectedConditio
         {
             @Override
             @SuppressWarnings("checkstyle:returnnullinsteadofboolean")
-            @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
             public Boolean apply(SearchContext searchContext)
             {
                 try
@@ -228,7 +228,6 @@ public abstract class AbstractExpectedConditions<T> implements IExpectedConditio
         {
             @Override
             @SuppressWarnings("checkstyle:returnnullinsteadofboolean")
-            @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
             public Boolean apply(SearchContext searchContext)
             {
                 try

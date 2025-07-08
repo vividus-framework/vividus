@@ -15,8 +15,9 @@
         <constructor-arg index="0" value="${selenium.grid.username}" />
         <constructor-arg index="1" value="${selenium.grid.password}" />
         <constructor-arg>
-            <bean class="com.saucelabs.ci.sauceconnect.SauceConnectFourManager">
-                <constructor-arg value="false"/>
+            <bean class="com.saucelabs.ci.sauceconnect.SauceConnectManager">
+                <constructor-arg index="0" value="false"/>
+                <constructor-arg index="1" value="VIVIDUS"/>
                 <property name="useLatestSauceConnect" value="${saucelabs.sauce-connect.use-latest-version}"/>
             </bean>
         </constructor-arg>
@@ -24,7 +25,12 @@
 
     <bean id="sauceLabsLinkPublisher" class="org.vividus.saucelabs.SauceLabsTestLinkPublisher" />
 
-    <bean class="org.vividus.saucelabs.SauceLabsTestStatusManager" lazy-init="false"/>
+    <bean class="org.vividus.saucelabs.SauceLabsTestStatusManager" lazy-init="false" />
+
+    <bean class="org.vividus.saucelabs.SessionCreationRetryOnConcurrencyLimitHandler">
+        <constructor-arg index="0" value="${saucelabs.free-device-wait-timeout}" />
+        <constructor-arg index="1" value="PT30S" />
+    </bean>
 
     <bean class="org.vividus.selenium.sauce.SauceLabsCapabilitiesConfigurer">
         <constructor-arg index="0" value="${saucelabs.sauce-connect.use-latest-version}" />

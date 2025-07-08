@@ -14,8 +14,12 @@
     </bean>
 
     <bean id="remoteWebDriverFactory" class="org.vividus.selenium.RemoteWebDriverFactory">
+        <constructor-arg index="0" value="${selenium.grid.http.read-timeout}" />
+        <constructor-arg index="1" value="${selenium.grid.http.connection-timeout}" />
+    </bean>
+
+    <bean class="org.vividus.selenium.SessionCreationRetryOnHttpConnectTimeoutHandler">
         <constructor-arg index="0" value="${selenium.grid.retry-session-creation-on-http-connect-timeout}" />
-        <constructor-arg index="1" value="${selenium.grid.http.read-timeout}" />
     </bean>
 
     <bean id="webDriverProvider" class="org.vividus.selenium.WebDriverProvider"
@@ -54,6 +58,10 @@
 
     <bean class="org.vividus.ui.monitor.PublishingHarOnFailureMonitor">
         <constructor-arg index="0" value="${proxy.publish-har-on-failure}" />
+    </bean>
+
+    <bean class="org.vividus.ui.monitor.PublishingSourceCodeOnFailureMonitor">
+        <constructor-arg index="0" value="${ui.publish-source-on-failure}" />
     </bean>
 
     <bean class="org.vividus.proxy.ThreadedProxy" >
@@ -121,7 +129,7 @@
 
     <bean class="org.vividus.selenium.locator.LocatorConverter">
         <property name="dynamicLocators">
-            <bean factory-bean="propertyMapper" factory-method="readValuesCaseInsensitively">
+            <bean factory-bean="dotNotationNamePropertyMapper" factory-method="readValuesCaseInsensitively">
                 <constructor-arg value="ui.locator." />
                 <constructor-arg value="org.vividus.ui.action.search.LocatorPattern" />
             </bean>
@@ -130,7 +138,7 @@
 
     <bean class="org.vividus.ui.listener.UiContextListener" lazy-init="false" />
 
-    <bean class="org.vividus.selenium.screenshot.ScreenshotFileNameGenerator" />
+    <bean class="org.vividus.selenium.screenshot.SeleniumScreenshotFileNameGenerator" />
 
     <bean id="genericElementSteps" class="org.vividus.steps.ui.GenericElementSteps" />
     <bean id="genericWaitSteps" class="org.vividus.steps.ui.GenericWaitSteps" />
@@ -138,7 +146,7 @@
     <bean id="genericSetContextSteps" class="org.vividus.steps.ui.GenericSetContextSteps" />
     <bean id="genericNestedSteps" class="org.vividus.steps.ui.GenericNestedSteps" />
     <bean id="navigationSteps" class="org.vividus.steps.ui.NavigationSteps" />
-    <bean id="screenshotTakingSteps" class="org.vividus.steps.ui.ScreenshotTakingSteps" />
+    <bean id="screenshotTakingSteps" class="org.vividus.ui.steps.ScreenshotTakingSteps" />
     <bean id="barcodeSteps" class="org.vividus.steps.ui.BarcodeSteps" />
 
     <bean class="org.vividus.ui.action.search.IndexElementFilter" />
@@ -167,7 +175,6 @@
     <bean id="executeScriptSteps" class="org.vividus.steps.ui.ExecuteScriptSteps" />
 
     <bean class="org.vividus.ui.converter.ParametersToAtomicActionConverter" />
-    <bean class="org.vividus.ui.converter.PointConverter" />
 
     <util:list id="stepBeanNames-UI" value-type="java.lang.String">
         <idref bean="executeScriptSteps" />
@@ -216,7 +223,6 @@
     <bean id="context-x-coordinate" class="org.vividus.ui.variable.SearchContextXCoordinateDynamicVariable"/>
     <bean id="context-y-coordinate" class="org.vividus.ui.variable.SearchContextYCoordinateDynamicVariable"/>
     <bean id="source-code" class="org.vividus.ui.variable.SourceCodeDynamicVariable"/>
-    <bean id="context-source-code" class="org.vividus.ui.variable.ContextSourceCodeDynamicVariable"/>
 
     <bean class="org.vividus.report.ui.ImageCompressor" >
         <property name="imageCompressionQuality" value="${ui.report.image-compression-quality}" />

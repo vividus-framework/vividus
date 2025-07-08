@@ -1,5 +1,36 @@
 project.description = 'VIVIDUS utilities'
 
+//Additional SourceSets can be added to the jacocoOfflineSourceSets as needed by
+project.ext.jacocoOfflineSourceSets = [ 'main' ]
+tasks.register('doJacocoOfflineInstrumentation') {
+    dependsOn = [classes, project.configurations.jacocoAnt]
+    inputs.files classes.outputs.files
+    File outputDir = layout.buildDirectory.dir('instrumentedClasses').get().asFile
+    outputs.dir outputDir
+    doFirst {
+        project.delete(outputDir)
+        ant.taskdef(
+            resource: 'org/jacoco/ant/antlib.xml',
+            classpath: project.configurations.jacocoAnt.asPath,
+            uri: 'jacoco'
+        )
+        jacocoOfflineSourceSets.each { sourceSetName ->
+            def instrumentedClassedDir = "${outputDir}/${sourceSetName}"
+            files(sourceSets[sourceSetName].output.classesDirs).each { classesDir ->
+                if (classesDir.exists()) {
+                    ant.'jacoco:instrument'(destdir: instrumentedClassedDir) {
+                        fileset(dir: classesDir, includes: '**/*.class')
+                    }
+                    //Replace the classes dir in the test classpath with the instrumented one
+                    sourceSets.test.runtimeClasspath -= files(classesDir)
+                    sourceSets.test.runtimeClasspath = files(instrumentedClassedDir) + sourceSets.test.runtimeClasspath
+                }
+            }
+        }
+    }
+}
+test.dependsOn doJacocoOfflineInstrumentation
+
 //https://github.com/powermock/powermock/issues/1094
 test {
     jvmArgs = [
@@ -15,27 +46,27 @@ test {
 }
 
 dependencies {
-    api(group: 'org.apache.commons', name: 'commons-pool2', version: '2.12.0')
-    api(group: 'org.freemarker', name: 'freemarker', version: '2.3.32')
-    api platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.17.1')
+    api(group: 'org.freemarker', name: 'freemarker', version: '2.3.34')
+    api platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.19.1')
     api(group: 'com.fasterxml.jackson.core', name: 'jackson-core')
     api(group: 'com.fasterxml.jackson.core', name: 'jackson-databind')
     api(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8')
-    api(group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0')
+    api(group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0')
 
     implementation(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310')
 
-    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: '4.4')
-    implementation(group: 'commons-io', name: 'commons-io', version: '2.16.1')
+    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: '4.5.0')
+    implementation(group: 'commons-io', name: 'commons-io', version: '2.19.0')
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties')
     implementation(group: 'com.github.vividus-framework.JsonPath', name: 'json-path', version: versions.jsonPath)
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.2')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.3')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testRuntimeOnly(group: 'org.junit.vintage', name: 'junit-vintage-engine')
     testCompileOnly(group: 'junit', name: 'junit', version: '4.13.2')
-    testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.12.0')
+    testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '3.0')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'com.github.powermock.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
     testImplementation(group: 'com.github.powermock.powermock', name: 'powermock-module-junit4', version: versions.powermock)

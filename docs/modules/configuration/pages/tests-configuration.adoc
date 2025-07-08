@@ -1,0 +1,906 @@
+= Tests Configuration
+
+== `configuration.properties`
+
+VIVIDUS configuration includes the following parts: xref:tests-configuration.adoc#_suites[suites], xref:configuration:tests-configuration.adoc#_profiles[profiles] and xref:tests-configuration.adoc#_environments[environments].
+
+[WARNING]
+====
+Properties prefixed with `*configuration.*` should be specified in the following locations only:
+
+* The system properties.
+* The `*configuration.properties*` file.
+* The `*overriding.properties*` file.
+====
+
+=== Suites
+
+The property `configuration.suites` defines the suites set. It is a comma separated set of suite file addresses:
+
+.configuration.properties
+[source,properties]
+----
+configuration.suites=testSuite,anotherDir/anotherTestSuite
+----
+VIVIDUS suite consists of the unlimited number of batches. In its turn the batch consists of any number of stories represented by the files with `*.story` extension. The batches are run sequentially, while the stories in the batch are run in parallel.
+
+The suites are loaded one by one starting from the last one in the sequence, in other words, the values of the properties defined in the first suite will take precedence over the values of the same properties defined in all subsequent suites. If any of the suites in the sequence is not found (i.e. no `\*.properties` file is present at the given path), the error will be thrown and the execution will be stopped. However if suites property is empty (`configuration.suites=`) and no suite is configured in the root (i.e no files can be found by `/properties/suite/*.properties` pattern), no error will be thrown and the execution will be continued.
+
+The following properties are used to configure batches (VIVIDUS doesn't provide any default batch configuration out of the box). `batch-number` is one-based batch index.
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="2,1,2", options="header"]
+|===
+|Property
+|Default value
+|Description
+
+|[subs=+quotes]`*batch-<batch-number>.resource-location*`
+|
+|The test project path to the folder with story-files
+
+|`batch-<batch-number>.resource-include-patterns`
+|`\**/*.story`
+|The comma-separated set of https://ant.apache.org/manual/dirtasks.html#patterns[ant-patterns] to match the stories to be included in the batch. Leading and trailing whitespaces in patterns are omitted.
+
+|`batch-<batch-number>.resource-exclude-patterns`
+|`<empty>`
+|The comma-separated set of https://ant.apache.org/manual/dirtasks.html#patterns[ant-patterns] to match the stories to be excluded from the batch. Leading and trailing whitespaces in patterns are omitted.
+
+|`batch-<batch-number>.name`
+|`batch-<batch-number>`
+|The name of the batch to display in the report
+
+|`batch-<batch-number>.threads`
+|`1`
+|The number of parallel threads used to run stories
+
+|`batch-<batch-number>.meta-filters`
+|suite meta-filter
+|The meta-filter used to filter the batch stories and scenarios
+
+|`batch-<batch-number>.fail-fast`
+|`false`
+|If `true` and any failure is occurred during the batch execution, the subsequent batches will not be executed.
+
+|`batch-<batch-number>.story.fail-fast`
+|`<empty>`
+|If set the value overrides global setting `story.fail-fast`.
+
+|`batch-<batch-number>.scenario.fail-fast`
+|`<empty>`
+|If set the value overrides global setting `scenario.fail-fast`.
+
+|`batch-<batch-number>.story.execution-timeout`
+|`PT2H`
+|The max duration of the single story in the batch in {durations-format-link} format. Overrides value specified via `story.execution-timeout`.
+
+|`batch.fail-fast`
+|`false`
+|If set to `true` the subsequent batches execution will be stopped after the first failed batch
+
+|`story.fail-fast`
+|`false`
+|If set to `true` the story execution will be stopped after the first failed scenario
+
+|`scenario.fail-fast`
+|`false`
+|If set to `true` the scenario execution will be stopped after the first failed assertion
+
+|`story.execution-timeout`
+|`PT2H`
+|The max duration of the single story in {durations-format-link} format. Could be overriden via corresponging batch setting.
+
+|`story.example-index-format`
+|`\u0020[0]`
+a|The format defining how to display indices of story-level xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] rows
+ when they are run in parallel.
+
+`\u0020` is a regular space represented as Unicode escape sequence, it is required to use this form, because the spaces
+before and after the equal sign are ignored in properties files.
+
+{java-api-docs-base-url}/docs/api/java.base/java/text/DecimalFormat.html#special_pattern_character[Special format chracters],
+e.g., `0`, `#`, specify the way indices are displayed.
+
+[cols="2,1,2", options="header"]
+!===
+!Pattern
+!Index
+!Result
+
+!`0`
+!`1`
+!`1`
+
+!`0`
+!`10`
+!`10`
+
+!`0`
+!`100`
+!`100`
+
+!`000`
+!`1`
+!`001`
+
+!`000`
+!`10`
+!`010`
+
+!`000`
+!`100`
+!`100`
+!===
+
+|`bdd.configuration.dry-run`
+|`false`
+|Enables dry-run execution mode (no actual steps will be executed, dynamic variables and xref:ROOT:glossary.adoc#_expression[expressions] won't be resolved). For example dry-run could be useful to debug what stroies will be executed with provided config.
+
+|`bdd.configuration.skip-story-if-given-story-failed`
+|`false`
+|Skips the story in case of failure in the given story
+
+|`engine.filtering-by-table-meta-enabled`
+|`false`
+|Enabled filtering of scenario by meta defined in examples table rows
+
+|`bdd.configuration.formats`
+|`JSON,XML`
+|Available formats of the output files with test execution results
+
+|`statistics.print-failures`
+|`false`
+|If set to `true` prints table of failures including: story, scenario, step and error message
+
+|`report.text-length-diff-threshold`
+|`100`
+|Defines text threshold length to enable unified diff report publishing on failure, for variable comparisons. If you want to have this report despite the size of the compared data set 0.
+
+|`engine.composite-paths`
+|<empty>
+|Paths to the composite steps e.g. `steps/*.steps`
+|===
+
+=== Profiles
+
+A profile defines the subject of the test, i.e. it answers the question "What are specifics of the browser/device I want to run tests on?".
+
+These specifics (properties) should be written in the `profile.properties` file. Path to this file is set in `configuration.properties` file:
+
+.configuration.properties
+[source,properties]
+----
+configuration.profiles=web
+----
+
+It's allowed to create multiple profiles. This can be useful for cross-browsing or cross-device testing: there is no need of changing all the properties, just switch the profile. +
+As well as the suites, profiles are loaded one by one starting from the last one in the sequence. This allows to reuse common properties and separate specific ones.
+
+==== Profiles setup
+
+Define the number of profiles you need to set up. In case of multiple profiles, distinguish common and specific properties and put them into `profile.properties` files in appropriate places.
+
+WARNING: Please keep in mind that running multiple profiles (e.g. for Chrome and Firefox simultaneously) is not supported. All the properties would be merged, but not iterated as separate profiles for scenario execution.
+
+Let's create an example. Imagine that our project contains automated scenarios for a couple of platforms: web and mobile. We will need to run autotests on different browsers and different devices. Therefore some of the properties would be common, but many of them should only belong to a certain subject. Let's see profiles structure for this case:
+
+[source,dir,subs=attributes+]
+----
+└─ src/main/resources/properties
+                            └─  profile <1>
+                                    ├─ web <2>
+                                        ├─ chrome <4>
+                                                └─ profile.properties <6>
+                                        ├─ firefox <4>
+                                                └─ profile.properties
+                                        └─ profile.properties <5>
+                                    ├─ mobile_app <2>
+                                            ├─ iOS <7>
+                                                └─ profile.properties
+                                            ├─ android <7>
+                                                └─ profile.properties <9>
+                                            └─ profile.properties <8>
+                                    └─ profile.properties <3>
+
+----
+<1> Profile directory which contains all the profiles properties;
+<2> General type of the profiles, either a browser or a mobile device;
+<3> The highest level of profile properties. Values written in this file will be applied to any browser or device;
+<4> Web browsers' profiles (directories);
+<5> Web-oriented properties. Values from this file will be applied for any web browser, but not for mobiles;
+<6> Chrome-specific profile. Any properties written here will not affect any other browsers or mobile devices;
+<7> Mobile profiles (directories);
+<8> Mobile-oriented properties. Values from this file will be applied for iOS and Android devices only;
+<9> Android-specific profile. Any properties written here will not affect iOS devices or any browser setup;
+
+By default, profile property is pointed to the `/src/main/resources/properties/profile` directory, so use the relative path starting from `profile` when you have nested directories:
+
+.configuration.properties
+[source,properties]
+----
+configuration.profiles=mobile_app/android
+----
+
+==== Built-in profiles
+
+Some of the plugins, like xref:plugins:plugin-web-app.adoc#_profiles[web-app], have built-in profiles. You can find them in project explorer after installation by the following path:
+
+[source,dir]
+----
+Referenced Libraries -> vividus-plugin-name -> properties -> profile
+----
+
+=== Environments
+
+Depending on the stage of the project, you will likely need to run automated scenarios on different environments, such as development, testing, and production servers.
+
+Rather than using specific variables in each profile or suite, always updating them according to the currently selected server, and eventually making mistakes, we instead use the environment configuration.
+
+Environment configuration allows putting environment-related variables (e.g. host, API endpoint) into `environment.properties` file. The path to this file is set in `configuration.properties` file. Create as many property files as a number of environments you have and easily switch between them:
+
+.configuration.properties
+[source,properties]
+----
+configuration.environments=dev
+#configuration.environments=test
+#configuration.environments=prod
+----
+
+Environment variables can also be declared in multiple files. Define common and specific properties for your environments and take the xref:configuration:tests-configuration.adoc#_profiles_setup[same approach] of reusing and separating values.
+
+=== Configuration sets
+
+Configuration set simplifies reusage of pre-defined combinations of profiles/suites/environments. Users are allowed to define multiple configuration sets. Only one configuration set can be used during a test run.
+
+.Configuration sets definition
+[source,properties]
+----
+configuration-set.api-preprod-uat.profiles=
+configuration-set.api-preprod-uat.suites=uat
+configuration-set.api-preprod-uat.environments=preprod
+
+configuration-set.api-test-regression.profiles=
+configuration-set.api-test-regression.suites=regression
+configuration-set.api-test-regression.environments=test
+----
+
+Once configuration sets are defined, one can use an active configuration set for test execution.
+
+.Usage of configuration set
+[source,properties]
+----
+configuration-set.active=api-preprod-uat
+----
+
+[IMPORTANT]
+====
+* Configuration sets can be defined only in `configuration.properties` file.
+* Active configuration set overrides defined `configuration.profiles`, `configuration.suites` and `configuration.environments` properties.
+* Configuration set requires to define `profiles`, `suites` and `environments`, empty value considered as a valid one.
+====
+
+== Known Issues
+
+Known issues mechanism allows to distinguish failures from known issues presented in the system under test.
+
+[IMPORTANT]
+JSON file should contain a valid JSON. If JSON is not valid known issues will be ignored and warning about invalid file will be printed.
+
+=== Properties
+
+[cols="2,1,2", options="header"]
+|===
+|Property
+|Default value
+|Description
+
+|`known-issue-provider.fileName`
+|`known-issues.json`
+|Defines the location of the known issues file
+
+|`known-issue-provider.detect-potentially-known-issues`
+|`true`
+|Defines are potentially known issues detected
+|===
+
+=== Known Issues file
+
+The file represents a collection of JSON elements describing known issues.
+
+.known-issues.json
+[source,json,subs=attributes+]
+----
+ {
+    "VVD-1": { <1>
+        "type": "Internal",<2>
+        "assertionPattern": "Expected: a value equal to 200, Actual: \\[404\\]", <3>
+        "storyPattern": "Validate the Math", <4>
+        "scenarioPattern": "Validate equality", <5>
+        "stepPattern": "Then `1` is = `2`.+", <6>
+        "variablePatterns": { <7>
+            "var":  "value-.*"
+        },
+        "failScenarioFast": true, <8>
+        "failStoryFast": true, <9>
+        "description": "Missing endpoint configuration on server side" <10>
+    }
+}
+----
+<1> [Mandatory] *Identifier* (This could be an ID of the issue in your bug tracking system)
+<2> [Mandatory] *Issue type.* One of: INTERNAL (application issue), EXTERNAL (3rd party issue), AUTOMATION (test automation issue)
+<3> [Mandatory] *Assertion pattern* describes which failed assertions should be considered as known
+<4> Story pattern to match the file name of the failed story. Pay attention, the file name extension (`.story`) should not be included in the pattern, only base file name is matched.
+<5> Scenario pattern to match failed scenario name
+<6> Step pattern to match failed step.
+<7> Variable patterns. Patterns to match variables.
+<8> Skip the rest of scenario in case of failure identified as this known issue
+<9> Skip the rest of story in case of failure identified as this known issue
+<10> Known issue description, it's used to give the meaningful explanation of the issue if it's not tracked in bug tracking system or if the issue is too complicated and to improve overall transparency
+
+[IMPORTANT]
+Use *\\* for escaping of special characters in regular expressions
+
+=== Examples
+
+* To consider failed assertion known or potentially-known *assertionPattern* should match assertion failure, if defined *variablePatterns* should match also.
+* If *assertionPattern*/*variablePatterns* matched and you have *story/scenario/step/Pattern* defined, to consider issue known all of them should match.
+* If *assertionPattern*/*variablePatterns* matched and you have *story/scenario/step/Pattern* defined, when at least one not matched issue is considered potentially known.
+
+== Meta tags
+
+Meta tags can be used to reach several goals:
+
+* Grouping of stories and scenarios in the report.
+* <<#_dynamic_selection>> of tests to execute by meta tags.
+* Management of capabilities for the particular tests.
+
+=== Levels
+Meta tags may be used at both story and scenario level. Meta tags specified at the story level are propagated to every scenario, if the same meta tag is used at the scenario level, then the scenario level value takes precedence.
+
+.Levels of meta tags
+[source,gherkin]
+----
+!-- Story level
+Meta:
+     @group Login
+
+Scenario: Open Epam main page
+!-- Scenario level
+Meta:
+  @priority 1
+  @layout desktop
+Given I am on page with URL `https://www.epam.com/`
+Then page title is equal to `EPAM | Enterprise Software Development, Design & Consulting`
+
+Scenario: Open Google main page
+Meta:
+  @priority 2
+  @layout desktop
+  @skip
+Given I am on page with URL `https://www.google.com/`
+Then page title is equal to `Google`
+----
+
+=== Properties
+
+The property `bdd.meta-filters` is used to filter tests to be executed and
+relies on Groovy syntax.
+
+.Execute stoies and scenarios marked with '@group Login' tag and matching default filters
+[source,properties]
+----
+bdd.meta-filters=group == 'Login'
+----
+
+The prorerty `bdd.all-meta-filters` is used to override values of the default
+meta filters based on the tags: `@skip`, `@layout` etc.
+
+.Execute stoies and scenarios marked with '@group Login' tag and without '@skip' tag
+[source,properties]
+----
+bdd.all-meta-filters=groovy: (group == 'Login' && !skip)
+----
+
+==== Limitations
+
+Since meta filters properties are based on Groovy, meta tags names support
+https://groovy-lang.org/syntax.html#_normal_identifiers[only normal Groovy identifiers]
+by default. If it's required to use arbitrary characters in meta tags names
+(e.g.follow kebab-case notation which actively relies on the hyphen char), then
+https://groovy-lang.org/syntax.html#_quoted_identifiers[quoted identifiers] or
+subscript operator must be used in the properties.
+
+.Execute stoies and scenarios not marked with '@test-stand' tag (quoted identifiers approach)
+[source,properties]
+----
+bdd.all-meta-filters=groovy: !this.'test-stand'
+----
+
+.Execute stoies and scenarios not marked with '@test-stand' tag (subscript operator approach)
+[source,properties]
+----
+bdd.all-meta-filters=groovy: !this['test-stand']
+----
+
+=== Dynamic selection
+
+Dynamic tests selection allows to filter tests based on meta information applied to stories, scenarios or examples table rows.
+
+==== Story level filtering
+
+The following example demonstrates a story that should run only on development application environment,
+to make it possible we annotate the story using custom `@environment` meta tag with `dev` value and configure
+meta filters to select only those stories that annotated with that value.
+
+[source,properties]
+----
+bdd.meta-filters=environment || environment.toString().tokenize(' ').contains('dev')
+----
+
+[source,gherkin]
+----
+Meta: @environment dev
+
+Scenario: My scenario for dev environment
+...
+----
+
+==== Scenario level filtering
+
+The following example demonstrates a scenario that should run only on development application environment,
+to make it possible we annotate the scenario using custom `@environment` meta tag with `dev` value and configure
+meta filters to select only those scenarios that annotated with that value, as a result first scenario will be
+executed, whereas the second one will be skipped as its `@environment` doesn't match `dev`.
+
+[source,properties]
+----
+bdd.meta-filters=environment || environment.toString().tokenize(' ').contains('dev')
+----
+
+[source,gherkin]
+----
+Scenario: My scenario for dev environment
+Meta: @environment dev
+...
+
+Scenario: My scenario for qa environment
+Meta: @environment qa
+...
+----
+
+==== Table row filtering
+
+IMPORTANT: This type of filtering requires table meta filtering to be turned on either by specifyin `{metaByRow=true}` property
+on the table, or by using `engine.filtering-by-table-meta-enabled=true` property.
+
+The following example demonstrates a scenario that has several example table rows each containing data for a specific
+environment, to run the scenario with a particular data row we annotate the row using custom `@environment` meta tag
+with `dev` value and configure meta filters to select only those rows that annotated with that value, as a result the
+scenario will be executed only with the first row, whereas the rest of the rows will be skipped.
+
+[source,properties]
+----
+bdd.meta-filters=environment || environment.toString().tokenize(' ').contains('dev')
+----
+
+[source,gherkin]
+----
+Scenario: My scenario
+...
+Examples:
+|Meta:             |data  |
+|@environment dev  |data 1|
+|@environment qa   |data 2|
+|@environment stage|data 3|
+----
+
+TIP: Table row filtering can be paired up with xref:commons:table-transformers.adoc#_resolving_variables_eagerly[RESOLVING_VARIABLES_EAGERLY transformer]
+to make the filtering process more dynamic by using variables initialized during test run.
+
+=== 1D tags (@key)
+[cols="1,4", options="header"]
+|===
+|Tag
+|Description
+
+|`@skip`
+|Used to exclude particular scenarios from the test execution
+|===
+
+
+=== 2D tags (@key  value)
+[cols="1,1,3,1", options="header"]
+|===
+|Tag Key
+|Allowed values
+|Description
+|Example
+
+|@layout
+|`desktop`, `phone`, `chrome_phone`, `chrome_responsive`, `chrome_tablet`, `tablet`
+|Used to specify layout, using which marked story or scenario should be executed. In case if this meta tag is not specified, default (`desktop`) value is used for web applications.
+|`@layout desktop`
+
+|===
+
+== Story Prioritization
+
+In order to start stories in particular order it is possible to assign the stories a numeric priority, the stories with the higher priority start first.
+
+To enable the feature create a file `spring.xml` in the `src/main/resources` directory and add the following XML data into that file.
+
+.Configuration
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
+       default-lazy-init="false">
+
+    <bean class="org.vividus.priority.MetaBasedStoryExecutionPriority" factory-method="byNumericMetaValue">
+        <constructor-arg index="0" value="story_priority" />
+    </bean>
+</beans>
+----
+
+The `story_priority` value that corresponds to a meta name in stories can be changed to arbitrary value without spaces.
+
+Taking `story_priority` as an example the priority meta should be placed at the story level as the following example shows:
+
+.Prioritized.story
+[source,gherkin]
+----
+Meta: @story_priority 15
+
+Scenario: Time consuming test
+When I perform highly time consuming task
+----
+
+== Exit codes
+
+The tests execution returns one of the following exit codes.
+
+[cols="1,9,1", options="header"]
+|===
+|Code
+|Description
+|Status
+
+|0
+|Test report is generated, contains only passed tests.
+|`GREEN`
+
+|1
+|Test report is generated, contains only passed and tests with known issues.
+|`AMBER`
+
+|2
+|Test report is generated, contains any tests except passed and with known issues or doesn't contain tests at all.
+|`RED`
+
+|3
+a|Test report isn't generated.
+
+*Common errors:*
+
+* "InvalidConfigurationException: No batches with tests to execute are configured" -
+the <<_suites,configured suite>> has 0 batches, i.e. no tests to execute are configured.
+
+|`RED`
+
+|===
+
+== HTTP Configuration
+
+Here one could find description of general HTTP properties applied across all the HTTP interactions in VIVIDUS.
+
+:keystore-ref: {java-api-docs-base-url}/security/terms-and-definitions.html#GUID-C7BB21C7-E19E-4DE4-8494-CB43F957C329__GUID-D7CAC72A-2714-4C9B-88E2-7F317DE94CEE[keystore]
+
+[cols="3,2,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+4+^.^|[#_general]_General_
+
+|`http.circular-redirects-allowed`
+|`boolean`
+|`false`
+|Allow circular redirects (redirects to the same location)
+
+|`http.connection-request-timeout`
+|`integer`
+|`30000`
+|The timeout in milliseconds used when requesting a connection from the client connections pool. A timeout value of zero is interpreted as an infinite timeout. A negative value is interpreted as undefined (system default if applicable)
+
+|`http.connect-timeout`
+|`integer`
+|`30000`
+|The timeout in milliseconds until a connection is established. A timeout value of zero is interpreted as an infinite timeout. A negative value is interpreted as undefined (system default if applicable)
+
+|`http.max-total-connections`
+|`integer`
+|`80`
+|The number of maximum total connections for the client connections pool
+
+|`http.max-connections-per-route`
+|`integer`
+|`60`
+|The number of maximum connections per route for the client connections pool
+
+|`http.socket-timeout`
+|`integer`
+|`300000`
+|The timeout in milliseconds used for waiting for data or, put differently, a maximum period inactivity between two consecutive data packets. A timeout value of zero is interpreted as an infinite timeout. A negative value is interpreted as undefined (system default if applicable)
+
+|`http.cookie-spec`
+a|
+* `relaxed` - The https://datatracker.ietf.org/doc/rfc6265/[RFC 6265] compliant policy (interoperability profile).
+* `strict` - The https://datatracker.ietf.org/doc/rfc6265/[RFC 6265] compliant policy (strict profile).
+* `ignore` - The policy that ignores cookies.
+|`relaxed`
+|The name of the cookie specification to be used for HTTP state management
+
+4+^.^a|[#_authentication]_Authentication_ +
+[NOTE]
+====
+https://en.wikipedia.org/wiki/Integrated_Windows_Authentication[Integrated Windows authentication] is enabled
+automatically whenever tests are run on Windows.
+====
+
+[NOTE]
+====
+The `<group id>` is a placeholder used to group up authentication configs which means that authentication properties related to the same
+origin should have the same `<group id>` value, please see the following example demonstrating configs for `https://securedomain.com` site:
+
+[source,properties]
+----
+http.context.myapp.origin=https://securedomain.com
+http.context.myapp.auth.username=whoisthis
+http.context.myapp.auth.password=3db8a57ba925a522c8bf
+http.context.myapp.auth.preemptive-auth-enabled=false
+----
+====
+
+|`http.context.<group id>.origin`
+|character sequence
+|`*`
+a|The URL identifying the origin to which HTTP requests the configuration will apply e.g. `https://securedomain.com`.
+All the URL components besides `scheme`, `domain` and `port` contained in the URL are ignored.
+
+To apply basic authentication credentials or headers to all domains use `*` (asterisk) symbol as an origin value. Please note that more
+specific origin values take presendence over `*` value.
+
+|`http.context.<group id>.headers`
+|character sequence
+|`<empty>`
+a|Collection of HTTP headers
+
+IMPORTANT: Presence of this property requires `http.context.<group id>.origin` property to be set as well
+
+[source,properties]
+----
+http.context.myapp.origin=https://example.com
+http.context.myapp.headers.User-Agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+http.context.myapp.headers.Accept-Charset=utf-8
+----
+
+|`http.context.<group id>.auth.username`
+|character sequence
+|`<empty>`
+a|The username
+
+IMPORTANT: Presence of this property requires `http.context.<group id>.origin` and `http.context.<group id>.auth.password` properties to be set as well
+
+|`http.context.<group id>.auth.password`
+|character sequence
+|`<empty>`
+a|The password
+
+IMPORTANT: Presence of this property requires `http.context.<group id>.username` and `http.context.<group id>.auth.origin` properties to be set as well
+
+|`http.context.<group id>.auth.preemptive-auth-enabled`
+|`boolean`
+|`false`
+|If enabled the HTTP client will send the basic authentication data even before the service gives an unauthorized response (401), useful when the service doesn't support unauthorized response (401) or to reduce the overhead of making the connection
+
+4+^.^|[#_ssl_handshake]_SSL handshake_
+
+|`http.ssl.check-certificate`
+|`boolean`
+|`true`
+|Verify https://datatracker.ietf.org/doc/html/rfc8446#section-4.4.2[certificates] sent by the server during SSL handshake, the most common errors occured during verfication are Expired SSL Certificate Error, SSL Certificate Not Trusted Error, SSL Certificate Revoked Error etc.
+
+|`http.ssl.verify-hostname`
+|`boolean`
+|`true`
+|Verify if the domain name in the SSL certificate matches the domain name in URL where the request is sent to
+
+4+^.^|_Two-Way SSL authentication_
+
+|`http.key-store.type`
+|{java-api-docs-base-url}/docs/specs/security/standard-names.html#keystore-types[Keystore type]
+|`JKS`
+|The {keystore-ref} type
+
+|`http.key-store.path`
+|xref:ROOT:glossary.adoc#_resource[Resource]
+|`<empty>`
+|The {keystore-ref} to load
+
+|`http.key-store.password`
+|`string`
+|`<empty>`
+|The password used to unlock the {keystore-ref} and for the integrity checking
+
+|`http.ssl.private-key-password`
+|`string`
+|`<empty>`
+|The password for the private key
+
+4+^.^|_DNS resolver_
+
+|`http.local-dns-storage.`
+|`key-value mapping`
+|`<empty>`
+|The property prefix used to override the OS DNS lookup by specifying hostname to IP address mappings e.g. `http.local-dns-storage.coursera.org=52.84.197.20`
+
+4+^.^|_Service unavailability retry handler_
+
+|`http.service-unavailable-retry.max-retries`
+|`integer`
+|`1`
+|The maximum number of allowed retries if the server responds with a HTTP code specified in `http.service-unavailable-retry.status-codes` property
+
+|`http.service-unavailable-retry.status-codes`
+|set of integers
+|`<empty>`
+|The set of HTTP status codes to be retried. If it's empty, no retries will be performed
+
+|`http.service-unavailable-retry.retry-interval`
+|{durations-format-link} format
+|`PT1S`
+|The retry interval between subsequent requests
+
+4+^.^|_Idempotent retry handler_
+
+|`http.idempotent-methods-sending-request-body`
+|set of integers
+|`<empty>`
+|The list of HTTP methods containing request body which should be treated as idempotent for retries
+
+|===
+
+== Externalized Configuration
+
+Most common use cases for externalized configuration are tests parametrization with properties passed from CI/CD pipeline,
+passing of secrets into test run etc. The available approaches are listed below.
+
+. Declare an https://en.wikipedia.org/wiki/Environment_variable[environment variable] containing the desired property value and
+then point the property to the declared environment variable:
++
+[source,shell]
+----
+export EXTERNAL_CONFIG_VALUE=value
+----
++
+[source,properties]
+----
+variables.some-key=${EXTERNAL_CONFIG_VALUE}
+----
++
+
+. Pass the property with its value into a test run using command line arguments prepending it with the `-Pvividus.` prefix.
+The prefix only plays role during test start-up phase and cut off during the actual test run:
++
+[source,shell]
+----
+./gradlew runStories -Pvividus.variables.some-key-1=value1 -Pvividus.variables.some-key-2=value2
+----
++
+This approach can be used only when tests are run via Gradle.
+
+. Generate the `overriding.properties` file on-the-fly and put it into corresponding folder in a test project.
++
+The following script assumes that we are in the root of the test project folder.
++
+[source,shell]
+----
+cat > src/main/resources/overriding.properties << EOD
+variables.some-key-1=value1
+variables.some-key-2=value2
+EOD
+----
++
+This approach can be used only when tests are run via Gradle.
+
+== Composite steps
+
+https://jbehave.org/reference/stable/composite-steps.html[Composite steps] allow to reuse set of actions via custom steps with own wordings.
+
+=== How to use composite steps
+
+. Define composite step in `*.steps` file, e.g. `steps/ui/my-app.steps`:
++
+.Composite step definition
+[source,gherkin]
+----
+Composite: When I login with username `$username` and password `$password`
+When I enter `<username>` in field located by `id(username)`
+When I enter `<password>` in field located by `id(password)`
+When I click on element located by `id(signInButton)`
+----
+
+. Configure paths to files with custom steps:
++
+.Composite steps paths configuration
+[source,gherkin]
+----
+engine.composite-paths=steps/ui/*.steps
+----
+
+. Use your step in the story:
++
+.Composite step usage example
+[source,gherkin]
+----
+Scenario: Verify login
+Given I am on main application page
+When I login with username `admin` and password `pa$$w0rd`
+----
+
+TIP: Users are allowed to use composite steps in composite step definition.
+
+== Steps aliases
+
+VIVIDUS allows to define set of aliases for steps in JSON format and then use them in stories.
+
+=== How to use steps aliases
+
+. Select a step you want to create alias for, as an example let's take the following step:
++
+.VIVIDUS step
+[source,gherkin]
+----
+When I hover mouse over element located `$locator`
+----
+
+. Create a new JSON file (for example, `aliases/aliases.json`) and put the following content with one or more aliases:
++
+.aliases/aliases.json
+[source,json]
+----
+[
+    {
+        "name": "When I hover mouse over element located `$locator`",
+        "aliases":
+        [
+            {
+                "name": "When I place mouse pointer over web element located by `$locator`"
+            },
+            {
+                "name": "When I hover mouse pointer over web element located `$locator`"
+            }
+        ]
+    }
+]
+----
+
+. Point the alias configuration property to an exact location or location pattern with the JSON files containing aliases:
++
+[source,properties]
+----
+engine.alias-paths=aliases/aliases.json
+----
+
+. Use the defined alias in place of actual step in your story
++
+[source,gherkin]
+----
+When I place mouse pointer over web element located by `id(loginButton)`
+----

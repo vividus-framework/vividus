@@ -1,0 +1,76 @@
+{
+  "simpleCodes": [
+    {
+      "code": "1",
+      "codeSystem": "VIVIDUS"
+    }
+  ],
+  "superCodes": [
+    {
+      "type": "A",
+      "codes": [
+        {
+          "code": "107214",
+          "codeSystem": "VIVIDUS"
+        }
+      ]
+    },
+    {
+      "type": "B",
+      "codes": [
+        {
+          "code": "107224",
+          "codeSystem": "VIVIDUS"
+        }
+      ]
+    },
+    {
+      "type": "C",
+      "codes": [
+        {
+          "code": "107314",
+          "codeSystem": "VIVIDUS"
+        }
+      ]
+    },
+    {
+      "type": "D",
+      "codes": [
+        {
+          "code": "107324",
+          "codeSystem": "VIVIDUS"
+        }
+      ]
+    },
+    {
+      "type": "E",
+      "codes": [
+        {
+          "code": "107XX4",
+          "codeSystem": "VIVIDUS"
+        }
+      ]
+    },
+    {
+      "type": "F",
+      "codes": [
+        {
+          "code": 1,
+          "codeSystem": true
+        }
+      ]
+    }
+  ],
+  "someCodes": [
+    {
+      "code": "6666",
+      "codeSystem": "NYSE"
+    }
+  ],
+  "anotherCodes": [
+    {
+      "code": "7777",
+      "codeSystem": "VIVIDUS"
+    }
+  ]
+}

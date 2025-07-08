@@ -2,7 +2,7 @@ project.description = 'VIVIDUS to Azure DevOps exporter'
 
 buildscript {
     ext {
-        springBootVersion = '3.2.5'
+        springBootVersion = '3.5.3'
     }
 
     repositories {
@@ -13,6 +13,11 @@ buildscript {
     }
 }
 apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+tasks {
+    javadocJar.enabled = false
+    sourcesJar.enabled = false
+}
 
 dependencies {
     // https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/257
@@ -27,13 +32,14 @@ dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-exporter-commons')
 
-    implementation platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.17.1')
+    implementation platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.19.1')
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml')
 
     testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test')
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.2')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.3')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.12.0')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
 }

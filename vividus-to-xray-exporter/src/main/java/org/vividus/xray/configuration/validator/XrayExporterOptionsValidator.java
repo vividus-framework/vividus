@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.vividus.xray.configuration.XrayExporterOptions;
 @Component(EnableConfigurationProperties.VALIDATOR_BEAN_NAME)
 public class XrayExporterOptionsValidator implements Validator
 {
-    private static final String TEST_EXECUTION_ATTACHMENTS_FIELD = "test-execution-attachments";
+    private static final String TEST_EXECUTION_ATTACHMENTS_FIELD = "test-execution.attachments";
 
     @Override
     public boolean supports(Class<?> clazz)
@@ -44,7 +44,7 @@ public class XrayExporterOptionsValidator implements Validator
     public void validate(Object target, Errors errors)
     {
         XrayExporterOptions options = (XrayExporterOptions) target;
-        List<Path> attachments = options.getTestExecutionAttachments();
+        List<Path> attachments = options.getTestExecutionOptions().getAttachments();
 
         attachments.forEach(attachment ->
         {

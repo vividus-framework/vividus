@@ -25,6 +25,8 @@
 
     <bean id="jsonSchemaValidationSteps" class="org.vividus.json.steps.JsonSchemaValidationSteps"/>
 
+    <bean class="org.vividus.json.expression.JsonExpressionProcessor"/>
+
     <util:list id="stepBeanNames-Json">
         <idref bean="jsonSteps" />
         <idref bean="jsonPatchSteps" />

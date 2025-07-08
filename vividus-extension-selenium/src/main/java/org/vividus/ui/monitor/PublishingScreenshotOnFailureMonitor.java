@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,21 @@ package org.vividus.ui.monitor;
 
 import java.util.Optional;
 
-import com.google.common.eventbus.EventBus;
-
 import org.vividus.context.RunContext;
 import org.vividus.report.ui.ImageCompressor;
+import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.screenshot.Screenshot;
-import org.vividus.selenium.screenshot.ScreenshotTaker;
+import org.vividus.ui.screenshot.Screenshot;
+import org.vividus.ui.screenshot.ScreenshotTaker;
 
 public class PublishingScreenshotOnFailureMonitor extends AbstractPublishingScreenshotOnFailureMonitor
 {
     private final ScreenshotTaker screenshotTaker;
 
-    public PublishingScreenshotOnFailureMonitor(EventBus eventBus, RunContext runContext,
-            IWebDriverProvider webDriverProvider, ScreenshotTaker screenshotTaker, ImageCompressor imageCompressor)
+    public PublishingScreenshotOnFailureMonitor(RunContext runContext, IWebDriverProvider webDriverProvider,
+            IAttachmentPublisher attachmentPublisher, ScreenshotTaker screenshotTaker, ImageCompressor imageCompressor)
     {
-        super(eventBus, runContext, webDriverProvider, imageCompressor);
+        super(runContext, webDriverProvider, attachmentPublisher, imageCompressor);
         this.screenshotTaker = screenshotTaker;
     }
 

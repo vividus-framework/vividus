@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@ import static java.util.Map.entry;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,15 +38,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.AfterStory;
 import org.jbehave.core.annotations.When;
+import org.jbehave.core.model.ExamplesTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
@@ -62,11 +69,11 @@ import org.vividus.util.property.IPropertyParser;
 import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.variable.VariableScope;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 public class KafkaSteps
 {
     private static final String DOT = ".";
+    private static final String NAME = "name";
+    private static final String VALUE = "value";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSteps.class);
 
@@ -74,6 +81,7 @@ public class KafkaSteps
 
     private static final Class<?> LISTENER_KEY = GenericMessageListenerContainer.class;
     private static final Class<?> EVENTS_KEY = ConsumerRecord.class;
+    private static final Class<?> HEADERS_KEY = Header.class;
 
     private final Map<String, KafkaTemplate<String, String>> kafkaTemplates;
     private final Map<String, DefaultKafkaConsumerFactory<Object, Object>> consumerFactories;
@@ -115,6 +123,25 @@ public class KafkaSteps
     }
 
     /**
+     * Set Kafka event headers
+     * @param headers ExamplesTable representing list of headers with columns "name" and "value" specifying kafka header
+     * names and values respectively
+     */
+    @When("I set Kafka event headers:$headers")
+    public void setEventHeaders(ExamplesTable headers)
+    {
+        List<Header> kafkaHeaders = headers.getRowsAsParameters(true).stream()
+                .map(row ->
+                {
+                    String name = row.valueAs(NAME, String.class);
+                    String value = row.valueAs(VALUE, String.class);
+                    return new RecordHeader(name, value.getBytes(StandardCharsets.UTF_8));
+                })
+                .collect(toList());
+        testContext.put(HEADERS_KEY, kafkaHeaders);
+    }
+
+    /**
      * Send the event with the specified value to the provided topic with no key or partition.
      * @param value                 The event value
      * @param producerKey           The key of the producer configuration
@@ -123,7 +150,6 @@ public class KafkaSteps
      * @throws ExecutionException   If the computation threw an exception
      * @throws TimeoutException     If the wait timed out
      */
-    @SuppressFBWarnings("NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS")
     @When("I send event with value `$value` to `$producerKey` Kafka topic `$topic`")
     public void sendEvent(String value, String producerKey, String topic)
             throws InterruptedException, ExecutionException, TimeoutException
@@ -150,7 +176,9 @@ public class KafkaSteps
     public void sendEventWithKey(String key, String value, String producerKey, String topic)
             throws InterruptedException, ExecutionException, TimeoutException
     {
-        kafkaTemplates.get(producerKey).send(topic, key, value).get(WAIT_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES);
+        ProducerRecord<String, String> record = new ProducerRecord<>(topic, null, key, value,
+                testContext.remove(HEADERS_KEY));
+        kafkaTemplates.get(producerKey).send(record).get(WAIT_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES);
     }
 
     /**
@@ -250,10 +278,13 @@ public class KafkaSteps
             String variableName)
     {
         List<ConsumerRecord<String, String>> events = queueOperation.performOn(getEventsBy(consumerKey));
-        LOGGER.atInfo().addArgument(() -> events.stream().map(ConsumerRecord::key)
-                                                         .map(key -> key == null ? "<no key>" : key)
-                                                         .collect(Collectors.joining(", ")))
-                       .log("Saving events with the keys: {}");
+        LOGGER.atInfo().addArgument(() -> events.stream().map(e -> {
+            String key = e.key() == null ? "<no key>" : e.key();
+            String headerNames = StreamSupport.stream(e.headers().spliterator(), false)
+                    .map(Header::key)
+                    .collect(Collectors.joining(", "));
+            return headerNames.isEmpty() ? key : "{" + key + "; " + headerNames + "}";
+        }).toList()).log("Saving events with the keys and headers: {}");
         List<String> eventValues = events.stream().map(ConsumerRecord::value).toList();
         variableContext.putVariable(scopes, variableName, eventValues);
     }

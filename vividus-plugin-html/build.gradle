@@ -1,14 +1,18 @@
 project.description = 'VIVIDUS plugin for HTML testing'
 
 dependencies {
-    api(group: 'com.github.vividus-framework', name: 'jsoup', version: '38b4d372d4')
+    api(group: 'com.github.vividus-framework', name: 'jsoup', version: '01fc3eba46')
 
     implementation project(':vividus-engine')
     implementation project(':vividus-soft-assert')
+    implementation project(':vividus-util')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
+    implementation(group: 'org.slf4j', name: 'slf4j-api')
 
     testImplementation project(':vividus-util')
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.2')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.3')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.12.0')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
 }

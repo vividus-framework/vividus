@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
@@ -36,20 +35,19 @@ import org.vividus.selenium.manager.IWebDriverManager;
 class BrowserWindowSizeListenerTests
 {
     @Mock private IWebDriverManager webDriverManager;
-    @InjectMocks private BrowserWindowSizeListener browserWindowSizeListener;
 
     @Test
     void shouldMaximize()
     {
         when(webDriverManager.isElectronApp()).thenReturn(false);
         when(webDriverManager.isMobile()).thenReturn(false);
-        var webDriver = mock(WebDriver.class);
-        var mockedOptions = mock(Options.class);
+        WebDriver webDriver = mock();
+        Options mockedOptions = mock();
         when(webDriver.manage()).thenReturn(mockedOptions);
-        var mockedWindow = mock(Window.class);
+        Window mockedWindow = mock();
         when(mockedOptions.window()).thenReturn(mockedWindow);
         var event = new WebDriverCreateEvent(webDriver);
-        browserWindowSizeListener.onWebDriverCreate(event);
+        new BrowserWindowSizeListener(true, webDriverManager).onWebDriverCreate(event);
         verify(mockedWindow).maximize();
     }
 
@@ -57,8 +55,8 @@ class BrowserWindowSizeListenerTests
     void shouldDoNothingForElectronApps()
     {
         when(webDriverManager.isElectronApp()).thenReturn(true);
-        var event = mock(WebDriverCreateEvent.class);
-        browserWindowSizeListener.onWebDriverCreate(event);
+        WebDriverCreateEvent event = mock();
+        new BrowserWindowSizeListener(true, webDriverManager).onWebDriverCreate(event);
         verifyNoInteractions(event);
     }
 
@@ -67,8 +65,16 @@ class BrowserWindowSizeListenerTests
     {
         when(webDriverManager.isElectronApp()).thenReturn(false);
         when(webDriverManager.isMobile()).thenReturn(true);
-        var event = mock(WebDriverCreateEvent.class);
-        browserWindowSizeListener.onWebDriverCreate(event);
+        WebDriverCreateEvent event = mock();
+        new BrowserWindowSizeListener(true, webDriverManager).onWebDriverCreate(event);
         verifyNoInteractions(event);
+    }
+
+    @Test
+    void shouldDoNothingWhenMaximizeWindowOnStartOptionIsDisabled()
+    {
+        WebDriverCreateEvent event = mock();
+        new BrowserWindowSizeListener(false, webDriverManager).onWebDriverCreate(event);
+        verifyNoInteractions(webDriverManager, event);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.vividus.selenium;
 
+import static org.openqa.selenium.chromium.ChromiumDriver.IS_CHROMIUM_BROWSER;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +27,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.HasAuthentication;
+import org.openqa.selenium.UsernameAndPassword;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
@@ -32,10 +36,15 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.events.EventFiringDecorator;
 import org.openqa.selenium.support.events.WebDriverListener;
 import org.vividus.proxy.IProxy;
+import org.vividus.selenium.authentication.BasicAuthCredentials;
+import org.vividus.selenium.driver.DelegatingWebDriver;
 import org.vividus.selenium.manager.WebDriverManager;
 import org.vividus.ui.web.listener.WebDriverListenerFactory;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
+import org.vividus.util.property.PropertyMappedCollection;
+
+import io.appium.java_client.AppiumDriver;
 
 public class WebDriverFactory extends GenericWebDriverFactory
 {
@@ -44,24 +53,29 @@ public class WebDriverFactory extends GenericWebDriverFactory
     private final IProxy proxy;
     private final WebDriverStartContext webDriverStartContext;
     private final TimeoutConfigurer timeoutConfigurer;
+    private final PropertyMappedCollection<BasicAuthCredentials> basicAuthCredentials;
     private WebDriverType webDriverType;
     private final List<WebDriverListenerFactory> webDriverListenerFactories;
     private final boolean remoteExecution;
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
 
+    @SuppressWarnings({"paramNum", "PMD.ExcessiveParameterList"})
     public WebDriverFactory(boolean remoteExecution, IRemoteWebDriverFactory remoteWebDriverFactory,
             IPropertyParser propertyParser, JsonUtils jsonUtils, IProxy proxy,
             WebDriverStartContext webDriverStartContext,
             Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters,
-            TimeoutConfigurer timeoutConfigurer,
+            Optional<SeleniumConfigurationValidator> seleniumConfigurationValidator,
+            TimeoutConfigurer timeoutConfigurer, PropertyMappedCollection<BasicAuthCredentials> basicAuthCredentials,
             List<WebDriverListenerFactory> webDriverListenerFactories)
     {
-        super(remoteWebDriverFactory, propertyParser, jsonUtils, desiredCapabilitiesAdjusters);
+        super(remoteWebDriverFactory, propertyParser, jsonUtils, desiredCapabilitiesAdjusters,
+                seleniumConfigurationValidator);
         this.remoteExecution = remoteExecution;
         this.proxy = proxy;
         this.webDriverStartContext = webDriverStartContext;
         this.timeoutConfigurer = timeoutConfigurer;
+        this.basicAuthCredentials = basicAuthCredentials;
         this.webDriverListenerFactories = webDriverListenerFactories;
     }
 
@@ -71,6 +85,16 @@ public class WebDriverFactory extends GenericWebDriverFactory
         WebDriver webDriver = remoteExecution ? super.createWebDriver(desiredCapabilities) : createLocalWebDriver(
                 desiredCapabilities);
         timeoutConfigurer.configure(webDriver.manage().timeouts());
+
+        DelegatingWebDriver driver = (DelegatingWebDriver) webDriver;
+        if (!(driver.getWrappedDriver() instanceof AppiumDriver)
+                && IS_CHROMIUM_BROWSER.test(driver.getCapabilities().getBrowserName()))
+        {
+            basicAuthCredentials.getData().values()
+                    .forEach(c -> WebDriverUtils.unwrap(webDriver, HasAuthentication.class).register(
+                            uri -> c.getUrlRegex().matcher(uri.toString()).matches(),
+                            UsernameAndPassword.of(c.getUsername(), c.getPassword())));
+        }
 
         WebDriverListener[] webDriverListeners = webDriverListenerFactories.stream()
                 .map(factory -> factory.createListener(webDriver))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.vividus.proxy.steps;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -26,15 +25,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.browserup.bup.util.HttpMessageInfo;
-import com.browserup.harreader.model.HarEntry;
-import com.browserup.harreader.model.HttpMethod;
+import com.browserup.harreader.filter.HarLogFilter;
 
-import org.apache.hc.core5.http.HttpStatus;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
 import org.vividus.proxy.IProxy;
+import org.vividus.proxy.ProxyMock;
 import org.vividus.proxy.model.HttpMessagePart;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
@@ -45,6 +43,8 @@ import org.vividus.ui.monitor.CaptureHarOnFailure;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.variable.VariableScope;
 
+import de.sstoehr.harreader.model.HarEntry;
+import de.sstoehr.harreader.model.HttpMethod;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
@@ -53,24 +53,30 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
-import jakarta.inject.Inject;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 @TakeScreenshotOnFailure(onlyInDebugMode = "proxy")
 @CaptureHarOnFailure
 public class ProxySteps
 {
-    @Inject private IProxy proxy;
-    @Inject private ISoftAssert softAssert;
-    @Inject private VariableContext variableContext;
-    @Inject private IWaitActions waitActions;
+    private final IProxy proxy;
+    private final IWaitActions waitActions;
+    private final VariableContext variableContext;
+    private final ISoftAssert softAssert;
+
+    public ProxySteps(IProxy proxy, IWaitActions waitActions, VariableContext variableContext, ISoftAssert softAssert)
+    {
+        this.proxy = proxy;
+        this.waitActions = waitActions;
+        this.variableContext = variableContext;
+        this.softAssert = softAssert;
+    }
 
     /**
-     * Clears the proxy log
+     * Clears the network recordings
      */
-    @When("I clear proxy log")
-    public void clearProxyLog()
+    @When("I clear network recordings")
+    public void clearNetworkRecordings()
     {
         proxy.clearRecordedData();
     }
@@ -165,8 +171,8 @@ public class ProxySteps
      * @param httpMethods The "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
      * @param urlPattern  The regular expression to match HTTP request URL
      */
-    @When("I wait until HTTP $httpMethods request with URL pattern `$urlPattern` exists in proxy log")
-    public void waitRequestInProxyLog(Set<HttpMethod> httpMethods, Pattern urlPattern)
+    @When("I wait until HTTP $httpMethods request with URL pattern `$urlPattern` is captured")
+    public void waitRequestIsCaptured(Set<HttpMethod> httpMethods, Pattern urlPattern)
     {
         waitActions.wait(urlPattern, new Function<>()
         {
@@ -196,7 +202,7 @@ public class ProxySteps
     public void addHeadersToProxyRequest(StringComparisonRule comparisonRule, String url, DefaultHttpHeaders headers)
     {
         Matcher<String> expected = comparisonRule.createMatcher(url);
-        applyUrlFilter(List.of(m -> expected.matches(m.getUrl())), request -> {
+        addProxyMock(List.of(m -> expected.matches(m.getUrl())), request -> {
             request.headers().add(headers);
             return null;
         });
@@ -218,7 +224,7 @@ public class ProxySteps
     public void mockHttpRequests(StringComparisonRule comparisonRule, String url, int responseCode, DataWrapper content,
             DefaultHttpHeaders headers)
     {
-        mockHttpRequests(Optional.empty(), comparisonRule, url, responseCode, content, headers);
+        mockHttpRequests(Set.of(), comparisonRule, url, responseCode, content, headers);
     }
 
     /**
@@ -237,11 +243,11 @@ public class ProxySteps
             DefaultHttpHeaders headers)
     {
         Matcher<String> expected = comparisonRule.createMatcher(url);
-        applyUrlFilter(List.of(m -> expected.matches(m.getUrl())), request -> {
-            DefaultHttpResponse mockedRequest =
+        addProxyMock(List.of(m -> expected.matches(m.getUrl())), request -> {
+            DefaultHttpResponse mockedResponse =
                 new DefaultHttpResponse(request.protocolVersion(), HttpResponseStatus.valueOf(responseCode));
-            mockedRequest.headers().add(headers);
-            return mockedRequest;
+            mockedResponse.headers().add(headers);
+            return mockedResponse;
         });
     }
 
@@ -262,32 +268,23 @@ public class ProxySteps
     public void mockHttpRequests(Set<HttpMethod> httpMethods, StringComparisonRule comparisonRule, String url,
             int responseCode, DataWrapper content, DefaultHttpHeaders headers)
     {
-        mockHttpRequests(Optional.of(httpMethods), comparisonRule, url, responseCode, content, headers);
-    }
-
-    private void mockHttpRequests(Optional<Set<HttpMethod>> httpMethods, StringComparisonRule comparisonRule,
-            String url, int responseCode, DataWrapper content, DefaultHttpHeaders headers)
-    {
         List<Predicate<HttpMessageInfo>> filters = new ArrayList<>();
         Matcher<String> expected = comparisonRule.createMatcher(url);
         filters.add(m -> expected.matches(m.getUrl()));
         if (!httpMethods.isEmpty())
         {
-            filters.add(m -> httpMethods.get().stream()
+            filters.add(m -> httpMethods.stream()
                     .anyMatch(e -> m.getOriginalRequest().method().toString().equals(e.toString())));
         }
         byte[] contentBytes = content.getBytes();
-        applyUrlFilter(filters, request -> {
-            HttpResponseStatus responseStatus = HttpResponseStatus.valueOf(responseCode);
-            HttpVersion protocolVersion = request.protocolVersion();
+        addProxyMock(filters, request -> {
+            DefaultFullHttpResponse mockedResponse = new DefaultFullHttpResponse(request.protocolVersion(),
+                    HttpResponseStatus.valueOf(responseCode), Unpooled.wrappedBuffer(contentBytes));
 
-            DefaultFullHttpResponse mockedRequest =
-                new DefaultFullHttpResponse(protocolVersion, responseStatus, Unpooled.wrappedBuffer(contentBytes));
-
-            HttpHeaders httpHeaders = mockedRequest.headers();
+            HttpHeaders httpHeaders = mockedResponse.headers();
             httpHeaders.add("Content-Length", contentBytes.length);
             httpHeaders.add(headers);
-            return mockedRequest;
+            return mockedResponse;
         });
     }
 
@@ -297,29 +294,20 @@ public class ProxySteps
     @When("I clear proxy mocks")
     public void resetMocks()
     {
-        proxy.clearRequestFilters();
+        proxy.clearMocks();
     }
 
-    private void applyUrlFilter(List<Predicate<HttpMessageInfo>> messageFilters,
+    private void addProxyMock(List<Predicate<HttpMessageInfo>> messageFilters,
             Function<HttpRequest, HttpResponse> requestProcessor)
     {
-        proxy.addRequestFilter((request, contents, messageInfo) ->
-        {
-            if (messageFilters.stream().allMatch(p -> p.test(messageInfo)))
-            {
-                return requestProcessor.apply(request);
-            }
-            return null;
-        });
+        proxy.addMock(new ProxyMock(messageFilters, requestProcessor));
     }
 
     private List<HarEntry> getLogEntries(Set<HttpMethod> httpMethods, Pattern urlPattern)
     {
-        return proxy.getRecordedData().getLog()
-                .findEntries(urlPattern)
+        return HarLogFilter.findEntries(proxy.getRecordedData().getLog(), urlPattern)
                 .stream()
-                .filter(entry -> entry.getResponse().getStatus() != HttpStatus.SC_MOVED_TEMPORARILY
-                        && httpMethods.contains(entry.getRequest().getMethod()))
+                .filter(entry -> httpMethods.contains(entry.getRequest().getMethod()))
                 .toList();
     }
 

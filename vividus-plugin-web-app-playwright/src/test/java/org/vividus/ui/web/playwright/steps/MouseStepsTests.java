@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.vividus.ui.web.playwright.steps;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Locator.ClickOptions;
+import com.microsoft.playwright.Page;
 import com.microsoft.playwright.TimeoutError;
 import com.microsoft.playwright.options.MouseButton;
 
@@ -52,9 +54,14 @@ class MouseStepsTests
     void shouldClickElement()
     {
         Locator locator = mock();
+        Page page = mock();
         when(uiContext.locateElement(LOCATOR)).thenReturn(locator);
+        when(uiContext.getCurrentPage()).thenReturn(page);
         mouseSteps.clickOnElement(LOCATOR);
-        verify(locator).click();
+        var ordered = inOrder(uiContext, locator, page);
+        ordered.verify(locator).click();
+        ordered.verify(page).waitForLoadState();
+        ordered.verify(uiContext).resetToActiveFrame();
         verifyNoInteractions(softAssert);
     }
 

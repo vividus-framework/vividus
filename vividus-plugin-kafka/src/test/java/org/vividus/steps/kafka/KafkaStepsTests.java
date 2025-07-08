@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,9 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.internals.RecordHeader;
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,6 +66,7 @@ class KafkaStepsTests
     private static final String KEY2 = "key2";
 
     private static final Class<?> LISTENER_KEY = GenericMessageListenerContainer.class;
+    private static final Class<?> HEADERS_KEY = Header.class;
 
     private static final String LISTENER_IS_STOPPED = "Kafka event listener is stopped";
 
@@ -157,5 +162,14 @@ class KafkaStepsTests
                                info(LISTENER_IS_STOPPED),
                                info(listenerIsStarted))));
         }
+    }
+
+    @Test
+    void testAddEventHeaders()
+    {
+        var headers = new ExamplesTable("|name|value|\n|headerName|headerValue|");
+        kafkaSteps.setEventHeaders(headers);
+        RecordHeader header = new RecordHeader("headerName", "headerValue".getBytes(StandardCharsets.UTF_8));
+        verify(testContext).put(HEADERS_KEY, List.of(header));
     }
 }

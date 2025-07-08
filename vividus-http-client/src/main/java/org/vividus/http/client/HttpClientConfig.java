@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.apache.hc.client5.http.DnsResolver;
 import org.apache.hc.client5.http.HttpRequestRetryStrategy;
-import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.protocol.RedirectStrategy;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
@@ -38,7 +37,6 @@ import org.vividus.http.handler.HttpResponseHandler;
 public class HttpClientConfig
 {
     private String baseUrl;
-    private AuthConfig authConfig;
     private Map<String, String> headers;
     private SslConfig sslConfig;
     private int maxTotalConnections;
@@ -50,13 +48,14 @@ public class HttpClientConfig
     private int connectionRequestTimeout = -1;
     private int connectTimeout = -1;
     private int socketTimeout;
-    private CookieStore cookieStore;
+    private CookieStoreProvider cookieStoreProvider;
     private boolean skipResponseEntity;
     private DnsResolver dnsResolver;
     private boolean circularRedirectsAllowed;
     private String cookieSpec;
     private HttpRequestRetryStrategy httpRequestRetryStrategy;
     private List<HttpResponseHandler> httpResponseHandlers;
+    private Map<String, HttpContextConfig> httpContextConfig;
 
     public boolean hasBaseUrl()
     {
@@ -93,17 +92,6 @@ public class HttpClientConfig
     public void setSslConfig(SslConfig sslConfig)
     {
         this.sslConfig = sslConfig;
-    }
-
-    public AuthConfig getAuthConfig()
-    {
-        return authConfig;
-    }
-
-    @JsonProperty("auth")
-    public void setAuthConfig(AuthConfig authConfig)
-    {
-        this.authConfig = authConfig;
     }
 
     public int getMaxTotalConnections()
@@ -196,19 +184,19 @@ public class HttpClientConfig
         this.socketTimeout = socketTimeout;
     }
 
-    public boolean hasCookieStore()
+    public boolean hasCookieStoreProvider()
     {
-        return cookieStore != null;
+        return cookieStoreProvider != null;
     }
 
-    public CookieStore getCookieStore()
+    public CookieStoreProvider getCookieStoreProvider()
     {
-        return cookieStore;
+        return cookieStoreProvider;
     }
 
-    public void setCookieStore(CookieStore cookieStore)
+    public void setCookieStoreProvider(CookieStoreProvider cookieStoreProvider)
     {
-        this.cookieStore = cookieStore;
+        this.cookieStoreProvider = cookieStoreProvider;
     }
 
     public boolean isSkipResponseEntity()
@@ -269,5 +257,15 @@ public class HttpClientConfig
     public void setHttpResponseHandlers(List<HttpResponseHandler> httpResponseHandlers)
     {
         this.httpResponseHandlers = httpResponseHandlers;
+    }
+
+    public Map<String, HttpContextConfig> getHttpContextConfig()
+    {
+        return httpContextConfig;
+    }
+
+    public void setHttpContextConfig(Map<String, HttpContextConfig> httpContextConfig)
+    {
+        this.httpContextConfig = httpContextConfig;
     }
 }

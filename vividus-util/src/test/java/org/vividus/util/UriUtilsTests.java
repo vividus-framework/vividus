@@ -147,6 +147,7 @@ class UriUtilsTests
     // CHECKSTYLE:OFF
     @CsvSource({
         "http://somehost:8080/path,                                   http://somehost:8080/path",
+        "https://example.com?conditionType=%3D,                       https://example.com?conditionType=%3D",
         "http://somehost:8080/path?name=goodvalue&a=b#fragment,       http://somehost:8080/path?name=goodvalue&a=b#fragment",
         "http://somehost:8080/pa | th?name=bad|value&a=b#fra| gme nt, http://somehost:8080/pa%20%7C%20th?name=bad%7Cvalue&a=b#fra%7C%20gme%20nt",
         "http://somehost:8080/path?name=bad|value&a=b#fragment,       http://somehost:8080/path?name=bad%7Cvalue&a=b#fragment",
@@ -185,6 +186,22 @@ class UriUtilsTests
         assertEquals(expected, actual);
     }
 
+    @ParameterizedTest
+    // CHECKSTYLE:OFF
+    @CsvSource({
+            "http://somehost:8080/pa%20%7C%20th?name=bad%7Cvalue&a=b#fra%7C%20gme%20nt, http://somehost:8080/pa | th?name=bad|value&a=b#fra| gme nt",
+            "http://somehost:8080/S%C3%96KV%C3%84G%20%7C%7C%20s%C3%A4tt,                http://somehost:8080/SÖKVÄG || sätt",
+            "http://somehost:8080/sessions/TH?firstName=%E0%B8%99%E0%B8%A4%E0%B8%A1%E0%B8%A5&lastName=TH%E0%B8%A7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B8%8A%E0%B8%A2%E0%B8%B2%E0%B8%A0%E0%B8%A3%E0%B8%93%E0%B9%8C&phone=660967931096, http://somehost:8080/sessions/TH?firstName=นฤมล&lastName=THว่องชยาภรณ์&phone=660967931096",
+            "https://ad.doubleclick.net/ddm/activity/src=5337729;type=brand0;cat=brand0;u9=%5BCachebuster%5D;u10=%5BSPIKA%20Locale%5D;u11=%5BSPIKA%20Brand%5D;u12=%5BPage%20Path%5D;u13=%5BSPIKA%20Language%5D;u14=%5BCocktail%20ID%5D;u15=%5BPage%20Type%5D;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;ord=1?,"+
+            "https://ad.doubleclick.net/ddm/activity/src=5337729;type=brand0;cat=brand0;u9=[Cachebuster];u10=[SPIKA Locale];u11=[SPIKA Brand];u12=[Page Path];u13=[SPIKA Language];u14=[Cocktail ID];u15=[Page Type];dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;ord=1?",
+    })
+    // CHECKSTYLE:ON
+    void shouldDecodeUrl(String input, String expected)
+    {
+        var actual = UriUtils.decodeUrl(input);
+        assertEquals(expected, actual);
+    }
+
     @Test
     void testCreateUriWithException()
     {
@@ -207,6 +224,7 @@ class UriUtilsTests
         "https://test:pas%40dsad@host.com, '',                                                      https://test:pas%40dsad@host.com",
         "http://localhost:4200,            /m/cool#%E7%94%A2%E5%93%81%E6%A6%82%E8%A6%BD%20overview, http://localhost:4200/m/cool#%E7%94%A2%E5%93%81%E6%A6%82%E8%A6%BD%20overview",
         "http://localhost:4200,            /m/cool#產品概覽 overview,                                http://localhost:4200/m/cool#%E7%94%A2%E5%93%81%E6%A6%82%E8%A6%BD%20overview",
+        "https://somehost.il/,             /%D7%92'%D7%95%D7%A0%D7%A1%D7%95%D7%A0%D7%A1-%D7%98%D7%99%D7%A4%D7%95%D7%AA-%D7%A9%D7%9C-%D7%91%D7%A8%D7%A7%20%D7%AA%D7%A8%D7%A1%D7%99%D7%A1-%D7%9E%D7%A8%D7%9B%D7%9A-%D7%A9%D7%99%D7%A2%D7%A8-%D7%9C%D7%99%D7%9C%D7%93%D7%99%D7%9D, https://somehost.il/%D7%92'%D7%95%D7%A0%D7%A1%D7%95%D7%A0%D7%A1-%D7%98%D7%99%D7%A4%D7%95%D7%AA-%D7%A9%D7%9C-%D7%91%D7%A8%D7%A7%20%D7%AA%D7%A8%D7%A1%D7%99%D7%A1-%D7%9E%D7%A8%D7%9B%D7%9A-%D7%A9%D7%99%D7%A2%D7%A8-%D7%9C%D7%99%D7%9C%D7%93%D7%99%D7%9D"
         // CHECKSTYLE:ON
     })
     void testBuildNewUri(String baseUrl, String relativeUrl, String expectedUrl)

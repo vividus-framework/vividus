@@ -1,0 +1,3 @@
+{transformer=REPLACING, replacing=to_replace1, replacement=to_replace2, headerSeparator=!, valueSeparator=!}
+!column      !
+!to_replace1 !

@@ -56,9 +56,18 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 |false
 |By default, the content of Test Cases that have associated IDs, is updated every export run, to disable this behavior set the value of this property to `false`
 
-|`xray-exporter.test-execution-attachments`
+|`xray-exporter.test-execution.attachments`
 |false
-|Comma-separated list of file and folder paths that should be uploaded to test execution as attachments. Please note that regular files like images, texts are uploaded as is, whereas folders are archived before the upload.
+a|Comma-separated list of file and folder paths that should be uploaded to test execution as attachments. Please note that regular files like images, texts are uploaded as is, whereas folders are archived before the upload.
+
+[WARNING]
+====
+`xray-exporter.test-execution-attachments` property is deprecated in favor of `xray-exporter.test-execution.attachments` and will be removed in VIVIDUS 0.8.0.
+====
+
+|`xray-exporter.test-case.use-scenario-title-as-description`
+|false
+|If enabled (`true` value), the scenario title will be used as the description, but *only* for newly created test cases, otherwise the description will be left empty.
 
 |===
 
@@ -78,17 +87,31 @@ xray-exporter.json-results-directory=/Users/happytester/Repositories/app-tests/o
 |Required
 |Description
 
-|`xray-exporter.test-execution-key`
+|`xray-exporter.test-execution.key`
 |false
-|The key of `Test Execution` which the exported test cases along with their statuses will be added to
+a|The key of `Test Execution` which the exported test cases along with their statuses will be added to
 
-|`xray-exporter.test-execution-summary`
+[WARNING]
+====
+`xray-exporter.test-execution-key` property is deprecated in favor of `xray-exporter.test-execution.key` and will be removed in VIVIDUS 0.8.0.
+====
+
+|`xray-exporter.test-execution.summary`
 |false
-|The `Test Execution` summary
+a|The `Test Execution` summary
+
+[WARNING]
+====
+`xray-exporter.test-execution-summary` property is deprecated in favor of `xray-exporter.test-execution.summary` and will be removed in VIVIDUS 0.8.0.
+====
+
+|`xray-exporter.test-execution.description`
+|false
+|The `Test Execution` description
 
 |===
 
-Test execution import varies depending on values in `xray-exporter.test-execution-key` and `xray-exporter.test-execution-summary`, the following matrix shows this behavior change:
+Test execution import varies depending on values in `xray-exporter.test-execution.key` and `xray-exporter.test-execution.summary`, the following matrix shows this behavior change:
 
 [cols="1,1", options="header"]
 |===
@@ -96,22 +119,22 @@ Test execution import varies depending on values in `xray-exporter.test-executio
 |Configuration
 |Result
 
-|Both `xray-exporter.test-execution-key` and `xray-exporter.test-execution-summary` are set
+|Both `xray-exporter.test-execution.key` and `xray-exporter.test-execution.summary` are set
 a|Test execution summary and associated test cases will be updated, the update of test cases is performed according to following rules:
 
 * new test cases are added to the test execution
 * statuses of existing test cases are updated
 
-|Only `xray-exporter.test-execution-summary` is set
+|Only `xray-exporter.test-execution.summary` is set
 |New test execution will be created
 
-|Only `xray-exporter.test-execution-key` is set
+|Only `xray-exporter.test-execution.key` is set
 a|Associated test cases will be updated according to following rules:
 
 * new test cases are added to the test execution
 * statuses of existing test cases are updated
 
-|Neither `xray-exporter.test-execution-key` nor `xray-exporter.test-execution-summary` are set
+|Neither `xray-exporter.test-execution.key` nor `xray-exporter.test-execution.summary` are set
 |Text execution import is skipped
 
 |===

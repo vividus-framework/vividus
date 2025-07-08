@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,24 @@ import org.vividus.ui.screenshot.ScreenshotParameters;
 
 public class WebScreenshotParameters extends ScreenshotParameters
 {
+    private int maxHeight;
     private int nativeHeaderToCut;
     private int nativeFooterToCut;
     private WebCutOptions webCutOptions;
     private Optional<WebElement> scrollableElement = Optional.empty();
     private CoordsProviderType coordsProvider;
     private Duration scrollTimeout;
+    private boolean hideScrollbars;
+
+    public int getMaxHeight()
+    {
+        return maxHeight;
+    }
+
+    public void setMaxHeight(int maxHeight)
+    {
+        this.maxHeight = maxHeight;
+    }
 
     public WebCutOptions getWebCutOptions()
     {
@@ -90,5 +102,15 @@ public class WebScreenshotParameters extends ScreenshotParameters
     public void setNativeFooterToCut(int nativeFooterToCut)
     {
         this.nativeFooterToCut = nativeFooterToCut;
+    }
+
+    public boolean isHideScrollbars()
+    {
+        return hideScrollbars;
+    }
+
+    public void setHideScrollbars(boolean hideScrollbars)
+    {
+        this.hideScrollbars = hideScrollbars;
     }
 }

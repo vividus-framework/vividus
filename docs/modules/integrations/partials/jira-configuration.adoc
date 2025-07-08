@@ -1,4 +1,4 @@
-:test-config: xref:ROOT:tests-configuration.adoc
+:test-config: xref:configuration:tests-configuration.adoc
 :allowed-http-properties: {test-config}#_general[general], {test-config}#_authentication[authentication] or {test-config}#_ssl_handshake[SSL handshake] properties
 
 == JIRA Configuration

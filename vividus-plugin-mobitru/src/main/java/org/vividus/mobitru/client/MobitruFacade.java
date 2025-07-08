@@ -32,6 +32,23 @@ public interface MobitruFacade
     String takeDevice(DesiredCapabilities desiredCapabilities) throws MobitruOperationException;
 
     /**
+     * Start the screen recording on the device with specified UDID.
+     *
+     * @param deviceId The UDID of the device
+     * @throws MobitruOperationException In case of any issues during start the recording.
+     */
+    void startDeviceScreenRecording(String deviceId) throws MobitruOperationException;
+
+    /**
+     * Stop the screen recording on the device with specified UDID.
+     *
+     * @param deviceId The UDID of the device
+     * @return The ID of the recorded artifact.
+     * @throws MobitruOperationException In case of any issues during start the recording.
+     */
+    ScreenRecording stopDeviceScreenRecording(String deviceId) throws MobitruOperationException;
+
+    /**
      * Installs the desired application on the device with specified UDID
      *
      * @param deviceId    The UDID of the device

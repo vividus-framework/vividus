@@ -2,27 +2,30 @@ project.description = 'VIVIDUS plugin for Web App and Rest API plugins integrati
 
 dependencies {
     implementation project(':vividus-http-client')
-    implementation project(':vividus-plugin-web-app')
+    implementation project(':vividus-extension-web-app')
     implementation project(':vividus-plugin-rest-api')
     implementation project(':vividus-plugin-html')
     implementation project(':vividus-reporter')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.13')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
-    implementation(group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.4')
-    implementation(group: 'de.hs-heilbronn.mi', name: 'crawler4j-with-sleepycat', version: '5.0.2') {
+    implementation(group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.5')
+    implementation(group: 'de.hs-heilbronn.mi', name: 'crawler4j-with-hsqldb', version: '5.1.2') {
         exclude module: 'log4j-slf4j-impl'
-        exclude group: "org.bouncycastle", module: "bcpkix-jdk15on"
-        exclude group: "org.bouncycastle", module: "bcprov-jdk15on"
     }
+    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.8-jre')
 
-    compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
+    compileOnly project(':vividus-plugin-web-app')
+    compileOnly project(':vividus-plugin-web-app-playwright')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.2')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.3')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.12.0')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
+    testImplementation project(':vividus-plugin-web-app')
+    testImplementation project(':vividus-plugin-web-app-playwright')
 }

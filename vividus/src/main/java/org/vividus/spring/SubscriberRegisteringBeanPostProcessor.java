@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,26 +18,19 @@ package org.vividus.spring;
 
 import java.util.stream.Stream;
 
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.vividus.eventbus.GlobalEventBus;
 
 public class SubscriberRegisteringBeanPostProcessor implements BeanPostProcessor
 {
-    private final EventBus eventBus;
-
-    public SubscriberRegisteringBeanPostProcessor(EventBus eventBus)
-    {
-        this.eventBus = eventBus;
-    }
-
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName)
     {
         if (Stream.of(bean.getClass().getMethods()).anyMatch(m -> m.isAnnotationPresent(Subscribe.class)))
         {
-            eventBus.register(bean);
+            GlobalEventBus.getEventBus().register(bean);
         }
         return bean;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,22 +23,21 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import com.google.common.eventbus.EventBus;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.RunContext;
+import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.screenshot.Screenshot;
-import org.vividus.selenium.screenshot.ScreenshotTaker;
+import org.vividus.ui.screenshot.Screenshot;
+import org.vividus.ui.screenshot.ScreenshotTaker;
 
 @ExtendWith(MockitoExtension.class)
 class PublishingScreenshotOnFailureMonitorTests
 {
-    @Mock private EventBus eventBus;
+    @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private RunContext runContext;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private ScreenshotTaker screenshotTaker;
@@ -55,6 +54,6 @@ class PublishingScreenshotOnFailureMonitorTests
 
         assertTrue(screenshot.isPresent());
         assertEquals(screenshotMock, screenshot.get());
-        verifyNoMoreInteractions(eventBus, runContext, webDriverProvider, screenshotTaker, screenshotMock);
+        verifyNoMoreInteractions(attachmentPublisher, runContext, webDriverProvider, screenshotTaker, screenshotMock);
     }
 }

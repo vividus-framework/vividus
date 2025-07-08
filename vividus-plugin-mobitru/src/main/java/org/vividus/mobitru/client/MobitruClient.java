@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpStatus;
@@ -43,10 +44,15 @@ public class MobitruClient
 
     private String apiUrl;
 
-    public MobitruClient(IHttpClient httpClient, String billingUnit)
+    public MobitruClient(IHttpClient httpClient, String billingUnit, String workspaceId)
     {
         this.httpClient = httpClient;
-        this.apiBasePath = String.format("/billing/unit/%s/automation/api", billingUnit);
+        StringBuilder basePath = new StringBuilder("/billing/unit/").append(billingUnit);
+        if (StringUtils.isNotBlank(workspaceId))
+        {
+            basePath.append("/workspace/").append(workspaceId);
+        }
+        this.apiBasePath = basePath.append("/automation/api").toString();
     }
 
     public byte[] findDevices(String platform, Map<String, String> parameters) throws MobitruOperationException
@@ -57,9 +63,12 @@ public class MobitruClient
                 MobitruDeviceSearchException::new);
     }
 
-    public byte[] takeDevice(String requestedDevice) throws MobitruOperationException
+    public byte[] takeDevice(String deviceCapabilities) throws MobitruOperationException
     {
-        return executePost(DEVICE_PATH, requestedDevice, HttpStatus.SC_OK);
+        return executeRequest(DEVICE_PATH, HttpMethod.POST,
+                rb -> rb.withContent(deviceCapabilities, ContentType.APPLICATION_JSON), HttpStatus.SC_OK,
+                message -> new MobitruDeviceTakeException(
+                        "Unable to take device with configuration " + deviceCapabilities + ". " + message));
     }
 
     public byte[] getArtifacts() throws MobitruOperationException
@@ -70,6 +79,29 @@ public class MobitruClient
     public void returnDevice(String deviceId) throws MobitruOperationException
     {
         executeRequest(DEVICE_PATH + "/" + deviceId, HttpMethod.DELETE, UnaryOperator.identity(), HttpStatus.SC_OK);
+    }
+
+    public void startDeviceScreenRecording(String deviceId) throws MobitruOperationException
+    {
+        performDeviceRecordingRequest(deviceId, HttpMethod.POST, HttpStatus.SC_CREATED);
+    }
+
+    public byte[] stopDeviceScreenRecording(String deviceId) throws MobitruOperationException
+    {
+        return performDeviceRecordingRequest(deviceId, HttpMethod.DELETE, HttpStatus.SC_OK);
+    }
+
+    private byte[] performDeviceRecordingRequest(String deviceId, HttpMethod httpMethod, int status)
+            throws MobitruOperationException
+    {
+        String url = String.format("%s/%s/recording", DEVICE_PATH, deviceId);
+        return executeRequest(url, httpMethod, UnaryOperator.identity(), status);
+    }
+
+    public byte[] downloadDeviceScreenRecording(String recordingId) throws MobitruOperationException
+    {
+        return executeRequest("/recording/" + recordingId, HttpMethod.GET,
+                UnaryOperator.identity(), HttpStatus.SC_OK);
     }
 
     public void installApp(String deviceId, String appId, InstallApplicationOptions options)
@@ -83,14 +115,6 @@ public class MobitruClient
     private byte[] executeGet(String relativeUrl, int expectedResponseCode) throws MobitruOperationException
     {
         return executeRequest(relativeUrl, HttpMethod.GET, UnaryOperator.identity(), expectedResponseCode);
-    }
-
-    private byte[] executePost(String relativeUrl, String payload, int expectedResponseCode)
-        throws MobitruOperationException
-    {
-        return executeRequest(relativeUrl, HttpMethod.POST,
-                rb -> rb.withContent(payload, ContentType.APPLICATION_JSON), expectedResponseCode,
-            MobitruDeviceTakeException::new);
     }
 
     private byte[] executeRequest(String relativeUrl, HttpMethod httpMethod,

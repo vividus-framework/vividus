@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
+import edu.uci.ics.crawler4j.url.AbstractWebURL;
 import edu.uci.ics.crawler4j.url.WebURL;
-import edu.uci.ics.crawler4j.url.WebURLImpl;
 
 class LinkCrawlerFactoryTests
 {
@@ -48,7 +48,7 @@ class LinkCrawlerFactoryTests
 
     private static WebURL createWebUrl(String url)
     {
-        WebURL webUrl = new WebURLImpl();
+        WebURL webUrl = new AbstractWebURL() { };
         webUrl.setURL(url);
         return webUrl;
     }

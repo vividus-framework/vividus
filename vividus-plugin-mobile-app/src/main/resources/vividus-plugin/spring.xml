@@ -27,9 +27,8 @@
 
     <bean class="org.vividus.selenium.mobileapp.MobileContextSourceCodeProvider" />
 
-    <bean class="org.vividus.ui.listener.SourceCodePublishingOnFailureListener" lazy-init="false">
-        <property name="publishSourceOnFailure" value="${ui.publish-source-on-failure}" />
-        <property name="format" value="XML" />
+    <bean id="sourceCodeAttachmentFormat" class="java.lang.String">
+        <constructor-arg value="xml" />
     </bean>
 
     <bean class="org.vividus.ui.monitor.PublishingScreenshotOnFailureMonitor"

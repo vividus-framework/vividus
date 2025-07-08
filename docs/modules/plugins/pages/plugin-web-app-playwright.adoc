@@ -5,6 +5,29 @@ The plugin provides functionality to interact with Web applications with help of
 :plugin-short-name: web-app-playwright
 include::partial$plugin-installation.adoc[]
 
+== Profiles
+
+The xref:configuration:tests-configuration.adoc#_profiles[profiles] allow to choose and/or parameterize browser that tests run on.
+
+=== Desktop
+
+The following profiles running desktop browsers are available out of the box:
+
+- `web_pw/desktop/chromium` - for Google Chrome, Microsoft Edge and other Chromium-based browsers, by default, Playwright uses open source https://playwright.dev/java/docs/browsers#chromium[Chromium] builds.
+- `web_pw/desktop/firefox` - https://playwright.dev/java/docs/browsers#firefox[Playwright's Firefox] version matches the recent Firefox Stable build.
+- `web_pw/desktop/webkit` - https://playwright.dev/java/docs/browsers#webkit[Playwright's WebKit] version matches the recent WebKit trunk build, before it is used in Apple Safari and other WebKit-based browsers.
+
+=== Headless
+
+https://en.wikipedia.org/wiki/Headless_browser[Headless mode] is a functionality that allows the execution of a full
+version of the browser while controlling it programmatically. It can be used without dedicated graphics or display,
+meaning that it runs without its “head”, the Graphical User Interface (GUI). The following profiles running browsers in
+headless mode are available:
+
+- `web_pw/headless/chromium` - for Google Chrome, Microsoft Edge and other Chromium-based browsers, by default, Playwright uses open source https://playwright.dev/java/docs/browsers#chromium[Chromium] builds.
+- `web_pw/headless/firefox` - https://playwright.dev/java/docs/browsers#firefox[Playwright's Firefox] version matches the recent Firefox Stable build.
+- `web_pw/headless/webkit` - https://playwright.dev/java/docs/browsers#webkit[Playwright's WebKit] version matches the recent WebKit trunk build, before it is used in Apple Safari and other WebKit-based browsers.
+
 == Properties
 
 NOTE: The properties marked with *bold* are mandatory.
@@ -38,9 +61,31 @@ a|`true` +
 |When tracing with the https://playwright.dev/java/docs/trace-viewer#snapshots[snapshots option] turned on,
 Playwright captures a set of complete DOM snapshots for each action.
 
+|`ui.wait.timeout`
+|{durations-format-link} format
+|`PT1M`
+|Total duration to wait for UI condition
+
 |===
 
+== xref:commons:variables.adoc[Dynamic variables]
+
+include::partial$dynamic-variable-context-source-code.adoc[]
+
 == Locator
+
+----
+By.<locatorType>(<locatorValue>):<visibility>
+----
+
+[IMPORTANT]
+
+By. prefix is optional.
+
+. `locatorType` - *[mandatory]* type of the locator
+. `locatorValue` - *[mandatory]* value of the locator
+. `visibility` - *[optional]* visibility of element (visible by default)
+
 
 === Locator Types
 
@@ -52,22 +97,119 @@ Playwright captures a set of complete DOM snapshots for each action.
 |Example
 
 |`id`
-|Locates elements whose `id` attribute matches the search value
+|Locates elements whose `id` attribute matches the specified search value.
 |id(submitBtn)
 
 |`css`
-|Locates elements matching a https://playwright.dev/java/docs/locators#locate-by-css-or-xpath[CSS selector]
+|Locates elements matching a https://playwright.dev/java/docs/locators#locate-by-css-or-xpath[CSS selector].
 |css(.menu-item)
 
 |`xPath`
-|Locates elements matching an https://playwright.dev/java/docs/locators#locate-by-css-or-xpath[xPath expression]
+|Locates elements matching an https://playwright.dev/java/docs/locators#locate-by-css-or-xpath[xPath expression].
 |xpath(//a)
+
+|`tagName`
+|Locates elements whose tag name matches the specified search value. This locator is translated to `css(<tagName>)` locator.
+|tagName(div)
+
+|`className`
+|Locates elements whose class name matches the specified search value. This locator is translated to `css(.<className>)` locator.
+|className(bold)
+
+|`linkText`
+|Locates elements whose text of the link matches the specified search value.
+|linkText(Google)
+
+|`linkUrl`
+|Locates elements whose `href` attribute matches the specified search value. This locator is translated to `css([href='<tagName>'])` locator.
+|linkUrl(/faq)
+
+|`linkUrlPart`
+|Locates elements whose part of `href` attribute matches the specified search value. This locator is translated to `css([href*='<tagName>'])` locator.
+|linkUrlPart(faq)
+
+|`imageSrc`
+|Locates elements whose `src` attribute matches the specified search value. This locator is translated to `css(img[src='<imageSrc>'])` locator.
+|imgSrc(/images/kote.png)
+
+|`imageSrcPart`
+|Locates elements whose part of `src` attribute matches the specified search value. This locator is translated to `css(img[src*='<imageSrc>'])` locator.
+|imgSrcPart(kote.png)
+
+|`fieldName`
+|Locate elements that are either input or textarea and their text or any attribute value matches the specified search value.
+|fieldName(editor)
+
+|`radioButton`
+|Locate elements that are input with @type="radio" and their label text value matches the specified searh value
+|radioButton(One)
+
+|`name`
+|Locate elements where any attribute or text value matches the specified search value. This locator is translated to `xpath(.//\*[@*='<elementName>' or text()='<elementName>'])`
+locator.
+|name(OK)
+
+|===
+
+=== Visibility types
+
+[cols="1,1,3", options="header"]
+|===
+
+|Visibility type
+|Usage example
+|Description
+
+|VISIBLE
+|xpath(//a)
+|Default visibility option. Only visible elements will be found
+
+|all
+|xpath(//a):a
+|Either visible and invisible elements will be found
 
 |===
 
 == Steps
 include::plugins:partial$common-web-app-steps.adoc[]
 include::plugins:partial$ui-context-management-steps.adoc[]
+
+=== Tab steps
+==== Open a new tab
+
+Opens a new browser tab and switches the focus for future commands to this tab.
+
+[source,gherkin]
+----
+When I open new tab
+----
+
+.Open page in a new tab
+[source,gherkin]
+----
+When I open new tab
+Given I am on page with URL `https://docs.vividus.dev`
+----
+
+==== Close current tab
+
+Closes the current tab and switches to the last browser tab.
+
+[source,gherkin]
+----
+When I close current tab
+----
+
+NOTE: This step can only be applied to a session with multiple tabs open.
+
+.Open URL in new tab, close it and switch to the previous page
+[source,gherkin]
+----
+Given I am on page with URL `https://example.com`
+When I open new tab
+Given I am on page with URL `https://example.com/contact-us`
+When I close current tab
+----
 
 === Mouse Actions
 ==== Click on the element
@@ -130,6 +272,440 @@ When I change context to element located by `id(username)`
 When I save text of context element to scneario variable `username`
 ----
 
+=== Saves the attribute value of the context
+
+Saves the attribute value of the context element into a variable.
+
+[source,gherkin]
+----
+When I save `$attributeName` attribute value of context element to $scopes variable `$variableName`
+----
+
+* `$attributeName` - The name of an element attribute.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the attribute value.
+
+.Save the attribute value of the context element
+[source,gherkin]
+----
+When I change context to element located by `id(username)`
+When I save `innerText` attribute value of context element to SCENARIO variable `username`
+----
+
+=== Save the attribute value of the element
+
+Saves the attribute value of the element located by locator into a variable.
+
+[source,gherkin]
+----
+When I save `$attributeName` attribute value of element located by `$locator` to $scopes variable `$variableName`
+----
+
+* `$attributeName` - The name of an element attribute.
+* `$locator` - <<_locator>>.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the attribute value.
+
+Save the attribute value of the element
+[source,gherkin]
+----
+When I save `innerText` attribute value of element located by `id(username)` to SCENARIO variable `username`
+----
+
+include::plugins:partial$ui-elements-quantity-steps.adoc[]
+
 include::plugins:partial$ui-size-and-coordinates-steps.adoc[]
 
 include::plugins:partial$common-web-app-text-steps.adoc[]
+
+include::plugins:partial$ui-wait-element-state-steps.adoc[]
+
+=== Wait for element state
+
+Waits for an element, located by the specified locator in the given search context, to change to the specified state.
+
+[source,gherkin]
+----
+When I wait until state of element located by `$locator` is $state
+----
+
+* `$locator` - The <<_locator,locator>> used to find element.
+* `$state` - The expected element xref:parameters:state.adoc[state].
+
+.Click on the button and wait until the element becomes invisible
+[source,gherkin]
+----
+When I click on element located by `id(signInButton)`
+When I wait until state of element located by `id(signInButton):a` is NOT VISIBLE
+----
+
+=== Wait for expected elements number
+
+Waits for the expected number of elements located by locator.
+
+[source,gherkin]
+----
+When I wait until number of elements located by `$locator` is $comparisonRule $number
+----
+
+* `$locator` - <<_locator>>.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$number` - The expected number of the elements.
+
+.Wait for the visible elements
+[source,gherkin]
+----
+When I wait until number of elements located by `xpath(//a)` is equal to `5`
+----
+
+include::plugins:partial$common-web-app-wait-steps.adoc[]
+
+=== JavaScript steps
+==== Execute JavaScript
+
+Executes passed JavaScript code on the opened page.
+
+[source,gherkin]
+----
+When I execute javascript `$jsCode`
+----
+* `$jsCode` - The JavaScript code.
+
+.Click on the link using JavaScript
+[source,gherkin]
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com`
+When I execute javascript `document.querySelector('a').click()`
+----
+
+==== Execute JavaScript and save result
+
+Executes passed JavaScript code on the opened page and saves result into variable.
+
+[source,gherkin]
+----
+When I execute javascript `$jsCode` and save result to $scopes variable `$variableName`
+----
+* `$jsCode` - The JavaScript code with return value.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to script execution result.
+
+.Validate timings
+[source,gherkin]
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
+When I execute javascript `JSON.stringify(window.performance.timing)` and save result to scenario variable `timings`
+Then number of JSON elements from `${timings}` by JSON path `$.connectStart` is = 1
+----
+
+=== Context steps
+==== Switch to the default context of page
+
+Switches context to the root https://developer.mozilla.org/en-US/docs/Web/HTML/Element/html[<html>] element of the current page.
+
+[source,gherkin]
+----
+When I switch back to page
+----
+
+.Switch to user context and back to the default context of page
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/elementState.html`
+When I change context to element located by `id(button-hide)`
+Then text `Element to hide` does not exist
+When I switch back to page
+Then text `Element to hide` exists
+----
+
+==== Switch context to a frame
+
+Switches to https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe[<iframe>] or https://developer.mozilla.org/en-US/docs/Web/HTML/Element/frame[<frame>] element using one of the supported locators.
+
+[source,gherkin]
+----
+When I switch to frame located by `$locator`
+----
+
+* `$locator` - <<_locator>> of frame element.
+
+.Switch to frame
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/nestedFrames.html`
+Then text `Modal Frame Example` does not exist
+When I switch to frame located by `id(parent)`
+Then text `Modal Frame Example` exists
+----
+
+=== Select an option in dropdown
+
+Selects the first https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option[option] in dropdown whose https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option#value[value attribute] is equal to the provided value (case-insensitive).
+
+[source,gherkin]
+----
+When I select `$option` in dropdown located by `$locator`
+----
+
+* `$option` - The option to select.
+* `$locator` - The <<_locator,locator>> used to find dropdown.
+
+.Select option with the value `Red` in dropdown
+[source,gherkin]
+----
+When I select `Red` in dropdown located by `id(colors)`
+----
+
+include::plugins:partial$ui-element-css-property-steps.adoc[]
+
+include::plugins:partial$ui-elements-conditional-iteration-steps.adoc[]
+
+include::plugins:partial$ui-execution-on-each-element-steps.adoc[]
+
+include::plugins:partial$web-cookie-steps.adoc[]
+
+include::plugins:partial$web-storage-steps.adoc[]
+
+=== Upload file
+
+Uploads the xref:ROOT:glossary.adoc#_resource[resource] or file via web interface.
+
+[source,gherkin]
+----
+When I select element located by `$locator` and upload `$resourceNameOrFilePath`
+----
+
+* `$locator` - the <<_locator,locator>> of the web element with *input* tag and attribute *type=file*
+* `$resourceNameOrFilePath` - relative path to the file to be uploaded
+
+.Upload file_for_upload.png file
+[source,gherkin]
+----
+When I select element located by `id(uploadfile)` and upload file `/folder/file_for_upload.png`
+----
+
+include::plugins:partial$ui-scrolling-steps.adoc[]
+
+=== Request validation steps
+:enable-recording-note: This step requires network recording to be turned on. It can be done in properties via "proxy.recording.enabled" or by switching on "@proxy" meta tag at the story or scenario level.
+
+==== Capture HTTP message
+
+Save the HTTP message part from the HTTP request with given URL-pattern into the variable with specified name and the scopes.
+
+NOTE: {enable-recording-note}
+
+The actions performed by the step:
+
+* extract HTTP messages from the network recording archive
+* find HTTP requests matching the provided HTTP methods and the URL regular expression
+* check that total number of the found HTTP messages is equal to `1`
+* save the HTTP message part to the specified variable
+
+[source,gherkin]
+----
+When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save $httpMessagePart to $scopes variable `$variableName`
+----
+* `$httpMethods` - The comma-separated set of HTTP methods to filter by, e.g. `GET, POST, PUT`.
+* `$urlPattern` - The regular expression to match HTTP request URL.
+* `$httpMessagePart` - The HTTP message part to save. One of:
+** `URL` - The request URL.
+** `URL query` - The request URL query parameters.
+** `request data` - The request data includes the following keys:
+*** `query` - The URL query is stored as a collection of key and value pairs, where key is the name of the query parameter and value is the list of query parameter values. The query parameter values are accessible via zero-based index.
+*** `resourceType` - The request's resource type as it was perceived by the rendering engine. `resourceType` will be one of the following: document, stylesheet, image, media, font, script, texttrack, xhr, fetch, eventsource, websocket, manifest, other.
+*** `requestBody.contentType` - The MIME type of posted data.
+*** `requestBody.text` - The posted data as plain text.
+*** `responseStatus` - The response status.
+** `response data` - The response data includes the following keys:
+*** `responsetBody.contentType` - The MIME type of received data.
+*** `responsetBody.text` - The received data as plain text.
+
+.Validate the URL of the matching HTTP request
+[source,gherkin]
+----
+Given I am on page with URL `https://www.google.com/search?q=vividus`
+When I capture HTTP GET,POST request with URL pattern `.*/search.*=vividus` and save URL to scenario variable `URL`
+Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
+----
+
+.Validate the URL query of the matching HTTP request
+[source,gherkin]
+----
+Given I am on page with URL `https://www.google.com/search?q=vividus`
+When I capture HTTP GET request with URL pattern `.*/search.*=vividus` and save URL query to scenario variable `query`
+Then `${query.q[0]}` is equal to `vividus`
+Then `${query.q}` is equal to `[vividus]`
+Then `${query}` is equal to `{q=[vividus]}`
+----
+
+.Validate the request and response data from the matching HTTP messages
+[source,gherkin,subs="attributes+"]
+----
+Given I am on page with URL `https://httpbingo.org/forms/post`
+When I click on element located by `xpath(//input[@value='cheese'])`
+When I click on element located by `xpath(//button)`
+When I capture HTTP POST request with URL pattern `https://httpbingo\.org/post` and save request data to SCENARIO variable `requestData`
+Then `${requestData.query}` is equal to `{}`
+Then `${requestData.resourceType}` is equal to `document`
+Then `${requestData.requestBody}` is not equal to `null`
+Then `${requestData.responseStatus}` is equal to `200`
+When I capture HTTP POST request with URL pattern `https://httpbingo\.org/post` and save response data to SCENARIO variable `responseData`
+Then `${responseData.responseBody}` matches `.*"topping":.*"cheese".*`
+----
+
+==== Wait for the HTTP request
+
+Waits for the HTTP requests matching the provided HTTP methods and URL regular expression.
+If no HTTP request is sent and wait timeout is reached, then the step will fail.
+
+NOTE: {enable-recording-note}
+
+[source,gherkin]
+----
+When I wait until HTTP $httpMethods request with URL pattern `$urlPattern` is captured
+----
+* `$httpMethods` - The comma-separated HTTP methods to filter by, e.g. `GET,POST,PUT`.
+* `$urlPattern` - The regular expression to match HTTP request URL.
+
+.Wait for the HTTP request
+[source,gherkin,subs="attributes+"]
+----
+Given I am on page with URL `https://www.google.com/search?q=vividus`
+When I wait until HTTP GET request with URL pattern `.*/search.*=vividus` is captured
+----
+
+==== Clear the network recordings
+
+The step clears recorded HTTP requests.
+
+[source,gherkin]
+----
+When I clear network recordings
+----
+
+.Clear the recorded data
+[source,gherkin,subs="attributes+"]
+----
+Given I am on page with URL `https://www.google.com/search?q=vividus`
+When I wait until HTTP GET request with URL pattern `.*/search.*=vividus` is captured
+When I clear network recordings
+----
+
+=== Execute sequence of actions
+
+Executes the sequence of web actions.
+
+[source,gherkin]
+----
+When I execute sequence of actions: $actions
+----
+* `$actions` - table of actions to execute
++
+.Possible actions
+[cols="1,5,3", options="header"]
+|===
+
+|`type`
+|`argument`
+|Argument example
+
+|CLICK
+|Element locator or empty.
+|By.caseSensitiveText(Done)
+
+|DOUBLE_CLICK
+|Element locator. Empty value is not supported.
+|By.linkUrl(http://httpbin.org)
+
+|CLICK_AND_HOLD
+|Element locator or empty.
+|By.linkText(Click me)
+
+|RELEASE
+|Element locator or empty.
+|By.tagName(div)
+
+|ENTER_TEXT
+|Text to type.
+|Minsk City
+
+|PRESS_KEYS
+|Comma-separated https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values[keys] to press and release.
+|Backspace
+
+|KEY_DOWN
+|Comma-separated https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values[keys] to press one by one.
+|Control,Shift,Alt
+
+|KEY_UP
+|Comma-separated https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values[keys] to release one by one.
+|Control,Shift,Alt
+
+|MOVE_TO
+|Element locator.
+|By.id(username)
+
+|===
+
+[TIP]
+====
+Use special Playwright `Control` key - `ControlOrMeta` to make tests fully platform independent.
+====
+
+.Execute various web-actions
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type          |argument                                 |
+|CLICK         |By.placeholder(Enter your password)      |
+|CLICK         |                                         |
+|DOUBLE_CLICK  |By.fieldText(Hello World)                |
+|CLICK_AND_HOLD|By.xpath(//signature-pad-control/canvas) |
+|CLICK_AND_HOLD|                                         |
+|RELEASE       |By.xpath(//signature-pad-control/canvas) |
+|RELEASE       |                                         |
+|ENTER_TEXT    |Text                                     |
+|PRESS_KEYS    |Backspace                                |
+|KEY_DOWN      |Control,Shift                            |
+|KEY_UP        |Control,Shift                            |
+|MOVE_TO       |By.id(name)                              |
+----
+
+[TIP]
+====
+This step can be used to perform clipboard interactions.
+
+.Select all text in the focused field and copy it to the clipboard on Windows
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type      |argument   |
+|KEY_DOWN  |Control, a |
+|KEY_UP    |a, Control |
+|KEY_DOWN  |Control, c |
+|KEY_UP    |c, Control |
+----
+
+.Paste text from the clipboard to the focused field on MacOS
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type      |argument |
+|KEY_DOWN  |Meta, v  |
+|KEY_UP    |v, Meta  |
+----
+
+.Select all text in the focused field and copy it to the clipboard on any OS
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type      |argument         |
+|KEY_DOWN  |ControlOrMeta, a |
+|KEY_UP    |a, ControlOrMeta |
+|KEY_DOWN  |ControlOrMeta, c |
+|KEY_UP    |c, ControlOrMeta |
+----
+====
+
+include::partial$common-web-app-browser-steps.adoc[]
+
+include::partial$common-ui-screenshot-steps.adoc[]

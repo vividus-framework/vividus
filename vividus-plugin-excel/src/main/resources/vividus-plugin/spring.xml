@@ -7,10 +7,18 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean id="excelDocumentValidationSteps" class="org.vividus.steps.ExcelDocumentValidationSteps" />
-    <bean id="excelFileSteps" class="org.vividus.steps.ExcelFileSteps" />
+    <bean id="excelDocumentValidationSteps" class="org.vividus.steps.ExcelDocumentValidationSteps">
+        <constructor-arg index="1" value="${excel.preserve-cell-formatting}" />
+    </bean>
+    <bean id="excelFileSteps" class="org.vividus.steps.ExcelFileSteps">
+        <constructor-arg>
+            <bean class="org.vividus.excel.ExcelSheetWriter" />
+        </constructor-arg>
+    </bean>
 
-    <bean id="FROM_EXCEL" class="org.vividus.excel.transformer.ExcelTableTransformer" />
+    <bean id="FROM_EXCEL" class="org.vividus.excel.transformer.ExcelTableTransformer">
+        <constructor-arg index="0" value="${excel.preserve-cell-formatting}" />
+    </bean>
 
     <util:list id="stepBeanNames-Excel" value-type="java.lang.String">
         <idref bean="excelDocumentValidationSteps" />

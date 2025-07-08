@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,11 @@ import java.util.regex.Pattern;
 
 public abstract class AbstractPropertiesProcessor implements PropertiesProcessor
 {
-    private final String processorMarker;
     private final Pattern propertyPattern;
 
-    AbstractPropertiesProcessor(String processorMarker)
+    AbstractPropertiesProcessor(String processorRegexMarker)
     {
-        this.processorMarker = processorMarker;
-        this.propertyPattern = Pattern.compile(processorMarker + "\\((.+?)\\)");
+        this.propertyPattern = Pattern.compile("(" + processorRegexMarker + "\\((.+?)\\)" + ")");
     }
 
     @Override
@@ -54,10 +52,9 @@ public abstract class AbstractPropertiesProcessor implements PropertiesProcessor
         Matcher matcher = propertyPattern.matcher(propertyValue);
         while (matcher.find())
         {
-            String partOfValueToProcess = matcher.group(1);
-            String processedPartOfValue = processValue(propertyName, partOfValueToProcess);
-            processedValue = processedValue.replace(processorMarker + "(" + partOfValueToProcess + ")",
-                    processedPartOfValue);
+            String expressionForProcessing = matcher.group(1);
+            String processedPartOfValue = processValue(propertyName, matcher.group(2));
+            processedValue = processedValue.replace(expressionForProcessing, processedPartOfValue);
         }
         return processedValue;
     }

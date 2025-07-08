@@ -71,8 +71,8 @@ import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.crawler.CrawlController.WebCrawlerFactory;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
+import edu.uci.ics.crawler4j.url.AbstractWebURL;
 import edu.uci.ics.crawler4j.url.WebURL;
-import edu.uci.ics.crawler4j.url.WebURLImpl;
 
 @ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class})
 class HeadlessCrawlerTableTransformerTests
@@ -90,7 +90,8 @@ class HeadlessCrawlerTableTransformerTests
 
     private static final String CRAWLING_RELATIVE_URL = "/page";
 
-    private static final String OUTGOING_ABSOLUT_URL = "http://some.url/path";
+    private static final String OUTGOING_RELATIVE_URL = "/path";
+    private static final String OUTGOING_ABSOLUTE_URL = MAIN_APP_PAGE + OUTGOING_RELATIVE_URL;
 
     private static final String EXCLUDE_EXTENSIONS_REGEX = "js|css";
     private static final String EXCLUDE_URLS_REGEX = ".*broken-link*";
@@ -129,7 +130,7 @@ class HeadlessCrawlerTableTransformerTests
         transformer.setExcludeUrlsRegex(EXCLUDE_URLS_REGEX);
         transformer.setMainPageUrlProperty(MAIN_APP_PROP);
         Set<String> urls = testFetchUrls(mainAppPageRelativeUrl, expectedSeedRelativeUrls);
-        assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
+        assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUTE_URL)));
         verifyNoInteractions(redirectsProvider);
         assertThat(logger.getLoggingEvents(), is(List.of(getMainAppPageWarn())));
     }
@@ -153,7 +154,7 @@ class HeadlessCrawlerTableTransformerTests
         transformer.setFilterRedirects(true);
         transformer.setSeedRelativeUrls(toSet(PATH2, PATH3));
         transformer.setMainPageUrlProperty(MAIN_APP_PROP);
-        URI outgoingURI = URI.create(OUTGOING_ABSOLUT_URL);
+        URI outgoingURI = URI.create(OUTGOING_ABSOLUTE_URL);
         when(redirectsProvider.getRedirects(outgoingURI)).thenReturn(List.of(outgoingURI));
         Set<String> urls = testFetchUrls(ROOT, asList(PATH2, SLASH_PATH3));
         assertThat(urls, equalTo(Set.of()));
@@ -167,11 +168,11 @@ class HeadlessCrawlerTableTransformerTests
         transformer.setFilterRedirects(true);
         transformer.setSeedRelativeUrls(toSet(PATH2, PATH3));
         transformer.setMainPageUrlProperty(MAIN_APP_PROP);
-        URI outgoingURI = URI.create(OUTGOING_ABSOLUT_URL);
+        URI outgoingURI = URI.create(OUTGOING_ABSOLUTE_URL);
         var httpResponseException = new HttpResponseException(HttpStatus.SC_NOT_FOUND, "");
         when(redirectsProvider.getRedirects(outgoingURI)).thenThrow(httpResponseException);
         Set<String> urls = testFetchUrls(ROOT, List.of(PATH2, SLASH_PATH3));
-        assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
+        assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUTE_URL)));
         assertThat(logger.getLoggingEvents(), is(List.of(getMainAppPageWarn(), warn(httpResponseException,
                 "Exception during redirects receiving"))));
     }
@@ -182,10 +183,10 @@ class HeadlessCrawlerTableTransformerTests
         transformer.setFilterRedirects(true);
         transformer.setSeedRelativeUrls(toSet(PATH2, PATH3));
         transformer.setMainPageUrlProperty(MAIN_APP_PROP);
-        URI outgoingURI = URI.create(OUTGOING_ABSOLUT_URL);
+        URI outgoingURI = URI.create(OUTGOING_ABSOLUTE_URL);
         when(redirectsProvider.getRedirects(outgoingURI)).thenReturn(List.of(URI.create("http://some.url/other")));
         Set<String> urls = testFetchUrls(ROOT, asList(PATH2, SLASH_PATH3));
-        assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
+        assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUTE_URL)));
         assertThat(logger.getLoggingEvents(), is(List.of(getMainAppPageWarn(),
                 info(REDIRECT_FILTER_LOG, System.lineSeparator(), "http://some.url/path -> http://some.url/other"))));
     }
@@ -195,7 +196,7 @@ class HeadlessCrawlerTableTransformerTests
     {
         transformer.setSeedRelativeUrls(toSet(SEED));
         Set<String> urls = testFetchUrls(DEFAULT_RELATIVE_URL, List.of(SEED));
-        assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
+        assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUTE_URL)));
         TableProperties tableProperties = buildTableProperties();
         Set<String> urls2 = transformer.fetchUrls(tableProperties);
         verifyNoMoreInteractions(crawlControllerFactory);
@@ -214,10 +215,10 @@ class HeadlessCrawlerTableTransformerTests
         transformer.setSeedRelativeUrls(toSet(seedRelativeUrlsProperty));
         Set<String> urls = runUrlFetching(mainAppPage, tableProperties,
                 List.of(seedRelativeUrlsProperty), crawlController, ordered);
-        assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
+        assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUTE_URL)));
         Set<String> urls2 = transformer.fetchUrls(tableProperties);
         verifyNoMoreInteractions(crawlControllerFactory, crawlController);
-        assertThat(urls2, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
+        assertThat(urls2, equalTo(Set.of(OUTGOING_ABSOLUTE_URL)));
         assertSame(urls, urls2);
         verifyNoInteractions(redirectsProvider);
     }
@@ -228,7 +229,7 @@ class HeadlessCrawlerTableTransformerTests
         String seedRelativeUrl = "/fromConfig";
         transformer.setSeedRelativeUrls(Set.of(seedRelativeUrl));
         Set<String> urls = testFetchUrls(DEFAULT_RELATIVE_URL, List.of(seedRelativeUrl));
-        assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
+        assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUTE_URL)));
         verifyNoInteractions(redirectsProvider);
     }
 
@@ -261,7 +262,7 @@ class HeadlessCrawlerTableTransformerTests
             {
                 LinkCrawler linkCrawler = ((LinkCrawlerFactory) factory).newInstance();
                 HtmlParseData htmlParseData = new HtmlParseData();
-                String outgoingUrl = UriUtils.buildNewUrl(mainAppPage, OUTGOING_ABSOLUT_URL).toString();
+                String outgoingUrl = UriUtils.buildNewUrl(mainAppPage, OUTGOING_RELATIVE_URL).toString();
                 htmlParseData.setOutgoingUrls(Set.of(createWebUrl(outgoingUrl)));
                 String crawlingPageUrl = UriUtils.buildNewUrl(mainAppPage, CRAWLING_RELATIVE_URL).toString();
                 WebURL crawlingPageWebUrl = createWebUrl(crawlingPageUrl);
@@ -307,7 +308,7 @@ class HeadlessCrawlerTableTransformerTests
     private LoggingEvent getMainAppPageWarn()
     {
         return warn("The use of {} property for setting of main page for crawling is deprecated and will "
-                + "be removed in VIVIDUS 0.7.0, pelase see use either {} transformer parameter or "
+                + "be removed in VIVIDUS 0.7.0, please see use either {} transformer parameter or "
                 + "{} property.",
                 "web-application.main-page-url", "mainPageUrl", MAIN_APP_PROP);
     }
@@ -319,7 +320,7 @@ class HeadlessCrawlerTableTransformerTests
 
     private static WebURL createWebUrl(String url)
     {
-        WebURL webUrl = new WebURLImpl();
+        WebURL webUrl = new AbstractWebURL() { };
         webUrl.setURL(url);
         return webUrl;
     }

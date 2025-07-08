@@ -41,6 +41,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import com.azure.core.amqp.AmqpRetryOptions;
 import com.azure.core.credential.TokenCredential;
@@ -62,6 +63,9 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
@@ -90,6 +94,7 @@ public class ServiceBusServiceTests
             + " Contents: {}";
     private static final String CONSUMER_IS_STOPPED_LOG_MSG = "'{}' Azure Service Bus consumer is stopped";
     private static final Class<?> MESSAGES_KEY = ServiceBusReceivedMessage.class;
+    private static final Map<String, Object> CUSTOM_PROPERTIES = Map.of("key", "value");
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(ServiceBusService.class);
 
@@ -115,6 +120,14 @@ public class ServiceBusServiceTests
     private ServiceBusConnectionParameters queueClient = createDefaultClient(ChannelType.QUEUE);
     private ServiceBusConnectionParameters topicClient = createDefaultClient(ChannelType.TOPIC);
 
+    static Stream<Arguments> messageSendingProvider()
+    {
+        return Stream.of(
+                Arguments.of((Consumer<ServiceBusService>) s -> s.send(CLIENT_KEY, MESSAGE), Map.of()),
+                Arguments.of((Consumer<ServiceBusService>) s -> s.send(CLIENT_KEY, MESSAGE, CUSTOM_PROPERTIES),
+                        CUSTOM_PROPERTIES));
+    }
+
     @AfterEach
     void afterEach()
     {
@@ -122,35 +135,39 @@ public class ServiceBusServiceTests
         Optional.ofNullable(amqpRetryOptions).ifPresent(MockedConstruction::close);
     }
 
-    @Test
-    void testSendQueue()
+    @ParameterizedTest
+    @MethodSource("messageSendingProvider")
+    void testSendQueue(Consumer<ServiceBusService> action, Map<String, Object> expectedApplicationProperties)
     {
         mockConstructorForServiceBusClient(ClientType.SENDER);
         mockClientEntity(ChannelType.QUEUE);
         when(clientSenderBuilder.queueName(eq(QUEUE_NAME))).thenReturn(clientSenderBuilder);
         when(clientSenderBuilder.buildClient()).thenReturn(senderClient);
 
-        serviceBusService.send(CLIENT_KEY, MESSAGE);
+        action.accept(serviceBusService);
 
         ArgumentCaptor<ServiceBusMessage> messageCaptor = ArgumentCaptor.forClass(ServiceBusMessage.class);
         verify(senderClient).sendMessage(messageCaptor.capture());
         assertEquals(MESSAGE, messageCaptor.getValue().getBody().toString());
+        assertEquals(expectedApplicationProperties, messageCaptor.getValue().getApplicationProperties());
         assertThat(logger.getLoggingEvents(), is(List.of(info(SUCCESS_LOG_MSG, QUEUE_NAME, NAMESPACE_NAME))));
     }
 
-    @Test
-    void testSendTopic()
+    @ParameterizedTest
+    @MethodSource("messageSendingProvider")
+    void testSendTopic(Consumer<ServiceBusService> action, Map<String, Object> expectedApplicationProperties)
     {
         mockConstructorForServiceBusClient(ClientType.SENDER);
         mockClientEntity(ChannelType.TOPIC);
         when(clientSenderBuilder.topicName(eq(TOPIC_NAME))).thenReturn(clientSenderBuilder);
         when(clientSenderBuilder.buildClient()).thenReturn(senderClient);
 
-        serviceBusService.send(CLIENT_KEY, MESSAGE);
+        action.accept(serviceBusService);
 
         ArgumentCaptor<ServiceBusMessage> messageCaptor = ArgumentCaptor.forClass(ServiceBusMessage.class);
         verify(senderClient).sendMessage(messageCaptor.capture());
         assertEquals(MESSAGE, messageCaptor.getValue().getBody().toString());
+        assertEquals(expectedApplicationProperties, messageCaptor.getValue().getApplicationProperties());
         assertThat(logger.getLoggingEvents(), is(List.of(info(SUCCESS_LOG_MSG, TOPIC_NAME, NAMESPACE_NAME))));
     }
 

@@ -2,13 +2,8 @@
 
 The plugin provides functionality to execute commands via https://en.wikipedia.org/wiki/Shell_(computing)[Shell].
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-shell', version: '{current-version}')
-----
+:plugin-short-name: shell
+include::partial$plugin-installation.adoc[]
 
 == Properties
 

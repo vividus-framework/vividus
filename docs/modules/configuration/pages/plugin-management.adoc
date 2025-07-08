@@ -1,0 +1,75 @@
+:tabs-sync-option:
+
+= Plugin Management
+
+== Bill of Materials
+
+VIVIDUS provides a BOM for plugin management.
+
+NOTE: A Bill of Materials (BOM) is a special kind of project object model that is used to control the versions of
+a project's dependencies and provide a central place to define and update those versions.
+
+Every project needs to import the BOM in the `build.gradle` file. This is done in the dependencies block using
+the `platform` function to ensure that the versions from the BOM are used:
+
+[source,gradle,subs="attributes+"]
+----
+dependencies {
+    implementation platform(group: 'org.vividus', name: 'vividus-bom', version: '{current-version}') <1>
+    implementation(group: 'org.vividus', name: 'vividus') <2>
+    implementation(group: 'org.vividus', name: 'vividus-plugin-web-app') <3>
+    implementation(group: 'org.vividus', name: 'vividus-plugin-html') <3>
+}
+----
+<1> `vividus-bom` is the BOM. Versions for the core and plugins do not need to be specified as they are managed by this BOM.
+<2> VIVIDUS core dependency, every project must have it.
+<3> Optional declaration of the VIVIDUS plugins used in the project.
+
+== Refresh the project
+
+After making changes to the `build.gradle` file (adding or removing dependencies), it is necessary to refresh the project
+so that the changes can be recognized and the project can be re-configured accordingly. This can be done by running:
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew build
+----
+
+Windows::
++
+[source,cmd]
+----
+gradlew build
+----
+======
+
+If the project was imported to the IDE before adding a new plugin, it is required
+xref:ROOT:getting-started.adoc#_use_ide_for_the_tests_development[to re-generate]
+the configuration files for the used IDE and then refresh the project in the used IDE.
+
+== Override a Version
+
+WARNING: It is not expected users will override versions of plugins from the BOM. The plugins of different versions
+may not be compatible with each other and may introduce unexpected errors.
+
+If it is necessary to use a version of a plugin that is different from the one specified in the BOM, the version can be
+explicitly specified in the dependencies block.
+
+[source,gradle,subs="attributes+"]
+----
+dependencies {
+    implementation platform(group: 'org.vividus', name: 'vividus-bom', version: '{current-version}')
+    implementation(group: 'org.vividus', name: 'vividus')
+    implementation(group: 'org.vividus', name: 'vividus-plugin-web-app', version: '0.6.13')
+}
+----
+
+== Keep Dependencies Up to Date
+
+It is recommended to update the BOM regularly to its latest version to take advantage of the latest bug fixes and
+improvements. This can be done by updating the version number in the BOM dependency in the `build.gradle` file. Then it
+is necessary to <<_refresh_the_project,refresh the project>>.

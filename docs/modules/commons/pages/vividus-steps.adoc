@@ -105,7 +105,7 @@ Given I initialize scenario variable `personalInfo` using template `templates/pe
 Compare the actual value against the expected value in accordance with the comparison rule. Could compare Maps and Lists of maps using EQUAL_TO comparison rule.
 Other rules will fallback to strings comparison.
 
-NOTE: The step prints the comparison results in the unified diff format for the strings with the legth more than specified in the property xref:ROOT:tests-configuration.adoc#_configuration_properties[report.text-length-diff-threshold].
+NOTE: The step prints the comparison results in the unified diff format for the strings with the legth more than specified in the property xref:configuration:tests-configuration.adoc#_configuration_properties[report.text-length-diff-threshold].
 
 WARNING: If the values are valid numbers than they will be converted into {java-api-docs-base-url}/docs/api/java.base/java/math/BigInteger.html[BigInteger] and compared as numbers.
 
@@ -266,7 +266,7 @@ If the maximum number of iterations is reached no failure or exception will occu
 
 [source,gherkin]
 ----
-When I execute steps with delay `$delay` at most $max times while variable variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute
+When I execute steps with delay `$delay` at most $max times while variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute
 ----
 
 Alias:

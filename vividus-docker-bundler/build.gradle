@@ -33,7 +33,7 @@ dependencies {
     implementation (project(':vividus-plugin-applitools')) {
         exclude group: 'com.applitools', module: 'eyes-universal-core-binaries'
     }
-    implementation(group: 'com.applitools', name: 'eyes-universal-core-alpine', version: versions.eyesUniversal)
+    implementation(group: 'com.applitools', name: 'eyes-universal-core-alpine', version: '5.73.2')
 
     implementation project(':vividus-plugin-avro')
     implementation project(':vividus-plugin-aws-dynamodb')
@@ -77,15 +77,14 @@ dependencies {
     implementation project(':vividus-plugin-yaml')
 
     implementation project(':vividus-agent-reportportal')
-
-    implementation(group: 'com.mysql', name: 'mysql-connector-j', version: '8.4.0')
-    implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.6.1.jre11')
-    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.7.3')
-    implementation(group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.23.0.0')
+    implementation(group: 'com.mysql', name: 'mysql-connector-j', version: '9.3.0')
+    implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.10.0.jre11')
+    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.7.7')
+    implementation(group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.27.0.0')
     implementation(group: 'com.ibm.db2.jcc', name: 'db2jcc', version: 'db2jcc4')
-    implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.42')
-    implementation(group: 'com.h2database', name: 'h2', version: '2.2.224')
-    implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.16.0')
+    implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.46')
+    implementation(group: 'com.h2database', name: 'h2', version: '2.3.232')
+    implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.24.2')
 }
 
 tasks.register('copyRuntimeLibs', Copy) {
@@ -96,7 +95,7 @@ tasks.register('copyRuntimeLibs', Copy) {
 tasks.register('createDockerfile', com.bmuschko.gradle.docker.tasks.image.Dockerfile) {
     dependsOn copyRuntimeLibs
 
-    from('eclipse-temurin:17-jre-alpine')
+    from('eclipse-temurin:21-jre-alpine')
     label(['maintainer': 'Vividus Team "vividus.team@vividus.dev"'])
     instruction('RUN apk add gcompat')
     workingDir('vividus')

@@ -1,3 +1,5 @@
+:tabs-sync-option:
+
 = CLI
 
 In scope of this article the `task` term is a piece of work that is done on stories, scenarios, steps and other entities
@@ -19,23 +21,23 @@ NOTE: The tasks are available only through the `gradlew` command.
 
 == Run stories
 
-The task runs test stories based on current xref:ROOT:tests-configuration.adoc[tests configuration] and tests state
-on the file system.
+The task runs test stories based on current xref:configuration:tests-configuration.adoc[tests configuration] and tests state
+on the file system:
 
 :task-name: runStories
-
 include::partial$stories-exec.adoc[]
 
 == Debug stories
 
-The task runs test stories omitting VIVIDUS initialization check based on current xref:ROOT:tests-configuration.adoc[tests configuration]
+The task runs test stories omitting VIVIDUS initialization check based on current xref:configuration:tests-configuration.adoc[tests configuration]
 and tests state on the file system.
 
-include::partial$stories-exec.adoc[task-name=debugStories]
+:task-name: debugStories
+include::partial$stories-exec.adoc[]
 
 == Print available steps
 
-The task prints all the steps that are available for the xref:ROOT:tests-configuration.adoc[configured] profiles, environments and suites in the alphabetical order.
+The task prints all the steps that are available for the xref:configuration:tests-configuration.adoc[configured] profiles, environments and suites in the alphabetical order.
 
 .Options
 [cols="3,1,1,1", options="header"]
@@ -53,17 +55,22 @@ The task prints all the steps that are available for the xref:ROOT:tests-configu
 
 |===
 
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell]
 ----
 ./gradlew printSteps --args='-f my-steps.txt'
 ----
 
-.Windows:
+Windows::
++
 [source,shell]
 ----
 gradlew printSteps --args='-f my-steps.txt'
 ----
+======
 
 .Output
 [source,gherkin]
@@ -101,17 +108,22 @@ The task counts steps in the specified tests folder and prints them in the desce
 
 |===
 
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell]
 ----
 ./gradlew countSteps --args='-t 5 -d story/uat'
 ----
 
-.Windows:
+Windows::
++
 [source,shell]
 ----
 gradlew countSteps --args='-t 5 -d story/uat'
 ----
+======
 
 .Output
 [source,gherkin]
@@ -144,17 +156,22 @@ The task counts and prints stories, scenarios and scenarios containing examples 
 
 |===
 
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell]
 ----
 ./gradlew countScenarios --args='-d story/uat'
 ----
 
-.Windows:
+Windows::
++
 [source,shell]
 ----
 gradlew countScenarios --args='-d story/uat'
 ----
+======
 
 .Output
 [source]
@@ -168,17 +185,22 @@ gradlew countScenarios --args='-d story/uat'
 
 The task validates known issues format and prints the validated known issues into the console.
 
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell]
 ----
 ./gradlew validateKnownIssues
 ----
 
-.Windows:
+Windows::
++
 [source,shell]
 ----
-./gradlew validateKnownIssues
+gradlew validateKnownIssues
 ----
+======
 
 .Output
 [source]
@@ -218,17 +240,22 @@ IMPORTANT: If you miss the file argument into the task it will behave as describ
 .*Doctor Who.*
 ----
 
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell]
 ----
 ./gradlew validateKnownIssues --args='-f ./assertion-failures.txt'
 ----
 
-.Windows:
+Windows::
++
 [source,shell]
 ----
 gradlew validateKnownIssues --args='-f assertion-failures.txt'
 ----
+======
 
 .Output
 [source]
@@ -242,17 +269,22 @@ VVD-6       | .*Doctor Who.*
 The task replaces deprecated steps with actual ones in all stories(`\*.story` files) and composite steps (`*.steps` files) along the path `<project-name>/src/main/resources`.
 Please note that some deprecated steps (for example which should be replaced with two steps) cannot be replaced automatically and must be refactored manually.
 
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell]
 ----
 ./gradlew replaceDeprecatedSteps
 ----
 
-.Windows:
+Windows::
++
 [source,shell]
 ----
 gradlew replaceDeprecatedSteps
 ----
+======
 
 .Output (for cases when found steps which cannot be replaced automatically)
 [source]
@@ -265,17 +297,22 @@ The step "When I check all checkboxes located by `xpath(.//input)`" from "compos
 
 The task replaces deprecated properties with actual ones in all properties files along the path `<project-name>/src/main/resources/properties`.
 
-.macOS / Linux:
+[tabs]
+======
+macOS / Linux::
++
 [source,shell]
 ----
 ./gradlew replaceDeprecatedProperties
 ----
 
-.Windows:
+Windows::
++
 [source,shell]
 ----
 gradlew replaceDeprecatedProperties
 ----
+======
 
 The examples below demonstrate property file with deprecated properties before and after applying the `replaceDeprecatedProperties` task.
 
@@ -296,3 +333,106 @@ applitools.app-name=name
 web.driver.chrome.experimental-options={"prefs": {"profile": {"cookie_controls_mode": 0}}}
 batch-6.story.execution-timeout=PT15M
 ----
+
+== Find and fix formatting issues
+https://github.com/diffplug/spotless[Spotless] checks refer to formatting and linting validations to enforce consistent
+code quality standards. Spotless automates the formatting of files based on predefined rules and integrates with linting
+tools. It offers a number of generic formatters (indentation correction, normalize line endings, enforce consistent EOF
+files, enforce file encoding, etc.) that help keep test files clean, readable, and consistent, reducing noise in version
+control and making collaboration easier.
+
+For files like `*.story`, `*.steps`, `*.table`, commonly used in VIVIDUS, the following Spotless rules are applied by default:
+
+.Spotless rules
+[cols="1,2", options="header"]
+|===
+|Rule
+|Description
+
+|Trimming Trailing Whitespace
+|Removes any spaces or tabs at the end of lines.
+
+|Ensuring Newline at End of File
+|Guarantees that each file ends with a single newline.
+
+|Consistent Indentation
+|Enforces 4 spaces for indentation.
+
+|Normalizing Line Endings
+|Converts all line endings to LF (\n) for consistency across platforms.
+
+|===
+
+=== Spotless tasks
+
+The task validates that all files comply with the specified formatting rules.
+
+NOTE: This task is executed automatically during the build process and does not require manual invocation.
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew spotlessCheck
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew spotlessCheck
+----
+======
+
+The task automatically formats files to conform to the defined rules.
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew spotlessApply
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew spotlessApply
+----
+======
+
+=== Fixing Spotless violations
+
+If the `build` task is failed and the result like the following is shown in the console output, it means that some files
+do not comply with the Spotless rules.
+
+[source,shell]
+----
+> Task :spotlessVividusCheck FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':spotlessVividusCheck'.
+> The following files had format violations:
+      src/main/resources/story/web_app/Google Search.story
+          @@ -13,8 +13,6 @@
+           |·step··········································|
+           |·When·I·click·on·element·located·by·`xpath(.)`·|
+           When·I·enter·`VIVIDUS·test·automation`·in·field·located·by·`<search-input-field>`
+          -When·I·wait·until·element·located·by·`<search-button>`·appears·
+          -When·I·click·on·element·located·by·`<search-button>`\t
+          +When·I·wait·until·element·located·by·`<search-button>`·appears
+          +When·I·click·on·element·located·by·`<search-button>`
+           Then·number·of·elements·found·by·`linkUrlPart(https://docs.vividus.dev/vividus/)->filter.textPart(What·is·VIVIDUS·::·VIVIDUS)`·is·equal·to·`1`
+          -
+          -
+  Run './gradlew :spotlessApply' to fix these violations.
+----
+
+You can fix the violations manually or automatically by running the `spotlessApply` task. After fixing, review
+the changes and commit them to your repository. Following these steps will help keep your build stable and successful.

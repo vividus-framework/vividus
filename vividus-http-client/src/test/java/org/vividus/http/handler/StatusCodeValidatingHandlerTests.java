@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,6 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,11 +30,10 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.vividus.http.client.HttpResponse;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
@@ -47,59 +44,67 @@ class StatusCodeValidatingHandlerTests
     @Test
     void shouldFailIfMinStatusCodeIsGreaterThanMaxStatusCode()
     {
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+        var thrown = assertThrows(IllegalArgumentException.class,
             () -> new StatusCodeValidatingHandler(100, 1, null));
-        assertEquals("Min allowed status code must be less than max status code", thrown.getMessage());
+        assertEquals("Min allowed status code must be less than or equal to max status code", thrown.getMessage());
     }
 
     @Test
     void shouldFailIfMinStatusIsLessThanAllowedValue()
     {
-        int invalidCode = 99;
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+        var invalidCode = 99;
+        var thrown = assertThrows(IllegalArgumentException.class,
             () -> new StatusCodeValidatingHandler(invalidCode, 400, null));
         assertEquals("Min status code must be greater than or equal to 100, but got " + invalidCode,
                 thrown.getMessage());
     }
 
     @Test
-    void shouldFailIfMaxStatusIsGreeaterThanAllowedValue()
+    void shouldFailIfMaxStatusIsGreaterThanAllowedValue()
     {
-        int invalidCode = 600;
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+        var invalidCode = 600;
+        var thrown = assertThrows(IllegalArgumentException.class,
             () -> new StatusCodeValidatingHandler(100, invalidCode, null));
         assertEquals("Min status code must be less than or equal to 599, but got " + invalidCode, thrown.getMessage());
     }
 
-    @Test
-    void shouldHandleResponseWithValidStatusCode() throws IOException
+    @ParameterizedTest
+    @CsvSource({
+            "200, 300, 200",
+            "200, 300, 201",
+            "200, 300, 300",
+            "200, 200, 200"
+    })
+    void shouldHandleResponseWithValidStatusCode(int minInclusiveStatusCode, int maxInclusiveStatusCode, int statusCode)
+            throws IOException
     {
-        HttpResponse response = spy(HttpResponse.class);
-        response.setStatusCode(HttpStatus.SC_OK);
+        var response = new HttpResponse();
+        response.setStatusCode(statusCode);
 
-        StatusCodeValidatingHandler handler = new StatusCodeValidatingHandler(HttpStatus.SC_OK,
-                HttpStatus.SC_MULTIPLE_CHOICES, null);
+        var handler = new StatusCodeValidatingHandler(minInclusiveStatusCode, maxInclusiveStatusCode, null);
         handler.handle(response);
 
         assertThat(logger.getLoggingEvents(), is(empty()));
-        verify(response).getStatusCode();
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { HttpStatus.SC_OK, HttpStatus.SC_BAD_REQUEST })
-    void shouldFailOnUnexpectedStatusCode(int statusCode) throws IOException
+    @CsvSource({
+            "201, 300, 200, 'The status code is expected to be between 201 and 300 inclusively, but got: 200'",
+            "201, 300, 400, 'The status code is expected to be between 201 and 300 inclusively, but got: 400'",
+            "201, 201, 200, 'The status code is expected to be 201, but got: 200'",
+            "201, 201, 202, 'The status code is expected to be 201, but got: 202'"
+    })
+    void shouldFailOnUnexpectedStatusCodeFromRange(int minInclusiveStatusCode, int maxInclusiveStatusCode,
+            int statusCode, String exceptionMessage)
     {
-        HttpResponse response = spy(HttpResponse.class);
+        var response = new HttpResponse();
         response.setStatusCode(statusCode);
-        String serviceName = "Rishikesh";
+        var serviceName = "Rishikesh";
 
-        StatusCodeValidatingHandler handler = new StatusCodeValidatingHandler(HttpStatus.SC_CREATED,
-                HttpStatus.SC_MULTIPLE_CHOICES, serviceName);
-        IOException thrown = assertThrows(IOException.class, () -> handler.handle(response));
+        var handler = new StatusCodeValidatingHandler(minInclusiveStatusCode, maxInclusiveStatusCode, serviceName);
+        var thrown = assertThrows(IOException.class, () -> handler.handle(response));
 
-        assertEquals("The status code is expected to be between " + HttpStatus.SC_CREATED + " and "
-                + HttpStatus.SC_MULTIPLE_CHOICES + " inclusively, but got: " + statusCode, thrown.getMessage());
+        assertEquals(exceptionMessage, thrown.getMessage());
         assertThat(logger.getLoggingEvents(), is(List.of(error("{} response: {}", serviceName, response))));
-        verify(response).getStatusCode();
     }
 }

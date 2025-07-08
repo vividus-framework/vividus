@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,44 +16,38 @@
 
 package org.vividus.steps.ui.web.devtools;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.Map;
+
+import com.google.common.eventbus.EventBus;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.chromium.HasCdp;
-import org.openqa.selenium.remote.Browser;
-import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.ui.web.action.CdpActions;
+import org.vividus.ui.web.event.DeviceMetricsOverrideEvent;
 import org.vividus.util.json.JsonUtils;
 
 @ExtendWith(MockitoExtension.class)
 class MobileEmulationStepsTests
 {
-    @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private IWebDriverManager webDriverManager;
-    @Mock private HasCdp hasCdp;
+    @Mock private CdpActions cdpActions;
+    @Mock private EventBus eventBus;
     private MobileEmulationSteps steps;
 
     @BeforeEach
     void init()
     {
-        this.steps = new MobileEmulationSteps(webDriverProvider, webDriverManager, new JsonUtils());
+        this.steps = new MobileEmulationSteps(cdpActions, new JsonUtils(), eventBus);
     }
 
     @Test
     void shouldOverrideDeviceMetrics()
     {
-        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(true);
-        when(webDriverProvider.getUnwrapped(HasCdp.class)).thenReturn(hasCdp);
-
         String metrics = """
             {
                 "width": 430,
@@ -65,32 +59,21 @@ class MobileEmulationStepsTests
 
         steps.overrideDeviceMetrics(metrics);
 
-        verify(hasCdp).executeCdpCommand("Emulation.setDeviceMetricsOverride", Map.of(
+        verify(cdpActions).executeCdpCommand("Emulation.setDeviceMetricsOverride", Map.of(
             "width", 430,
             "height", 932,
             "deviceScaleFactor", 3,
             "mobile", true
         ));
+        verify(eventBus).post(any(DeviceMetricsOverrideEvent.class));
     }
 
     @Test
     void shouldClearDeviceMetrics()
     {
-        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(true);
-        when(webDriverProvider.getUnwrapped(HasCdp.class)).thenReturn(hasCdp);
-
         steps.clearDeviceMetrics();
 
-        verify(hasCdp).executeCdpCommand("Emulation.clearDeviceMetricsOverride", Map.of());
-    }
-
-    @Test
-    void shouldFailIfBrowserIsNotChrome()
-    {
-        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(false);
-
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, steps::clearDeviceMetrics);
-
-        assertEquals("The step is only supported by Chrome browser.", thrown.getMessage());
+        verify(cdpActions).executeCdpCommand("Emulation.clearDeviceMetricsOverride", Map.of());
+        verify(eventBus).post(any(DeviceMetricsOverrideEvent.class));
     }
 }

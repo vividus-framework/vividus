@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.jbehave.core.configuration.Configuration;
@@ -76,7 +75,7 @@ class ProxyAgentStoryReporterTests
     {
         Story story = mock(Story.class);
         mockRunningStoryInRunContext(story);
-        when(story.getMeta()).thenReturn(new Meta(Collections.emptyList()));
+        when(story.getMeta()).thenReturn(new Meta(List.of()));
         proxyAgentStoryReporter.beforeStory(story, false);
         verifyNoInteractions(proxy);
         verify(next).beforeStory(story, false);
@@ -119,7 +118,7 @@ class ProxyAgentStoryReporterTests
     void testBeforeScenarioDryRun()
     {
         when(configuration.dryRun()).thenReturn(true);
-        Scenario scenario = new Scenario(SCENARIO_TITLE, Collections.emptyList());
+        Scenario scenario = new Scenario(SCENARIO_TITLE, List.of());
         proxyAgentStoryReporter.beforeScenario(scenario);
         verifyNoInteractions(proxy);
         verify(next).beforeScenario(scenario);
@@ -130,9 +129,9 @@ class ProxyAgentStoryReporterTests
     {
         proxyAgentStoryReporter.setProxyRecordingEnabled(true);
         when(proxy.isStarted()).thenReturn(Boolean.TRUE);
-        Scenario scenario = new Scenario(SCENARIO_TITLE, Collections.emptyList());
+        Scenario scenario = new Scenario(SCENARIO_TITLE, List.of());
         proxyAgentStoryReporter.beforeScenario(scenario);
-        verify(proxy).clearRequestFilters();
+        verify(proxy).clearMocks();
         verify(proxy).startRecording();
         verify(next).beforeScenario(scenario);
     }
@@ -140,11 +139,11 @@ class ProxyAgentStoryReporterTests
     @Test
     void testBeforeScenarioStartProxyRecordingByScenarioMeta()
     {
-        Scenario scenario = mockRunningScenarioAndStoryWithMeta(Collections.emptyList(), PROXY_META);
+        Scenario scenario = mockRunningScenarioAndStoryWithMeta(List.of(), PROXY_META);
         proxyAgentStoryReporter.setProxyRecordingEnabled(false);
         when(proxy.isStarted()).thenReturn(Boolean.TRUE);
         proxyAgentStoryReporter.beforeScenario(scenario);
-        verify(proxy).clearRequestFilters();
+        verify(proxy).clearMocks();
         verify(proxy).startRecording();
         verify(next).beforeScenario(scenario);
     }
@@ -152,11 +151,11 @@ class ProxyAgentStoryReporterTests
     @Test
     void testBeforeScenarioNoProxyRecordingStart()
     {
-        Scenario scenario = mockRunningScenarioAndStoryWithMeta(Collections.emptyList(), Collections.emptyList());
+        Scenario scenario = mockRunningScenarioAndStoryWithMeta(List.of(), List.of());
         proxyAgentStoryReporter.setProxyRecordingEnabled(false);
         when(proxy.isStarted()).thenReturn(Boolean.TRUE);
         proxyAgentStoryReporter.beforeScenario(scenario);
-        verify(proxy, never()).clearRequestFilters();
+        verify(proxy, never()).clearMocks();
         verify(proxy, never()).startRecording();
         verify(next).beforeScenario(scenario);
     }
@@ -164,7 +163,7 @@ class ProxyAgentStoryReporterTests
     @Test
     void testBeforeScenarioStartProxy()
     {
-        Scenario scenario = mockRunningScenarioAndStoryWithMeta(Collections.emptyList(), PROXY_META);
+        Scenario scenario = mockRunningScenarioAndStoryWithMeta(List.of(), PROXY_META);
         proxyAgentStoryReporter.beforeScenario(scenario);
         verify(proxy).start();
         verify(next).beforeScenario(scenario);
@@ -173,7 +172,7 @@ class ProxyAgentStoryReporterTests
     @Test
     void testBeforeScenarioNoProxyStart()
     {
-        Scenario scenario = mockRunningScenarioAndStoryWithMeta(Collections.emptyList(), Collections.emptyList());
+        Scenario scenario = mockRunningScenarioAndStoryWithMeta(List.of(), List.of());
         proxyAgentStoryReporter.beforeScenario(scenario);
         verify(proxy, never()).start();
         verify(next).beforeScenario(scenario);
@@ -182,7 +181,7 @@ class ProxyAgentStoryReporterTests
     @Test
     void testBeforeScenarioStartProxyAndRecording()
     {
-        Scenario scenario = mockRunningScenarioAndStoryWithMeta(PROXY_META, Collections.emptyList());
+        Scenario scenario = mockRunningScenarioAndStoryWithMeta(PROXY_META, List.of());
         when(proxy.isStarted()).thenAnswer(new Answer<Boolean>()
         {
             private int count;
@@ -195,7 +194,7 @@ class ProxyAgentStoryReporterTests
         });
         proxyAgentStoryReporter.beforeScenario(scenario);
         verify(proxy).start();
-        verify(proxy).clearRequestFilters();
+        verify(proxy).clearMocks();
         verify(proxy).startRecording();
         verify(next).beforeScenario(scenario);
     }
@@ -203,7 +202,7 @@ class ProxyAgentStoryReporterTests
     @Test
     void testBeforeScenarioStartProxyEnabledInStoryMeta()
     {
-        Scenario scenario = mockRunningScenarioAndStoryWithMeta(PROXY_META, Collections.emptyList());
+        Scenario scenario = mockRunningScenarioAndStoryWithMeta(PROXY_META, List.of());
         proxyAgentStoryReporter.beforeScenario(scenario);
         verify(proxy).start();
         verify(next).beforeScenario(scenario);
@@ -221,7 +220,7 @@ class ProxyAgentStoryReporterTests
     @Test
     void testAfterScenarioWhenProxyIsStartedButNoCleanUpIsNeeded()
     {
-        mockRunningScenarioAndStoryWithMeta(Collections.emptyList(), Collections.emptyList());
+        mockRunningScenarioAndStoryWithMeta(List.of(), List.of());
         proxyAgentStoryReporter.setProxyEnabled(true);
         when(proxy.isStarted()).thenReturn(Boolean.TRUE);
         Timing timing = mock(Timing.class);
@@ -233,7 +232,7 @@ class ProxyAgentStoryReporterTests
     @Test
     void testAfterScenarioWhenProxyIsStartedAndStopRecordingIsNeededButProxyStopIsNot()
     {
-        mockRunningScenario(mock(Story.class), Collections.emptyList());
+        mockRunningScenario(mock(Story.class), List.of());
         proxyAgentStoryReporter.setProxyRecordingEnabled(true);
         when(proxy.isStarted()).thenReturn(Boolean.TRUE);
         Timing timing = mock(Timing.class);

@@ -1,5 +1,5 @@
 plugins {
-  id 'org.sonarqube' version '5.0.0.4638'
+  id 'org.sonarqube' version '6.2.0.5505'
 }
 
 ext.buildSystemPath = file("${System.env.VIVIDUS_BUILD_SYSTEM_HOME?:buildSystemRootDir}/${buildSystemVersion}")
@@ -26,6 +26,12 @@ subprojects {
             module('ch.qos.reload4j:reload4j') {
                 replacedBy('org.slf4j:log4j-over-slf4j', 'Redirect Reload4j (a drop-in replacement for Log4J 1.x) logs to SLF4J')
             }
+            module('org.jsoup:jsoup') {
+                replacedBy('com.github.vividus-framework:jsoup', 'Use jsoup build from the custom fork')
+            }
+            module('com.jayway.jsonpath:json-path') {
+                replacedBy('com.github.vividus-framework.JsonPath:json-path', 'Use JsonPath build from the custom fork')
+            }
         }
     }
 }
@@ -36,6 +42,9 @@ def publishedSubprojects = subprojects.findAll {
 def libraries = publishedSubprojects.findAll { it.name != 'vividus-bom' }
 configure(libraries) {
     apply from: "${buildSystemPath}/vividus-library-subproject.gradle"
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+    }
 }
 
 configure(publishedSubprojects) {
@@ -68,11 +77,8 @@ project.description = 'Vividus'
 
 ext {
     versions = [
-        jbehave:                '6.0.0-alpha.3',
+        jbehave:                '6.0.0-alpha.9',
         powermock:              'a0be5c4bbe',
-        // eyes and eyesUniversal versions should be updated and tested together
-        eyes:                   '5.67.2',
-        eyesUniversal:          '5.64.3',
-        jsonPath:               '52ebb195bd'
+        jsonPath:               'eec830ced9'
     ]
 }

@@ -4,7 +4,7 @@ Meta:
     @epic vividus-plugin-rest-api
 
 Scenario: Verify method DEBUG is supported; accidental space is trimmed in httpMethod enum
-When I execute HTTP DEBUG request for resource with URL `http://example.org/`
+When I execute HTTP DEBUG  request for resource with URL `https://httpbingo.org/`
 Then `${response-code}` is equal to `405`
 
 Scenario: Verify handling of plus character in URL query
@@ -160,3 +160,7 @@ Then JSON element from `${response-as-bytes}` by JSON path `$` is equal to `{
      "Content-Type": [ "application/x-www-form-urlencoded; charset=UTF-8" ]
   }
 }`ignoring extra fields
+
+Scenario: Verify using of encoded unsafe characters in user info for Basic Authentication
+When I execute HTTP GET request for resource with URL `https://username:password%5E@httpbingo.org/basic-auth/username/password^`
+Then response code is equal to `200`

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 
 public class SelfHealingUiContext extends UiContext
 {
+    private static final String WRAPS_ELEMENT_METHOD = "getWrappedElement";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SelfHealingUiContext.class);
 
     @Override
@@ -60,7 +62,7 @@ public class SelfHealingUiContext extends UiContext
         proxied.add(clazz);
         return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), proxied.toArray(new Class[0]),
                 (proxy, method, args) -> {
-                if ("getWrappedElement".equals(method.getName()))
+                if (WRAPS_ELEMENT_METHOD.equals(method.getName()))
                 {
                     return searchContext;
                 }

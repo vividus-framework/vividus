@@ -44,9 +44,11 @@ Where:
 
 . `account-key` - The key of the account configuration
 . `property-name` - The name of the container property. One of:
-.. `endpoint` - The endoint of the account.
+.. `endpoint` - The endpoint of the account.
 .. `key` - Either a master or readonly key used to perform authentication for Cosmos database service.
 If `key` is not set, <<_authentication,default authentication mechanism described below>> will be used.
+.. `connection-mode` - https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/sdk-connection-modes [The mechanism],
+how the client connects to Azure Cosmos DB. Possible values: `DIRECT` or `GATEWAY`. If `connection-mode` is not set, `DIRECT` will be used.
 
 .Access configuration
 [source,properties]
@@ -71,6 +73,7 @@ azure.cosmos-db.database.commecrial.account-key=vividus
 # Accounts configuration contains connection details
 azure.cosmos-db.account.vividus.endpoint=https://vividus-cosmos.documents.azure.com:443/
 azure.cosmos-db.account.vividus.key=some key
+azure.cosmos-db.account.vividus.connection-mode=GATEWAY
 ----
 
 include::partial$azure-authentication.adoc[]

@@ -105,78 +105,15 @@ When I clear field located by `$locator` using keyboard
 When I clear field located by `id(email)` using keyboard
 ----
 
-
-=== Scrolling steps
-==== Scroll context
-
-Scrolls the context to an edge
-
-[source,gherkin]
-----
-When I scroll context to $scrollDirection edge
-----
-* `$scrollDirection` - the direction of the scroll. One of:
-** `LEFT` - start of a page/element horizontally
-** `RIGHT` - end of a page/element horizontally
-** `TOP` - start of a page/element vertically
-** `BOTTOM` - end of a page/element vertically
-
-[TIP]
-If the context is not set, the whole page will be scrolled
-
-.Scroll login to a bottom
-[source,gherkin]
-----
-When I change context to element located by `id(login)`
-When I scroll context to BOTTOM edge
-----
-
-==== Scroll element into view
-
-Scrolls an element into the view with centred positioning.
-
-NOTE: If the element to scroll is located inside an https://developer.mozilla.org/en-US/docs/Web/CSS/overflow[overflow] container then native https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView[scrollIntoView] JS method with top alignment is used.
-
-[source,gherkin]
-----
-When I scroll element located by `$locator` into view
-----
-* `$locator` - The <<_locator,locator>> used to find element.
-
-_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
-[source,gherkin]
-----
-When I scroll element located `$locator` into view
-----
-* `$locator` - The <<_locator,locator>> used to find element.
-
-.Scroll button into view
-[source,gherkin]
-----
-When I scroll element located by `id(way_down_button)` into view
-----
-
-==== Validate the page is scrolled to element
-
-Checks if the page is scrolled to the specific element
-
-[source,gherkin]
-----
-Then page is scrolled to element located by `$locator`
-----
-* `$locator` - The <<_locator,locator>> used to find element.
-
-.Validate Contact link is scrolled into view
-[source,gherkin]
-----
-Then page is scrolled to element located by `xpath(//a[text()="Contact"])`
-----
+include::plugins:partial$ui-scrolling-steps.adoc[]
 
 include::plugins:partial$ui-elements-validation-steps.adoc[]
 
 include::plugins:partial$ui-selenium-text-content-steps.adoc[]
+
 include::plugins:partial$common-web-app-text-steps.adoc[]
 
+include::plugins:partial$common-web-app-wait-steps.adoc[]
 
 === Tab steps
 ==== Open a new tab
@@ -522,38 +459,25 @@ When I wait until browser console infos by regex `.*Application ready.*` appear 
 Then `${logs}` matches `.*Application ready in \d+ seconds.*`
 ----
 
-=== Perform steps for each found element
+==== Clear browser console logs
 
-Executes the steps against all elements found by locator. After a required number of elements is found,
-search context switches in order for each found element and performs all steps on it.
+Clears browser console logs of all types.
 
-[IMPORTANT]
-If comparison rule mismatch steps will not be performed even if elements are found.
+NOTE: The `console.clear();` JS command doesn't affect the logs fetched by Selenium.
 
 [source,gherkin]
 ----
-When I find $comparisonRule `$number` elements by `$locator` and for each element do$stepsToExecute
+When I clear browser console logs
 ----
 
-Alias:
-[source,gherkin]
+.Clear browser console logs
 ----
-When I find $comparisonRule '$number' elements by $locator and for each element do$stepsToExecute
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
+When I clear browser console logs
+Then there are browser console ERRORS by regex `.*`
 ----
 
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-* `$number` - The number of elements to find.
-* `$locator` - The <<_locator,locator>> used to find elements.
-* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
-
-.Script type check
-[source,gherkin]
-----
-When I find = `5` elements by `xpath(//script):a` and for each element do
-|step                                                                                      |
-|When I set 'type' attribute value of the context element to the 'scenario' variable 'type'|
-|Then `${type}` is equal to `text/javascript`                                              |
-----
+include::plugins:partial$ui-execution-on-each-element-steps.adoc[]
 
 === Context steps
 ==== Switch to the default context of page

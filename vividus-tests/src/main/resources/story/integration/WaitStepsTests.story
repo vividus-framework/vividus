@@ -3,6 +3,14 @@ Description: Integration tests for WaitSteps class.
 Meta:
     @epic vividus-plugin-web-app
 
+Scenario: Verify step: 'When I wait until element located by `$locator` stops moving'
+Given I am on page with URL `${vividus-test-site-url}/movingElement.html`
+When I click on element located by `buttonName(Start moving)`
+When I wait until element located by `cssSelector(.internal)` stops moving
+When I change context to element located by `cssSelector(.external)`
+When I COMPARE_AGAINST baseline with name `moving-element-after-stopping#{eval(isWindows ? '-windows' : '')}`
+When I reset context
+
 Scenario: Step verification "When I wait until element located by '$locator' disappears"
 Given I am on page with URL `${vividus-test-site-url}/elementState.html`
 Given I initialize scenario variable `disappearing-locator` with value `By.id(element-to-hide)`
@@ -58,13 +66,6 @@ When I click on element located by `id(button-show)`
 When I wait until number of elements located by `id(element-to-show):i` is equal to 0
 Then number of elements found by `id(element-to-show)` is equal to `1`
 
-Scenario: Verify step: 'When I wait until element located by `$locator` stops moving'
-Given I am on page with URL `${vividus-test-site-url}/movingElement.html`
-When I change context to element located by `cssSelector(.external)`
-When I wait until element located by `cssSelector(.internal)` stops moving
-When I COMPARE_AGAINST baseline with name `moving-element-after-stopping`
-When I reset context
-
 Scenario: Verify steps: "When I wait until alert appears" and "When I wait until alert disappears"
 Given I am on page with URL `${vividus-test-site-url}/alertprompt.html`
 When I click on element located by `buttonName(Survey)`
@@ -80,5 +81,7 @@ Given I am on page with URL `${vividus-test-site-url}/frames.html`
 When I wait until frame with name `exampleCom` appears and I switch to it
 Then text `Example Domain` exists
 
-Scenario: Verify step: 'Then element located by `$locator` appears in `$timeout`'
+Scenario: Verify step: 'Then element located by `$locator` appears in `$timeout`', 'When I wait until element located by `$locator` appears in `$timeout`'
+When I wait until element located by `id(non-existent-element)` appears in `PT4S`
+!-- Deprecated
 Then element located by `id(non-existent-element)` appears in `PT4S`

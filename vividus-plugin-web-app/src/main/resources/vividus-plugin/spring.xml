@@ -2,10 +2,14 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
+        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"
         default-lazy-init="true" profile="web_selenium">
+
+    <context:component-scan base-package="org.vividus.ui.web.listener" />
 
     <bean id="timeoutConfigurer" class="org.vividus.selenium.TimeoutConfigurer">
         <property name="pageLoadTimeout" value="${web.timeouts.page-load}" />
@@ -14,6 +18,12 @@
 
     <bean id="webDriverFactory" class="org.vividus.selenium.WebDriverFactory" parent="parentWebDriverFactory">
         <constructor-arg index="0" value="${selenium.grid.enabled}"/>
+        <constructor-arg>
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="web-application.basic-authentication." />
+                <constructor-arg value="org.vividus.selenium.authentication.BasicAuthCredentials" />
+            </bean>
+        </constructor-arg>
         <property name="webDriverType" value="${selenium.browser}" />
     </bean>
 
@@ -63,6 +73,7 @@
     <bean id="webElementActions" class="org.vividus.ui.web.action.WebElementActions" />
     <bean id="windowsActions" class="org.vividus.ui.web.action.WindowsActions" />
     <bean class="org.vividus.ui.web.action.FrameActions" />
+    <bean class="org.vividus.ui.web.action.CdpActions" />
 
     <bean class="org.vividus.ui.web.action.WebWaitActions" parent="waitActions">
         <property name="pageStartsToLoadTimeout" value="${web.wait.page-starts-to-load-timeout}" />
@@ -72,11 +83,9 @@
         <property name="waitForAlertTimeout" value="${web.alert.wait-for-alert-timeout}" />
     </bean>
 
-    <bean id="cookieManager" class="org.vividus.ui.web.action.CookieManager" />
+    <bean class="org.vividus.ui.web.action.WebDriverCookieManager" />
 
     <bean id="cssSelectorFactory" class="org.vividus.ui.web.action.CssSelectorFactory" />
-
-    <bean class="org.vividus.ui.web.storage.WebStorage" />
 
     <bean id="abstractWebElementSearchAction" class="org.vividus.ui.web.action.search.AbstractWebElementSearchAction"
           parent="abstractElementAction" abstract="true" />
@@ -170,7 +179,7 @@
     <bean id="alertSteps" class="org.vividus.steps.ui.web.AlertSteps" />
     <bean id="buttonSteps" class="org.vividus.steps.ui.web.RadioButtonSteps" />
     <bean id="codeSteps" class="org.vividus.steps.ui.web.CodeSteps" />
-    <bean id="cookieSteps" class="org.vividus.steps.ui.web.CookieSteps" />
+    <bean id="cookieSteps" class="org.vividus.steps.ui.web.SeleniumCookieSteps" />
     <bean id="checkboxSteps" class="org.vividus.steps.ui.web.CheckboxSteps" />
     <bean id="dropdownSteps" class="org.vividus.steps.ui.web.DropdownSteps" />
     <bean id="elementSteps" class="org.vividus.steps.ui.web.ElementSteps" />
@@ -184,7 +193,6 @@
     </bean>
 
     <bean id="keyboardSteps" class="org.vividus.steps.ui.web.KeyboardSteps" />
-    <bean id="webStorageSteps" class="org.vividus.steps.ui.web.WebStorageSteps" />
     <bean id="nestedSteps" class="org.vividus.steps.ui.web.NestedSteps" />
 
     <bean id="pageSteps" class="org.vividus.steps.ui.web.PageSteps">
@@ -196,6 +204,8 @@
     <bean id="browserSteps" class="org.vividus.steps.ui.web.BrowserSteps" />
     <bean id="performanceSteps" class="org.vividus.steps.ui.web.PerformanceSteps" />
     <bean id="mobileEmulationSteps" class="org.vividus.steps.ui.web.devtools.MobileEmulationSteps" />
+    <bean id="geolocationEmulationSteps" class="org.vividus.steps.ui.web.devtools.GeolocationEmulationSteps" />
+    <bean id="browserPermissionsSteps" class="org.vividus.steps.ui.web.bidi.BrowserPermissionsSteps" />
     <bean id="scriptSteps" class="org.vividus.steps.ui.web.ScriptSteps" />
     <bean id="scrollSteps" class="org.vividus.steps.ui.web.ScrollSteps" />
     <bean id="setContextSteps" class="org.vividus.steps.ui.web.SetContextSteps" />
@@ -215,13 +225,12 @@
 
     <bean class="org.vividus.selenium.WebContextSourceCodeProvider" />
 
-    <bean class="org.vividus.ui.listener.SourceCodePublishingOnFailureListener" lazy-init="false">
-        <property name="publishSourceOnFailure" value="${ui.publish-source-on-failure}" />
-        <property name="format" value="HTML" />
+    <bean id="sourceCodeAttachmentFormat" class="java.lang.String">
+        <constructor-arg value="html" />
     </bean>
 
     <bean class="org.vividus.selenium.BrowserWindowSizeListener" lazy-init="false">
-         <property name="webDriverManager" ref="webDriverManager" />
+         <constructor-arg index="0" value="${web.browser.maximizeWindowOnStart}" />
     </bean>
 
     <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
@@ -276,7 +285,6 @@
         <idref bean="nestedSteps" />
         <idref bean="actionsSequenceSteps" />
         <idref bean="webUiVividusSetupSteps" />
-        <idref bean="webStorageSteps" />
         <idref bean="dragAndDropSteps" />
         <idref bean="mouseSteps" />
         <idref bean="scrollSteps" />
@@ -284,6 +292,8 @@
         <idref bean="windowSteps" />
         <idref bean="browserSteps" />
         <idref bean="mobileEmulationSteps" />
+        <idref bean="geolocationEmulationSteps" />
+        <idref bean="browserPermissionsSteps" />
     </util:list>
 
     <util:map id="propertyEditors-WebUi" key-type="java.lang.Class">

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.vividus.steps.kafka;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,12 +44,14 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -58,6 +61,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
@@ -68,6 +72,7 @@ import org.vividus.util.property.IPropertyParser;
 import org.vividus.variable.VariableScope;
 
 @EmbeddedKafka(topics = KafkaStepsIntegrationTests.TOPIC)
+@DirtiesContext
 @ExtendWith({ MockitoExtension.class, SpringExtension.class, TestLoggerFactoryExtension.class })
 class KafkaStepsIntegrationTests
 {
@@ -162,6 +167,7 @@ class KafkaStepsIntegrationTests
     @Test
     void shouldProduceEventWithKey() throws InterruptedException, ExecutionException, TimeoutException
     {
+        String anyDataWithHeader = ANY_DATA + "-with-headers";
         kafkaSteps.startKafkaListener(CONSUMER, Set.of(TOPIC));
 
         kafkaSteps.sendEventWithKey(KEY + 1, ANY_DATA, PRODUCER, TOPIC);
@@ -169,7 +175,9 @@ class KafkaStepsIntegrationTests
         kafkaSteps.sendEvent(ANY_DATA, PRODUCER, TOPIC);
         kafkaSteps.sendEventWithKey(KEY + 2, ANY_DATA, PRODUCER, TOPIC);
         kafkaSteps.sendEventWithKey(KEY + 3, ANY_DATA, PRODUCER, TOPIC);
-        kafkaSteps.sendEvent(ANY_DATA, PRODUCER, TOPIC);
+        var headers = new ExamplesTable("|name|value|\n|headerName1|headerValue1|\n|headerName2|headerValue2|");
+        kafkaSteps.setEventHeaders(headers);
+        kafkaSteps.sendEvent(anyDataWithHeader, PRODUCER, TOPIC);
 
         kafkaSteps.waitForKafkaEvents(Duration.ofSeconds(10), CONSUMER, ComparisonRule.EQUAL_TO, 6);
         kafkaSteps.stopKafkaListener(CONSUMER);
@@ -181,14 +189,19 @@ class KafkaStepsIntegrationTests
         assertEquals(info(LISTENER_STOPPED), events.get(1));
         LoggingEvent keysLogEvent = events.get(2);
         assertEquals(Level.INFO, keysLogEvent.getLevel());
-        assertEquals("Saving events with the keys: {}", keysLogEvent.getMessage());
+        assertEquals("Saving events with the keys and headers: {}", keysLogEvent.getMessage());
         List<Object> arguments = keysLogEvent.getArguments();
         assertThat(arguments, hasSize(1));
-        List<String> keys = Stream.of(arguments.get(0).toString().split(",")).map(String::strip).sorted().toList();
-        String noKey = "<no key>";
-        assertEquals(List.of(noKey, noKey, noKey, KEY + 1, KEY + 2, KEY + 3), keys);
+        @SuppressWarnings("unchecked")
+        var eventKeysAndHeaders = (List<String>) arguments.get(0);
+        var eventWithoutKey = "<no key>";
+        assertThat(eventKeysAndHeaders, containsInAnyOrder("key1", eventWithoutKey, eventWithoutKey, "key2", "key3",
+                "{<no key>; headerName1, headerName2}"));
 
-        verify(variableContext).putVariable(SCOPES, VARIABLE_NAME,
-                List.of(ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA));
+        var variableValueArgumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(variableContext).putVariable(eq(SCOPES), eq(VARIABLE_NAME), variableValueArgumentCaptor.capture());
+        @SuppressWarnings("unchecked")
+        List<String> variable = variableValueArgumentCaptor.getValue();
+        assertThat(variable, containsInAnyOrder(ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, anyDataWithHeader));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ class PublishingAttachmentInterceptorTests
 {
     private static final String ENDPOINT = "https://uri.com/";
     private static final String METHOD = "method";
-    private static final String API_MESSAGE_FTL = "/org/vividus/http/attachment/api-message.ftl";
+    private static final String API_MESSAGE_FTL = "/org/vividus/http/steps/attachment/api-message.ftl";
     private static final String RESPONSE = "Response: method " + ENDPOINT;
     private static final String REQUEST = "Request: method " + ENDPOINT;
     private static final String CONTENT_TYPE = "Content-Type";
@@ -162,7 +162,7 @@ class PublishingAttachmentInterceptorTests
         when(httpResponse.getResponseHeaders()).thenReturn(new Header[] { mock(Header.class) });
         interceptor.handle(httpResponse);
         var argumentCaptor = verifyPublishAttachment(RESPONSE);
-        assertEquals(HttpStatus.SC_OK, argumentCaptor.getValue().get("statusCode").intValue());
+        assertEquals(HttpStatus.SC_OK, argumentCaptor.getValue().get("statusCode"));
     }
 
     @Test

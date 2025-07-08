@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,8 +136,8 @@ class GenericElementStepsTests
         List<WebElement> elements = List.of(webElement, webElement, webElement);
         Locator locator = new Locator(TestLocatorType.SEARCH, VALUE);
 
-        when(baseValidations.assertNumberOfElementsFound(ELEMENTS_TO_CHECK, locator, 1, ComparisonRule.GREATER_THAN))
-                .thenReturn(elements);
+        when(baseValidations.assertNumberOfElementsFound(ELEMENTS_TO_CHECK, locator, 1,
+                ComparisonRule.GREATER_THAN_OR_EQUAL_TO)).thenReturn(elements);
         when(elementActions.getElementText(webElement)).thenReturn(A_LETTER)
                                                        .thenReturn(C_LETTER)
                                                        .thenReturn(B_LETTER);
@@ -156,14 +156,12 @@ class GenericElementStepsTests
     }
 
     @Test
-    void shouldNotCheckIfNumberOfElementsIsLessThanTwo()
+    void shouldNotCheckIfNumberOfElementsIsLessThanOne()
     {
-        WebElement webElement = mock(WebElement.class);
-        List<WebElement> elements = List.of(webElement);
         Locator locator = new Locator(TestLocatorType.SEARCH, VALUE);
 
-        when(baseValidations.assertNumberOfElementsFound(ELEMENTS_TO_CHECK, locator, 1, ComparisonRule.GREATER_THAN))
-                .thenReturn(elements);
+        when(baseValidations.assertNumberOfElementsFound(ELEMENTS_TO_CHECK, locator, 1,
+                ComparisonRule.GREATER_THAN_OR_EQUAL_TO)).thenReturn(List.of());
 
         elementSteps.areElementSorted(locator, StringSortingOrder.ASCENDING);
 
@@ -175,24 +173,22 @@ class GenericElementStepsTests
     void shouldNotCheckIfElementsAreFiltredOutByText()
     {
         WebElement webElement = mock(WebElement.class);
-        List<WebElement> elements = List.of(webElement, webElement, webElement);
+        List<WebElement> elements = List.of(webElement, webElement);
         Locator locator = new Locator(TestLocatorType.SEARCH, VALUE);
 
-        when(baseValidations.assertNumberOfElementsFound(ELEMENTS_TO_CHECK, locator, 1, ComparisonRule.GREATER_THAN))
-                .thenReturn(elements);
-        when(elementActions.getElementText(webElement)).thenReturn(A_LETTER)
-                                                       .thenReturn(StringUtils.EMPTY)
+        when(baseValidations.assertNumberOfElementsFound(ELEMENTS_TO_CHECK, locator, 1,
+                ComparisonRule.GREATER_THAN_OR_EQUAL_TO)).thenReturn(elements);
+        when(elementActions.getElementText(webElement)).thenReturn(StringUtils.EMPTY)
                                                        .thenReturn(null);
 
 
-        when(softAssert.assertTrue(String.format(ELEMENT_CONTAINS_TEXT, 1), true)).thenReturn(true);
+        when(softAssert.assertTrue(String.format(ELEMENT_CONTAINS_TEXT, 1), false)).thenReturn(false);
         when(softAssert.assertTrue(String.format(ELEMENT_CONTAINS_TEXT, 2), false)).thenReturn(false);
-        when(softAssert.assertTrue(String.format(ELEMENT_CONTAINS_TEXT, 3), false)).thenReturn(false);
 
         elementSteps.areElementSorted(locator, StringSortingOrder.ASCENDING);
 
         verify(softAssert).recordFailedAssertion(
-                "There are not enough elements with text to check sorting: " + List.of(A_LETTER));
+                "There are not enough elements with text to check sorting: " + List.of());
         verifyNoMoreInteractions(baseValidations, softAssert, elementActions);
     }
 

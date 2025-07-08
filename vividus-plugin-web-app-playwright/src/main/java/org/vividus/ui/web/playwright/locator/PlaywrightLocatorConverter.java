@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,23 @@
 package org.vividus.ui.web.playwright.locator;
 
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
+import org.apache.commons.text.CaseUtils;
 import org.vividus.ui.locator.LocatorParser;
 
 public final class PlaywrightLocatorConverter
 {
+    private static final int ATTRIBUTE_TYPE_GROUP = 1;
+    private static final int SEARCH_VALUE_GROUP = 2;
+    private static final int ELEMENT_TYPE_GROUP = 3;
+    private static final int VISIBILITY_GROUP = 4;
+    private static final char CLOSING_BRACKET = ']';
+    private static final String LOCATOR_FORMAT = "(?:By\\.)?([a-zA-Z-]+)\\((.*)\\)(:(.*))?";
+    private static final Pattern LOCATOR_PATTERN = Pattern.compile(LOCATOR_FORMAT);
+
     private PlaywrightLocatorConverter()
     {
     }
@@ -33,11 +45,34 @@ public final class PlaywrightLocatorConverter
 
     public static PlaywrightLocator convertToLocator(String locatorAsString)
     {
-        return LocatorParser.parseSingleLocator(locatorAsString, PlaywrightLocatorConverter::convertToLocator);
+        Matcher matcher = LOCATOR_PATTERN.matcher(locatorAsString);
+        if (matcher.matches())
+        {
+            String elementActionType = matcher.group(ATTRIBUTE_TYPE_GROUP);
+            String searchValue = matcher.group(SEARCH_VALUE_GROUP);
+            String elementType = matcher.group(ELEMENT_TYPE_GROUP);
+            PlaywrightLocator convertedLocator = convertToLocator(elementActionType, searchValue);
+            if (elementType != null)
+            {
+                String visibilityType = matcher.group(VISIBILITY_GROUP);
+                convertedLocator.setVisibility(Visibility.getElementType(visibilityType));
+            }
+            return convertedLocator;
+        }
+        throw new IllegalArgumentException("Invalid locator format. Expected matches [" + LOCATOR_FORMAT
+                                           + CLOSING_BRACKET + " Actual: [" + locatorAsString + CLOSING_BRACKET);
     }
 
     private static PlaywrightLocator convertToLocator(String type, String value)
     {
-        return new PlaywrightLocator(type, value);
+        return getLocatorType(type).createLocator(value);
+    }
+
+    private static PlaywrightLocatorType getLocatorType(String locatorType)
+    {
+        return Stream.of(PlaywrightLocatorType.values())
+                .filter(type -> CaseUtils.toCamelCase(type.name(), false, '_').equals(locatorType))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unsupported locator type: " + locatorType));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,11 @@ package org.vividus.util.json;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.function.Function;
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
@@ -41,7 +44,7 @@ class JsonPathUtilsTests
     private static final List<String> NAME_VALUES = List.of("value1", "value2");
 
     @Test
-    void testGetData()
+    void shouldGetDataFromJsonString()
     {
         var json = "{\"test\":{\"name\":\"value\"}}";
         var path = "$.test.name";
@@ -49,18 +52,41 @@ class JsonPathUtilsTests
     }
 
     @Test
-    void testGetListData()
+    void shouldGetListDataFromJsonString()
     {
         assertEquals(NAME_VALUES, JsonPathUtils.getData(JSON, NAME_JSON_PATH));
     }
 
     @Test
-    void testGetDataByJsonPaths()
+    void shouldGetDataByJsonPathsFromJsonString()
     {
-        var jsonPaths = List.of(NAME_JSON_PATH, "$.int", "$.float", "$.boolean", "$.string");
-        var expected = List.of(NAME_VALUES, 1, new BigDecimal("485690.3866338789319252000000135498000000"), true,
-                "data");
-        assertEquals(expected, JsonPathUtils.getData(JSON, jsonPaths));
+        testGetDataByJsonPaths(jsonPaths -> JsonPathUtils.getData(JSON, jsonPaths));
+    }
+
+    @Test
+    void shouldGetDataByJsonPathsFromJsonInputStream()
+    {
+        var jsonInputStream = new ByteArrayInputStream(JSON.getBytes(StandardCharsets.UTF_8));
+        testGetDataByJsonPaths(jsonPaths -> JsonPathUtils.getData(jsonInputStream, jsonPaths));
+    }
+
+    private <T> void testGetDataByJsonPaths(Function<List<String>, List<T>> test)
+    {
+        var jsonPaths = List.of(
+                NAME_JSON_PATH,
+                "$.int",
+                "$.float",
+                "$.boolean",
+                "$.string"
+        );
+        var expected = List.of(
+                NAME_VALUES,
+                1,
+                new BigDecimal("485690.3866338789319252000000135498000000"),
+                true,
+                "data"
+        );
+        assertEquals(expected, test.apply(jsonPaths));
     }
 
     @Test

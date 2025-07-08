@@ -2,7 +2,7 @@ project.description = 'VIVIDUS to Xray exporter'
 
 buildscript {
     ext {
-        springBootVersion = '3.2.5'
+        springBootVersion = '3.5.3'
     }
 
     repositories {
@@ -13,6 +13,11 @@ buildscript {
     }
 }
 apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+tasks {
+    javadocJar.enabled = false
+    sourcesJar.enabled = false
+}
 
 dependencies {
     // https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/257
@@ -27,19 +32,19 @@ dependencies {
     implementation project(':vividus-facade-jira')
     implementation project(':vividus-exporter-commons')
 
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0')
-    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: '4.4')
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0')
+    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: '4.5.0')
 
     implementation(group: 'org.zeroturnaround', name: 'zt-zip', version: '1.17')
 
-    implementation(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '3.2.7')
-
-    compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
+    implementation(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '4.1.1')
+    implementation(group: 'com.jayway.jsonpath', name: 'json-path')
 
     testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test')
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.2')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.3')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.12.0')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
 }

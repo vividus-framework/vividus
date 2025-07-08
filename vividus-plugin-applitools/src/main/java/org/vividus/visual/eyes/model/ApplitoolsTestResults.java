@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ public class ApplitoolsTestResults
 
     public ApplitoolsTestResults(TestResults testResults)
     {
-        this.passed = testResults.isPassed();
         this.status = testResults.getStatus();
         this.name = testResults.getName();
         this.os = testResults.getHostOS();
@@ -58,6 +57,11 @@ public class ApplitoolsTestResults
             StepInfo stepInfo = testResults.getStepsInfo()[0];
             this.accessibilityCheckResult = new AccessibilityCheckResult(stepInfo.getAppUrls().getStepEditor(),
                     accessibilityStatus);
+            this.passed = testResults.isPassed() && this.accessibilityCheckResult.isPassed();
+        }
+        else
+        {
+            this.passed = testResults.isPassed();
         }
     }
 

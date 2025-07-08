@@ -22,17 +22,6 @@
     </bean>
 
     <bean class="org.vividus.report.allure.plugin.EmbeddedPlugin">
-        <constructor-arg index="0" value="vividus-logo" />
-        <constructor-arg index="1">
-            <util:list value-type="java.lang.String">
-                <value>styles.css</value>
-                <value>vividus-logo.svg</value>
-            </util:list>
-        </constructor-arg>
-        <constructor-arg index="2" ref="pluginFilesLoader" />
-    </bean>
-
-    <bean class="org.vividus.report.allure.plugin.EmbeddedPlugin">
         <constructor-arg index="0" value="vividus-step-formatting" />
         <constructor-arg index="1">
             <util:list value-type="java.lang.String">
@@ -42,14 +31,46 @@
         <constructor-arg index="2" ref="pluginFilesLoader" />
     </bean>
 
-    <bean class="org.vividus.report.allure.plugin.EmbeddedPlugin">
-        <constructor-arg index="0" value="vividus-title" />
-        <constructor-arg index="1">
-            <util:list value-type="java.lang.String">
-                <value>styles.css</value>
-            </util:list>
+    <bean class="org.vividus.report.allure.plugin.CustomTranslationsPlugin">
+        <constructor-arg>
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="report.translations." />
+                <constructor-arg value="java.util.Map" />
+            </bean>
         </constructor-arg>
-        <constructor-arg index="2" ref="pluginFilesLoader" />
+    </bean>
+
+    <bean class="org.vividus.report.allure.plugin.LayoutConfiguringPlugin">
+        <constructor-arg>
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="report.tabs." />
+                <constructor-arg value="org.vividus.report.allure.plugin.LayoutConfiguringPlugin.Component" />
+            </bean>
+        </constructor-arg>
+        <constructor-arg>
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="report.tabs.overview.widgets." />
+                <constructor-arg value="org.vividus.report.allure.plugin.LayoutConfiguringPlugin.Component" />
+            </bean>
+        </constructor-arg>
+        <constructor-arg>
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="report.tabs.graph.charts." />
+                <constructor-arg value="org.vividus.report.allure.plugin.LayoutConfiguringPlugin.Component" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean class="org.vividus.report.allure.plugin.CustomTabPlugin">
+        <constructor-arg index="0" value="${report.tabs.custom-tab.enabled}" />
+    </bean>
+
+    <bean class="org.vividus.report.allure.plugin.BrandLogoPlugin">
+        <constructor-arg value="${report.brand.logo-path}" />
+    </bean>
+
+    <bean class="org.vividus.report.allure.plugin.BrandTitlePlugin">
+        <constructor-arg value="${report.brand.title}" />
     </bean>
 
     <bean class="org.vividus.report.allure.AllureRunContext" />
@@ -60,6 +81,7 @@
 
     <bean id="allureReportGenerator" class="org.vividus.report.allure.AllureReportGenerator"
         destroy-method="end">
+        <constructor-arg index="0" value="${report.title}" />
         <constructor-arg>
             <bean class="org.vividus.report.allure.notification.NotificationsSender" />
         </constructor-arg>

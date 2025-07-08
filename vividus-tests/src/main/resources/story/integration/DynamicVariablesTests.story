@@ -24,7 +24,10 @@ When I reset context
 When I save coordinates and size of element located by `tagName(img)` to scenario variable `rect`
 Then `${rect.height}`            is = `400`
 Then `${rect.width}`             is = `400`
-Then `${rect.x}`                 is = `200`
+!-- Browser window has borders of 8px size on Windows OS, that's why x == 192 on Windows and x == 200 on Linux and MacOS
+!-- https://stackoverflow.com/a/42491227/2067574
+Then `${rect.x}`                 is at least `192`
+Then `${rect.x}`                 is at most `200`
 Then `${rect.y}`                 is = `8`
 
 Scenario: Verify `source-code` dynamic variable
@@ -36,7 +39,9 @@ Then `${browser-window-height}` is = `500`
 Then `${browser-window-width}`  is = `600`
 
 Scenario: Verify `context-source-code` dynamic variable
+Meta:
+    @playwrightSupported
 When I reset context
-Then `${context-source-code}` matches `^<html><head>.+`
-When I change context to element located by `elementName(vividus-logo)`
+Then `${context-source-code}` matches `^(<!DOCTYPE html>)?<html><head>.+`
+When I change context to element located by `name(vividus-logo)`
 Then `${context-source-code}` matches `^<img name.+`

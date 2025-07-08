@@ -27,25 +27,33 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hc.core5.http.HttpStatus;
+import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
-import org.vividus.http.validation.model.AbstractResourceValidation;
-import org.vividus.http.validation.model.CheckStatus;
 import org.vividus.softassert.ISoftAssert;
 
 public class ResourceValidator<T extends AbstractResourceValidation<T>>
 {
+    private static final Set<Integer> NOT_ALLOWED_HEAD_STATUS_CODES = Set.of(
+            // twitter.com for HEAD requests returns response with 403 status code
+            HttpStatus.SC_FORBIDDEN,
+            HttpStatus.SC_NOT_FOUND,
+            HttpStatus.SC_METHOD_NOT_ALLOWED,
+            HttpStatus.SC_NOT_IMPLEMENTED,
+            HttpStatus.SC_SERVICE_UNAVAILABLE
+    );
+
+    private static final String EXCEPTION_MESSAGE = "Exception occured during check of: %s";
+
     private final IHttpClient httpClient;
 
     private final ISoftAssert softAssert;
 
     private final Set<Integer> allowedStatusCodes = Set.of(HttpStatus.SC_OK);
-    private final Set<Integer> notAllowedHeadStatusCodes = Set.of(HttpStatus.SC_METHOD_NOT_ALLOWED,
-                                                                  HttpStatus.SC_SERVICE_UNAVAILABLE,
-                                                                  HttpStatus.SC_NOT_FOUND,
-                                                                  HttpStatus.SC_NOT_IMPLEMENTED);
 
     private final Map<URI, T> cache = new ConcurrentHashMap<>();
+    private boolean publishResponseBody;
 
     public ResourceValidator(IHttpClient httpClient, ISoftAssert softAssert)
     {
@@ -58,7 +66,17 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
         return cache.compute(resourceValidation.getUriOrError().getLeft(), (uri, rv) -> Optional.ofNullable(rv)
                 .map(r -> {
                     T cachedResult = r.copy();
-                    cachedResult.setCheckStatus(CheckStatus.SKIPPED);
+                    cachedResult.setCheckStatus(r.getCheckStatus());
+
+                    switch (r.getCheckStatus())
+                    {
+                        case FAILED -> assertForStatusCode(uri, r.getStatusCode().getAsInt());
+                        case BLOCKED -> recordBlockedByAkamaiRequest(uri);
+                        case BROKEN -> softAssert.recordFailedAssertion(EXCEPTION_MESSAGE.formatted(uri)
+                                + System.lineSeparator() + r.getUriOrError().getRight());
+                        default -> cachedResult.setCheckStatus(CheckStatus.SKIPPED);
+                    }
+
                     return cachedResult;
                 }).orElseGet(() -> {
                     validateResource(uri, resourceValidation);
@@ -71,22 +89,56 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
     {
         try
         {
-            int statusCode = httpClient.doHttpHead(uri).getStatusCode();
-            if (notAllowedHeadStatusCodes.contains(statusCode))
+            HttpResponse response = httpClient.doHttpHead(uri);
+            int statusCode = response.getStatusCode();
+
+            if (NOT_ALLOWED_HEAD_STATUS_CODES.contains(statusCode))
             {
-                statusCode = httpClient.doHttpGet(uri).getStatusCode();
+                response = httpClient.doHttpGet(uri);
+                statusCode = response.getStatusCode();
             }
             resourceValidation.setStatusCode(OptionalInt.of(statusCode));
 
-            CheckStatus checkStatus = softAssert.assertThat(
-                    String.format("Status code for %s is %d. expected one of %s", uri, statusCode, allowedStatusCodes),
-                    statusCode, is(oneOf(allowedStatusCodes.toArray()))) ? CheckStatus.PASSED : CheckStatus.FAILED;
+            CheckStatus checkStatus = evaluateStatus(uri, response);
+
+            if (publishResponseBody && response.getResponseBodyAsString() != null && checkStatus == CheckStatus.FAILED)
+            {
+                resourceValidation.setResponseBody(response.getResponseBodyAsString());
+            }
             resourceValidation.setCheckStatus(checkStatus);
         }
         catch (IOException e)
         {
-            softAssert.recordFailedAssertion("Exception occured during check of: " + uri, e);
+            softAssert.recordFailedAssertion(EXCEPTION_MESSAGE.formatted(uri), e);
             resourceValidation.setCheckStatus(CheckStatus.BROKEN);
+            resourceValidation.setUriOrError(Pair.of(uri, e.toString()));
         }
+    }
+
+    private CheckStatus evaluateStatus(URI uri, HttpResponse response)
+    {
+        int statusCode = response.getStatusCode();
+        return statusCode == HttpStatus.SC_FORBIDDEN && response.getHeaderByName("Akamai-GRN").isPresent()
+                ? recordBlockedByAkamaiRequest(uri)
+                : assertForStatusCode(uri, statusCode);
+    }
+
+    private CheckStatus recordBlockedByAkamaiRequest(URI uri)
+    {
+        softAssert.recordFailedAssertion(
+                "Request to %s has been blocked by Akamai Web Application Firewall".formatted(uri));
+        return CheckStatus.BLOCKED;
+    }
+
+    private CheckStatus assertForStatusCode(URI uri, int statusCode)
+    {
+        return softAssert.assertThat(
+                String.format("Status code for %s is %d. expected one of %s", uri, statusCode, allowedStatusCodes),
+                statusCode, is(oneOf(allowedStatusCodes.toArray()))) ? CheckStatus.PASSED : CheckStatus.FAILED;
+    }
+
+    public void setPublishResponseBody(boolean publishResponseBody)
+    {
+        this.publishResponseBody = publishResponseBody;
     }
 }

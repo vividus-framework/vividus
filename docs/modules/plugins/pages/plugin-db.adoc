@@ -17,7 +17,7 @@ system (DBMS) can understand.
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-db', version: '{current-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-db')
 ----
 
 . Define your JDBC driver and add appropriate dependency. Let's take PostgreSQL as an example:

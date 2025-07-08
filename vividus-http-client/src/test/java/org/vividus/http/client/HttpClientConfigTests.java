@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.vividus.http.client;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -31,8 +32,6 @@ import java.util.Map;
 
 import org.apache.hc.client5.http.DnsResolver;
 import org.apache.hc.client5.http.HttpRequestRetryStrategy;
-import org.apache.hc.client5.http.cookie.BasicCookieStore;
-import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.protocol.RedirectStrategy;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
@@ -43,8 +42,6 @@ import org.junit.jupiter.api.Test;
 class HttpClientConfigTests
 {
     private static final String BASE_URL = "http://somewh.ere/";
-    private static final String USERNAME = "user";
-    private static final String PASSWORD = "pass";
     private final HttpClientConfig config = new HttpClientConfig();
 
     @Test
@@ -78,18 +75,6 @@ class HttpClientConfigTests
     void testHasBaseUrlNotExists()
     {
         assertFalse(config.hasBaseUrl());
-    }
-
-    @Test
-    void testGetAndSetAuthConfig()
-    {
-        AuthConfig authConfig = new AuthConfig();
-        authConfig.setPassword(PASSWORD);
-        authConfig.setUsername(USERNAME);
-        config.setAuthConfig(authConfig);
-        assertEquals(authConfig, config.getAuthConfig());
-        assertEquals(PASSWORD, config.getAuthConfig().getPassword());
-        assertEquals(USERNAME, config.getAuthConfig().getUsername());
     }
 
     @Test
@@ -229,24 +214,20 @@ class HttpClientConfigTests
     }
 
     @Test
-    void testHasCookieStore()
+    void testDoesNotHaveCookieStoreProvider()
     {
-        config.setCookieStore(new BasicCookieStore());
-        assertTrue(config.hasCookieStore());
-    }
-
-    @Test
-    void testDoesNotHaveCookieStore()
-    {
-        assertFalse(config.hasCookieStore());
+        assertFalse(config.hasCookieStoreProvider());
     }
 
     @Test
     void testCookieStore()
     {
-        CookieStore cookieStore = new BasicCookieStore();
-        config.setCookieStore(cookieStore);
-        assertEquals(cookieStore, config.getCookieStore());
+        var cookieStoreProvider = mock(CookieStoreProvider.class);
+        config.setCookieStoreProvider(cookieStoreProvider);
+        assertAll(
+                () -> assertTrue(config.hasCookieStoreProvider()),
+                () -> assertEquals(cookieStoreProvider, config.getCookieStoreProvider())
+        );
     }
 
     @Test

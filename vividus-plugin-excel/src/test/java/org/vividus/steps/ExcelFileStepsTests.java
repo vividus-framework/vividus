@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.Set;
 
@@ -31,13 +32,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jbehave.core.model.ExamplesTable;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
 import org.vividus.excel.ExcelSheetWriter;
+import org.vividus.util.DateUtils;
 import org.vividus.util.ResourceUtils;
 import org.vividus.variable.VariableScope;
 
@@ -48,10 +50,18 @@ class ExcelFileStepsTests
     private static final String PATH = "path";
     private static final ExamplesTable CONTENT = new ExamplesTable("|k1|\n|v1|");
     private static final String DEFAULT_SHEET_NAME = "Sheet0";
+    private static final ExcelSheetWriter EXCEL_SHEET_WRITER = new ExcelSheetWriter(
+            new DateUtils(ZoneId.systemDefault()));
 
     @Mock private VariableContext variableContext;
 
-    @InjectMocks private ExcelFileSteps fileSteps;
+    private ExcelFileSteps fileSteps;
+
+    @BeforeEach
+    void init()
+    {
+        fileSteps = new ExcelFileSteps(EXCEL_SHEET_WRITER, variableContext);
+    }
 
     @Test
     void shouldCreateExcelFileContainigSheetWithContent() throws IOException
@@ -72,7 +82,7 @@ class ExcelFileStepsTests
     void shouldAddSheetToExcelFile() throws IOException
     {
         Path excelFile = ResourceUtils.createTempFile("", ".xlsx", null);
-        ExcelSheetWriter.createExcel(excelFile, Optional.empty(), CONTENT);
+        EXCEL_SHEET_WRITER.createExcel(excelFile, Optional.empty(), CONTENT);
 
         String sheetA = "sheet a";
         fileSteps.addSheetToExcelFile(sheetA, CONTENT, excelFile);

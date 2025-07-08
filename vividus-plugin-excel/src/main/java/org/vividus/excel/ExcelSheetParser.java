@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,10 @@ import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
@@ -46,31 +48,24 @@ public class ExcelSheetParser implements IExcelSheetParser
 
     private final int columnsToParseCount;
 
-    private boolean trimCellValues;
+    private final boolean preserveCellFormatting;
 
     private DataFormatter dataFormatter;
 
     private FormulaEvaluator formulaEvaluator;
 
-    public ExcelSheetParser(Sheet sheet)
+    public ExcelSheetParser(Sheet sheet, boolean preserveCellFormatting)
     {
         this.sheet = sheet;
+        this.preserveCellFormatting = preserveCellFormatting;
         SheetDataLimits sheetDataLimits = getSheetDataLimits(sheet.getLastRowNum());
         rowsToParseCount = sheetDataLimits.getLastRowIndex() + 1;
         columnsToParseCount = sheetDataLimits.getLastColumnIndex() + 1;
-    }
-
-    public ExcelSheetParser(Sheet sheet, boolean trimCellValues)
-    {
-        this(sheet);
-        this.trimCellValues = trimCellValues;
-    }
-
-    public ExcelSheetParser(Sheet sheet, boolean trimCellValues, DataFormatter dataFormatter)
-    {
-        this(sheet, trimCellValues);
-        this.dataFormatter = dataFormatter;
-        formulaEvaluator = sheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+        if (preserveCellFormatting)
+        {
+            dataFormatter = new DataFormatter();
+            formulaEvaluator = sheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+        }
     }
 
     private SheetDataLimits getSheetDataLimits(int lastRowCandidate)
@@ -107,7 +102,7 @@ public class ExcelSheetParser implements IExcelSheetParser
     public List<String> getRow(int rowNumber)
     {
         return StreamSupport.stream(sheet.getRow(rowNumber).spliterator(), false)
-                .map(this::getCellValueAndTrimIfNeeded).toList();
+                .map(this::getCellValue).toList();
     }
 
     @Override
@@ -132,7 +127,7 @@ public class ExcelSheetParser implements IExcelSheetParser
                 .map(row -> IntStream.range(0, getCellsCount(row.getLastCellNum()))
                         .mapToObj(row::getCell)
                         .filter(Objects::nonNull)
-                        .map(this::getCellValueAndTrimIfNeeded)
+                        .map(this::getCellValue)
                         .collect(toLinkedList()))
                 .collect(toLinkedList());
     }
@@ -170,11 +165,11 @@ public class ExcelSheetParser implements IExcelSheetParser
                     Cell titleCell = titleRow.getCell(j);
                     if (null != titleCell)
                     {
-                        String key = getCellValueAndTrimIfNeeded(titleCell);
+                        String key = getCellValue(titleCell);
                         Cell dataCell = dataRow.getCell(j);
                         if (null != dataCell && !key.isEmpty())
                         {
-                            entryData.put(key, getCellValueAndTrimIfNeeded(dataCell));
+                            entryData.put(key, getCellValue(dataCell));
                         }
                     }
                 }
@@ -184,18 +179,10 @@ public class ExcelSheetParser implements IExcelSheetParser
         return resultData;
     }
 
-    private String getCellValueAndTrimIfNeeded(Cell cell)
+    private String getCellValue(Cell cell)
     {
-        String cellValue;
-        if (dataFormatter != null)
-        {
-            cellValue = dataFormatter.formatCellValue(cell, formulaEvaluator);
-        }
-        else
-        {
-            cellValue = CellUtils.getCellValueAsString(cell);
-        }
-        return trimCellValues ? cellValue.trim() : cellValue;
+        return preserveCellFormatting ? dataFormatter.formatCellValue(cell, formulaEvaluator)
+                                      : CellUtils.getCellValueAsString(cell);
     }
 
     @Override
@@ -222,15 +209,39 @@ public class ExcelSheetParser implements IExcelSheetParser
         {
             throw new IllegalArgumentException(String.format("Row at address '%s' doesn't exist", address));
         }
-        return Optional.ofNullable(row.getCell(cellReference.getCol())).map(CellUtils::getCellValueAsString)
+        return Optional.ofNullable(row.getCell(cellReference.getCol())).map(this::getCellValue)
                 .orElse(null);
     }
 
     @Override
     public Map<String, List<String>> getDataAsTable(String range)
     {
-        CellRangeAddress address = CellRangeAddress.valueOf(range);
+        List<String> rangeList = Stream.of(StringUtils.split(range, ';'))
+                .map(String::trim)
+                .toList();
+
+        Map<String, List<String>> data = parseRowsWithHeader(CellRangeAddress.valueOf(rangeList.get(0)));
+        int numOfHeaders = data.size();
+
+        rangeList.stream().skip(1).forEach(r ->
+        {
+            CellRangeAddress address = CellRangeAddress.valueOf(r);
+            int numOfColumnsInAddress = address.getLastColumn() - address.getFirstColumn() + 1;
+            if (numOfHeaders != numOfColumnsInAddress)
+            {
+                throw new IllegalArgumentException(String.format(
+                "The number of columns (%d) in the \"%s\" range must correspond to the number of table headers (%d)",
+                        numOfColumnsInAddress, r, numOfHeaders));
+            }
+            addAdditionalRows(data, address);
+        });
+        return data;
+    }
+
+    private Map<String, List<String>> parseRowsWithHeader(CellRangeAddress address)
+    {
         Map<String, List<String>> data = new LinkedHashMap<>();
+
         for (int colIndex = address.getFirstColumn(); colIndex <= address.getLastColumn(); colIndex++)
         {
             String columnName = sheet.getRow(address.getFirstRow()).getCell(colIndex).getStringCellValue();
@@ -238,11 +249,28 @@ public class ExcelSheetParser implements IExcelSheetParser
             for (int rowIndex = address.getFirstRow() + 1; rowIndex <= address.getLastRow(); rowIndex++)
             {
                 Row row = sheet.getRow(rowIndex);
-                columnsData.add(CellUtils.getCellValueAsString(row.getCell(colIndex)));
+                String cellValue = Optional.ofNullable(row.getCell(colIndex))
+                                           .map(this::getCellValue)
+                                           .orElse(null);
+                columnsData.add(cellValue);
             }
             data.put(columnName, columnsData);
         }
         return data;
+    }
+
+    @SuppressWarnings("checkstyle:MultipleVariableDeclarationsExtended")
+    private void addAdditionalRows(Map<String, List<String>> data, CellRangeAddress address)
+    {
+        for (int colIndex = address.getFirstColumn(), i = 0; colIndex <= address.getLastColumn(); colIndex++, i++)
+        {
+            List<String> colValues = data.get(new ArrayList<>(data.keySet()).get(i));
+            for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++)
+            {
+                Row row = sheet.getRow(rowIndex);
+                colValues.add(getCellValue(row.getCell(colIndex)));
+            }
+        }
     }
 
     private static final class SheetDataLimits

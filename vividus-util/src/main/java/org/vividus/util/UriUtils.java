@@ -44,8 +44,12 @@ public final class UriUtils
     private static final char QUERY_SEPARATOR = '?';
     private static final char FRAGMENT_SEPARATOR = '#';
     private static final char SLASH = '/';
+
     private static final String ENCODED_AMPERSAND = "%26";
     private static final String DOUBLE_ENCODED_AMPERSAND = "%2526";
+    private static final String ENCODED_EQUALS_SIGN = "%3D";
+    private static final String DOUBLE_ENCODED_EQUALS_SIGN = "%253D";
+
     private static final String SCHEME_AUTHORITY_SEPARATOR = "://";
     private static final int LAST_ASCII_CODE_POSITION = 127;
 
@@ -205,11 +209,18 @@ public final class UriUtils
         return data.replace("+", "%2B");
     }
 
-    private static String decodeUrl(String url)
+    public static String decodeUrl(String url)
     {
         String query = substringBeforeLast(substringAfter(url, QUERY_SEPARATOR), "#");
-        return decode(!query.isEmpty() ? url.replace(query, query.replace(ENCODED_AMPERSAND, DOUBLE_ENCODED_AMPERSAND))
-                : url);
+        String urlToDecode = url;
+        if (!query.isEmpty())
+        {
+            urlToDecode = url.replace(query, query
+                    .replace(ENCODED_AMPERSAND, DOUBLE_ENCODED_AMPERSAND)
+                    .replace(ENCODED_EQUALS_SIGN, DOUBLE_ENCODED_EQUALS_SIGN)
+            );
+        }
+        return decode(urlToDecode);
     }
 
     private static String decode(String data)
@@ -280,7 +291,7 @@ public final class UriUtils
     }
 
     private static void recodeSpecialCharacters(StringBuilder normalizedUri, String uriPart,
-            boolean decodeDoubleEncodedAmpersand)
+            boolean uriQuery)
     {
         if (uriPart != null)
         {
@@ -288,9 +299,11 @@ public final class UriUtils
                     .replace("[", "%5B")
                     .replace("]", "%5D");
             encodedUriPart = encodePlusCharacter(encodedUriPart);
-            if (decodeDoubleEncodedAmpersand)
+            if (uriQuery)
             {
-                encodedUriPart = encodedUriPart.replace(DOUBLE_ENCODED_AMPERSAND, ENCODED_AMPERSAND);
+                encodedUriPart = encodedUriPart
+                        .replace(DOUBLE_ENCODED_AMPERSAND, ENCODED_AMPERSAND)
+                        .replace(DOUBLE_ENCODED_EQUALS_SIGN, ENCODED_EQUALS_SIGN);
             }
             encodedUriPart = encodeNonAsciiChars(encodedUriPart);
             int indexOfUriPart = normalizedUri.indexOf(uriPart);
@@ -317,15 +330,18 @@ public final class UriUtils
                 return new URI(url.getScheme(), url.getSchemeSpecificPart(), decodedFragment);
             }
 
-            URI parsedRelativeUrl = new URI(removeFragment(decodeUrl(normalizedRelativeUrl), decodedFragment));
-            String path = StringUtils.repeat(SLASH, indexOfFirstNonSlashChar - 1) + parsedRelativeUrl.getRawPath();
+            String parsedRelativeUrl = removeFragment(decodeUrl(normalizedRelativeUrl), decodedFragment);
+            String[] parts = StringUtils.split(parsedRelativeUrl, "?", 2);
+            String rawPath = parts.length > 0 ? parts[0] : "";
+            String query = parts.length > 1 ? parts[1] : null;
+            String path = StringUtils.repeat(SLASH, indexOfFirstNonSlashChar - 1) + rawPath;
             if (!path.isEmpty() && path.charAt(0) != '/')
             {
                 throw new IllegalArgumentException(String
                         .format("Relative path '%s' for '%s' should start with forward slash ('/')", path, url));
             }
-            String uriAsString = createUriAsString(url.getScheme(), url.getRawAuthority(), path,
-                    parsedRelativeUrl.getQuery(), decodedFragment);
+            String uriAsString = createUriAsString(url.getScheme(), url.getRawAuthority(), path, query,
+                    decodedFragment);
 
             return buildUrl(uriAsString, decodedFragment);
         }

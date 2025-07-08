@@ -1,4 +1,4 @@
-// Copy of https://github.com/allure-framework/allure2/blob/2.24.0/plugins/behaviors-plugin/src/dist/static/index.js
+// Copy of https://github.com/allure-framework/allure2/blob/2.32.0/plugins/behaviors-plugin/src/dist/static/index.js
 'use strict';
 
 allure.api.addTranslation('en', {
@@ -169,6 +169,20 @@ allure.api.addTranslation('pl', {
     }
 });
 
+allure.api.addTranslation('am', {
+    tab: {
+        behaviors: {
+            name: 'Վարքագծեր'
+        }
+    },
+    widget: {
+        behaviors: {
+            name: 'Ֆիչրները ըստ պատմությունների',
+            showAll: 'ցույց տալ բոլորը'
+        }
+    }
+});
+
 allure.api.addTranslation('az', {
     tab: {
         behaviors: {
@@ -179,6 +193,62 @@ allure.api.addTranslation('az', {
         behaviors: {
             name: 'Hekayələr üzrə xüsusiyyətlər',
             showAll: 'hamısını göstər'
+        }
+    }
+});
+
+allure.api.addTranslation('sv', {
+    tab: {
+        behaviors: {
+            name: 'Beteenden'
+        }
+    },
+    widget: {
+        behaviors: {
+            name: 'Funktioner efter user stories',
+            showAll: 'visa allt'
+        }
+    }
+});
+
+allure.api.addTranslation('isv', {
+    tab: {
+        behaviors: {
+            name: 'Funkcionalnost',
+        }
+    },
+    widget: {
+        behaviors: {
+            name: 'Funkcionalnost',
+            showAll: 'pokaži vsěčto',
+        }
+    }
+});
+
+allure.api.addTranslation('ka', {
+    tab: {
+        behaviors: {
+            name: 'ფუნქციონალი',
+        }
+    },
+    widget: {
+        behaviors: {
+            name: 'ფუნქციონალი',
+            showAll: 'ყველას ჩვენება',
+        }
+    }
+});
+
+allure.api.addTranslation('it', {
+    tab: {
+        behaviors: {
+            name: 'Comportamenti'
+        }
+    },
+    widget: {
+        behaviors: {
+            name: 'Funzionalità per storie',
+            showAll: 'Mostra tutto'
         }
     }
 });

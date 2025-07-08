@@ -1,6 +1,6 @@
 Meta:
     @layout desktop tablet phone
 
-Scenario: Healthcheck
+Scenario: Health check
 Given I am on page with URL `${vividus-test-site-url}`
-Then number of elements found by `elementName(vividus-logo)` is = `1`
+When I wait until element located by `name(vividus-logo)` appears

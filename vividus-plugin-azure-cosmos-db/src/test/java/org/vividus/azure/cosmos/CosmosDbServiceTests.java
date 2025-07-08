@@ -27,6 +27,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import com.azure.core.credential.TokenCredential;
+import com.azure.cosmos.ConnectionMode;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
@@ -80,21 +81,13 @@ class CosmosDbServiceTests
         database.setAccountKey(ACCOUNT_KEY);
         database.setId(DB);
         when(databases.get(DB_KEY, "Database configuration not found for the key: %s", DB_KEY)).thenReturn(database);
-        CosmosDbAccount cosmosDbAccount = new CosmosDbAccount();
-        cosmosDbAccount.setEndpoint(ENDPOINT);
-        cosmosDbAccount.setKey(KEY);
-        when(accounts.get(ACCOUNT_KEY, ACCOUNT_MSG, ACCOUNT_KEY))
-            .thenReturn(cosmosDbAccount);
         cosmosDbService = new CosmosDbService(jsonUtils, accounts, databases, tokenCredential);
     }
 
     @Test
     void shouldQueryDatabase()
     {
-        CosmosDbAccount cosmosDbAccount = new CosmosDbAccount();
-        cosmosDbAccount.setEndpoint(ENDPOINT);
-        when(accounts.get(ACCOUNT_KEY, ACCOUNT_MSG, ACCOUNT_KEY))
-                .thenReturn(cosmosDbAccount);
+        mockCosmosDBAccount(KEY, ConnectionMode.GATEWAY);
         testWithContainer((cosmosDbContainer, container) -> {
             @SuppressWarnings(UNCHECKED)
             CosmosPagedIterable<JsonNode> result = mock(CosmosPagedIterable.class);
@@ -108,6 +101,7 @@ class CosmosDbServiceTests
     @Test
     void shouldDeleteItem()
     {
+        mockCosmosDBAccount(null, ConnectionMode.GATEWAY);
         testWithContainer((cosmosDbContainer, container) -> {
             @SuppressWarnings(UNCHECKED)
             CosmosItemResponse<Object> response = mock(CosmosItemResponse.class);
@@ -120,6 +114,7 @@ class CosmosDbServiceTests
     @Test
     void shouldInsertItem()
     {
+        mockCosmosDBAccount(KEY, ConnectionMode.DIRECT);
         testWithContainer((cosmosDbContainer, container) -> {
             @SuppressWarnings(UNCHECKED)
             CosmosItemResponse<JsonNode> response = mock(CosmosItemResponse.class);
@@ -132,6 +127,7 @@ class CosmosDbServiceTests
     @Test
     void shouldUpsertItem()
     {
+        mockCosmosDBAccount(null, null);
         testWithContainer((cosmosDbContainer, container) -> {
             @SuppressWarnings(UNCHECKED)
             CosmosItemResponse<JsonNode> response = mock(CosmosItemResponse.class);
@@ -144,6 +140,7 @@ class CosmosDbServiceTests
     @Test
     void shouldReadItem()
     {
+        mockCosmosDBAccount(KEY, null);
         testWithContainer((cosmosDbContainer, container) -> {
             @SuppressWarnings(UNCHECKED)
             CosmosItemResponse<JsonNode> response = mock(CosmosItemResponse.class);
@@ -152,6 +149,16 @@ class CosmosDbServiceTests
             assertEquals(String.format("{%n  \"key\" : \"value\"%n}"),
                     cosmosDbService.readById(cosmosDbContainer, ID, PARTITION));
         }, "http://azure.com/read");
+    }
+
+    private void mockCosmosDBAccount(String key, ConnectionMode connectionMode)
+    {
+        CosmosDbAccount cosmosDbAccount = new CosmosDbAccount();
+        cosmosDbAccount.setEndpoint(ENDPOINT);
+        cosmosDbAccount.setKey(key);
+        cosmosDbAccount.setConnectionMode(connectionMode);
+        when(accounts.get(ACCOUNT_KEY, ACCOUNT_MSG, ACCOUNT_KEY))
+                .thenReturn(cosmosDbAccount);
     }
 
     private void testWithContainer(BiConsumer<CosmosDbContainer, CosmosContainer> testToRun, String containerId)

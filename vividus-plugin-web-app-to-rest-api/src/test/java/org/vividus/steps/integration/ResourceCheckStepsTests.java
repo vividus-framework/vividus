@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -63,8 +64,8 @@ import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
+import org.vividus.http.validation.CheckStatus;
 import org.vividus.http.validation.ResourceValidator;
-import org.vividus.http.validation.model.CheckStatus;
 import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.softassert.FailableRunnable;
 import org.vividus.softassert.ISoftAssert;
@@ -102,7 +103,7 @@ class ResourceCheckStepsTests
     private static final String ROOT_ID = "#root";
     private static final String HTTPS_ID = "#https";
     private static final String HTTP_ID = "#http";
-    private static final String TEMPLATE_NAME = "resources-validation-result.ftl";
+    private static final String TEMPLATE_NAME = "resources-validation-result.ftlh";
     private static final String REPORT_NAME = "Resource validation results";
     private static final URI VIVIDUS_URI = URI.create("https://vividus.org");
     private static final URI VIVIDUS_ABOUT_URI = URI.create("https://vividus.org/about");
@@ -154,6 +155,9 @@ class ResourceCheckStepsTests
               <p id='section'>Section</p>
               <a id='jump-link-using-name' href='#named-section'>Jump link using name</a>
               <p name='named-section'>Named Section</a>
+              <img class="vds-flex_1 vds-d_block lg:vds-d_flex vds-flex_column vds-items_flex-end
+               [&amp;_>_*:first-child]:vds-pt_0"
+                href="https://docs.vividus.dev/vividus/latest/_images/subscribe-to-releases.gif"></img>
             </body>
             </html>""";
 
@@ -165,6 +169,7 @@ class ResourceCheckStepsTests
           + "</head>"
           + "<body>"
           + "  <a id='about' href='https://vividus.org/about'>About</a>"
+          + "  <a id='non-ascii-symbols' href='https://vividus.org/ábout'>About</a>"
           + "</body>"
           + "</html>";
 
@@ -183,8 +188,8 @@ class ResourceCheckStepsTests
           + "</body>\r\n"
           + "</html>\r\n";
 
-    @Mock(lenient = true)
-    private ResourceValidator resourceValidator;
+    @Mock
+    private ResourceValidator<WebPageResourceValidation> resourceValidator;
     @Mock
     private AttachmentPublisher attachmentPublisher;
     @Mock
@@ -204,8 +209,11 @@ class ResourceCheckStepsTests
     @BeforeEach
     void beforeEach()
     {
+        resourceCheckSteps.setAttributesToCheck(List.of("href", "src"));
+        //noinspection unchecked
         doAnswer(a ->
         {
+            //noinspection rawtypes
             FailableRunnable runnable = a.getArgument(0);
             runnable.run();
             return null;
@@ -215,7 +223,7 @@ class ResourceCheckStepsTests
     @Test
     void shouldCheckDesiredResourcesAndPostAttachment() throws InterruptedException, ExecutionException
     {
-        mockResourceValidator();
+        mockValidator();
         runExecutor();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
@@ -228,16 +236,21 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(16));
+            assertThat(validationsToReport, hasSize(17));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations, URI.create(NAMED_SECTION_SELECTOR), JUMP_LINK_USING_NAME_SELECTOR,
                     CheckStatus.PASSED, N_A);
             validate(resourceValidations, URI.create(SECTION_SELECTOR), JUMP_LINK_SELECTOR, CheckStatus.PASSED, N_A);
             validate(resourceValidations, SERENITY_URI, HTTP_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, imageUri, "#image", CheckStatus.PASSED, N_A);
+            validate(resourceValidations,
+                    URI.create("https://docs.vividus.dev/vividus/latest/_images/subscribe-to-releases.gif"),
+                    "html > body > p:nth-child(20) > img.vds-flex_1.vds-d_block.lg\\:vds-d_flex.vds-flex_column"
+                    + ".vds-items_flex-end.\\[\\&_\\>_\\*\\:first-child\\]\\:vds-pt_0",
+                    CheckStatus.PASSED, N_A);
             validate(resourceValidations, EXTERNAL_SECTION_LINK, EXTERNAL_SECTION_LINK_SELECTOR, CheckStatus.PASSED,
                     N_A);
-            validate(resourceValidations, gifImageUri, "Unable to build CSS selector for 'img' element",
+            validate(resourceValidations, gifImageUri, "html > body > img.image.\\(gif\\)",
                     CheckStatus.PASSED, N_A);
             validate(resourceValidations,
                     URI.create("https://images.ctfassets.net/us_cool_mint_pocketpaks_breath_strips.png"),
@@ -259,7 +272,6 @@ class ResourceCheckStepsTests
     void shouldConsiderResourceAsBrokenIfUnableToResolveTheUrlFromHtmlDocument()
             throws InterruptedException, ExecutionException
     {
-        mockResourceValidator();
         runExecutor();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
@@ -301,7 +313,6 @@ class ResourceCheckStepsTests
     void shouldConsiderResourceAsBrokenIfUnableToResolveTheUrlFromPage(String pageUrl, String message,
             BiConsumer<ISoftAssert, String> softAssertVerifier) throws InterruptedException, ExecutionException
     {
-        mockResourceValidator();
         runExecutor();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
@@ -323,7 +334,7 @@ class ResourceCheckStepsTests
     @Test
     void shouldCheckResourcesFromPages() throws IOException, InterruptedException, ExecutionException
     {
-        mockResourceValidator();
+        mockValidator();
         runExecutor();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
@@ -344,7 +355,7 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(14));
+            assertThat(validationsToReport, hasSize(15));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations.next(), URI.create(NAMED_SECTION_SELECTOR), JUMP_LINK_USING_NAME_SELECTOR,
                     CheckStatus.PASSED);
@@ -359,6 +370,8 @@ class ResourceCheckStepsTests
             validate(resourceValidations.next(), URI.create(FIRST_PAGE_URL + "/products?name=smetanka"),
                     SELECTOR_QUERY_2, CheckStatus.PASSED);
             validate(resourceValidations.next(), VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED);
+            validate(resourceValidations.next(), URI.create("https://vividus.org/%C3%A1bout"), "#non-ascii-symbols",
+                    CheckStatus.PASSED);
             validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, ABOUT_ID, CheckStatus.PASSED);
             validate(resourceValidations.next(), SHARP_URI, SHARP_ID, CheckStatus.FILTERED);
             validate(resourceValidations.next(), FTP_URI, FTP_ID, CheckStatus.FILTERED);
@@ -371,7 +384,7 @@ class ResourceCheckStepsTests
     @Test
     void shouldCheckResourcesFromPagesWithEmptyResource() throws IOException, InterruptedException, ExecutionException
     {
-        mockResourceValidator();
+        mockValidator();
         runExecutor();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
@@ -391,11 +404,11 @@ class ResourceCheckStepsTests
             validateError(resourceValidations.next(), "Element doesn't contain href/src attributes", "#video-id",
                     THIRD_PAGE_URL);
             validateError(resourceValidations.next(), INVALID_HREF_ATTR_MESSAGE, "#link-id-2", THIRD_PAGE_URL);
-            validateError(resourceValidations.next(), "Jump link points to missing element with section id or name",
-                    JUMP_LINK_SELECTOR, THIRD_PAGE_URL);
+            String error = "Jump link points to missing element with %s id or name";
+            validateError(resourceValidations.next(), error.formatted("named-section"), JUMP_LINK_USING_NAME_SELECTOR,
+                    THIRD_PAGE_URL);
+            validateError(resourceValidations.next(), error.formatted("section"), JUMP_LINK_SELECTOR, THIRD_PAGE_URL);
             validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, "#link-id", CheckStatus.PASSED);
-            validate(resourceValidations.next(), URI.create(NAMED_SECTION_SELECTOR), JUMP_LINK_USING_NAME_SELECTOR,
-                    CheckStatus.FILTERED);
             return true;
         }), eq(REPORT_NAME));
         verify(softAssert).recordFailedAssertion("Element by selector #video-id doesn't contain href/src attributes");
@@ -419,7 +432,6 @@ class ResourceCheckStepsTests
     @Test
     void shouldNotAppendSchemeToUrlIfMainAppUrlIsNotSet() throws InterruptedException, ExecutionException, IOException
     {
-        mockResourceValidator();
         runExecutor();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
@@ -439,7 +451,9 @@ class ResourceCheckStepsTests
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
-            validate(validationsToReport.iterator().next(), resourceUri, SHORTCUT_SELECTOR, CheckStatus.FILTERED);
+            String error = "Unable to resolve //images.ctfassets.net/icon.png resource since the main application "
+                    + "page URL doesn't have scheme";
+            validateError(validationsToReport.iterator().next(), error, SHORTCUT_SELECTOR, page);
             return true;
         }), eq(REPORT_NAME));
     }
@@ -447,7 +461,6 @@ class ResourceCheckStepsTests
     @Test
     void shouldReportBrokenUrlWhenExceptionOccurs() throws IOException, InterruptedException, ExecutionException
     {
-        mockResourceValidator();
         runExecutor();
         IOException ioException = new IOException();
         doThrow(ioException).when(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, FIRST_PAGE_URL,
@@ -473,7 +486,6 @@ class ResourceCheckStepsTests
     @Test
     void shouldReportBrokenUrlWhenNoBodyReturned() throws IOException, InterruptedException, ExecutionException
     {
-        mockResourceValidator();
         runExecutor();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
@@ -528,21 +540,11 @@ class ResourceCheckStepsTests
         assertEquals(exception, illegalStateException.getCause());
     }
 
-    private void mockResourceValidator()
-    {
-        when(resourceValidator.perform(any(WebPageResourceValidation.class)))
-            .thenAnswer(invocation -> {
-                WebPageResourceValidation resourceValidation = invocation.getArgument(0);
-                resourceValidation.setCheckStatus(CheckStatus.PASSED);
-                return resourceValidation;
-            });
-    }
-
     @Test
     void shouldFilterResourceByRegExpCheckDesiredResourcesAnPostAttachment()
             throws InterruptedException, ExecutionException
     {
-        mockResourceValidator();
+        mockValidator();
         runExecutor();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.of("(?!https).*"));
         resourceCheckSteps.init();
@@ -554,6 +556,9 @@ class ResourceCheckStepsTests
                     .get(RESULTS);
             assertThat(validationsToReport, hasSize(13));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
+            validate(resourceValidations, URI.create(NAMED_SECTION_SELECTOR), JUMP_LINK_USING_NAME_SELECTOR,
+                    CheckStatus.PASSED, N_A);
+            validate(resourceValidations, URI.create(SECTION_SELECTOR), JUMP_LINK_SELECTOR, CheckStatus.PASSED, N_A);
             validate(resourceValidations, EXTERNAL_SECTION_LINK, EXTERNAL_SECTION_LINK_SELECTOR, CheckStatus.PASSED,
                     N_A);
             validate(resourceValidations, VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED, N_A);
@@ -562,9 +567,6 @@ class ResourceCheckStepsTests
             validate(resourceValidations, VIVIDUS_QUERY_URI_1, SELECTOR_QUERY_1, CheckStatus.PASSED, N_A);
             validate(resourceValidations, VIVIDUS_QUERY_URI_2, SELECTOR_QUERY_2, CheckStatus.PASSED, N_A);
             validate(resourceValidations, SHARP_URI, SHARP_ID, CheckStatus.FILTERED, N_A);
-            validate(resourceValidations, URI.create(NAMED_SECTION_SELECTOR), JUMP_LINK_USING_NAME_SELECTOR,
-                    CheckStatus.FILTERED, N_A);
-            validate(resourceValidations, URI.create(SECTION_SELECTOR), JUMP_LINK_SELECTOR, CheckStatus.FILTERED, N_A);
             validate(resourceValidations, FTP_URI, FTP_ID, CheckStatus.FILTERED, N_A);
             validate(resourceValidations, SERENITY_URI, HTTP_ID, CheckStatus.FILTERED, N_A);
             validate(resourceValidations, JS_URI, JS_ID, CheckStatus.FILTERED, N_A);
@@ -577,7 +579,6 @@ class ResourceCheckStepsTests
     void shouldFilterJumpLinkDuringContextValidation() throws InterruptedException, ExecutionException
     {
         String contextHtml = "<a id='jump-link' href='#section'>Jump link</a>";
-        mockResourceValidator();
         runExecutor();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
@@ -610,6 +611,16 @@ class ResourceCheckStepsTests
             r.run();
             return true;
         }), any());
+    }
+
+    private void mockValidator()
+    {
+        doAnswer(a ->
+        {
+            WebPageResourceValidation r = a.getArgument(0);
+            r.setCheckStatus(CheckStatus.PASSED);
+            return r;
+        }).when(resourceValidator).perform(any());
     }
 
     private void validate(Iterator<WebPageResourceValidation> toValidate, URI uri, String selector,

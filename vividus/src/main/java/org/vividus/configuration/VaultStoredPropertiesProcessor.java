@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.vividus.configuration;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Properties;
@@ -24,6 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.vault.client.RestTemplateCustomizer;
@@ -33,17 +34,25 @@ import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBac
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
 
-public class VaultStoredPropertiesProcessor extends AbstractPropertiesProcessor implements Closeable
+public class VaultStoredPropertiesProcessor extends AbstractPropertiesProcessor
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(VaultStoredPropertiesProcessor.class);
     private static final Pattern SECRET_PATTERN = Pattern.compile("(?<engine>[^/]+)/(?<path>.+)/(?<key>[^/]+)$");
-    private final Properties properties;
+
+    private Properties properties;
     private VaultTemplate vaultTemplate;
     private AnnotationConfigApplicationContext context;
 
-    VaultStoredPropertiesProcessor(Properties properties)
+    public VaultStoredPropertiesProcessor()
     {
-        super("VAULT");
+        super("(?<!AZURE_KEY_)(?:VAULT|HASHI_CORP_VAULT)");
+    }
+
+    @Override
+    public Properties processProperties(Properties properties)
+    {
         this.properties = properties;
+        return super.processProperties(properties);
     }
 
     @Override
@@ -64,6 +73,17 @@ public class VaultStoredPropertiesProcessor extends AbstractPropertiesProcessor 
                 .orElseThrow(() -> new IllegalArgumentException(
                         String.format("Unable to find secret at path '%s' in Vault", partOfPropertyValueToProcess)
                 ));
+    }
+
+    @Override
+    public String processProperty(String propertyName, String propertyValue)
+    {
+        if (propertyValue.matches(".*(?<!AZURE_KEY_|HASHI_CORP_)VAULT\\((.*?)\\).*"))
+        {
+            LOGGER.warn("`VAULT(...)` placeholder is deprecated and will be removed in VIVIDUS 0.7.0, "
+                    + "please use `HASHI_CORP_VAULT(...)` placeholder instead.");
+        }
+        return super.processProperty(propertyName, propertyValue);
     }
 
     @Override

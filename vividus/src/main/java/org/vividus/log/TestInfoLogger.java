@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
+import org.apache.commons.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.reporter.environment.EnvironmentConfigurer;
-import org.vividus.reporter.environment.PropertyCategory;
+import org.vividus.reporter.metadata.MetadataCategory;
+import org.vividus.reporter.metadata.MetadataEntry;
+import org.vividus.reporter.metadata.MetadataProvider;
 import org.vividus.results.ResultsProvider;
 import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Failure;
@@ -79,29 +81,35 @@ public final class TestInfoLogger
     {
         logInfoMessage(() ->
         {
-            int maxKeyLength = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION
-                    .values()
-                    .stream()
-                    .map(Map::keySet)
-                    .flatMap(Set::stream)
+            int maxKeyLength = Stream.of(MetadataCategory.values())
+                    .map(MetadataProvider::getMetaDataByCategory)
+                    .flatMap(List::stream)
+                    .map(MetadataEntry::getName)
                     .mapToInt(String::length)
                     .max().orElse(0);
             String propertyFormat = "   %-" + maxKeyLength + "s %s%n";
             try (Formatter message = new Formatter())
             {
                 message.format(NEW_LINE);
-                EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.forEach((category, properties) -> {
-                    if (category == PropertyCategory.CONFIGURATION && properties.get(CONFIGURATION_SET) != null)
+                Stream.of(MetadataCategory.values()).forEach(category -> {
+                    Map<String, String> asMap = MetadataProvider.getMetaDataByCategoryAsMap(category);
+                    if (category == MetadataCategory.CONFIGURATION && asMap.get(CONFIGURATION_SET) != null)
                     {
                         String configurationSetFormat = "%s%n %-" + maxKeyLength + "s   %s%n";
                         message.format(configurationSetFormat, HORIZONTAL_RULE, "Configuration set:",
-                            properties.remove(CONFIGURATION_SET));
+                                asMap.get(CONFIGURATION_SET));
+                        asMap.remove(CONFIGURATION_SET);
                     }
                     else
                     {
-                        message.format(CATEGORY_FORMAT, HORIZONTAL_RULE, category.getCategoryName());
+                        String categoryName = category.name();
+                        if (category != MetadataCategory.VIVIDUS)
+                        {
+                            categoryName = WordUtils.capitalize(categoryName.toLowerCase());
+                        }
+                        message.format(CATEGORY_FORMAT, HORIZONTAL_RULE, categoryName);
                     }
-                    properties.forEach((name, value) -> message.format(propertyFormat, name, value));
+                    asMap.forEach((description, value) -> message.format(propertyFormat, description, value));
                 });
                 logExecutionStatistics(message);
                 return message.toString();

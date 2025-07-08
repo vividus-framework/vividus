@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.jbehave.core.annotations.BeforeStories;
 import org.vividus.analytics.model.AnalyticsEvent;
 import org.vividus.analytics.model.AnalyticsEventBatch;
 import org.vividus.analytics.model.CustomDefinitions;
-import org.vividus.reporter.environment.EnvironmentConfigurer;
-import org.vividus.reporter.environment.PropertyCategory;
+import org.vividus.reporter.metadata.MetadataCategory;
+import org.vividus.reporter.metadata.MetadataProvider;
 import org.vividus.results.ResultsProvider;
 import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Statistic;
@@ -51,14 +51,14 @@ public class AnalyticsSteps
     public void postBeforeStoriesAnalytics()
     {
         Map<String, String> payload = new HashMap<>();
-        Map<String, String> configuration = getEnvironmentProperties(PropertyCategory.CONFIGURATION);
-        Map<String, String> modules = getEnvironmentProperties(PropertyCategory.VIVIDUS);
+        Map<String, String> configuration = MetadataProvider.getMetaDataByCategoryAsMap(MetadataCategory.CONFIGURATION);
+        Map<String, String> modules = MetadataProvider.getMetaDataByCategoryAsMap(MetadataCategory.VIVIDUS);
 
         CustomDefinitions.PROFILES.add(payload, configuration.get("Profiles"));
         CustomDefinitions.JAVA.add(payload, Runtime.version().toString());
         CustomDefinitions.VIVIDUS.add(payload, modules.getOrDefault("vividus", "not detected"));
         CustomDefinitions.REMOTE.add(payload,
-                getEnvironmentProperties(PropertyCategory.PROFILE).get("Remote Execution"));
+                MetadataProvider.getMetaDataByCategoryAsMap(MetadataCategory.PROFILE).get("Remote Execution"));
         payload.put(SESSION_CONTROL, "start");
 
         List<AnalyticsEvent> events = new ArrayList<>();
@@ -97,10 +97,5 @@ public class AnalyticsSteps
             CustomDefinitions.PLUGIN_VERSION.add(payload, module.getValue());
             return new AnalyticsEvent(module.getKey(), "use", payload);
         }).toList();
-    }
-
-    private Map<String, String> getEnvironmentProperties(PropertyCategory propertyCategory)
-    {
-        return EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.get(propertyCategory);
     }
 }

@@ -7,50 +7,17 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean id="httpClient-ResourceValidator" class="org.vividus.http.client.HttpClient"
-          factory-bean="httpClientFactory"
-          factory-method="buildHttpClient">
-        <constructor-arg>
-            <bean parent="restApiHttpClientConfig">
-                <property name="skipResponseEntity" value="true" />
-                <property name="lastRequestInterceptor"><null/></property>
-                <property name="lastResponseInterceptor"><null/></property>
-                <property name="httpResponseHandlers"><list/></property>
-            </bean>
-        </constructor-arg>
-    </bean>
-
     <bean id="httpTestContext" class="org.vividus.http.HttpTestContext" />
 
-    <bean id="apiSteps" class="org.vividus.steps.api.HttpRequestSteps">
-        <property name="apiEndpoint" value="${rest-api.http.endpoint}"/>
-    </bean>
-
-    <bean id="httpResponseValidationSteps" class="org.vividus.steps.api.HttpResponseValidationSteps" />
-
-    <bean id="httpResourceValidationSteps" class="org.vividus.steps.http.HttpResourceValidationSteps">
-        <constructor-arg>
-            <bean class="org.vividus.http.validation.ResourceValidator">
-                <constructor-arg ref="httpClient-ResourceValidator" />
-            </bean>
-        </constructor-arg>
-    </bean>
-
-    <bean id="jsonResponseValidationSteps" class="org.vividus.steps.api.JsonResponseValidationSteps" />
-
-    <bean id="sslSteps" class="org.vividus.steps.ssl.SslSteps" />
-
-    <bean id="httpClient-RestApi" class="org.vividus.http.client.HttpClient"
-        factory-bean="httpClientFactory"
-        factory-method="buildHttpClient">
-        <constructor-arg>
-            <ref bean="restApiHttpClientConfig" />
-        </constructor-arg>
-    </bean>
-
-    <bean id="cookieStoreProvider" class="org.vividus.http.CookieStoreProvider">
+    <bean id="cookieStoreProvider" class="org.vividus.http.CookieStoreProviderImpl">
         <constructor-arg value="${rest-api.http.cookie-store-level}" />
     </bean>
+
+    <bean id="extendedHttpLoggingInterceptor" class="org.vividus.http.ExtendedHttpLoggingInterceptor">
+        <constructor-arg value="${rest-api.http.extended-logging}" />
+    </bean>
+
+    <bean id="publishingAttachmentInterceptor" class="org.vividus.http.PublishingAttachmentInterceptor" />
 
     <bean id="restApiHttpClientConfig" parent="httpClientConfig">
         <property name="headers">
@@ -65,9 +32,7 @@
                 <property name="httpTestContext" ref="httpTestContext" />
             </bean>
         </property>
-        <property name="cookieStore">
-            <bean factory-method="getCookieStore" factory-bean="cookieStoreProvider" />
-        </property>
+        <property name="cookieStoreProvider" ref="cookieStoreProvider" />
         <property name="httpResponseHandlers">
             <list>
                 <ref bean="extendedHttpLoggingInterceptor" />
@@ -76,30 +41,84 @@
         </property>
     </bean>
 
+    <bean id="httpClient-ResourceValidator" class="org.vividus.http.client.HttpClient"
+          factory-bean="httpClientFactory"
+          factory-method="buildHttpClient">
+        <constructor-arg>
+            <bean parent="restApiHttpClientConfig">
+                <property name="skipResponseEntity" value="#{!${resource-checker.publish-response-body}}" />
+                <property name="lastRequestInterceptor"><null/></property>
+                <property name="lastResponseInterceptor"><null/></property>
+                <property name="httpResponseHandlers"><list/></property>
+            </bean>
+        </constructor-arg>
+    </bean>
+
     <bean class="org.vividus.http.HttpRequestExecutor">
-        <constructor-arg ref="httpClient-RestApi" />
+        <constructor-arg>
+            <bean class="org.vividus.http.client.HttpClient"
+                  factory-bean="httpClientFactory"
+                  factory-method="buildHttpClient">
+                <constructor-arg>
+                    <ref bean="restApiHttpClientConfig" />
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
         <constructor-arg ref="httpTestContext" />
         <constructor-arg ref="softAssert" />
     </bean>
 
-    <bean id="extendedHttpLoggingInterceptor" class="org.vividus.http.ExtendedHttpLoggingInterceptor">
-        <constructor-arg value="${rest-api.http.extended-logging}" />
+    <bean id="redirectsHttpClientConfig" parent="httpClientConfig">
+        <property name="circularRedirectsAllowed" value="${http.redirects-provider.circular-redirects-allowed}" />
     </bean>
 
-    <bean id="publishingAttachmentInterceptor" class="org.vividus.http.PublishingAttachmentInterceptor" />
+    <bean id="httpRedirectsProvider" class="org.vividus.http.HttpRedirectsProvider">
+        <property name="httpClient">
+            <bean class="org.vividus.http.client.HttpClient"
+                  factory-bean="httpClientFactory"
+                  factory-method="buildHttpClient">
+                <constructor-arg>
+                    <bean parent="redirectsHttpClientConfig">
+                        <property name="lastResponseInterceptor">
+                            <bean class="org.vividus.http.SavingStatusCodeHttpResponseInterceptor">
+                                <property name="httpTestContext" ref="httpTestContext" />
+                            </bean>
+                        </property>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
 
-    <bean id="httpCookieSteps" class="org.vividus.steps.api.HttpCookieSteps"/>
+    <bean id="apiSteps" class="org.vividus.http.steps.HttpRequestSteps">
+        <property name="apiEndpoint" value="${rest-api.http.endpoint}"/>
+    </bean>
 
-    <bean id="jwtSteps" class="org.vividus.steps.api.JwtSteps"/>
+    <bean id="httpResourceValidationSteps" class="org.vividus.http.steps.HttpResourceValidationSteps">
+        <constructor-arg>
+            <bean class="org.vividus.http.validation.ResourceValidator">
+                <constructor-arg ref="httpClient-ResourceValidator" />
+                <property name="publishResponseBody" value="${resource-checker.publish-response-body}" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="httpCookieSteps" class="org.vividus.http.steps.HttpCookieSteps"/>
+    <bean id="httpResponseValidationSteps" class="org.vividus.http.steps.HttpResponseValidationSteps" />
+    <bean id="jsonResponseValidationSteps" class="org.vividus.http.steps.JsonResponseValidationSteps" />
+    <bean id="jwtSteps" class="org.vividus.http.steps.JwtSteps"/>
+    <bean id="redirectValidationSteps" class="org.vividus.http.steps.RedirectValidationSteps" />
+    <bean id="sslSteps" class="org.vividus.ssl.steps.SslSteps" />
 
     <util:list id="stepBeanNames-Api" value-type="java.lang.String">
         <idref bean="apiSteps" />
-        <idref bean="httpResponseValidationSteps" />
-        <idref bean="httpResourceValidationSteps" />
-        <idref bean="jsonResponseValidationSteps" />
         <idref bean="cookieStoreProvider" />
         <idref bean="httpCookieSteps" />
+        <idref bean="httpResourceValidationSteps" />
+        <idref bean="httpResponseValidationSteps" />
+        <idref bean="jsonResponseValidationSteps" />
         <idref bean="jwtSteps" />
+        <idref bean="redirectValidationSteps" />
         <idref bean="sslSteps" />
     </util:list>
 
@@ -115,6 +134,7 @@
     <bean id="response" class="org.vividus.http.variable.ResponseDynamicVariable"/>
     <bean id="response-as-bytes" class="org.vividus.http.variable.ResponseAsBytesDynamicVariable"/>
 
-    <bean class="org.vividus.http.expression.UriEncodingExpressionProcessors" />
+    <bean class="org.vividus.http.expression.PkceExpressionProcessor" />
     <bean class="org.vividus.http.expression.RemoveWrappingDoubleQuotesExpressionProcessor" />
+    <bean class="org.vividus.http.expression.UriExpressionProcessors" />
 </beans>

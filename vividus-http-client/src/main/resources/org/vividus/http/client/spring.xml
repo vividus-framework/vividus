@@ -57,19 +57,20 @@
                 <property name="idempotentMethodsSendingRequestBody" value="${http.idempotent-methods-sending-request-body}" />
             </bean>
         </property>
-        <property name="authConfig">
-            <bean class="org.vividus.http.client.AuthConfig">
-                <property name="username" value="${http.auth.username}" />
-                <property name="password" value="${http.auth.password}" />
-                <property name="preemptiveAuthEnabled" value="${http.auth.preemptive-auth-enabled}" />
-            </bean>
-        </property>
         <property name="skipResponseEntity" value="false" />
         <property name="firstRequestInterceptor">
             <bean class="org.vividus.http.client.LoggingHttpRequestInterceptor">
                 <constructor-arg value="org.vividus.http.client.HttpClient" type="java.lang.Class" />
             </bean>
         </property>
+        <property name="httpContextConfig">
+            <bean factory-bean="httpContextConfigs" factory-method="getData" />
+        </property>
+    </bean>
+
+    <bean id="httpContextConfigs" factory-bean="propertyMapper" factory-method="readValuesCaseInsensitively">
+        <constructor-arg value="http.context." />
+        <constructor-arg value="org.vividus.http.client.HttpContextConfig" />
     </bean>
 
     <bean id="localDnsStorage" factory-bean="propertyParser"

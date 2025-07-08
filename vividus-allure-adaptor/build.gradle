@@ -2,7 +2,7 @@ project.description = 'VIVIDUS Allure report adaptor'
 
 nohttp.source.excludes += '**/webjars/**'
 
-ext.allureReportVersion = '2.29.0'
+ext.allureReportVersion = '2.34.1'
 
 dependencies {
     implementation project(':vividus-engine')
@@ -14,25 +14,26 @@ dependencies {
     implementation(group: 'io.qameta.allure', name: 'allure-plugin-api', version: "${allureReportVersion}")
     implementation(group: 'io.qameta.allure.plugins', name: 'behaviors-plugin', version: "${allureReportVersion}")
 
-    implementation platform(group: 'io.qameta.allure', name: 'allure-bom', version: '2.27.0')
+    implementation platform(group: 'io.qameta.allure', name: 'allure-bom', version: '2.29.0')
     implementation(group: 'io.qameta.allure', name: 'allure-java-commons')
 
-    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.1.7')
+    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.8')
     implementation(group: 'org.springframework', name: 'spring-core')
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.2.0-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.8-jre')
     implementation(group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1')
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.13')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties')
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0')
-    implementation(group: 'com.github.valfirst', name: 'allure-notifications', version: 'e91fdab70b')
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0')
+    implementation(group: 'com.github.qa-guru.allure-notifications', name: 'allure-notifications-api', version: '4.9.0')
 
     compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.2')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.3')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.12.0')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
-    testImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '2.2.0')
+    testImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '2.3.0')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
 }

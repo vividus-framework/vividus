@@ -28,6 +28,7 @@ import org.vividus.ui.screenshot.ScreenshotConfiguration;
 
 public class WebScreenshotConfiguration extends ScreenshotConfiguration
 {
+    private int maxHeight;
     private int nativeHeaderToCut;
     private int nativeFooterToCut;
     private int webHeaderToCut = DEFAULT_STICKY_HEADER_HEIGHT;
@@ -36,6 +37,17 @@ public class WebScreenshotConfiguration extends ScreenshotConfiguration
     private CoordsProviderType coordsProvider = CoordsProviderType.CEILING;
     @SuppressWarnings("MagicNumber")
     private Duration scrollTimeout = Duration.ofMillis(500);
+    private boolean hideScrollbars = true;
+
+    public int getMaxHeight()
+    {
+        return maxHeight;
+    }
+
+    public void setMaxHeight(int maxHeight)
+    {
+        this.maxHeight = maxHeight;
+    }
 
     public int getWebHeaderToCut()
     {
@@ -105,5 +117,15 @@ public class WebScreenshotConfiguration extends ScreenshotConfiguration
     protected void setNativeHeaderToCut(int nativeHeaderToCut)
     {
         this.nativeHeaderToCut = nativeHeaderToCut;
+    }
+
+    public boolean isHideScrollbars()
+    {
+        return hideScrollbars;
+    }
+
+    public void setHideScrollbars(boolean hideScrollbars)
+    {
+        this.hideScrollbars = hideScrollbars;
     }
 }

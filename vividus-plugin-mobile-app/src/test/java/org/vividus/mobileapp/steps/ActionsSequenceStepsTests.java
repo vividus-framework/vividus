@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Interactive;
@@ -48,6 +47,7 @@ import org.vividus.selenium.locator.Locator;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.AtomicAction;
 import org.vividus.ui.mobile.action.search.AppiumLocatorType;
+import org.vividus.ui.model.Point;
 
 @ExtendWith(MockitoExtension.class)
 class ActionsSequenceStepsTests
@@ -86,8 +86,8 @@ class ActionsSequenceStepsTests
 
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(baseValidations.assertElementExists(ELEMENT_EXISTS_MESSAGE, LOCATOR)).thenReturn(Optional.of(webElement));
-        when(point.getX()).thenReturn(offset);
-        when(point.getY()).thenReturn(offset);
+        when(point.x()).thenReturn(offset);
+        when(point.y()).thenReturn(offset);
 
         var actions = List.of(
                 new AtomicAction<>(TAP_AND_HOLD, LOCATOR),

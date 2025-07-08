@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,38 +16,13 @@
 
 package org.vividus.transformer;
 
-import java.util.List;
-
 import org.jbehave.core.embedder.StoryControls;
 import org.jbehave.core.expressions.ExpressionResolver;
-import org.jbehave.core.model.ExamplesTable.TableProperties;
-import org.jbehave.core.model.ExamplesTable.TableRows;
-import org.jbehave.core.model.TableParsers;
-import org.vividus.util.ExamplesTableProcessor;
 
-public class ResolvingExpressionsEagerlyTransformer implements ExtendedTableTransformer
+public class ResolvingExpressionsEagerlyTransformer extends AbstractResolvingTransformer
 {
-    private final ExpressionResolver expressionResolver;
-    private final StoryControls storyControls;
-
     public ResolvingExpressionsEagerlyTransformer(ExpressionResolver expressionResolver, StoryControls storyControls)
     {
-        this.expressionResolver = expressionResolver;
-        this.storyControls = storyControls;
-    }
-
-    @Override
-    public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
-    {
-        TableRows tableRows = tableParsers.parseRows(tableAsString, properties);
-        List<List<String>> rows = tableRows.getRows();
-        resolveExpressions(rows);
-        return ExamplesTableProcessor.buildExamplesTable(tableRows.getHeaders(), rows, properties);
-    }
-
-    private void resolveExpressions(List<List<String>> rows)
-    {
-        rows.forEach(row -> row.replaceAll(expression -> String.valueOf(
-                expressionResolver.resolveExpressions(storyControls.dryRun(), expression))));
+        super(v -> String.valueOf(expressionResolver.resolveExpressions(storyControls.dryRun(), v)));
     }
 }

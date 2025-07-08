@@ -16,7 +16,6 @@
 
 package org.vividus.selenium.mobileapp;
 
-import java.util.Map;
 import java.util.Optional;
 
 import org.vividus.selenium.IWebDriverProvider;
@@ -32,10 +31,8 @@ public class MobileContextSourceCodeProvider implements ContextSourceCodeProvide
     }
 
     @Override
-    public Map<String, String> getSourceCode()
+    public Optional<String> getSourceCode()
     {
-        return Optional.ofNullable(webDriverProvider.get().getPageSource())
-                       .map(sc -> Map.of(APPLICATION_SOURCE_CODE, sc))
-                       .orElseGet(Map::of);
+        return Optional.ofNullable(webDriverProvider.get().getPageSource());
     }
 }

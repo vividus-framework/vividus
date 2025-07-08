@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package org.vividus.configuration;
 
-import java.util.List;
+import java.io.IOException;
 import java.util.Properties;
+import java.util.stream.StreamSupport;
 
 public class DelegatingPropertiesProcessor implements PropertiesProcessor
 {
-    private final List<PropertiesProcessor> propertiesProcessors;
+    private final Iterable<PropertiesProcessor> propertiesProcessors;
 
-    public DelegatingPropertiesProcessor(List<PropertiesProcessor> propertiesProcessors)
+    public DelegatingPropertiesProcessor(Iterable<PropertiesProcessor> propertiesProcessors)
     {
         this.propertiesProcessors = propertiesProcessors;
     }
@@ -31,14 +32,24 @@ public class DelegatingPropertiesProcessor implements PropertiesProcessor
     @Override
     public Properties processProperties(Properties properties)
     {
-        return propertiesProcessors.stream().reduce(properties,
-                (result, processor) -> processor.processProperties(result), (p1, p2) -> p1);
+        return StreamSupport.stream(propertiesProcessors.spliterator(), false)
+                .reduce(properties, (result, processor) -> processor.processProperties(result), (p1, p2) -> p1);
     }
 
     @Override
     public String processProperty(String propertyName, String propertyValue)
     {
-        return propertiesProcessors.stream().reduce(propertyValue,
+        return StreamSupport.stream(propertiesProcessors.spliterator(), false).reduce(propertyValue,
                 (result, processor) -> processor.processProperty(propertyName, result), (p1, p2) -> p1);
+    }
+
+    @Override
+    @SuppressWarnings("PMD.CloseResource")
+    public void close() throws IOException
+    {
+        for (PropertiesProcessor propertiesProcessor : propertiesProcessors)
+        {
+            propertiesProcessor.close();
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.vividus.util.json;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -57,7 +58,7 @@ public final class JsonPathUtils
     }
 
     /**
-     * Gets data from feed using jsonPaths
+     * Gets data from feed using JSON paths
      * @param <T> resulting type
      * @param json JSON String
      * @param jsonPaths collection of JSON paths
@@ -65,7 +66,23 @@ public final class JsonPathUtils
      */
     public static <T> List<T> getData(String json, Collection<String> jsonPaths)
     {
-        DocumentContext jsonPathContext = JsonPath.parse(json);
+        return getData(JsonPath.parse(json), jsonPaths);
+    }
+
+    /**
+     * Gets data from feed using JSON paths
+     * @param <T> resulting type
+     * @param jsonInputStream JSON {@link InputStream}
+     * @param jsonPaths collection of JSON paths
+     * @return list with results found by JSON paths
+     */
+    public static <T> List<T> getData(InputStream jsonInputStream, Collection<String> jsonPaths)
+    {
+        return getData(JsonPath.parse(jsonInputStream), jsonPaths);
+    }
+
+    private static <T> List<T> getData(DocumentContext jsonPathContext, Collection<String> jsonPaths)
+    {
         return jsonPaths.stream().map(jsonPathContext::<T>read).toList();
     }
 

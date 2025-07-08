@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,38 @@
 
 package org.vividus.excel;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.EnumUtils;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jbehave.core.model.ExamplesTable;
+import org.vividus.model.CellType;
+import org.vividus.util.DateUtils;
 
-public final class ExcelSheetWriter
+public class ExcelSheetWriter
 {
-    private ExcelSheetWriter()
+    private static final Pattern HEADER_WITH_TYPE_PATTERN = Pattern
+            .compile("#\\{withColumnCellsType\\(([^,]+),\\h*(.*)\\)}");
+    private static final Pattern CELL_WITH_TYPE_PATTERN = Pattern.compile("#\\{withCellType\\(([^,]+),\\h*(.*)\\)}");
+
+    private final DateUtils dateUtils;
+
+    public ExcelSheetWriter(DateUtils dateUtils)
     {
+        this.dateUtils = dateUtils;
     }
 
     /**
@@ -42,13 +56,13 @@ public final class ExcelSheetWriter
     * @param sheetName sheet name, if not specified the default name will be determined by underlying excel library
     * @param content any valid ExamplesTable
     */
-    public static void createExcel(Path path, Optional<String> sheetName, ExamplesTable content) throws IOException
+    public void createExcel(Path path, Optional<String> sheetName, ExamplesTable content) throws IOException
     {
         try (XSSFWorkbook workbook = new XSSFWorkbook();
-                FileOutputStream fileOut = new FileOutputStream(path.toFile()))
+                OutputStream fileOut = Files.newOutputStream(path))
         {
             XSSFSheet sheet = sheetName.map(workbook::createSheet).orElseGet(workbook::createSheet);
-            fillData(content, sheet);
+            fillData(content, sheet, workbook);
             workbook.write(fileOut);
         }
     }
@@ -59,29 +73,67 @@ public final class ExcelSheetWriter
     * @param sheetName sheet name
     * @param content any valid ExamplesTable
     */
-    public static void addSheetToExcel(Path path, String sheetName, ExamplesTable content) throws IOException
+    public void addSheetToExcel(Path path, String sheetName, ExamplesTable content) throws IOException
     {
-        try (InputStream fileInput = new FileInputStream(path.toFile());
+        try (InputStream fileInput = Files.newInputStream(path);
                 XSSFWorkbook workbook = new XSSFWorkbook(fileInput);
-                FileOutputStream fileOut = new FileOutputStream(path.toFile()))
+                OutputStream fileOut = Files.newOutputStream(path))
         {
-            fillData(content, workbook.createSheet(sheetName));
+            fillData(content, workbook.createSheet(sheetName), workbook);
             workbook.write(fileOut);
         }
     }
 
-    private static void fillData(ExamplesTable content, XSSFSheet sheet)
+    private void fillData(ExamplesTable content, XSSFSheet sheet, XSSFWorkbook workbook)
     {
-        fillRow(sheet, 0, content.getHeaders());
+        ArrayList<CellType> columTypes = new ArrayList<>();
+        fillRow(sheet, workbook, 0, content.getHeaders(), columTypes);
         IntStream.range(0, content.getRowCount()).forEach(rowIndex -> {
             List<String> cells = content.getRowValues(rowIndex, true);
-            fillRow(sheet, rowIndex + 1, cells);
+            fillRow(sheet, workbook, rowIndex + 1, cells, columTypes);
         });
     }
 
-    private static void fillRow(XSSFSheet sheet, int rowIndex, List<String> cells)
+    private void fillRow(XSSFSheet sheet, XSSFWorkbook workbook, int rowIndex, List<String> cells,
+            ArrayList<CellType> columTypes)
     {
         Row row = sheet.createRow(rowIndex);
-        IntStream.range(0, cells.size()).forEach(index -> row.createCell(index).setCellValue(cells.get(index)));
+        IntStream.range(0, cells.size()).forEach(index ->
+        {
+            if (rowIndex == 0)
+            {
+                String headerFromExampleTable = cells.get(index);
+                Cell cellExcel = row.createCell(index);
+                Matcher headerTypeMatcher = HEADER_WITH_TYPE_PATTERN.matcher(headerFromExampleTable);
+
+                if (headerTypeMatcher.matches())
+                {
+                    columTypes.add(EnumUtils.getEnumIgnoreCase(CellType.class, headerTypeMatcher.group(1)));
+                    cellExcel.setCellValue(headerTypeMatcher.group(2));
+                }
+                else
+                {
+                    cellExcel.setCellValue(headerFromExampleTable);
+                    columTypes.add(CellType.STRING);
+                }
+            }
+            else
+            {
+                String cellContentFromExampleTable = cells.get(index);
+                Cell cellExcel = row.createCell(index);
+                Matcher cellTypeMatcher = CELL_WITH_TYPE_PATTERN.matcher(cellContentFromExampleTable);
+                if (cellTypeMatcher.matches())
+                {
+                    CellType type = EnumUtils.getEnumIgnoreCase(CellType.class, cellTypeMatcher.group(1));
+                    String cellContent = cellTypeMatcher.group(2);
+                    type.setCellValue(workbook, cellExcel, cellContent, dateUtils);
+                }
+                else
+                {
+                    CellType type = columTypes.get(index);
+                    type.setCellValue(workbook, cellExcel, cellContentFromExampleTable, dateUtils);
+                }
+            }
+        });
     }
 }

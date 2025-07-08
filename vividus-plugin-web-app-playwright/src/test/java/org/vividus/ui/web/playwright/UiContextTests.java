@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,16 @@
 
 package org.vividus.ui.web.playwright;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
+import com.microsoft.playwright.FrameLocator;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 
@@ -30,13 +34,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
+import org.vividus.ui.web.playwright.locator.Visibility;
 
 @SuppressWarnings("PMD.CloseResource")
 @ExtendWith(MockitoExtension.class)
 class UiContextTests
 {
+    private static final String GET_OUTER_HTML_SCRIPT = "el => el.outerHTML";
+
     private static final PlaywrightLocator PLAYWRIGHT_LOCATOR = new PlaywrightLocator("xpath", "//div");
-    private final UiContext uiContext = new UiContext(new SimpleTestContext());
+    private final SimpleTestContext testContext = new SimpleTestContext();
+    private final UiContext uiContext = new UiContext(testContext);
+
+    static
+    {
+        PLAYWRIGHT_LOCATOR.setVisibility(Visibility.ALL);
+    }
 
     @Test
     void shouldSetAndGetPage()
@@ -58,12 +71,48 @@ class UiContextTests
     }
 
     @Test
+    void shouldSetAndGetFrame()
+    {
+        FrameLocator frame = mock();
+        uiContext.setCurrentFrame(frame);
+        var currentFrame = uiContext.getCurrentFrame();
+        assertSame(frame, currentFrame);
+    }
+
+    @Test
+    void shouldSetAndGetContext()
+    {
+        Locator context = mock();
+        uiContext.setContext(context);
+        var currentContext = uiContext.getContext();
+        assertSame(context, currentContext);
+    }
+
+    @Test
+    void shouldReturnNullWhenFrameNotSet()
+    {
+        var currentFrame = uiContext.getCurrentFrame();
+        assertNull(currentFrame);
+    }
+
+    @Test
     void shouldLocateElementOnPage()
     {
         Page page = mock();
         uiContext.setCurrentPage(page);
         Locator locator = mock();
         when(page.locator(PLAYWRIGHT_LOCATOR.getLocator())).thenReturn(locator);
+        Locator actual = uiContext.locateElement(PLAYWRIGHT_LOCATOR);
+        assertSame(locator, actual);
+    }
+
+    @Test
+    void shouldLocateElementInFrame()
+    {
+        FrameLocator frameLocator = mock();
+        uiContext.setCurrentFrame(frameLocator);
+        Locator locator = mock();
+        when(frameLocator.locator(PLAYWRIGHT_LOCATOR.getLocator())).thenReturn(locator);
         Locator actual = uiContext.locateElement(PLAYWRIGHT_LOCATOR);
         assertSame(locator, actual);
     }
@@ -117,5 +166,110 @@ class UiContextTests
         when(page.locator("//html/body")).thenReturn(root);
         Locator actual = uiContext.getCurrentContexOrPageRoot();
         assertSame(root, actual);
+    }
+
+    @Test
+    void shouldReturnFrameWhenNoContextIsSet()
+    {
+        FrameLocator frameLocator = mock();
+        uiContext.setCurrentFrame(frameLocator);
+        Locator root = mock();
+        when(frameLocator.owner()).thenReturn(root);
+        Locator actual = uiContext.getCurrentContexOrPageRoot();
+        assertSame(root, actual);
+    }
+
+    @Test
+    void shouldReturnSourceCodeOfCurrentContext()
+    {
+        Page page = mock();
+        uiContext.setCurrentPage(page);
+        Locator context = mock();
+        var sourceCode = "<img/>";
+        when(context.evaluate(GET_OUTER_HTML_SCRIPT)).thenReturn(sourceCode);
+        uiContext.setContext(context);
+        var actual = uiContext.getSourceCode();
+        assertEquals(Optional.of(sourceCode), actual);
+        verifyNoInteractions(page);
+    }
+
+    @Test
+    void shouldReturnSourceCodeOfPageWhenNoContextIsSet()
+    {
+        Page page = mock();
+        var sourceCode = "<html/>";
+        when(page.content()).thenReturn(sourceCode);
+        uiContext.setCurrentPage(page);
+        var actual = uiContext.getSourceCode();
+        assertEquals(Optional.of(sourceCode), actual);
+    }
+
+    @Test
+    void shouldReturnSourceCodeOfFrameWhenNoContextIsSet()
+    {
+        FrameLocator frameLocator = mock();
+        uiContext.setCurrentFrame(frameLocator);
+        Locator frameRoot = mock();
+        when(frameLocator.locator("html")).thenReturn(frameRoot);
+        var sourceCode = "<iframe/>";
+        when(frameRoot.evaluate(GET_OUTER_HTML_SCRIPT)).thenReturn(sourceCode);
+        var actual = uiContext.getSourceCode();
+        assertEquals(Optional.of(sourceCode), actual);
+    }
+
+    @Test
+    void shouldLocateVisibleElement()
+    {
+        var playwrightLocator = new PlaywrightLocator("css", "div");
+        Page page = mock();
+        uiContext.setCurrentPage(page);
+        Locator locator = mock();
+        Locator visibleLocator = mock();
+        when(page.locator(playwrightLocator.getLocator())).thenReturn(locator);
+        when(locator.locator("visible=true")).thenReturn(visibleLocator);
+        Locator actual = uiContext.locateElement(playwrightLocator);
+        assertSame(visibleLocator, actual);
+    }
+
+    @Test
+    void shouldResetFrame()
+    {
+        setupFrameMock(false);
+        uiContext.resetToActiveFrame();
+        assertNull(uiContext.getCurrentFrame());
+    }
+
+    @Test
+    void shouldNotResetFrameWhenFrameIsVisible()
+    {
+        FrameLocator frame = setupFrameMock(true);
+        uiContext.resetToActiveFrame();
+        assertEquals(frame, uiContext.getCurrentFrame());
+    }
+
+    @Test
+    void shouldNotThrowExceptionWhenResetFrameWithNoFrames()
+    {
+        uiContext.resetToActiveFrame();
+        assertNull(uiContext.getCurrentFrame());
+    }
+
+    @Test
+    void shouldRemovePlaywrightContext()
+    {
+        uiContext.reset();
+        assertEquals(1, testContext.size());
+        uiContext.removePlaywrightContext();
+        assertEquals(0, testContext.size());
+    }
+
+    private FrameLocator setupFrameMock(boolean visibility)
+    {
+        FrameLocator frame = mock();
+        Locator frameOwner = mock();
+        uiContext.setCurrentFrame(frame);
+        when(frame.owner()).thenReturn(frameOwner);
+        when(frameOwner.isVisible()).thenReturn(visibility);
+        return frame;
     }
 }

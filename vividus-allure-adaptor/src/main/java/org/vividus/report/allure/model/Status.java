@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import org.vividus.JBehaveFailureUnwrapper;
 import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.model.SoftAssertionError;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public enum Status
 {
@@ -66,7 +64,6 @@ public enum Status
                 .allMatch(SoftAssertionError::isNotFixedKnownIssue);
     }
 
-    @SuppressFBWarnings("SING_SINGLETON_GETTER_NOT_SYNCHRONIZED")
     public static Status getLowest()
     {
         return LOWEST;

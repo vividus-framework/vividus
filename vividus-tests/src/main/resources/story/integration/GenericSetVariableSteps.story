@@ -1,5 +1,5 @@
 Meta:
-    @epic vividus-extension-selenium
+    @epic vividus-extension-selenium; vividus-plugin-web-app
 
 Scenario: Verify step: "When I set the text found in search context to the '$scopes' variable '$variableName'"
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`

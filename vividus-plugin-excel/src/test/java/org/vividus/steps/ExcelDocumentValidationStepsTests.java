@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@ import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.model.CellRecord;
@@ -46,8 +46,13 @@ class ExcelDocumentValidationStepsTests
     @Mock
     private ISoftAssert softAssert;
 
-    @InjectMocks
     private ExcelDocumentValidationSteps steps;
+
+    @BeforeEach
+    void beforeEach()
+    {
+        steps = new ExcelDocumentValidationSteps(softAssert, false);
+    }
 
     static Stream<Arguments> sheetProcessors()
     {

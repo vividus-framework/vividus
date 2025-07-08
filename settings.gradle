@@ -72,3 +72,5 @@ include 'vividus-exporter-commons'
 
 include 'vividus-docker-bundler'
 include 'vividus-tests'
+
+include 'vividus-mcp-server'

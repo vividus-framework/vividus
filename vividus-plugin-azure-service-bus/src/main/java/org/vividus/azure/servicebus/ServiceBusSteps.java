@@ -19,14 +19,17 @@ package org.vividus.azure.servicebus;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.stream.Collectors;
 
 import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.AfterStory;
 import org.jbehave.core.annotations.When;
+import org.jbehave.core.model.ExamplesTable;
 import org.vividus.azure.servicebus.service.ServiceBusService;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
@@ -74,6 +77,57 @@ public class ServiceBusSteps
     public void sendMessageToServiceBus(String serviceBusKey, String payload)
     {
         serviceBusService.send(serviceBusKey, payload);
+    }
+
+    /**
+     * Send message with custom properties to
+     * <a href="https://learn.microsoft.com/en-us/azure/service-bus-messaging">Azure Service Bus</a>
+     * <br>
+     * <br>Service Bus <b>connection configuration</b> should be defined via properties with a following format:
+     * <br><code>azure.service-bus.{service-bus-key}.{property-name}</code>
+     * <br>Example:
+     * <br><code>
+     * <br>azure.service-bus.test-topic.channel-type=TOPIC
+     * <br>azure.service-bus.test-topic.namespace=testNamespace
+     * <br>azure.service-bus.test-topic.name=testTopicName
+     * <br>azure.service-bus.test-topic.subscription-name=testSubscriptionName
+     * </code>
+     * <br>
+     * <br> Where:
+     * <ul>
+     *     <li><b>channel-type</b> - the type of service bus messaging components: either `QUEUE` or `TOPIC`</li>
+     *     <li><b>namespace</b> - the name of the namespace the service bus belongs to</li>
+     *     <li><b>name</b> - the queue or topic name</li>
+     *     <li><b>subscription-name</b> - the name of the topic subscription. Only for TOPIC channel-type</li>
+     * </ul>
+     * @param serviceBusKey    The key associated with Azure Service Bus connection configuration.
+     * @param payload          Message to send to the service bus.
+     * @param customProperties ExamplesTable representing the list of custom properties with columns "key", "type"
+     *                         and "value":
+     *                         <ul>
+     *                              <li><b>key</b> - the property name</li>
+     *                              <li><b>type</b> - the data type of the property (case-insensitive).
+     *                                                Options include 'string', 'boolean', 'number'</li>
+     *                              <li><b>value</b> - the property value</li>
+     *                         </ul>
+     *                         <p>Example:</p>
+     *                         <code>
+     *                         |key     |type   |value|<br>
+     *                         |purpose |string |test |<br>
+     *                         |flag    |boolean|true |<br>
+     *                         |mode    |number |5    |<br>
+     *                         </code>
+     */
+    @When("I send message to `$serviceBusKey` service bus with payload:`$payload` and custom properties:"
+            + "$customProperties")
+    public void sendMessageToServiceBus(String serviceBusKey, String payload, ExamplesTable customProperties)
+    {
+        Map<String, Object> properties = customProperties.getRowsAsParameters(true).stream()
+                .collect(Collectors.toMap(row -> row.valueAs("key", String.class), row -> {
+                    ApplicationPropertyType type = row.valueAs("type", ApplicationPropertyType.class);
+                    return row.valueAs("value", type.getValueType());
+                }));
+        serviceBusService.send(serviceBusKey, payload, properties);
     }
 
     /**
@@ -245,5 +299,24 @@ public class ServiceBusSteps
         };
 
         abstract List<ServiceBusReceivedMessage> performOn(BlockingQueue<ServiceBusReceivedMessage> blockingQueue);
+    }
+
+    private enum ApplicationPropertyType
+    {
+        STRING(String.class),
+        BOOLEAN(Boolean.class),
+        NUMBER(Number.class);
+
+        private final Class<?> valueType;
+
+        ApplicationPropertyType(Class<?> valueType)
+        {
+            this.valueType = valueType;
+        }
+
+        public Class<?> getValueType()
+        {
+            return valueType;
+        }
     }
 }

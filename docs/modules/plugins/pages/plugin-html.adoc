@@ -5,6 +5,107 @@ The plugin provides the ability to work with HTML documents: data extraction and
 :plugin-short-name: html
 include::partial$plugin-installation.adoc[]
 
+== xref:ROOT:glossary.adoc#_table_transformer[Table Transformers]
+
+=== FROM_HTML
+
+`FROM_HTML` transformer generates a table based on the text content, HTML content or attributes of HTML elements found in the requested HTML page.
+
+[cols="1,3", options="header"]
+|===
+
+|Parameter Name
+|Description
+
+|`pageUrl`
+a|The URL of the page to build the table upon.
+
+WARNING: The `pageUrl` parameter is deprecated and will be removed in VIVIDUS 0.7.0, please use `variableName` instead.
+
+IMPORTANT: The `pageUrl` parameter can not be used together with the `variableName` or `path` parameter.
+
+|`variableName`
+a|The name of the variable containing source HTML, only variables of scopes `global` and `next_batches` are allowed.
+Exceptions are cases when the transformer using in xref:commons:vividus-steps.adoc#_initialize_variable_with_a_table[step]
+which initializes a variable with a table.
+
+IMPORTANT: The `variableName` parameter can not be used together with the `pageUrl` or `path` parameter.
+
+|`path`
+a|The xref:ROOT:glossary.adoc#_resource[HTML resource name] or the HTML file path.
+
+IMPORTANT: The `path` parameter can not be used together with the `variableName` or `pageUrl` parameter.
+
+|`column`
+|The column name in the generated table.
+
+|`xpathSelector`
+a|The XPath selector to select HTML elements in the HTML page.
+
+By using XPath selector we can extract element's HTML content, attributes and text content like its shown in the following example:
+
+* `//a` - extract the link HTML content, e.g. `<a href="/hello">Say Hello</a>`
+* `//a/text()` - extract the link text, e.g. `Say Hello`
+* `//a/@href` - extract the link `href` attribute, e.g. `/hello`
+
+|`baseUri`
+|The base URI  can be used to get an absolute URL from an attribute that may be a relative URL: make sure to add the prefix `abs:` before the attribute name to https://jsoup.org/cookbook/extracting-data/working-with-urls[xPath selector], e.g. `//a/@abs:href`. If defined `pageUrl` parameter as the base URI implicitly using value of this parameter.
+
+|===
+
+[cols="3,1,1,3", options="header"]
+|===
+
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`transformer.from-html.headers.<header name>=<header value>`
+|
+|
+a|Set of headers to set when requesting the page.
+
+[source,properties]
+----
+transformer.from-html.headers.x-vercel-protection-bypass=1fac2b25014d35e5103b
+----
+
+|===
+
+.Given the following HTML page
+[source,html]
+----
+<!DOCTYPE html>
+<html>
+    <body>
+        <a href="/r">R</a>
+        <a href="/g">G</a>
+        <a href="/b">B</a>
+    </body>
+</html>
+----
+
+.Applyng FROM_HTML to the page
+----
+Examples:
+{transformer=FROM_HTML, column=relative-url, pageUrl=https://mypage.com, xpathSelector=//a/@href}
+----
+
+.Output table
+----
+|relative-url|
+|/r          |
+|/g          |
+|/b          |
+----
+
+.The transformer configuration based on local HTML file
+[source,gherkin]
+----
+transformer=FROM_HTML, column=relative-url, path=data/index.html, xpathSelector=//a/@href
+----
+
 == Steps
 
 === Validate elements

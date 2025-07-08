@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ class UfgStepsTests
                 new DesktopBrowserInfo(new RectangleSize(1920, 1080), BrowserType.CHROME).getRenderBrowserInfo(),
                 AccessibilityStatus.Failed);
         ApplitoolsTestResults iosResults = createResults("iOS 16.1", "Safari", new RectangleSize(375, 821),
-                new RenderBrowserInfo(new IosDeviceInfo(IosDeviceName.iPhone_X)), AccessibilityStatus.Passed);
+                new RenderBrowserInfo(new IosDeviceInfo(IosDeviceName.iPhone_16_Pro_Max)), AccessibilityStatus.Passed);
         when(visualCheckResult.getTestResults()).thenReturn(List.of(desktopResults, iosResults));
 
         steps.performCheck(List.of(applitoolsVisualCheck), new IRenderingBrowserInfo[] { renderInfo, renderInfo });
@@ -124,7 +124,7 @@ class UfgStepsTests
         verify(softAssert).assertTrue(
                 "WCAG 2.1 - AA accessibility check for test: baseline-name Chrome 1920x1080", false);
         verify(softAssert).assertTrue(
-                "WCAG 2.1 - AA accessibility check for test: baseline-name iPhone X iOS 16.1 Safari", true);
+                "WCAG 2.1 - AA accessibility check for test: baseline-name iPhone 16 Pro Max iOS 16.1 Safari", true);
     }
 
     private ApplitoolsTestResults createResults(String os, String browser, RectangleSize viewport,

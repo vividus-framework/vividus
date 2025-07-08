@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
-import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.vividus.model.CellValue;
 
 class ExcelSheetParserTests
@@ -43,7 +47,11 @@ class ExcelSheetParserTests
     private static final String AS_STRING_SHEET = "AsString";
     private static final String SHEET_NAME = "RepeatingData";
     private static final String OPEN_STATUS = "OPEN";
+    private static final String FIRST = "First";
+    private static final String SECOND = "Second";
+    private static final String THIRD = "Third";
     private static final String NAME = "name";
+    private static final String STATUS = "status";
     private static final String ONE_AS_STRING = "1.0";
     private static final String TWO_AS_STRING = "2.0";
     private static final String THREE_AS_STRING = "3.0";
@@ -65,7 +73,7 @@ class ExcelSheetParserTests
             extractor = new ExcelSheetsExtractor(inputStream.readAllBytes());
         }
         mappingSheet = extractor.getSheet("Mapping").get();
-        sheetParser = new ExcelSheetParser(mappingSheet, true);
+        sheetParser = new ExcelSheetParser(mappingSheet, false);
 
         expectedTitleRowData = new LinkedList<>();
         expectedTitleRowData.add(TITLE_KEY_PRODUCT);
@@ -143,20 +151,6 @@ class ExcelSheetParserTests
     }
 
     @Test
-    void testTrimFalse()
-    {
-        sheetParser = new ExcelSheetParser(mappingSheet);
-        List<Map<String, String>> expectedData = new LinkedList<>();
-        Map<String, String> rowMap1 = new LinkedHashMap<>();
-        rowMap1.put(TITLE_KEY_PRODUCT, "Product1 ");
-        rowMap1.put(TITLE_KEY_PRICE, "Price1 ");
-        expectedData.add(rowMap1);
-
-        var actualData = sheetParser.getDataWithTitle(TITLE_ROW_NUMBER, 1);
-        assertEquals(expectedData, actualData);
-    }
-
-    @Test
     void testGetCellValueWithDiffTypes()
     {
         List<List<String>> expectedStringData = new LinkedList<>();
@@ -172,7 +166,7 @@ class ExcelSheetParserTests
         row3.add(THREE_AS_STRING);
         expectedStringData.add(row3);
 
-        sheetParser = new ExcelSheetParser(extractor.getSheet(AS_STRING_SHEET).get());
+        sheetParser = new ExcelSheetParser(extractor.getSheet(AS_STRING_SHEET).get(), false);
         var data = sheetParser.getData();
         assertEquals(expectedStringData, data);
     }
@@ -193,8 +187,7 @@ class ExcelSheetParserTests
         row3.add("3");
         expectedStringData.add(row3);
 
-        var dataFormatter = new DataFormatter();
-        sheetParser = new ExcelSheetParser(extractor.getSheet(AS_STRING_SHEET).get(), true, dataFormatter);
+        sheetParser = new ExcelSheetParser(extractor.getSheet(AS_STRING_SHEET).get(), true);
         var data = sheetParser.getData();
         assertEquals(expectedStringData, data);
     }
@@ -202,7 +195,7 @@ class ExcelSheetParserTests
     @Test
     void testGetDataFromRange()
     {
-        sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get());
+        sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get(), false);
         var dataFromRange = sheetParser.getDataFromRange("B2:B7");
         assertEquals(6, dataFromRange.size());
         var openStatus = OPEN_STATUS;
@@ -215,15 +208,37 @@ class ExcelSheetParserTests
         assertCellValue(dataFromRange.get(5), closedStatus, "B7");
     }
 
-    @Test
-    void testGetDataFromTableRange()
+    static Stream<Arguments> rangesAndExpectedData()
     {
-        sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get());
-        var data = sheetParser.getDataAsTable("A1:B3");
-        Map<String, List<String>> expectedData = new HashMap<>();
-        expectedData.put(NAME, List.of("First", "Second"));
-        expectedData.put("status", List.of(OPEN_STATUS, OPEN_STATUS));
+        return Stream.of(
+                Arguments.of("A1:B1", Map.of(NAME, List.of(), STATUS, List.of())),
+                Arguments.of("A1:B3", Map.of(NAME, List.of(FIRST, SECOND), STATUS, List.of(OPEN_STATUS, OPEN_STATUS))),
+                Arguments.of("A9:B9;A4:B4;", Map.of("name1", List.of(THIRD), "status1", List.of(OPEN_STATUS))),
+                Arguments.of("A1:B2;A4:B4",
+                        Map.of(NAME, List.of(FIRST, THIRD), STATUS, List.of(OPEN_STATUS, OPEN_STATUS))));
+    }
+
+    @ParameterizedTest
+    @MethodSource("rangesAndExpectedData")
+    void shouldGetDataFromTableRanges(String ranges, Map<String, List<String>> expectedData)
+    {
+        sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get(), false);
+        var data = sheetParser.getDataAsTable(ranges);
         assertEquals(expectedData, data);
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "A9:B9;A8, A8,    1, 2",
+                 "A9;A8:B8, A8:B8, 2, 1"
+    })
+    void shouldThrowExceptionIfRangesHaveDifferentColumnSize(String ranges, String dataRange, int numOfColumns,
+            int numOfHeaders)
+    {
+        sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get(), false);
+        var exception = assertThrows(IllegalArgumentException.class, () -> sheetParser.getDataAsTable(ranges));
+        assertEquals(String.format(
+                "The number of columns (%d) in the \"%s\" range must correspond to the number of table headers (%d)",
+                numOfColumns, dataRange, numOfHeaders), exception.getMessage());
     }
 
     @Test
@@ -234,9 +249,13 @@ class ExcelSheetParserTests
         expectedData.put("Number", List.of(ONE_AS_STRING, TWO_AS_STRING));
         expectedData.put("String", List.of("STRING", "string"));
         expectedData.put("Formula", List.of(THREE_AS_STRING, ""));
+        List<String> nulls = new ArrayList<>();
+        nulls.add(null);
+        nulls.add(null);
+        expectedData.put("Null", nulls);
 
-        sheetParser = new ExcelSheetParser(extractor.getSheet("DifferentTypes").get());
-        var data = sheetParser.getDataAsTable("A1:D3");
+        sheetParser = new ExcelSheetParser(extractor.getSheet("DifferentTypes").get(), false);
+        var data = sheetParser.getDataAsTable("A1:E3");
         assertEquals(expectedData, data);
     }
 
@@ -249,14 +268,14 @@ class ExcelSheetParserTests
     @Test
     void testGetDataFromCell()
     {
-        sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get());
+        sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get(), false);
         assertEquals(NAME, sheetParser.getDataFromCell("A1"));
     }
 
     @Test
     void testGetDataFromNotExistingCell()
     {
-        sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get());
+        sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get(), false);
         var exception = assertThrows(IllegalArgumentException.class,
             () -> sheetParser.getDataFromCell("A1001"));
         assertEquals("Row at address 'A1001' doesn't exist", exception.getMessage());

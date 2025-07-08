@@ -1,0 +1,25 @@
+=== Save number of elements
+
+Saves number of elements located by locator into a variable.
+
+[source,gherkin]
+----
+When I save number of elements located by `$locator` to $scopes variable `$variableName`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+When I save number of elements located `$locator` to $scopes variable `$variableName`
+----
+
+* `$locator` - <<_locator>>.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the number of elements.
+
+.Save number of elements
+[source,gherkin]
+----
+When I save number of elements located by `xpath(//a)` to scenario variable `numberOfLinks`
+Then `${numberOfLinks}` is equal to `1`
+----

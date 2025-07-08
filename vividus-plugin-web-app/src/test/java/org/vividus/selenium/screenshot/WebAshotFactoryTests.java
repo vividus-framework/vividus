@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,11 @@ import org.vividus.ui.web.screenshot.WebCutOptions;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 
 import pazone.ashot.AShot;
+import pazone.ashot.CuttingDecorator;
 import pazone.ashot.ElementCroppingDecorator;
 import pazone.ashot.ScalingDecorator;
 import pazone.ashot.ShootingStrategy;
+import pazone.ashot.SimpleShootingStrategy;
 import pazone.ashot.coordinates.CoordsProvider;
 import pazone.ashot.cutter.CutStrategy;
 import pazone.ashot.cutter.FixedCutStrategy;
@@ -91,6 +93,7 @@ class WebAshotFactoryTests
         factory.setScreenshotShootingStrategy(SIMPLE);
         var screenshotParameters = new WebScreenshotParameters();
         screenshotParameters.setShootingStrategy(Optional.of(VIEWPORT_PASTING));
+        screenshotParameters.setHideScrollbars(true);
         var aShot = factory.create(Optional.of(screenshotParameters));
         validateCoordsProvider(aShot);
         var baseStrategy = (ShootingStrategy) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
@@ -116,17 +119,7 @@ class WebAshotFactoryTests
     @Test
     void shouldCreateAshotWithCuttingStrategiesForNativeWebHeadersFooters() throws IllegalAccessException
     {
-        var screenshotParameters = new WebScreenshotParameters();
-        screenshotParameters.setNativeFooterToCut(TEN);
-        var webCutOptions = new WebCutOptions(TEN, TEN);
-        screenshotParameters.setWebCutOptions(webCutOptions);
-        screenshotParameters.setShootingStrategy(Optional.empty());
-        screenshotParameters.setWebCutOptions(new WebCutOptions(TEN, 0));
-        screenshotParameters.setScrollTimeout(Duration.ofMillis(500));
-        screenshotParameters.setCoordsProvider(CoordsProviderType.CEILING);
-
-        when(javascriptActions.getDevicePixelRatio()).thenReturn(2d);
-        var aShot = factory.create(Optional.of(screenshotParameters));
+        var aShot = createAshot(true);
 
         validateCoordsProvider(aShot);
         var baseStrategy = getShootingStrategy(aShot);
@@ -152,6 +145,43 @@ class WebAshotFactoryTests
         verifyDPR(scalingDecorator);
     }
 
+    @Test
+    void shouldCreateAshotWithoutScrollBarHidingDecorator() throws IllegalAccessException
+    {
+        var aShot = createAshot(false);
+
+        var baseStrategy = getShootingStrategy(aShot);
+        assertThat(baseStrategy, is(instanceOf(ElementCroppingDecorator.class)));
+
+        var viewportPastingDecorator = getShootingStrategy(baseStrategy);
+        assertThat(viewportPastingDecorator, is(instanceOf(DebuggingViewportPastingDecorator.class)));
+
+        var nativeCuttingDecorator = getShootingStrategy(viewportPastingDecorator);
+        assertThat(nativeCuttingDecorator, is(instanceOf(CuttingDecorator.class)));
+
+        var scalingDecorator = getShootingStrategy(nativeCuttingDecorator);
+        assertThat(scalingDecorator, is(instanceOf(ScalingDecorator.class)));
+
+        var simple = getShootingStrategy(scalingDecorator);
+        assertThat(simple, is(instanceOf(SimpleShootingStrategy.class)));
+    }
+
+    private AShot createAshot(boolean hideScrollbars)
+    {
+        var screenshotParameters = new WebScreenshotParameters();
+        screenshotParameters.setNativeFooterToCut(TEN);
+        var webCutOptions = new WebCutOptions(TEN, TEN);
+        screenshotParameters.setWebCutOptions(webCutOptions);
+        screenshotParameters.setShootingStrategy(Optional.empty());
+        screenshotParameters.setWebCutOptions(new WebCutOptions(TEN, 0));
+        screenshotParameters.setScrollTimeout(Duration.ofMillis(500));
+        screenshotParameters.setCoordsProvider(CoordsProviderType.CEILING);
+        screenshotParameters.setHideScrollbars(hideScrollbars);
+
+        when(javascriptActions.getDevicePixelRatio()).thenReturn(2d);
+        return factory.create(Optional.of(screenshotParameters));
+    }
+
     private void verifyDPR(ShootingStrategy scalingDecorator) throws IllegalAccessException
     {
         assertEquals(2f, (float) FieldUtils.readField(scalingDecorator, "dprX", true));
@@ -168,6 +198,7 @@ class WebAshotFactoryTests
         screenshotParameters.setShootingStrategy(Optional.empty());
         screenshotParameters.setWebCutOptions(new WebCutOptions(0, 0));
         screenshotParameters.setScrollTimeout(Duration.ofMillis(TEN));
+        screenshotParameters.setHideScrollbars(true);
 
         when(javascriptActions.getDevicePixelRatio()).thenReturn(2d);
         var aShot = factory.create(Optional.of(screenshotParameters));

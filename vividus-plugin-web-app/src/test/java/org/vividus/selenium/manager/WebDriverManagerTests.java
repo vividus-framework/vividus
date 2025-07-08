@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,12 @@ package org.vividus.selenium.manager;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
@@ -44,7 +48,11 @@ import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.cdp.BrowserPermissions;
+import org.vividus.selenium.cdp.CdpWebDriverSessionAttribute;
+import org.vividus.selenium.session.WebDriverSessionAttributes;
 import org.vividus.selenium.session.WebDriverSessionInfo;
+import org.vividus.ui.web.event.DeviceMetricsOverrideEvent;
 
 @ExtendWith(MockitoExtension.class)
 class WebDriverManagerTests
@@ -157,6 +165,25 @@ class WebDriverManagerTests
         when(capabilities.getBrowserName()).thenReturn("chrome-headless-shell");
 
         assertTrue(WebDriverManager.isBrowser(capabilities, Browser.CHROME));
+    }
+
+    @Test
+    void shouldResetScreenSize()
+    {
+        DeviceMetricsOverrideEvent event = mock();
+        webDriverManager.onDeviceMetricsOverride(event);
+        verify(webDriverSessionInfo).reset(WebDriverSessionAttributes.SCREEN_SIZE);
+        verifyNoInteractions(event);
+    }
+
+    @Test
+    void shouldReturnBrowserPermissions()
+    {
+        BrowserPermissions permissions = new BrowserPermissions();
+        when(webDriverSessionInfo.get(eq(CdpWebDriverSessionAttribute.BROWSER_PERMISSIONS), any()))
+                .thenReturn(permissions);
+        BrowserPermissions actual = webDriverManager.getBrowserPermissions();
+        assertEquals(permissions, actual);
     }
 
     @ParameterizedTest

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,9 +99,11 @@ public enum WebLocatorType implements LocatorType
         }
     },
     TEXT_PART("Text part", GenericTextFilter.class),
+    @Deprecated(since = "0.6.14", forRemoval = true)
     PLACEHOLDER("Placeholder", PlaceholderFilter.class),
     STATE("State", StateFilter.class),
     DROP_DOWN_STATE("Drop down state", DropDownStateFilter.class),
+    @Deprecated(since = "0.6.14", forRemoval = true)
     VALIDATION_ICON_SOURCE("Validation icon source", ValidationIconSourceFilter.class),
     RELATIVE_TO_PARENT_WIDTH("Relative to parent width", RelativeToParentWidthFilter.class),
     CLASS_ATTRIBUTE_PART("Attribute class part", ClassAttributePartFilter.class),
@@ -109,6 +111,7 @@ public enum WebLocatorType implements LocatorType
     FIELD_TEXT("Field text", FieldTextFilter.class),
     FIELD_TEXT_PART("Field text part", FieldTextPartFilter.class),
     DROP_DOWN_TEXT("Drop down text", DropDownTextFilter.class),
+    @Deprecated(since = "0.6.14", forRemoval = true)
     ELEMENT_NAME("Element name", ElementNameSearch.class),
     NAME("Name", ElementNameSearch.class),
     PARTIAL_LINK_TEXT("Partial link text", ByLocatorSearch.class)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class ComparisonRuleTests
 {
@@ -80,11 +81,35 @@ class ComparisonRuleTests
         // @formatter:on
     }
 
+    static Stream<Arguments> getAliases()
+    {
+        // @formatter:off
+        return Stream.of(
+                Arguments.of("at most", ComparisonRule.LESS_THAN_OR_EQUAL_TO),
+                Arguments.of("at least", ComparisonRule.GREATER_THAN_OR_EQUAL_TO)
+        );
+        // @formatter:on
+    }
+
     @ParameterizedTest
     @MethodSource("getComparisonRule")
     void comparisonRuleBySignTest(String sign, ComparisonRule rule)
     {
         assertEquals(rule, ComparisonRule.fromString(sign));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"At Most", "AT_MOST", "AT MOST"})
+    void comparisonRuleByAliasFormatTest(String alias)
+    {
+        assertEquals(ComparisonRule.LESS_THAN_OR_EQUAL_TO, ComparisonRule.fromString(alias));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getAliases")
+    void comparisonRuleByAliasTest(String alias, ComparisonRule rule)
+    {
+        assertEquals(rule, ComparisonRule.fromString(alias));
     }
 
     @Test
@@ -110,8 +135,8 @@ class ComparisonRuleTests
 
     @ParameterizedTest
     @MethodSource("getComparisonRuleAsString")
-    void shouldReturnComparisonRulesInPlainText(String expecred, ComparisonRule toCheck)
+    void shouldReturnComparisonRulesInPlainText(String expected, ComparisonRule toCheck)
     {
-        assertEquals(expecred, toCheck.toString());
+        assertEquals(expected, toCheck.toString());
     }
 }

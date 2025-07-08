@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,12 @@ import org.vividus.variable.VariableScope;
 
 public class ExcelFileSteps
 {
+    private final ExcelSheetWriter sheetWriter;
     private final VariableContext variableContext;
 
-    public ExcelFileSteps(VariableContext variableContext)
+    public ExcelFileSteps(ExcelSheetWriter sheetWriter, VariableContext variableContext)
     {
+        this.sheetWriter = sheetWriter;
         this.variableContext = variableContext;
     }
 
@@ -85,7 +87,7 @@ public class ExcelFileSteps
             Set<VariableScope> scopes, String variableName) throws IOException
     {
         Path pathTemporaryFile = ResourceUtils.createTempFile("", ".xlsx", null);
-        ExcelSheetWriter.createExcel(pathTemporaryFile, Optional.ofNullable(sheetName), content);
+        sheetWriter.createExcel(pathTemporaryFile, Optional.ofNullable(sheetName), content);
         variableContext.putVariable(scopes, variableName, pathTemporaryFile);
     }
 
@@ -99,6 +101,6 @@ public class ExcelFileSteps
     @When("I add sheet with name `$sheetName` and content:$content to excel file at path `$path`")
     public void addSheetToExcelFile(String sheetName, ExamplesTable content, Path path) throws IOException
     {
-        ExcelSheetWriter.addSheetToExcel(path, sheetName, content);
+        sheetWriter.addSheetToExcel(path, sheetName, content);
     }
 }

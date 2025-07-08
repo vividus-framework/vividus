@@ -4,22 +4,23 @@ dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-reporter')
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.2.0-jre')
-    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.1.7')
+    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.8-jre')
+    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.8')
     implementation(group: 'org.springframework', name: 'spring-context')
 
     // ReportPortal
-    implementation(group: 'com.epam.reportportal', name: 'logger-java-log4j', version: '5.2.2')
-    implementation(group: 'com.epam.reportportal', name: 'agent-java-jbehave', version: '5.3.4') {
+    implementation(group: 'com.epam.reportportal', name: 'logger-java-log4j', version: '5.3.0')
+    implementation(group: 'com.epam.reportportal', name: 'agent-java-jbehave', version: '5.4.0') {
         exclude module: 'jbehave-core'
     }
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.13')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
     implementation(group: 'org.vividus', name: 'jbehave-core', version: versions.jbehave)
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.2')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.3')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.12.0')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
 }

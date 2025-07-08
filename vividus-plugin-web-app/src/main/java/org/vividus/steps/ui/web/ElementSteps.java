@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -50,10 +49,12 @@ import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.IWebElementActions;
+import org.vividus.ui.web.action.ResourceFileLoader;
 import org.vividus.ui.web.action.search.WebLocatorType;
+import org.vividus.ui.web.validation.ScrollValidations;
 import org.vividus.variable.VariableScope;
 
-@SuppressWarnings({"PMD.ExcessiveImports", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({"PMD.ExcessiveImports", "PMD.AvoidDuplicateLiterals", "PMD.CouplingBetweenObjects"})
 @TakeScreenshotOnFailure
 public class ElementSteps implements ResourceLoaderAware
 {
@@ -70,11 +71,15 @@ public class ElementSteps implements ResourceLoaderAware
     private final IBaseValidations baseValidations;
     private final IElementValidations elementValidations;
     private final VariableContext variableContext;
+    private final ResourceFileLoader resourceFileLoader;
+    private final ScrollValidations<WebElement> scrollValidations;
     private ResourceLoader resourceLoader;
 
+    @SuppressWarnings("checkstyle:paramNum")
     public ElementSteps(IWebElementActions webElementActions, IWebDriverProvider webDriverProvider,
             WebDriverManager webDriverManager, IUiContext uiContext, IDescriptiveSoftAssert descriptiveSoftAssert,
-            IBaseValidations baseValidations, IElementValidations elementValidations, VariableContext variableContext)
+            IBaseValidations baseValidations, IElementValidations elementValidations, VariableContext variableContext,
+            ResourceFileLoader resourceFileLoader, ScrollValidations<WebElement> scrollValidations)
     {
         this.webElementActions = webElementActions;
         this.webDriverProvider = webDriverProvider;
@@ -84,6 +89,8 @@ public class ElementSteps implements ResourceLoaderAware
         this.baseValidations = baseValidations;
         this.elementValidations = elementValidations;
         this.variableContext = variableContext;
+        this.resourceFileLoader = resourceFileLoader;
+        this.scrollValidations = scrollValidations;
     }
 
     /**
@@ -144,14 +151,7 @@ public class ElementSteps implements ResourceLoaderAware
     @When("I select element located by `$locator` and upload `$resourceNameOrFilePath`")
     public void uploadFile(Locator locator, String filePath) throws IOException
     {
-        Resource resource = resourceLoader.getResource(ResourceLoader.CLASSPATH_URL_PREFIX + filePath);
-        if (!resource.exists())
-        {
-            resource = resourceLoader.getResource(ResourceUtils.FILE_URL_PREFIX + filePath);
-        }
-        File fileForUpload = ResourceUtils.isFileURL(resource.getURL()) ? resource.getFile()
-                : unpackFile(resource, filePath);
-        Validate.isTrue(fileForUpload.exists(), FILE_EXISTS_MESSAGE_FORMAT, filePath);
+        File fileForUpload = resourceFileLoader.loadFile(filePath);
         if (webDriverManager.isRemoteExecution())
         {
             webDriverProvider.getUnwrapped(RemoteWebDriver.class).setFileDetector(new LocalFileDetector());
@@ -375,6 +375,19 @@ public class ElementSteps implements ResourceLoaderAware
                     .ifPresent(elementParent -> elementValidations
                             .assertIfElementHasWidthInPerc(elementParent, elementChild, width));
         });
+    }
+
+    /**
+     * Checks if the element located by the specified locater is or is not presented in the browser viewport
+     *
+     * @param locator The locator of the element to check presence in viewport
+     * @param presence The presence state of the element, either <b>is</b> or <b>is not</b>
+     */
+    @Then("element located by `$locator` $presence visible in viewport")
+    public void checkElementViewportPresence(Locator locator, ViewportPresence presence)
+    {
+        baseValidations.assertElementExists("Element to check", locator)
+                .ifPresent(e -> scrollValidations.assertElementPositionAgainstViewport(e, presence));
     }
 
     @Override

@@ -38,8 +38,24 @@ NOTE: The table transformers properties marked with *bold* are mandatory.
 |Parameter
 |Description
 
-|[subs=+quotes]`*csvPath*`
-|The relative path of the CSV file
+|`path`
+a|The xref:ROOT:glossary.adoc#_resource[CSV resource name] or the CSV file path.
+
+IMPORTANT: The `path` parameter can not be used together with the `variableName` or `csvPath` parameter.
+
+|`variableName`
+a|The name of the variable containing source CSV, only variables of scopes `global` and `next_batches` are allowed.
+Exceptions are cases when the transformer using in xref:commons:vividus-steps.adoc#_initialize_variable_with_a_table[step]
+which initializes a variable with a table.
+
+IMPORTANT: The `variableName` parameter can not be used together with the `path` or `csvPath` parameter.
+
+|`csvPath`
+a|The xref:ROOT:glossary.adoc#_resource[CSV resource name] or the CSV file path.
+
+WARNING: The `csvPath` parameter is deprecated and will be removed in VIVIDUS 0.7.0, please use `path` instead.
+
+IMPORTANT: The `csvPath` parameter can not be used together with the `variableName` or `path` parameter.
 
 |`delimiterChar`
 |The char used for value separation, must not be a line break character
@@ -50,13 +66,19 @@ If `delimiterChar` is not set, then the corresponding property will be used duri
 .The transformer based on the default configuration
 [source,gherkin]
 ----
-{transformer=FROM_CSV, csvPath=/data/example.csv}
+{transformer=FROM_CSV, path=/data/example.csv}
+----
+
+.The transformer based on the default configuration with variable CSV source
+[source,gherkin]
+----
+{transformer=FROM_CSV, variableName=csvVariable}
 ----
 
 .The transformer with custom inlined configuration
 [source,gherkin]
 ----
-{transformer=FROM_CSV, csvPath=/data/another-example.csv, delimiterChar=;}
+{transformer=FROM_CSV, path=/data/another-example.csv, delimiterChar=;}
 ----
 
 == Steps

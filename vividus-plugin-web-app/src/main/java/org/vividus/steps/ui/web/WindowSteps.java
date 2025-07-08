@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.function.BiConsumer;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.Window;
 import org.openqa.selenium.WindowType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,8 +88,23 @@ public class WindowSteps
         }
         if (resizingPossible)
         {
-            getWebDriver().manage().window().setSize(targetSize);
+            getWindow().setSize(targetSize);
         }
+    }
+
+    /**
+     * Maximizes the current window if it is not already maximized, the step can be useful if you previously performed
+     * any resize actions with the browser window.
+     */
+    @When("I maximize window")
+    public void maximizeWindow()
+    {
+        getWindow().maximize();
+    }
+
+    private Window getWindow()
+    {
+        return getWebDriver().manage().window();
     }
 
     /**

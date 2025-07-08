@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.ui.web.action;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -30,7 +31,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.OngoingStubbing;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.JavascriptExecutor;
@@ -38,7 +41,11 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.testcontext.SimpleTestContext;
+import org.vividus.testcontext.TestContext;
+import org.vividus.ui.web.event.DeviceMetricsOverrideEvent;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,11 +58,11 @@ class WebJavascriptActionsTests
     private static final String SCRIPT_GET_ELEMENT_ATTRIBUTES = "var attributes = arguments[0].attributes;"
             + " var map = new Object(); for(i=0; i< attributes.length; i++)"
             + "{ map[attributes[i].name] = attributes[i].value; } return map;";
-    private static final String SCRIPT_SET_TOP_POSITION = "var originTop = arguments[0].getBoundingClientRect().top;"
-            + " arguments[0].style.top = \"%dpx\"; return Math.round(originTop);";
+    private static final String SCRIPT_GET_DEVICE_PIXEL_RATIO = "return window.devicePixelRatio;";
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IWebDriverManager webDriverManager;
+    @Spy private final TestContext testContext = new SimpleTestContext();
 
     @Mock(extraInterfaces = { JavascriptExecutor.class, HasCapabilities.class })
     private WebDriver webDriver;
@@ -221,13 +228,38 @@ class WebJavascriptActionsTests
     @Test
     void shouldReturnDevicePixelRatio()
     {
-        String getDprJs = "return window.devicePixelRatio;";
         double dpr = 1.5;
         Number devicePixelRatioValue = dpr;
-        mockScriptExecution(getDprJs, devicePixelRatioValue);
+        mockScriptExecution(SCRIPT_GET_DEVICE_PIXEL_RATIO, devicePixelRatioValue);
         assertEquals(dpr, javascriptActions.getDevicePixelRatio());
         assertEquals(dpr, javascriptActions.getDevicePixelRatio());
-        verify((JavascriptExecutor) webDriver).executeScript(getDprJs);
+        verify((JavascriptExecutor) webDriver).executeScript(SCRIPT_GET_DEVICE_PIXEL_RATIO);
+    }
+
+    @Test
+    void shouldResetDevicePixelRatioOnDeviceMetricsOverrideEvent()
+    {
+        double dpr1 = 1.5;
+        double dpr2 = 2.5;
+        mockScriptExecution(SCRIPT_GET_DEVICE_PIXEL_RATIO, dpr1, dpr2);
+        assertEquals(dpr1, javascriptActions.getDevicePixelRatio());
+        javascriptActions.onDeviceMetricsOverride(new DeviceMetricsOverrideEvent());
+        assertEquals(dpr2, javascriptActions.getDevicePixelRatio());
+        assertEquals(dpr2, javascriptActions.getDevicePixelRatio());
+        verify((JavascriptExecutor) webDriver, times(2)).executeScript(SCRIPT_GET_DEVICE_PIXEL_RATIO);
+    }
+
+    @Test
+    void shouldResetDevicePixelRatioOnAfterWebDriverQuitEvent()
+    {
+        double dpr1 = 1.5;
+        double dpr2 = 2.5;
+        mockScriptExecution(SCRIPT_GET_DEVICE_PIXEL_RATIO, dpr1, dpr2);
+        assertEquals(dpr1, javascriptActions.getDevicePixelRatio());
+        javascriptActions.onAfterWebDriverQuitEvent(new AfterWebDriverQuitEvent(""));
+        assertEquals(dpr2, javascriptActions.getDevicePixelRatio());
+        assertEquals(dpr2, javascriptActions.getDevicePixelRatio());
+        verify((JavascriptExecutor) webDriver, times(2)).executeScript(SCRIPT_GET_DEVICE_PIXEL_RATIO);
     }
 
     @Test
@@ -291,9 +323,13 @@ class WebJavascriptActionsTests
         assertEquals(result, javascriptActions.stopPageLoading());
     }
 
-    private void mockScriptExecution(String script, Object result)
+    private void mockScriptExecution(String script, Object... results)
     {
-        when(((JavascriptExecutor) webDriver).executeScript(script)).thenReturn(result);
+        OngoingStubbing<Object> stubbing = when(((JavascriptExecutor) webDriver).executeScript(script));
+        for (Object result : results)
+        {
+            stubbing = stubbing.thenReturn(result);
+        }
     }
 
     private void mockIsFirefox(boolean firefox)

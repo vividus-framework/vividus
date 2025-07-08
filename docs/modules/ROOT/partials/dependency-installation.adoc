@@ -8,7 +8,7 @@ Please make sure to use the same version for all VIVIDUS dependencies.
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-{dependency-short-name}', version: '{current-version}')
+implementation(group: 'org.vividus', name: 'vividus-{dependency-short-name}')
 ----
 
 . If the project was imported to the IDE before adding new dependency,

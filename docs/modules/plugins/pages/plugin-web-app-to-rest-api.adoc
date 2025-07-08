@@ -13,7 +13,7 @@ include::partial$plugin-installation.adoc[]
 
 `FROM_SITEMAP` transformer generates table based on the website sitemap.
 
-IMPORTANT: The use of `web-application.main-page-url` property for setting of main page for crawling is deprecated and will be removed in VIVIDUS 0.7.0, pelase see either `mainPageUrl` transformer parameter or `transformer.from-sitemap.main-page-url` property.
+IMPORTANT: The use of `web-application.main-page-url` property for setting of main page for crawling is deprecated and will be removed in VIVIDUS 0.7.0, please see either `mainPageUrl` transformer parameter or `transformer.from-sitemap.main-page-url` property.
 
 The properties outlined in the table below are applied to all FROM_SITEMAP transformers utilized in the tests, unless
 they override the values by specifiying the corresponding table parameters.
@@ -98,7 +98,7 @@ Examples:
 
 `FROM_HEADLESS_CRAWLING` transformer generates table based on the results of headless crawling.
 
-IMPORTANT: The use of `web-application.main-page-url` property for setting of main page for crawling is deprecated and will be removed in VIVIDUS 0.7.0, pelase see either `mainPageUrl` transformer parameter or `transformer.from-headless-crawling.main-page-url` property.
+IMPORTANT: The use of `web-application.main-page-url` property for setting of main page for crawling is deprecated and will be removed in VIVIDUS 0.7.0, please see either `mainPageUrl` transformer parameter or `transformer.from-headless-crawling.main-page-url` property.
 
 
 [cols="3,1,1,3", options="header"]
@@ -126,7 +126,7 @@ IMPORTANT: The main page url value defined by this property gets overriden by th
 |`transformer.from-headless-crawling.exclude-urls-regex`
 |Regular expression
 a |`.*(css\|gif\|gz\|ico\|jpeg\|jpg\|js\|mp3\|mp4\|pdf\|png\|svg\|zip\|woff2
-\|woff\|ttf\|doc\|docx\|xml\|json\|webmanifest)$`
+\|woff\|ttf\|doc\|docx\|xml\|json\|webmanifest\|webp)$`
 |The regular expression to match URLs.
 The crawler will not crawl all URLs that matching the given regular expression and they will not be added to the resulting table.
 https://en.wikipedia.org/wiki/URI_fragment[URI fragments] and https://en.wikipedia.org/wiki/Query_string[URL query] are ignored at filtering.
@@ -290,88 +290,12 @@ Examples:
 
 === FROM_HTML
 
-`FROM_HTML` transformer generates a table based on the text content, HTML content or attributes of HTML elements found in the requested HTML page.
-
-[cols="1,3", options="header"]
-|===
-
-|Parameter Name
-|Description
-
-|`pageUrl`
-a|The URL of the page to build the table upon.
-
-WARNING: The `pageUrl` parameter is deprecated and will be removed in VIVIDUS 0.7.0, please use `variableName` instead.
-
-IMPORTANT: The `pageUrl` parameter can not be used together with the `variableName` parameter.
-
-|`variableName`
-a|The name of the variable containing source HTML, only variables of scopes `global` and `next_batches` are allowed.
-Exceptions are cases when the transformer using in xref:commons:vividus-steps.adoc#_initialize_variable_with_a_table[step]
-which initializes a variable with a table.
-
-IMPORTANT: The `variableName` parameter can not be used together with the `pageUrl` parameter.
-
-|`column`
-|The column name in the generated table.
-
-|`xpathSelector`
-a|The XPath selector to select HTML elements in the HTML page.
-
-By using XPath selector we can extract element's HTML content, attributes and text content like its shown in the following example:
-
-* `//a` - extract the link HTML content, e.g. `<a href="/hello">Say Hello</a>`
-* `//a/text()` - extract the link text, e.g. `Say Hello`
-* `//a/@href` - extract the link `href` attribute, e.g. `/hello`
-
-|===
-
-[cols="3,1,1,3", options="header"]
-|===
-
-|Property Name
-|Acceptable values
-|Default
-|Description
-
-|`transformer.from-html.headers.<header name>=<header value>`
-|
-|
-a|Set of headers to set when requesting the page.
-
-[source,properties]
-----
-transformer.from-html.headers.x-vercel-protection-bypass=1fac2b25014d35e5103b
-----
-
-|===
-
-.Given the following HTML page
-[source,html]
-----
-<!DOCTYPE html>
-<html>
-    <body>
-        <a href="/r">R</a>
-        <a href="/g">G</a>
-        <a href="/b">B</a>
-    </body>
-</html>
-----
-
-.Applyng FROM_HTML to the page
-----
-Examples:
-{transformer=FROM_HTML, column=relative-url, pageUrl=https://mypage.com, xpathSelector=//a/@href}
-----
-
-.Output table
-----
-|relative-url|
-|/r          |
-|/g          |
-|/b          |
-----
+[WARNING]
+====
+The transformer xref:plugins:plugin-html.adoc#_from_html[has been moved] to `vividus-plugin-html`.
+The transformer is still available via `vividus-plugin-web-app-to-rest-api`, but it will be required
+to install `vividus-plugin-html` explicitly starting from VIVIDUS 0.7.0.
+====
 
 == Steps
 
@@ -390,6 +314,9 @@ Steps to check resource availability using HTTP requests.
 
 |`FAILED`
 |An HTTP request to the resource returns a status code other than https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200[200 OK].
+
+|`BLOCKED`
+|An HTTP request has been blocked by https://techdocs.akamai.com/property-mgr/docs/web-app-firewall[Akamai Web Application Firewall] and requires manual validation.
 
 |`BROKEN`
 a|Reasons:
@@ -414,7 +341,30 @@ a|Reasons:
 * the resource is jump link which cannot be verified from the current context (if only part of the document is checked).
 
 |`SKIPPED`
-|A resource validation has already been performed, i.e. if the same resource might be present on several pages so we do not need to validate it twice.
+|A resource validation has already been performed, i.e. if the same resource might be present on several pages so we do not need to validate it twice. `FAILED` and `BROKEN` resource validations will still have their respective statuses despite the validations have been already performed.
+
+|===
+
+==== Properties
+
+[cols="3,1,1,3", options="header"]
+|===
+
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`resource-checker.attributes-to-check`
+|HTML Attributes
+|`href,src`
+|A comma-separated list of HTML attributes where resource links will be searched. If values present in multiple attributes, the link will be fetched from the first one.
+
+|`resource-checker.publish-response-body`
+a|`true`
+`false`
+|`false`
+a|Whether to attach the HTTP response body for HTTP calls with non-successful status codes (may reduce performance).
 
 |===
 
@@ -484,27 +434,10 @@ Then all resources found by CSS selector `a,img` in ${source-code} are valid
 
 === Validate redirects
 
-Check that all URLs from xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] redirect to proper pages with correct redirects number. Validation fails if either actual final URL or number of redirects do not match the expected values.
-
-NOTE: The step throws the error in case if https://developer.mozilla.org/en-US/docs/Web/HTTP/Status[HTTP response status code] of checked URL out of range 200-207.
-
-[source,gherkin]
-----
-Then I validate HTTP redirects: $expectedRedirects
-----
-
-. `$expectedRedirects` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with redirect parameters containing the following columns:
-** [subs=+quotes]`*startUrl*` - The URL from which redirection starts.
-** [subs=+quotes]`*endUrl*` - The expected final URL to redirect to.
-** [subs=+quotes]`*redirectsNumber*` - The expected number of redirects between `startUrl` and `endUrl` (optional).
-
-.Validate redirects
-[source,gherkin]
-----
-Then I validate HTTP redirects:
-|startUrl                    |endUrl                          |redirectsNumber |
-|http://example.com/redirect |http://example.com/get-response |1               |
-----
+[WARNING]
+====
+The step xref:plugins:plugin-rest-api.adoc#_validate_redirects[has been moved] to `vividus-plugin-rest-api`.
+====
 
 === Validate SSL rating
 
@@ -540,4 +473,65 @@ Then SSL rating for URL `$url` is $comparisonRule `$gradeName`
 [source,gherkin]
 ----
 Then SSL rating for URL `https://www.google.com` is equal to `B`
+----
+
+=== Cookie Steps
+
+==== Set browser cookies to the HTTP context
+
+Sets the current browser cookies to the HTTP context to use them in further HTTP requests.
+
+[source,gherkin]
+----
+When I set browser cookies to HTTP context
+----
+
+.Open web page and send GET request with cookies from the opened page
+[source,gherkin]
+----
+Given I am on main application page
+When I set browser cookies to HTTP context
+When I execute HTTP GET request for resource with relative URL `/get`
+----
+
+==== Set HTTP cookies to the browser
+
+Sets the current cookies from the preceding HTTP calls to the current browser instance.
+After adding the cookies the opened page is refreshed (this is required to apply the new cookies).
+
+NOTE: If the Selenium engine is used, the HTTP context cookies with a domain that is either a subdomain or equal to
+the domain of the page opened in the web browser will be set.
+
+[source,gherkin]
+----
+When I set HTTP context cookies to browser
+----
+
+.Send GET request and then put received cookies to the browser
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with relative URL `/get`
+Given I am on main application page
+When I set HTTP context cookies to browser
+----
+
+==== Set HTTP cookies to the browser without applying changes
+
+Sets the current cookies from the preceding HTTP calls to the current browser instance, but does not apply the changes
+in cookies instantly. The current page must be refreshed, or navigation must be performed to apply the cookie changes.
+
+NOTE: If the Selenium engine is used, the HTTP context cookies with a domain that is either a subdomain or equal to
+the domain of the page opened in the web browser will be set.
+
+[source,gherkin]
+----
+When I set HTTP context cookies to browser without applying changes
+----
+
+.Send GET request and then put received cookies to the browser but without refreshing the page
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with relative URL `/get`
+Given I am on main application page
+When I set HTTP context cookies to browser without applying changes
 ----

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,6 @@ package org.vividus.reporter.model;
 
 import java.net.URLConnection;
 
-import com.google.common.io.Files;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 public class Attachment
 {
     private final byte[] content;
@@ -30,14 +26,14 @@ public class Attachment
 
     public Attachment(byte[] content, String title, String contentType)
     {
-        this.content = ArrayUtils.clone(content);
+        this.content = content;
         this.title = title;
         this.contentType = contentType;
     }
 
     public Attachment(byte[] content, String fileName)
     {
-        this(content, Files.getNameWithoutExtension(fileName), probeContentType(fileName));
+        this(content, fileName, probeContentType(fileName));
     }
 
     private static String probeContentType(String fileName)
@@ -47,7 +43,7 @@ public class Attachment
 
     public byte[] getContent()
     {
-        return ArrayUtils.clone(content);
+        return content;
     }
 
     public String getTitle()

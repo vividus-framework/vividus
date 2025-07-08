@@ -1,7 +1,7 @@
 :test-cloud-name: SauceLabs
 :test-cloud-key: saucelabs
 :test-cloud-link: https://saucelabs.com/
-:test-cloud-capabilities: https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
+:test-cloud-capabilities: https://saucelabs.com/products/platform-configurator#/
 
 include::partial$test-cloud-header.adoc[]
 
@@ -13,10 +13,10 @@ The plugin defines profiles with a set of the preconfigured properties.
 |===
 
 |`saucelabs/web`
-|Use in conjunction with xref:plugins:plugin-web-app.adoc#_list_of_desktop_profiles[web application profiles].
+|Use in conjunction with xref:plugins:plugin-web-app.adoc#_desktop[desktop web application profiles].
 
 |`saucelabs/web/phone/iphone`
-a|Use in conjunction with xref:plugins:plugin-web-app.adoc#_phone[web application phone profiles].
+a|Use in conjunction with xref:plugins:plugin-web-app.adoc#_mobile_web[mobile web application profiles].
 
 Required properties:
 
@@ -24,7 +24,7 @@ Required properties:
 * `selenium.grid.platform-version`
 
 |`saucelabs/web/phone/android`
-a|Use in conjunction with xref:plugins:plugin-web-app.adoc#_phone[web application phone profiles].
+a|Use in conjunction with xref:plugins:plugin-web-app.adoc#_mobile_web[mobile web application profiles].
 
 Required properties:
 
@@ -57,7 +57,7 @@ NOTE: The properties marked with *bold* are mandatory.
 |[subs=+quotes]`*selenium.grid.host*`
 |hostname
 |`<empty>`
-|https://wiki.saucelabs.com/display/DOCS/Data+Center+Endpoints[Sauce Labs OnDemand host] to be used to create a new session
+|https://docs.saucelabs.com/basics/data-center-endpoints[Sauce Labs OnDemand host] to be used to create a new session
 
 |[subs=+quotes]`*selenium.grid.username*`
 |username
@@ -75,13 +75,21 @@ a|
 * `US_EAST` +
 * `EU_CENTRAL` +
 |
-|https://wiki.saucelabs.com/display/DOCS/Data+Center+Endpoints[Sauce Labs data center] to use
+|https://docs.saucelabs.com/basics/data-center-endpoints[Sauce Labs data center] to use
+
+|`saucelabs.free-device-wait-timeout`
+|{durations-format-link} format
+|`PT0S`
+|When the https://docs.saucelabs.com/dev/error-messages/#youve-exceeded-your-sauce-labs-concurrency-limit[Sauce Labs concurrency limit is exceeded],
+the error message will be "Could not start a new session. Response code 400. Message: CCYAbuse - too many jobs".
+This means all devices are busy. This property sets the maximum wait time for a free device before throwing an exception.
+If set to zero, waiting is disabled.
 
 |`saucelabs.sauce-connect.enabled`
 a|`true` +
 `false`
 |`false`
-|Enables https://wiki.saucelabs.com/display/DOCS/Sauce+Connect+Proxy[Sauce Connect Proxy]
+|Enables https://docs.saucelabs.com/secure-connections/#sauce-connect[Sauce Connect Proxy]
 
 |`saucelabs.sauce-connect.use-latest-version`
 a|`true` +
@@ -92,7 +100,7 @@ a|`true` +
 |`saucelabs.sauce-connect.command-line-arguments`
 |String line with CLI flags
 |
-|Used to provide set of custom https://wiki.saucelabs.com/display/DOCS/Sauce+Connect+Proxy+Command-Line+Quick+Reference+Guide[Sauce Connect command line arguments]
+|Used to provide set of custom https://docs.saucelabs.com/dev/cli/[Sauce Connect command line arguments]
 
 |`saucelabs.sauce-connect.skip-host-glob-patterns`
 |Comma (,) separated list of host https://developer.mozilla.org/en-US/docs/Web/HTTP/Proxy_servers_and_tunneling/Proxy_Auto-Configuration_PAC_file#shexpmatch[glob patterns]

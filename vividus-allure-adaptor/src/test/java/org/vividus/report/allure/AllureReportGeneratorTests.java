@@ -54,7 +54,6 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,9 +64,12 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.vividus.report.allure.model.AllureCategory;
 import org.vividus.report.allure.notification.NotificationsSender;
-import org.vividus.reporter.environment.EnvironmentConfigurer;
-import org.vividus.reporter.environment.PropertyCategory;
+import org.vividus.reporter.metadata.MetadataCategory;
+import org.vividus.reporter.metadata.MetadataEntry;
+import org.vividus.reporter.metadata.MetadataProvider;
+import org.vividus.util.property.PropertyMappedCollection;
 import org.vividus.util.property.PropertyMapper;
 
 import io.qameta.allure.Constants;
@@ -85,8 +87,11 @@ class AllureReportGeneratorTests
     private static final String REPORT = "report";
 
     private static final String EXECUTOR_JSON = "executor.json";
+    private static final String CATEGORIES_JSON = "categories.json";
     private static final String ALLURE_EXECUTOR_PROPERTY_PREFIX = "allure.executor.";
+    private static final String ALLURE_TABS_CATEGORIES_PREFIX = "report.tabs.categories.";
     private static final String INDEX_HTML = "index.html";
+    private static final String VIVIDUS_REPORT = "VIVIDUS Report";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AllureReportGenerator.class);
 
@@ -108,14 +113,8 @@ class AllureReportGeneratorTests
         resultsDirectory = tempDir.resolve("allure-results");
         Files.createDirectories(resultsDirectory);
         System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.toAbsolutePath().toString());
-        allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver,
+        allureReportGenerator = new AllureReportGenerator(VIVIDUS_REPORT, propertyMapper, resourcePatternResolver,
                 allurePluginsProvider, notificationsSender);
-    }
-
-    @AfterEach
-    void afterEach()
-    {
-        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(Map::clear);
     }
 
     @Test
@@ -170,6 +169,8 @@ class AllureReportGeneratorTests
         ExecutorInfo executorInfo = createExecutorInfo();
         when(propertyMapper.readValue(ALLURE_EXECUTOR_PROPERTY_PREFIX, ExecutorInfo.class)).thenReturn(
                 Optional.of(executorInfo));
+        when(propertyMapper.readValues(ALLURE_TABS_CATEGORIES_PREFIX, AllureCategory.class))
+                .thenReturn(new PropertyMappedCollection<>(Map.of()));
         testEnd(reportDirectory);
         assertThat(logger.getLoggingEvents(), is(List.of(
             buildCleanUpDirectoryLogEvent(RESULTS, resultsDirectory.toFile()),
@@ -179,18 +180,21 @@ class AllureReportGeneratorTests
             buildReportGeneratedLogEvent(tempDir)
         )));
         assertExecutorJson(executorInfo);
+        assertCategoriesJson();
     }
 
     @Test
     void testEndWhenResultsDirectoryDoesNotExist() throws IOException
     {
-        File reportDirectory = tempDir.toFile();
         resultsDirectory = tempDir.resolve("allure-results-to-be-created");
         System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.toAbsolutePath().toString());
-        allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver,
+        allureReportGenerator = new AllureReportGenerator(VIVIDUS_REPORT, propertyMapper, resourcePatternResolver,
                 allurePluginsProvider, notificationsSender);
         when(propertyMapper.readValue(ALLURE_EXECUTOR_PROPERTY_PREFIX, ExecutorInfo.class)).thenReturn(
                 Optional.empty());
+        when(propertyMapper.readValues(ALLURE_TABS_CATEGORIES_PREFIX, AllureCategory.class))
+                .thenReturn(new PropertyMappedCollection<>(Map.of()));
+        File reportDirectory = tempDir.toFile();
         testEnd(reportDirectory);
         assertThat(logger.getLoggingEvents(), is(List.of(
             buildCleanUpDirectoryLogEvent(RESULTS, resultsDirectory.toFile()),
@@ -201,6 +205,20 @@ class AllureReportGeneratorTests
         )));
         assertFalse(resultsDirectory.resolve(EXECUTOR_JSON).toFile().exists());
         verify(notificationsSender).sendNotifications(reportDirectory);
+    }
+
+    @Test
+    void shouldTestUserDefinedDefectCategories() throws IOException
+    {
+        AllureCategory category = new AllureCategory();
+        category.setName("Failed and broken tests");
+        category.setStatuses("Failed, BROKEN");
+        when(propertyMapper.readValues(ALLURE_TABS_CATEGORIES_PREFIX, AllureCategory.class)).thenReturn(
+                new PropertyMappedCollection<>(Map.of("failed", category)));
+
+        testEnd(tempDir.toFile());
+        assertResultFile(CATEGORIES_JSON, """
+                [{"name":"Failed and broken tests","matchedStatuses":["failed","broken"]}]""");
     }
 
     private LoggingEvent buildCleanUpDirectoryLogEvent(String directoryDescription, File directory)
@@ -226,7 +244,7 @@ class AllureReportGeneratorTests
         Files.createDirectories(historyDirectory);
         allureReportGenerator.setHistoryDirectory(historyDirectory.toFile());
         allureReportGenerator.setReportDirectory(reportDirectory);
-        try (var fileUtils = mockStatic(FileUtils.class))
+        try (var fileUtils = mockStatic(FileUtils.class); var metadataProvider = mockStatic(MetadataProvider.class))
         {
             var text = "text";
             fileUtils.when(() -> FileUtils.readFileToString(any(File.class), eq(StandardCharsets.UTF_8))).thenReturn(
@@ -236,7 +254,7 @@ class AllureReportGeneratorTests
             var folder = mockResource("/allure-customization/folder/");
             Resource[] resources = { resource, folder };
             when(resourcePatternResolver.getResources(ALLURE_CUSTOMIZATION_PATTERN)).thenReturn(resources);
-            prepareEnvironmentConfiguration();
+            prepareEnvironmentProperties(metadataProvider);
 
             allureReportGenerator.start();
             allureReportGenerator.end();
@@ -250,7 +268,6 @@ class AllureReportGeneratorTests
                             eq(historyDirectory.toFile())));
 
             assertEnvironmentProperties();
-            assertCategoriesJson();
 
             var reportDirectoryPath = reportDirectory.toPath();
             assertIndexHtml(reportDirectoryPath);
@@ -261,14 +278,33 @@ class AllureReportGeneratorTests
         }
     }
 
-    private void prepareEnvironmentConfiguration()
+    private void prepareEnvironmentProperties(MockedStatic<MetadataProvider> metadataProviderMock)
     {
-        Map<PropertyCategory, Map<String, String>> environmentConfiguration =
-                EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION;
-        environmentConfiguration.get(PropertyCategory.CONFIGURATION).put("Suite", "allure-test");
-        environmentConfiguration.get(PropertyCategory.PROFILE).put("Operating System", "Mac OS X");
-        environmentConfiguration.get(PropertyCategory.SUITE).put("Global Meta Filters", "groovy: !skip");
-        environmentConfiguration.get(PropertyCategory.ENVIRONMENT).put("Main Application Page", "https://vividus.dev/");
+        var suite = new MetadataEntry();
+        suite.setName("Suite");
+        suite.setValue("allure-test");
+        var os = new MetadataEntry();
+        os.setName("Operating System");
+        os.setValue("Mac OS X");
+        var filters = new MetadataEntry();
+        filters.setName("Global Meta Filters");
+        filters.setValue("groovy: !skip");
+        var page = new MetadataEntry();
+        page.setName("Main Application Page");
+        page.setValue("https://vividus.dev/");
+        var browser = new MetadataEntry();
+        browser.setName("Browser");
+        browser.setValue("Chrome");
+        browser.setShowInReport(false);
+
+        metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategory(MetadataCategory.CONFIGURATION))
+                .thenReturn(List.of(suite));
+        metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategory(MetadataCategory.PROFILE))
+                .thenReturn(List.of(os, browser));
+        metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategory(MetadataCategory.SUITE))
+                .thenReturn(List.of(filters));
+        metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategory(MetadataCategory.ENVIRONMENT))
+                .thenReturn(List.of(page));
     }
 
     private ExecutorInfo createExecutorInfo()
@@ -294,7 +330,7 @@ class AllureReportGeneratorTests
     private void assertSummaryJson(Path reportDirectory) throws IOException
     {
         assertFile(reportDirectory, "widgets/summary.json",
-                "{\"reportName\":\"VIVIDUS Report\","
+                "{\"reportName\":\"" + VIVIDUS_REPORT + "\","
                     + "\"testRuns\":[],"
                     + "\"statistic\":{\"failed\":0,\"broken\":0,\"skipped\":0,\"passed\":0,\"unknown\":0,\"total\":0},"
                     + "\"time\":{}"
@@ -348,7 +384,7 @@ class AllureReportGeneratorTests
 
     private void assertCategoriesJson() throws IOException
     {
-        assertResultFile("categories.json",
+        assertResultFile(CATEGORIES_JSON,
                   "["
                 + "{\"name\":\"Test defects\","
                 + "\"matchedStatuses\":[\"broken\"]},"

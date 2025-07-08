@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.vividus.model.jbehave.Examples;
 import org.vividus.model.jbehave.Scenario;
 import org.vividus.model.jbehave.Step;
 import org.vividus.xray.configuration.XrayExporterOptions;
+import org.vividus.xray.configuration.XrayExporterOptions.TestExecutionOptions;
 import org.vividus.xray.model.TestExecution;
 import org.vividus.xray.model.TestExecutionInfo;
 import org.vividus.xray.model.TestExecutionItem;
@@ -56,6 +57,7 @@ class TestExecutionFactoryTests
     private static final String COMMENT = "comment";
     private static final String KEY = "TEST-EXEC-KEY";
     private static final String SUMMARY = "summary";
+    private static final String DESCRIPTION = "description";
 
     @Spy private XrayExporterOptions xrayExporterOptions;
     @InjectMocks private TestExecutionFactory factory;
@@ -86,8 +88,11 @@ class TestExecutionFactoryTests
             entry("PLAIN_FAILED_IN_BEFORE_SYSTEM_STEPS", createPlainScenario(SUCCESS, List.of(createStep(FAILED)),
                     List.of(), List.of(), List.of()))
         );
-        xrayExporterOptions.setTestExecutionKey(KEY);
-        xrayExporterOptions.setTestExecutionSummary(SUMMARY);
+        TestExecutionOptions executionOptions = new TestExecutionOptions();
+        xrayExporterOptions.setTestExecutionOptions(executionOptions);
+        executionOptions.setKey(KEY);
+        executionOptions.setSummary(SUMMARY);
+        executionOptions.setDescription(DESCRIPTION);
 
         TestExecution execution = factory.create(scenarios);
 
@@ -95,6 +100,7 @@ class TestExecutionFactoryTests
         TestExecutionInfo info = execution.getInfo();
         assertNotNull(info);
         assertEquals(SUMMARY, info.getSummary());
+        assertEquals(DESCRIPTION, info.getDescription());
         List<TestExecutionItem> tests = execution.getTests();
         assertThat(tests, hasSize(13));
         assertExecutedItem(tests.get(0), TestExecutionItemStatus.PASS);
@@ -115,13 +121,19 @@ class TestExecutionFactoryTests
     @Test
     void createTestExecutionWithKeyOnly()
     {
-        xrayExporterOptions.setTestExecutionKey(KEY);
-        xrayExporterOptions.setTestExecutionSummary(null);
+        TestExecutionOptions executionOptions = new TestExecutionOptions();
+        xrayExporterOptions.setTestExecutionOptions(executionOptions);
+        executionOptions.setKey(KEY);
+        executionOptions.setSummary(null);
+        executionOptions.setDescription(null);
 
         TestExecution execution = factory.create(List.of());
 
         assertEquals(KEY, execution.getTestExecutionKey());
-        assertNull(execution.getInfo());
+        TestExecutionInfo info = execution.getInfo();
+        assertNotNull(info);
+        assertNull(info.getSummary());
+        assertNull(info.getDescription());
     }
 
     private static void assertExecutedItem(TestExecutionItem item, TestExecutionItemStatus status)

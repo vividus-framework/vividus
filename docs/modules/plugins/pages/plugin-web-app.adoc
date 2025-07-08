@@ -5,6 +5,8 @@ The plugin provides functionality to interact with Web applications.
 :plugin-short-name: web-app
 include::partial$plugin-installation.adoc[]
 
+include::plugins:partial$plugin-web-app-profiles.adoc[]
+
 == Properties
 
 NOTE: The properties marked with *bold* are mandatory.
@@ -66,9 +68,95 @@ include::partial$common-web-app-properties.adoc[]
 |`25`
 |Before the click VIVIDUS scrolls element into the viewport, the property defines top edge indent in viewport percent for the scroll
 
+|`ui.publish-shadow-dom-source-on-failure`
+a|`true` +
+`false`
+|`true`
+|Whether to publish the source code of Shadow DOM elements on failure or not
+
 |===
 
-=== How to configure user preferences for Chrome browser?
+=== Configure driver path
+
+While executing tests on the local machine it is allowed to use custom browser
+driver. This approach first requires manually downloading the driver (See
+https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/#quick-reference[Quick Reference Section]
+for download links). The path to the downloaded binary should be configured
+using the following property:
+
+[source, properties]
+----
+web.driver.<browser>.driver-executable-path=/path/to/driver/executable
+----
+
+where `<browser>` is one of the following values:
+
+- `chrome`
+- `firefox`
+- `safari`
+- `iexplore`
+- `edge`
+- `opera`
+
+=== Configure browser path
+
+While executing tests on the local machine it is allowed to configure path to
+browser executable file. In general cases it's not required, installed browsers
+are found automatically (except Opera browser). Also, for example, if browser is
+not installed, but only downloaded and unpacked into some folder, the path to
+the downloaded binary should be configured using the following property:
+
+[source, properties]
+----
+web.driver.<browser>.binary-path=/path/to/custom/browser/executable
+----
+
+where `<browser>` is one of the following values:
+
+- `chrome`
+- `firefox`
+- `edge`
+- `opera`
+
+=== Configure Basic authentication for Chromium browsers
+It is allowed to add predefined configurations for
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#basic_authentication_scheme[Basic authentication].
+This setting is only available for desktop Chromium browsers (Chrome, Opera, Microsoft Edge) and allows to define
+multiple configurations for authentication on different websites.
+
+[cols="4,3,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Description
+
+|`web-application.basic-authentication.<configuration-name>.url-regex`
+|Regular expression
+|Regular expression for site URI (regex validate URI without path, for example for page https://www.example.com/page regex will be `^https:\/\/www\.example\.com$`)
+
+|`web-application.basic-authentication.<configuration-name>.username`
+|Username
+|Username
+
+|`web-application.basic-authentication.<configuration-name>.password`
+|Password
+|Password
+
+|===
+
+.Set up authentication for websites https://httpbingo.org and https://www.example.com
+[source,properties]
+----
+web-application.basic-authentication.httpbingo.url-regex=https:\/\/httpbingo\.org
+web-application.basic-authentication.httpbingo.username=user
+web-application.basic-authentication.httpbingo.password=password
+
+web-application.basic-authentication.example.url-regex=.*example\.org
+web-application.basic-authentication.example.username=admin
+web-application.basic-authentication.example.password=qwerty123
+----
+
+=== Configure user preferences for Chrome browser
 In addition to the command line arguments, user preferences (see the _Preferences_ file in Chrome's user data directory or open `chrome://prefs-internals/` link in Chrome browser for examples) can be customised.
 
 Here is an example how to configure third-party cookies behaviour.
@@ -168,8 +256,6 @@ Then `${browser-window-height}` is = `600`
 ----
 
 include::partial$dynamic-variables-ui.adoc[]
-
-include::plugins:partial$plugin-web-app-profiles.adoc[]
 
 include::partial$locator-header.adoc[]
 include::plugins:partial$plugin-web-app-locators.adoc[]
@@ -396,27 +482,7 @@ Then each element with locator `$elementLocator` has `$number` child elements wi
 Then each element with locator `id(menu)` has `5` child elements with locator `id(menu-item)`
 ----
 
-=== Check an element CSS property
-
-Checks the context element has the expected CSS property.
-
-The context can be set by the <<_change_context,corresponding steps>>.
-
-[source,gherkin]
-----
-Then context element has CSS property `$cssName` with value that $comparisonRule `$cssValue`
-----
-
-* `$cssName` - A name of the CSS property.
-* `$comparisonRule` - CSS property xref:parameters:string-comparison-rule.adoc[comparison rule].
-* `$cssValue` - The expected value of the CSS property.
-
-.Change context to element and verify it color CSS property value
-[source,gherkin]
-----
-When I change context to element located by `id(rainbow)`
-Then context element has CSS property `color` with value that is equal to `rgba(0, 0, 0, 1)`
-----
+include::plugins:partial$ui-element-css-property-steps.adoc[]
 
 === Compare sizes of the elements
 
@@ -693,14 +759,15 @@ Validates whether the certain cookie is set.
 
 [source,gherkin]
 ----
-Then cookie with name `$cookieName` is set
+Then cookie with name that $stringComparisonRule `$cookieName` is set
 ----
+* `$stringComparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison rule].
 * `$cookieName` - The name of the cookie to check presence.
 
 .Check the session cookie is present
 [source,gherkin]
 ----
-Then cookie with name `JSESSIONID` is set
+Then cookie with name that is equal to `JSESSIONID` is set
 ----
 
 ==== Validate cookie absence
@@ -709,14 +776,15 @@ Validates whether the certain cookie is not set.
 
 [source,gherkin]
 ----
-Then cookie with name `$cookieName` is not set
+Then cookie with name that $stringComparisonRule `$cookieName` is not set
 ----
+* `$stringComparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison rule].
 * `$cookieName` - The name of the cookie to check absence.
 
-.Check the session cookie is not present
+.Check that Google Analytics cookies are not present
 [source,gherkin]
 ----
-Then cookie with name `JSESSIONID` is not set
+Then cookie with name that matches `_ga.*` is not set
 ----
 
 ==== Set cookies
@@ -757,6 +825,44 @@ When I set all cookies for current domain:$parameters
 When I set all cookies for current domain:
 |cookieName   |cookieValue |path |
 |cookieAgreed |2           |/    |
+----
+
+==== Set cookies without applying changes
+
+Adds the cookies provided in the input xref:ROOT:glossary.adoc#_examplestable[ExamplesTable], but does not apply the
+changes in cookies. The current page must be refreshed or the navigation must be performed to apply the cookie changes.
+It's allowed to add the cookies for the current domain only: make sure the web browser is opened at the expected domain.
+
+[source,gherkin]
+----
+When I set all cookies for current domain without applying changes:$parameters
+----
+* `$parameters` - The parameters of the cookies to set as xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
++
+[cols="1,2", options="header"]
+|===
+
+|Column Name
+|Description
+
+|`cookieName`
+|the name of the cookie to set
+
+|`cookieValue`
+|the value of the cookie to set
+
+|`path`
+|the path of the cookie to set
+
+|===
+
+.Set the cookie for the current domain
+[source,gherkin]
+----
+When I set all cookies for current domain without applying changes:
+|cookieName   |cookieValue |path |
+|cookieAgreed |2           |/    |
+When I refresh page
 ----
 
 ==== Get cookie value
@@ -814,7 +920,7 @@ When I remove cookie with name `$cookieName` from current domain
 When I remove cookie with name `JSESSIONID` from current domain
 ----
 
-==== Remove cookie without apply
+==== Remove cookie without applying changes
 
 Removes the certain cookie from the current domain, but does not apply the
 changes in cookies. The current page must be refreshed or the navigation must
@@ -845,7 +951,7 @@ Removes all cookies from the current domain. The actions performed by the step:
 When I remove all cookies from current domain
 ----
 
-==== Remove all cookies without apply
+==== Remove all cookies without applying changes
 
 Removes all cookies from the current domain, but does not apply the changes in
 cookies. The current page must be refreshed or the navigation must be performed
@@ -856,119 +962,30 @@ to apply the cookie changes.
 When I remove all cookies from current domain without applying changes
 ----
 
-
-=== https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API[Web Storage] steps
-==== Get web storage item
-
-Finds the web storage item by the key and saves its value to the variable.
-
-[source,gherkin]
-----
-When I save $storageType storage item with key `$key` to $scopes variable `$variableName`
-----
-* `$storageType` - One of the web storage mechanisms: either `local` or `session`.
-* `$key` - The name of the key to retrieve the value of.
-* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The name of the variable to store the value of the web storage item.
-
-.Get the value of the local storage item
-[source,gherkin]
-----
-When I save local storage item with key `token` to scenario variable `application-token`
-----
-
-==== Set web storage item
-
-Adds the item with the specified key-value pair to the web storage, or updates
-that key's value if it already exists.
-
-[source,gherkin]
-----
-When I set $storageType storage item with key `$key` and value `$value`
-----
-* `$storageType` - One of the web storage mechanisms: either `local` or `session`.
-* `$key` - The name of the key to create/update.
-* `$value` - The value to give the key that is creating/updating.
-
-.Set the session storage item
-[source,gherkin]
-----
-When I set session storage item with key `token` and value `session-token`
-----
-
-==== Validate web storage item presence
-
-Validates the web storage item with the specified key exists.
-
-[source,gherkin]
-----
-Then $storageType storage item with key `$key` exists
-----
-* `$storageType` - One of the web storage mechanisms: either `local` or `session`.
-* `$key` - The name of the key to check presence.
-
-.Check the session storage item is present
-[source,gherkin]
-----
-Then session storage item with key `token` exists
-----
-
-==== Validate web storage item absence
-
-Validates the web storage item with the specified key does not exist.
-
-[source,gherkin]
-----
-Then $storageType storage item with key `$key` does not exist
-----
-* `$storageType` - One of the web storage mechanisms: either `local` or `session`.
-* `$key` - The key of the local storage item to check absence.
-
-.Check the local storage item is not present
-[source,gherkin]
-----
-Then local storage item with key `token` does not exist
-----
-
-==== Remove web storage item
-
-Removes an item with the key from web storage.
-
-[source,gherkin]
-----
-When I remove item with key `$key` from $storageType storage
-----
-
-* `$key` - The key of the item to remove.
-* `$storageType` - One of the web storage mechanisms: either `local` or `session`.
-
-.Remove item with 'token' key from web storage
-[source,gherkin]
-----
-When I remove item with key `token` from session storage
-----
-
-==== Clear web storage
-
-Removes all items from web storage.
-
-[source,gherkin]
-----
-When I clear $storageType storage
-----
-
-* `$storageType` - One of the web storage mechanisms: either `local` or `session`.
-
-.Clear session storage
-[source,gherkin]
-----
-When I clear session storage
-----
+include::plugins:partial$web-storage-steps.adoc[]
 
 :given-step: Given I am on page with URL `https://www.google.com/search?q=vividus`
 include::partial$proxy-steps.adoc[]
 
 === Window Steps
+
+==== Maximize browser window
+
+Maximizes the current window if it is not already maximized, the step can be useful if you previously performed any resize actions with the browser window.
+
+[source,gherkin]
+----
+When I maximize window
+----
+
+.Maximize browser window after resize
+[source,gherkin]
+----
+Given I am on page with URL `https://example.com/`
+When I change window size to `640x320`
+When I maximize window
+----
+
 ==== Resize the current browser window
 
 Changes the current browser window size to the specified one.
@@ -1169,27 +1186,6 @@ Then `${response}` matcher `.+`
 ----
 
 === Element wait steps
-
-==== Wait for element appearance with timeout
-
-Waits for element appearance with desired timeout.
-
-WARNING: It's forbidden to use <<_visibility_types>> in the locator.
-
-[source,gherkin]
-----
-Then element located by `$locator` appears in `$timeout`
-----
-
-* `$locator` - The <<_locator,locator>> used to find element.
-* `$timeout` - The maximum time to wait for the element appearance in {durations-format-link} format.
-
-.Click on the button and waiting for element appearance for 2 minutes
-[source,gherkin]
-----
-When I click on element located by `buttonName(Show element)`
-Then element located by 'id(element-to-show)' appears in 'PT2M'
-----
 
 ==== Wait for element disappearance with timeout
 
@@ -1712,6 +1708,121 @@ When I reset mobile device emulation
 [source,gherkin]
 ----
 When I reset mobile device emulation
+----
+
+=== Geolocation emulation
+
+==== Emulate Geolocation
+
+Set the current Geolocation to coordinates with the specified latitude and longitude.
+
+[IMPORTANT]
+====
+* The step is only supported by Chrome browser.
+* The step automatically grants the permission to track geolocation in the browser.
+====
+
+[source,gherkin]
+----
+When I emulate Geolocation using coordinates with latitude `$latitude` and longitude `$longitude`
+----
+
+* `$latitude` - The https://en.wikipedia.org/wiki/Latitude[latitude].
+* `$longitude` - The https://en.wikipedia.org/wiki/Longitude[longitude].
+
+.Set Geolocation to New York, USA
+[source,gherkin]
+----
+Given I am on page with URL `https://my-location.org`
+Then text `Brooklyn, NY` does not exist
+When I emulate Geolocation using coordinates with latitude `40.678207` and longitude `-73.944390`
+When I refresh page
+Then text `Brooklyn, NY` exists
+----
+
+==== Reset Geolocation emulation
+
+Resets the emulated Geolocation position.
+
+IMPORTANT: The step is only supported by Chrome browser.
+
+[source,gherkin]
+----
+When I reset Geolocation emulation
+----
+
+.Set Geolocation emulation and reset it
+[source,gherkin]
+----
+Given I am on page with URL `https://my-location.org`
+When I emulate Geolocation using coordinates with latitude `40.678207` and longitude `-73.944390`
+When I refresh page
+Then text `Brooklyn, NY` exists
+When I reset Geolocation emulation
+When I refresh page
+Then text `Brooklyn, NY` does not exist
+----
+
+=== Browser Permissions
+
+==== Configure permission
+
+Configures desired browser permission for currently opened page. You might need to refresh the page to make permission
+changes applied.
+
+IMPORTANT: The steps requires current page to be non-blank page.
+
+[source,gherkin]
+----
+When I set state of `$permission` browser permission to `$state`
+----
+
+* `$permission` - The https://www.w3.org/TR/permissions/#permissions[permission].
+* `$state` - The https://www.w3.org/TR/permissions/#dfn-states[permission state].
+
+.Enable geolocation permission
+[source,gherkin]
+----
+Given I am on page with URL `https://example.com`
+When I set state of `geolocation` browser permission to `granted`
+----
+
+==== Configure permission for origin
+
+Configures desired browser permission for the specified origin.
+
+[source,gherkin]
+----
+When I set state of `$permission` browser permission to `$state` for `$origin` origin
+----
+
+* `$permission` - The https://www.w3.org/TR/permissions/#permissions[permission].
+* `$state` - The https://www.w3.org/TR/permissions/#dfn-states[permission state].
+* `$origin` - The URL of origin to configure permission for.
+
+.Enable persistent storage permission
+[source,gherkin]
+----
+When I set state of `persistent storage` browser permission to `granted` for `https://example.com` origin
+Given I am on page with URL `https://example.com`
+----
+
+==== Configure multiple permissions
+
+Configures multiple browser permissions.
+
+[source,gherkin]
+----
+When I configure browser permissions:$permissions
+----
+
+.Disable geolocation and enable persistent storage permissions
+[source,gherkin]
+----
+When I configure browser permissions:
+|permissionName    |state  |origin             |
+|geolocation       |denied |https://example.com|
+|persistent storage|granted|https://example.com|
 ----
 
 == Tips & Tricks

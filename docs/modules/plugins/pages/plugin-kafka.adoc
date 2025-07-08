@@ -29,6 +29,28 @@ Where `<producer-key>` is the key of the producer configuration which should be 
 
 === Steps
 
+==== *Set headers to Kafka event*
+
+Sets headers to the event, which will be sent to Kafka topic.
+
+NOTE: The set headers are scoped to the first event, which will be sent, and not available afterwards.
+
+[source,gherkin]
+----
+When I set Kafka event headers:$headers
+----
+
+* `headers` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing the list of the headers with columns `name` and `value`.
+
+.Set event header with name `aggregate-type` and value `tenant`
+[source,gherkin]
+----
+When I set Kafka event headers:
+|name          |value |
+|aggregate-type|tenant|
+When I send event with value `test-data` to `dev` Kafka topic `test-topic`
+----
+
 ==== *Send event with value*
 
 Sends the event with the value to the provided topic with no key or partition.

@@ -16,6 +16,8 @@
 
 package org.vividus.azure.cosmos;
 
+import static com.azure.cosmos.ConnectionMode.GATEWAY;
+
 import java.util.stream.Collectors;
 
 import com.azure.core.credential.TokenCredential;
@@ -44,7 +46,7 @@ public class CosmosDbService
                 new CacheLoader<CosmosDbContainer, CosmosContainer>()
                 {
                     @Override
-                    public CosmosContainer load(CosmosDbContainer cosmosDbContainer)
+                    public CosmosContainer load(CosmosDbContainer cosmosDbContainer) throws IllegalArgumentException
                     {
                         String databaseKey = cosmosDbContainer.getDbKey();
                         CosmosDbDatabase db = databases.get(databaseKey,
@@ -66,6 +68,16 @@ public class CosmosDbService
                         {
                             builder.key(key);
                         }
+
+                        if (GATEWAY.equals(account.getConnectionMode()))
+                        {
+                            builder.gatewayMode();
+                        }
+                        else
+                        {
+                            builder.directMode();
+                        }
+
                         return builder.buildClient()
                                 .getDatabase(db.getId())
                                 .getContainer(cosmosDbContainer.getId());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,26 @@
 
 package org.vividus.steps.ui.web.devtools;
 
-import static org.apache.commons.lang3.Validate.isTrue;
-
 import java.util.Map;
 
+import com.google.common.eventbus.EventBus;
+
 import org.jbehave.core.annotations.When;
-import org.openqa.selenium.chromium.HasCdp;
-import org.openqa.selenium.remote.Browser;
-import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.ui.web.action.CdpActions;
+import org.vividus.ui.web.event.DeviceMetricsOverrideEvent;
 import org.vividus.util.json.JsonUtils;
 
 public class MobileEmulationSteps
 {
-    private final IWebDriverProvider webDriverProvider;
-    private final IWebDriverManager webDriverManager;
+    private final CdpActions cdpActions;
     private final JsonUtils jsonUtils;
+    private final EventBus eventBus;
 
-    public MobileEmulationSteps(IWebDriverProvider webDriverProvider, IWebDriverManager webDriverManager,
-            JsonUtils jsonUtils)
+    public MobileEmulationSteps(CdpActions cdpActions, JsonUtils jsonUtils, EventBus eventBus)
     {
-        this.webDriverProvider = webDriverProvider;
-        this.webDriverManager = webDriverManager;
+        this.cdpActions = cdpActions;
         this.jsonUtils = jsonUtils;
+        this.eventBus = eventBus;
     }
 
     /**
@@ -54,7 +51,9 @@ public class MobileEmulationSteps
     @When("I emulate mobile device with configuration:`$jsonConfiguration`")
     public void overrideDeviceMetrics(String jsonConfiguration)
     {
-        executeCdpCommand("Emulation.setDeviceMetricsOverride", jsonUtils.toObject(jsonConfiguration, Map.class));
+        cdpActions.executeCdpCommand("Emulation.setDeviceMetricsOverride",
+                jsonUtils.toObject(jsonConfiguration, Map.class));
+        eventBus.post(new DeviceMetricsOverrideEvent());
     }
 
     /**
@@ -67,13 +66,7 @@ public class MobileEmulationSteps
     @When("I reset mobile device emulation")
     public void clearDeviceMetrics()
     {
-        executeCdpCommand("Emulation.clearDeviceMetricsOverride", Map.of());
-    }
-
-    private void executeCdpCommand(String command, Map<String, Object> metrics)
-    {
-        isTrue(webDriverManager.isBrowserAnyOf(Browser.CHROME), "The step is only supported by Chrome browser.");
-        HasCdp hasCdp = webDriverProvider.getUnwrapped(HasCdp.class);
-        hasCdp.executeCdpCommand(command, metrics);
+        cdpActions.executeCdpCommand("Emulation.clearDeviceMetricsOverride", Map.of());
+        eventBus.post(new DeviceMetricsOverrideEvent());
     }
 }

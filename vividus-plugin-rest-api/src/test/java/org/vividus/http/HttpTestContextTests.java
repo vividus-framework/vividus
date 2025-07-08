@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.junit.jupiter.api.Test;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.testcontext.SimpleTestContext;
@@ -148,6 +149,33 @@ class HttpTestContextTests
         response.setResponseBody(responseBody.getBytes(StandardCharsets.UTF_8));
         httpTestContext.putResponse(response);
         assertEquals(responseBody, httpTestContext.getJsonContext());
+    }
+
+    @Test
+    void testAddStatusCodeToChain()
+    {
+        int statusCode = 301;
+        httpTestContext.addStatusCodeToChain(statusCode, null);
+        assertEquals(List.of(statusCode), httpTestContext.getStatusCodes());
+    }
+
+    @Test
+    void testMultipleStatusCodes()
+    {
+        HttpContext context = mock(HttpContext.class);
+        httpTestContext.addStatusCodeToChain(301, context);
+        httpTestContext.addStatusCodeToChain(302, context);
+        assertEquals(List.of(301, 302), httpTestContext.getStatusCodes());
+    }
+
+    @Test
+    void testAddStatusCodeToChainWithReset()
+    {
+        HttpContext context = mock(HttpContext.class);
+        httpTestContext.addStatusCodeToChain(301, context);
+        HttpContext newContext = mock(HttpContext.class);
+        httpTestContext.addStatusCodeToChain(302, newContext);
+        assertEquals(List.of(302), httpTestContext.getStatusCodes());
     }
 
     @Test

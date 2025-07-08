@@ -18,6 +18,7 @@ package org.vividus.ui.web.converter;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -36,8 +37,8 @@ class ExamplesTableToWebScreenshotParametersConverterTests
     void shouldConvertExamplesTableToWebScreenshotConfiguration()
     {
         var table = new ExamplesTable("""
-                |nativeHeaderToCut|nativeFooterToCut|webHeaderToCut|webFooterToCut|
-                |1                |2                |3             |4             |
+                |nativeHeaderToCut|nativeFooterToCut|webHeaderToCut|webFooterToCut|hideScrollbars|
+                |1                |2                |3             |4             |false         |
                 """);
         var configuration =
                 (WebScreenshotConfiguration) tableConverter.convertValue(table, null);
@@ -48,7 +49,8 @@ class ExamplesTableToWebScreenshotParametersConverterTests
                 () -> assertEquals(1, configuration.getNativeHeaderToCut()),
                 () -> assertEquals(2, configuration.getNativeFooterToCut()),
                 () -> assertEquals(3, configuration.getWebHeaderToCut()),
-                () -> assertEquals(4, configuration.getWebFooterToCut())
+                () -> assertEquals(4, configuration.getWebFooterToCut()),
+                () -> assertFalse(configuration.isHideScrollbars())
         );
     }
 }

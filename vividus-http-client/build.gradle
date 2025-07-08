@@ -1,26 +1,18 @@
 project.description = 'VIVIDUS HTTP client'
 
-// give test dependencies access to compileOnly dependencies to emulate providedCompile
-// https://discuss.gradle.org/t/compileonly-dependencies-are-not-available-in-tests/15366/7
-configurations {
-    testImplementation.extendsFrom compileOnly
-}
-
-ext.httpClientVersion = '5.2.3'
-
 dependencies {
-    api(group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: "${httpClientVersion}")
-    implementation(group: 'org.apache.httpcomponents.client5', name: 'httpclient5-win', version: "${httpClientVersion}")
+    api(group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.5')
+    implementation(group: 'org.apache.httpcomponents.client5', name: 'httpclient5-win', version: '5.2.3')
     implementation project(':vividus-util')
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0')
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.13')
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
-    compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.2')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.3')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.12.0')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '3.0')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
 }

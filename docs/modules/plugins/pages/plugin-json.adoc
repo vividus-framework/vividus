@@ -147,8 +147,15 @@ Then number of JSON elements from `${json-context}` by JSON path `$.product` is 
 
 |`variableName`
 a|The name of the variable containing source JSON, only variables of scopes `global` and `next_batches` are allowed.
-Exceptions are cases when the transformer using in xref:commons:vividus-steps.adoc#_initialize_variable_with_a_table[step]
-which initializes a variable with a table.
+The exception to this limitation is the case when the transformer is used in a
+xref:commons:vividus-steps.adoc#_initialize_variable_with_a_table[step] that initializes a variable with a table.
+
+IMPORTANT: The `variableName` parameter can not be used together with the `path` parameter.
+
+|`path`
+a|The xref:ROOT:glossary.adoc#_resource[JSON resource name] or the JSON file path.
+
+IMPORTANT: The `path` parameter can not be used together with the `variableName` parameter.
 
 |columns
 a|The semicolon-separated list of mappings between column names and {json-paths} used to get column values.
@@ -212,6 +219,43 @@ Given I initialize scenario variable `jsonData` with value `${json-context}`
 When I initialize scenario variable `jsonDataTable` with values:
 {transformer=FROM_JSON, variableName=jsonData, columns=host=$..Host}
 Then `${jsonDataTable[0].host}` is not equal to `[httpbingo.org]`
+----
+
+.The transformer configuration based on local JSON file
+[source,gherkin]
+----
+{transformer=FROM_JSON, path=data/test.json, columns=fname=$..firstName;lname=$..lastName}
+----
+
+== Expressions
+
+NOTE: The expression parameters marked with *bold* are mandatory.
+
+=== `formatToOneLineJson`
+
+Formats any JSON into a one line.
+
+[source, subs="+quotes"]
+----
+#{formatToOneLineJson(*$json*)}
+----
+
+* *`$json`* - The input JSON.
+
+.Format pretty JSON to one line JSON
+[source,gherkin]
+----
+Given I initialize scenario variable `oneLineJson` with value `#{formatToOneLineJson(
+{
+  "title": "Berserk",
+  "year": 1997,
+  "episodes": 25,
+  "genre": ["Action", "Adventure", "Dark Fantasy"],
+  "director": "Naohito Takahashi",
+  "studio": "OLM, Inc.",
+  "synopsis": "A mercenary named Guts joins the Band of the Hawk, leading to a tragic fate."
+}
+)}`
 ----
 
 == Steps
@@ -388,11 +432,11 @@ When I find > `0` JSON elements from `
 {
   "accounts": [
     {
-      "accountId": 00,
+      "accountId": 0,
       "status": "Active"
     },
     {
-      "accountId": 01,
+      "accountId": 1,
       "status": "Active"
     },
     {

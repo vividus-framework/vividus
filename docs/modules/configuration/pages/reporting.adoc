@@ -1,0 +1,507 @@
+= Reporting Configuration
+
+== Configure report translations and layout
+
+[cols="3,2,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`report.title`
+|Any short description of the report.
+|`VIVIDUS Report`
+|The provided title is displayed on *Summary* widget of *Overview* tab. Also it is used as HTML title of the document.
+
+|`report.show-parameters-section`
+a|`true` +
+`false`
+|`true`
+|Within the report section menu:Suites[Overview > Parameters] houses input data from both the scenario-level and
+story-level xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] if any of them is available. When the test data
+contains numerous records, the Parameters section can become lengthy, thus increasing the difficulty of navigating to
+the actual Execution body. The property can be used to hide the Parameters section, making navigation easier.
+
+|`report.translations.<lang>.<translation key>`
+|Alternative translation for the specified key.
+|
+a|This family of properties allows overriding text values in report controls, such as labels, buttons, etc. These values
+represent translations for the chosen language. The list of languages and default translations can be found in the
+official report repository, for example, here is translation configuration for English:
+https://github.com/allure-framework/allure2/blob/main/allure-generator/src/main/javascript/translations/en.json[en.json].
+
+To override a translation value it is necessary to provide translation key, which is essentially a path to the value in
+JSON file. For example, to specify custom English message for duration chart without data the following property should
+be used:
+[source,properties]
+----
+report.translations.en.chart.duration.empty=No data to display
+----
+
+4+^.^|[#_report_layout]_Report Layout_
+
+|`report.tabs.categories.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Categories[] tab
+
+|`report.tabs.suites.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Suites[] (aka menu:Batches[]) tab
+
+|`report.tabs.graph.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Graphs[] tab
+
+|`report.tabs.timeline.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Timeline[] tab
+
+|`report.tabs.behaviors.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Behaviors[] tab
+
+|`report.tabs.overview.widgets.summary.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Summary[] widget on menu:Overview[] tab
+
+|`report.tabs.overview.widgets.suites.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Suites[] (aka menu:Batches[]) widget on menu:Overview[] tab
+
+|`report.tabs.overview.widgets.environment.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Environment[] widget on menu:Overview[] tab
+
+|`report.tabs.overview.widgets.history-trend.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Trend[] widget on menu:Overview[] tab
+
+|`report.tabs.overview.widgets.categories.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Categories[] widget on menu:Overview[] tab
+
+|`report.tabs.overview.widgets.behaviors.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Features by Stories[] widget on menu:Overview[] tab
+
+|`report.tabs.overview.widgets.executors.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Executors[] widget on menu:Overview[] tab
+
+|`report.tabs.graph.charts.status-chart.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Status[] chart on menu:Graphs[] tab
+
+|`report.tabs.graph.charts.severity.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Severity[] chart on menu:Graphs[] tab
+
+|`report.tabs.graph.charts.duration.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Duration[] chart on menu:Graphs[] tab
+
+|`report.tabs.graph.charts.duration-trend.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Duration Trend[] chart on menu:Graphs[] tab
+
+|`report.tabs.graph.charts.retry-trend.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Retry Trend[] chart on menu:Graphs[] tab
+
+|`report.tabs.graph.charts.categories-trend.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Categories Trend[] chart on menu:Graphs[] tab
+
+|`report.tabs.graph.charts.history-trend.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Trend[] chart on menu:Graphs[] tab
+
+|===
+
+== Configure brand logo and title
+
+image::report-logo-title.png[Report logo and title, 256, float=right]
+VIVIDUS provides the capability to change logo and title in your generated report.
+
+To change the brand logo in report use the property `report.brand.logo-path=<path>` where `path` is the relative to `src/main/resources` path to `.svg` image.
+
+.Use custom brand logo
+[source,properties]
+----
+report.brand.logo-path=/customer-data/logo-icon.svg
+----
+
+To change the brand title in report use the property `report.brand.title=<title>` where `title` is the desired title.
+
+.Use custom brand title
+[source,properties]
+----
+report.brand.title=MY BRAND
+----
+
+== Configure categories
+
+It is possible to customize the names of categories in the report, as well as the statuses of tests that will be categorized under these names. +
+Use the following properties:
+
+[source,properties]
+----
+report.tabs.categories.<category-identifier>.name=<name>
+report.tabs.categories.<category-identifier>.statuses=<statuses>
+----
+
+* `category-identifier` - The unique identifier of category.
+* `name` - The desired category name to be displayed in the report.
+* `statuses` - The comma-separated list of test statuses included in this category. Possible values:
+https://allurereport.org/docs/test-statuses/#failed[failed],
+https://allurereport.org/docs/test-statuses/#broken[broken],
+unknown (in context of VIVIDUS - test cases with xref:tests-configuration.adoc#_known_issues[Known issues]),
+https://allurereport.org/docs/test-statuses/#skipped[skipped],
+https://allurereport.org/docs/test-statuses/#passed[passed].
+
+[NOTE]
+====
+User categories take precedence over default categories. So if you create your own configuration for failed and broken tests,
+but ignore test cases from `Known issues` category (`unknown` status), these defects will not be displayed in the  `Categories` tab.
+This rule does not apply to `Test defects`(`broken` status) and `Product defects`(`failed` status) categories: if user configuration is not defined, the default categories will be shown.
+====
+
+.Create test category with name `Defects of the tested application` which including all tests with `broken` and `failed` statuses.
+[source,properties]
+----
+report.tabs.categories.defects.name=Defects of the tested application
+report.tabs.categories.defects.statuses=failed, broken
+----
+
+== Add metadata
+
+It is allowed to add metadata to be displayed in the report and the output logs. There are 2 types of metadata
+configuration: static and dynamic.
+
+=== Static metadata
+
+To add custom metadata the following properties are needed to be set:
+[source,properties]
+----
+metadata.static.<data-identifier>.name=<name>
+metadata.static.<data-identifier>.value=<value>
+metadata.static.<data-identifier>.category=<category>
+metadata.static.<data-identifier>.show-in-report=<true or false>
+----
+
+where:
+
+* `data-identifier` - The unique identifier of metadata configuration (It is to group information about single metadata
+entry and not used in the report or the output logs).
+* `name` - The short name of the metadata entry.
+* `value` - The actual metadata value to be shown.
+* `category` - The category under which the metadata will be published. Available values `ENVIRONMENT`, `SUITE`,
+`PROFILE`, `CONFIGURATION`.
+* `show-in-report` - Whether to show metadata in the report (optional value, default `true`). It can be useful if
+necessary to show metadata in the end of test execution log, but hide in the report.
+
+.Enable reporting of global variable `visual-action`
+[source,properties]
+----
+metadata.static.visual-action.name=Visual Action
+metadata.static.visual-action.value=${variables.visual-action}
+metadata.static.visual-action.category=ENVIRONMENT
+----
+
+=== Dynamic metadata
+
+Sometimes it might be needed to add custom metadata which should be mapped to dynamic properties (e.g. batches
+configuration), in this case the following properties are needed to be set:
+
+[source,properties]
+----
+metadata.dynamic.<data-identifier>.name-pattern=<name-pattern>
+metadata.dynamic.<data-identifier>.property-regex=<property-regex>
+metadata.dynamic.<data-identifier>.category=<category>
+metadata.dynamic.<data-identifier>.show-in-report=<true or false>
+----
+
+where:
+
+* `data-identifier` - The unique identifier of metadata configuration (It is to group information about single metadata
+entry and not used in the report or the output logs).
+* `name-pattern` - The pattern according to which the metadata name will be generated. The pattern can use a special
+placeholder `%s` which will be replaced with a value of the first captured group from the property regular expression
+described below.
+* `property-regex` - The regular expression to find properties by key. The first captured group can be used in the name
+pattern.
+* `category` - The category under which the metadata will be published. Available values `ENVIRONMENT`, `SUITE`,
+`PROFILE`, `CONFIGURATION`.
+* `show-in-report` - Whether to show metadata in the report (optional value, default `true`). It can be useful if
+necessary to show metadata in the end of test execution log, but hide in the report.
+
+.Enable reporting of locations for all batches
+[source,properties]
+----
+metadata.dynamic.batch-location.name-pattern=Batch %s Location
+metadata.dynamic.batch-location.property-regex=batch-(.+).resource-location
+metadata.dynamic.batch-location.category=SUITE
+----
+
+== Add external links to report
+
+User has possibility to link stories/scenarios to external systems like test-management or bug-tracking systems.
+
+There are a few steps to achieve this:
+
+. Configure link pattern via properties.
++
+.Configure link to issue tracking system in `environment.properties`
+[source,properties]
+----
+system.allure.link.issue.pattern=https://vividus.dev/issues/{}
+----
+
+. Add meta tags to the story/scenario meta.
++
+.Story level meta-tag containing ID of the issue
+[source,gherkin]
+----
+Meta:
+    @issueId VVD-1
+
+Scenario: Should check variables equals
+Then `1` is = `1`
+----
+
+. Run tests and explore the links in the report.
++
+image::linked.png[Link in allure report]
+
+=== System types
+
+[cols="3,1,2,1", options="header"]
+|===
+|Property name
+|Meta tag
+|Description
+|Example
+
+|`system.allure.link.issue.pattern`
+|`@issueId`
+|Issue link pattern
+|https://github.com/vividus-framework/vividus/issues/{}
+
+|`system.allure.link.requirement.pattern`
+|`@requirementId`
+|Requirement link pattern
+|https://github.com/vividus-framework/vividus/issues/{}
+
+|`system.allure.link.tms.pattern`
+|`@testCaseId`
+|Test case link pattern
+|https://vividus.jira.com/issues/{}
+|===
+
+=== Multiple external systems
+
+It is possible to configure linking to multiple systems of the same type.
+To achieve this user should define *a custom suffix* for the properties and meta tags.
+
+.Configure links to several issue tracking systems in `environment.properties`
+[source,properties]
+----
+# Default property
+system.allure.link.issue.pattern=https://vividus.prod/issues/{}
+# Additional property with .dev suffix, that used to create links annotated with @isssueId.dev
+system.allure.link.issue.dev.pattern=https://vividus.dev/issues/{}
+----
+
+.Story level meta-tags containing IDs of the issues belonging to different systems
+[source,gherkin]
+----
+Meta:
+    @issueId VVD-1
+    @issueId.dev DEV-1
+
+Scenario: Should check variables equal
+Then `1` is = `1`
+----
+
+image::multiple-links.png[Multiple external systems]
+
+== Viewing distribution of tests by priorities
+
+. Put meta at story or/and scenario level.
++
+[cols="2a,1,3,1", options="header"]
+|===
+|Meta tag name
+|Allowed values
+|Description
+|Example
+
+|`@severity` +
+
+WARNING: This meta tag is deprecated and will be removed in VIVIDUS 0.7.0. Please use `@priority` meta tag instead.
+
+|Numeric values (range 1-5)
+|Used to mark importance of the test where, most usually, the smallest number is the most important test, the highest number is the least important one.
+|`@severity 1`
+
+|`@priority`
+|Numeric values (range 1-5)
+|Used to mark importance of the test where, most usually, the smallest number is the most important test, the highest number is the least important one.
+|`@priority 1`
+
+|===
+
+. Run tests.
+. Open the report and find the distribution of tests by priorities at Graphs tab.
+
+== Add custom tab to report
+
+User can add a new tab to the report with custom content in https://www.markdownguide.org/getting-started/[Markdown format], such as instructions, project information, or other relevant details.
+
+=== To add Custom Tab
+
+1. Create a *report-plugin/custom-tab* folder in the test project resources directory.
+2. Create a *custom-tab.md* file inside this folder and add your content.
+3. Enable the custom tab by adding the following property `report.tabs.custom-tab.enabled=true`.
+
+=== Adding images
+
+It is possible to include images in the custom-tab.md file.
+
+To do so:
+
+ * place the image inside the *report-plugin/custom-tab* folder (you can create subdirectories, e.g., report-plugin/custom-tab/images).
+ * Use `img` tag to insert the image to custom-tab.md document, e.g. `<img src="./plugin/custom-tab/images/my-image.png">`.
+
+[IMPORTANT]
+All images and resources must be stored inside the report-plugin/custom-tab folder, and the _src_ attribute must start with *./plugin/custom-tab*. Otherwise, images will not be displayed in the Allure report.
+
+=== Renaming Custom Tab
+
+Default tab name is 'Custom tab'. User can define name and translations for tab using the `report.translations.<lang>.tab.custom-tab.name` property.
+
+Multiple translations can be added:
+[source, properties]
+----
+report.translations.en.tab.custom-tab.name=Instructions
+report.translations.es.tab.custom-tab.name=Instrucciones
+----
+
+== Notifications
+
+VIVIDUS can send notifications with test execution summary upon test completion.
+
+=== Base configuration
+
+The following table defines a set of common properties that may be used to generate notification data.
+All properties are optional, in case if property is not set, no corresponding data will be added to the notification.
+
+[cols="1,2,2", options="header"]
+|===
+|Property name
+|Description
+|Example
+
+|`notifications.base.project`
+|Project name (e.g. abbreviation, code or full descriptive name)
+|`vividus-tests`
+
+|`notifications.base.environment`
+|Test execution environment, by default it's mapped to `configuration.environments` property
+|`web/qa`
+
+|`notifications.base.comment`
+|Any comment to add
+|`Smoke tests`
+
+|`notifications.base.report-link`
+|URL of the report
+|`https://my-jenkins.com/build/123/report`
+|===
+
+=== E-mail
+
+VIVIDUS can send e-mail notifications via https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol[Simple Mail Transfer Protocol (SMTP)].
+The following properties are used configure notification sending.
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="4,3,3", options="header"]
+|===
+|Property name
+|Description
+|Example
+
+|[subs=+quotes]`*notifications.mail.host*`
+|The SMTP server to connect to
+|`smtp.gmail.com`
+
+|[subs=+quotes]`*notifications.mail.port*`
+|The SMTP server port to connect to
+|`465`
+
+|[subs=+quotes]`*notifications.mail.username*`
+|User name for SMTP connection
+|`iamvividus@gmail.com`
+
+|[subs=+quotes]`*notifications.mail.password*`
+|The user's password
+|`abcdefghijklmnop`
+
+|[subs=+quotes]`*notifications.mail.from*`
+|The envelope return address
+|`iamvividus@gmail.com`
+
+|[subs=+quotes]`*notifications.mail.recipient*`
+|Comma-separated set the recipient addresses
+|`dl@my-company.com, test-results@my-company.com`
+
+|[subs=+quotes]`notifications.mail.security-protocol`
+a|One of the following security protocols:
+
+* `SSL` - use SSL to connect (make sure the SSL port is used).
+* `STARTTLS` - use of the STARTTLS command (if supported by the server) to switch the connection to
+  a TLS-protected connection before issuing any login commands. If the server does not support STARTTLS,
+  the connection continues without the use of TLS.
+
+|`SSL`
+|===

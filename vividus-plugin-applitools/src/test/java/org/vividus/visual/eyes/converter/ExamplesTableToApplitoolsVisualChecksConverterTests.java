@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import com.applitools.eyes.AccessibilityGuidelinesVersion;
 import com.applitools.eyes.AccessibilityLevel;
 import com.applitools.eyes.AccessibilitySettings;
 import com.applitools.eyes.MatchLevel;
+import com.applitools.eyes.PropertyData;
 import com.applitools.eyes.RectangleSize;
 import com.applitools.eyes.config.Configuration;
 
@@ -49,6 +50,8 @@ import org.jbehave.core.steps.ParameterConverters;
 import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -83,8 +86,8 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
         when(baselineIndexer.createIndexedBaseline(BASELINE)).thenReturn(BASELINE);
 
          // CHECKSTYLE:OFF
-        String table = "|executeApiKey  |readApiKey  |hostApp |hostOS |viewportSize|matchLevel|disableBrowserFetching|layoutBreakpoints|serverUri          |appName |batchName |baselineEnvName  |elementsToIgnore|areasToIgnore|baselineName |action   |accessibilityStandard|" + System.lineSeparator()
-                     + "|execute-api-key|read-api-key|host-app|host-os|1x1         |EXACT     |true                  |true             |https://example.com|app-name|batch-name|baseline-env-name|elements        |areas        |baseline-name|ESTABLISH|WCAG 2.1 - AA        |";
+        String table = "|executeApiKey  |readApiKey  |hostApp |hostOS |viewportSize|matchLevel|disableBrowserFetching|layoutBreakpoints|serverUri          |appName |batchName |baselineEnvName  |elementsToIgnore|areasToIgnore|baselineName |action   |accessibilityStandard|scaleRatio|properties                            |" + System.lineSeparator()
+                     + "|execute-api-key|read-api-key|host-app|host-os|1x1         |EXACT     |true                  |true             |https://example.com|app-name|batch-name|baseline-env-name|elements        |areas        |baseline-name|ESTABLISH|WCAG 2.1 - AA        |0.75      |Test type=Unit test, Plugin=Applitools|";
         // CHECKSTYLE:ON
         ExamplesTable applitoolsCheckTable = createTable(table);
 
@@ -114,9 +117,23 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
             () -> assertTrue(configuration.isDisableBrowserFetching()),
             () -> assertTrue(configuration.isDefaultLayoutBreakpointsSet()),
             () -> assertEquals(BATCH, configuration.getBatch().getName()),
+            () -> assertEquals(0.75d, configuration.getScaleRatio()),
             () -> assertEquals(AccessibilityLevel.AA, settings.getLevel()),
-            () -> assertEquals(AccessibilityGuidelinesVersion.WCAG_2_1, settings.getGuidelinesVersion())
+            () -> assertEquals(AccessibilityGuidelinesVersion.WCAG_2_1, settings.getGuidelinesVersion()),
+            () ->
+            {
+                List<PropertyData> propsData = configuration.getProperties();
+                assertThat(propsData, hasSize(2));
+                assertPropertyData(propsData.get(0), "Test type", "Unit test");
+                assertPropertyData(propsData.get(1), "Plugin", "Applitools");
+            }
         );
+    }
+
+    private void assertPropertyData(PropertyData propData, String key, String value)
+    {
+        assertEquals(key, propData.getName());
+        assertEquals(value, propData.getValue());
     }
 
     @Test
@@ -133,6 +150,20 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
         ExamplesTable applitoolsCheckTable = createTable(table);
 
         testDefaultParameters(() -> converter.convertValue(applitoolsCheckTable, null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "=value", "parampampam" })
+    void shouldFailOnInvalidProperties(String invalidProp)
+    {
+        String table = "|batchName |baselineName |action         |properties|" + System.lineSeparator()
+                + "|batch-name|baseline-name|COMPARE_AGAINST|%s|".formatted(invalidProp);
+        ExamplesTable applitoolsCheckTable = createTable(table);
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> converter.convertValue(applitoolsCheckTable, null));
+        assertEquals("The property defined in 'properties' field has invalid format, expected <not empty key>=<value>"
+                + " but got %s".formatted(invalidProp), thrown.getMessage());
     }
 
     private void testDefaultParameters(Supplier<List<ApplitoolsVisualCheck>> checksSupplier)
@@ -184,7 +215,9 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
             () -> assertFalse(configuration.isDisableBrowserFetching()),
             () -> assertFalse(configuration.isDefaultLayoutBreakpointsSet()),
             () -> assertEquals(BATCH, configuration.getBatch().getName()),
-            () -> assertNull(configuration.getAccessibilityValidation())
+            () -> assertNull(configuration.getAccessibilityValidation()),
+            () -> assertNull(configuration.getScaleRatio()),
+            () -> assertEquals(List.of(), configuration.getProperties())
         );
     }
 
@@ -204,8 +237,8 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
         ParameterConverters parameterConverters = new ParameterConverters();
         parameterConverters.addConverters(
             new FunctionalParameterConverter<String, Set<Locator>>(value -> Set.of(locator)) { },
-            new FunctionalParameterConverter<String, Dimension>(StringToDimensionParameterConverter::convert) { },
-            new FunctionalParameterConverter<String, URI>(URI::create) { },
+            new FunctionalParameterConverter<>(StringToDimensionParameterConverter::convert) { },
+            new FunctionalParameterConverter<>(URI::create) { },
             new StringToAccessibilitySettingsConverter(new FluentTrimmedEnumConverter())
         );
         return new ExamplesTableFactory(new Keywords(), null, parameterConverters, new ParameterControls(),

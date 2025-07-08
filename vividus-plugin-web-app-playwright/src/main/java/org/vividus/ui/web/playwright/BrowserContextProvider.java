@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,58 +25,75 @@ import com.microsoft.playwright.BrowserType.LaunchOptions;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.Tracing;
-import com.microsoft.playwright.Tracing.StartOptions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.testcontext.TestContext;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.vividus.ui.web.playwright.network.NetworkContext;
 
 public class BrowserContextProvider
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(BrowserContextProvider.class);
     private static final Class<BrowserContext> BROWSER_CONTEXT_KEY = BrowserContext.class;
+    private static final Class<PlaywrightContext> PLAYWRIGHT_CONTEXT_KEY = PlaywrightContext.class;
 
     private final BrowserType browserType;
     private final LaunchOptions launchOptions;
-    private final Tracing.StartOptions tracingOptions;
-    private final Path tracesOutputDirectory;
     private final TestContext testContext;
+    private final BrowserContextConfiguration browserContextConfiguration;
+    private final NetworkContext networkContext;
 
-    private PlaywrightContext playwrightContext;
-
-    public BrowserContextProvider(BrowserType browserType, LaunchOptions launchOptions, StartOptions tracingOptions,
-            Path tracesOutputDirectory, TestContext testContext)
+    public BrowserContextProvider(BrowserType browserType, LaunchOptions launchOptions, TestContext testContext,
+            BrowserContextConfiguration browserContextConfiguration, NetworkContext networkContext)
     {
         this.browserType = browserType;
         this.launchOptions = launchOptions;
-        this.tracingOptions = tracingOptions;
-        this.tracesOutputDirectory = tracesOutputDirectory;
         this.testContext = testContext;
+        this.browserContextConfiguration = browserContextConfiguration;
+        this.networkContext = networkContext;
     }
 
     public BrowserContext get()
     {
         return testContext.get(BROWSER_CONTEXT_KEY, () -> {
-            BrowserContext browserContext = getPlaywrightContext().browser().newContext();
-            if (isTracingEnabled())
+            PlaywrightContext context = getPlaywrightContext();
+            Browser browser = context.browser;
+            if (!browser.isConnected())
             {
-                browserContext.tracing().start(tracingOptions);
+                browser = launchBrowserWithCurrentOptions(context.playwright);
+                testContext.put(PLAYWRIGHT_CONTEXT_KEY, new PlaywrightContext(context.playwright, browser));
             }
+            BrowserContext browserContext = browser.newContext();
+            networkContext.listenNetwork(browserContext);
+            if (browserContextConfiguration.isTracingEnabled())
+            {
+                browserContext.tracing().start(browserContextConfiguration.getTracingOptions());
+            }
+            long browserContextTimeout = browserContextConfiguration.getTimeout().toMillis();
+            browserContext.setDefaultTimeout(browserContextTimeout);
             return browserContext;
         });
     }
 
-    public void closeCurrentContext()
+    private PlaywrightContext getPlaywrightContext()
+    {
+        return testContext.get(PLAYWRIGHT_CONTEXT_KEY, () -> {
+            Playwright playwright = Playwright.create();
+            Browser browser = launchBrowserWithCurrentOptions(playwright);
+            return new PlaywrightContext(playwright, browser);
+        });
+    }
+
+    public void closeBrowserContext()
     {
         Optional.ofNullable(testContext.get(BROWSER_CONTEXT_KEY, BrowserContext.class)).ifPresent(
                 browserContext -> {
-                    if (isTracingEnabled())
+                    if (browserContextConfiguration.isTracingEnabled())
                     {
                         String tracesArchiveFileName = "traces-%s-%d.zip".formatted(Thread.currentThread().getName(),
                                 System.currentTimeMillis());
-                        Path tracesArchiveFilePath = tracesOutputDirectory.resolve(tracesArchiveFileName);
+                        Path tracesArchiveFilePath = browserContextConfiguration.getTracesOutputDirectory()
+                                .resolve(tracesArchiveFileName);
                         browserContext.tracing().stop(new Tracing.StopOptions().setPath(tracesArchiveFilePath));
                         LOGGER.info("The recorded Playwright traces are saved at {}", tracesArchiveFilePath);
                     }
@@ -86,44 +103,30 @@ public class BrowserContextProvider
                 });
     }
 
-    // Impossible because 'destroy' is invoked by Spring in thread-safe way
-    @SuppressFBWarnings("IS2_INCONSISTENT_SYNC")
-    public void destroy()
+    public void closePlaywrightContext()
     {
-        Optional.ofNullable(playwrightContext).ifPresent(context -> {
-            context.browser().close();
-            context.playwright().close();
-        });
+        Optional.ofNullable(testContext.get(PLAYWRIGHT_CONTEXT_KEY, PlaywrightContext.class))
+                .ifPresent(playwrightContext -> {
+                    playwrightContext.browser.close();
+                    playwrightContext.playwright.close();
+                    testContext.remove(PLAYWRIGHT_CONTEXT_KEY);
+                });
     }
 
-    // This implementation of DC Locking algorithm is correct,
-    // check: https://shipilev.net/blog/2014/safe-public-construction/
-    @SuppressFBWarnings({ "IS2_INCONSISTENT_SYNC", "DC_DOUBLECHECK" })
-    // Playwright and Browser instances are closed in 'destroy' method
-    @SuppressWarnings("PMD.CloseResource")
-    private PlaywrightContext getPlaywrightContext()
+    public void closeBrowserInstance()
     {
-        PlaywrightContext pc = playwrightContext;
-        if (pc == null)
-        {
-            synchronized (this)
-            {
-                pc = playwrightContext;
-                if (pc == null)
-                {
-                    Playwright playwright = Playwright.create();
-                    Browser browser = browserType.launchBrowser(playwright, launchOptions);
-                    pc = new PlaywrightContext(playwright, browser);
-                    playwrightContext = pc;
-                }
-            }
-        }
-        return pc;
+        Optional.ofNullable(testContext.get(PLAYWRIGHT_CONTEXT_KEY, PlaywrightContext.class))
+                .ifPresent(playwrightContext -> playwrightContext.browser.close());
     }
 
-    private boolean isTracingEnabled()
+    public boolean isBrowserContextInitialized()
     {
-        return tracingOptions.screenshots || tracingOptions.snapshots;
+        return null != testContext.get(BROWSER_CONTEXT_KEY);
+    }
+
+    private Browser launchBrowserWithCurrentOptions(Playwright playwright)
+    {
+        return browserType.launchBrowser(playwright, launchOptions);
     }
 
     private record PlaywrightContext(Playwright playwright, Browser browser)

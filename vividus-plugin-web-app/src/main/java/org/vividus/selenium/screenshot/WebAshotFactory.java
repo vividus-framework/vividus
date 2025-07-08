@@ -18,7 +18,6 @@ package org.vividus.selenium.screenshot;
 
 import java.util.Optional;
 
-import org.openqa.selenium.WebElement;
 import org.vividus.selenium.screenshot.strategies.AdjustingScrollableElementAwareViewportPastingDecorator;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.screenshot.WebCutOptions;
@@ -69,7 +68,7 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
                 .withDebugger(screenshotDebugger)
                 .withScrollTimeout(((Long) screenshotParameters.getScrollTimeout().toMillis()).intValue());
 
-        decorated = decorateWithScrollbarHiding(decorated, screenshotParameters.getScrollableElement());
+        decorated = decorateWithScrollbarHiding(decorated, screenshotParameters);
 
         decorated = decorateWithCropping(decorated, screenshotParameters);
 
@@ -88,17 +87,22 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
         WebCutOptions webCutOptions = screenshotParameters.getWebCutOptions();
         return screenshotParameters.getScrollableElement().map(
                 e -> (DebuggingViewportPastingDecorator) new AdjustingScrollableElementAwareViewportPastingDecorator(
-                        toDecorate, e, javascriptActions, webCutOptions)
+                        toDecorate, e, javascriptActions, webCutOptions, screenshotParameters.getMaxHeight())
                 ).orElseGet(
                 () -> new DebuggingViewportPastingDecorator(toDecorate, webCutOptions.webHeaderToCut(),
-                        webCutOptions.webFooterToCut())
+                        webCutOptions.webFooterToCut(), screenshotParameters.getMaxHeight())
         );
     }
 
-    private ShootingStrategy decorateWithScrollbarHiding(ShootingStrategy strategy,
-            Optional<WebElement> scrollableElement)
+    private ShootingStrategy decorateWithScrollbarHiding(ShootingStrategy strategy, WebScreenshotParameters params)
     {
-        return new ScrollbarHidingDecorator(strategy, scrollableElement, scrollbarHandler);
+        if (params == null)
+        {
+            return new ScrollbarHidingDecorator(strategy, Optional.empty(), scrollbarHandler);
+        }
+        return params.isHideScrollbars()
+                ? new ScrollbarHidingDecorator(strategy, params.getScrollableElement(), scrollbarHandler)
+                : strategy;
     }
 
     private AShot createAShot(String strategyName, WebScreenshotParameters screenshotParameters)
@@ -116,13 +120,14 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
             case "VIEWPORT_PASTING" ->
             {
                 shootingStrategy = new DebuggingViewportPastingDecorator(baseShootingStrategy,
-                        DEFAULT_STICKY_HEADER_HEIGHT, DEFAULT_STICKY_FOOTER_HEIGHT).withScrollTimeout(SCROLL_TIMEOUT);
+                        DEFAULT_STICKY_HEADER_HEIGHT, DEFAULT_STICKY_FOOTER_HEIGHT, 0)
+                                .withScrollTimeout(SCROLL_TIMEOUT);
                 yield CeilingJsCoordsProvider.getScrollAdjusted(javascriptActions);
             }
             default -> throw new IllegalArgumentException(
                     String.format("Unknown shooting strategy with the name: %s", strategyName));
         };
-        shootingStrategy = decorateWithScrollbarHiding(shootingStrategy, Optional.empty());
+        shootingStrategy = decorateWithScrollbarHiding(shootingStrategy, screenshotParameters);
         shootingStrategy = screenshotParameters == null
                 ? shootingStrategy
                 : decorateWithCropping(shootingStrategy, screenshotParameters);

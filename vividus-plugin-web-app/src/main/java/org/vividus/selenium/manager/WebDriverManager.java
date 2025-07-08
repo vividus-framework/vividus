@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,18 @@ import java.awt.Toolkit;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.google.common.eventbus.Subscribe;
+
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.cdp.BrowserPermissions;
+import org.vividus.selenium.cdp.CdpWebDriverSessionAttribute;
+import org.vividus.selenium.session.WebDriverSessionAttributes;
 import org.vividus.selenium.session.WebDriverSessionInfo;
+import org.vividus.ui.web.event.DeviceMetricsOverrideEvent;
 
 public class WebDriverManager extends GenericWebDriverManager implements IWebDriverManager
 {
@@ -90,6 +96,18 @@ public class WebDriverManager extends GenericWebDriverManager implements IWebDri
     public boolean isRemoteExecution()
     {
         return getWebDriverProvider().isWebDriverInitialized() && remoteExecution;
+    }
+
+    @Override
+    public BrowserPermissions getBrowserPermissions()
+    {
+        return getWebDriverSessionInfo().get(CdpWebDriverSessionAttribute.BROWSER_PERMISSIONS, BrowserPermissions::new);
+    }
+
+    @Subscribe
+    public void onDeviceMetricsOverride(DeviceMetricsOverrideEvent event)
+    {
+        getWebDriverSessionInfo().reset(WebDriverSessionAttributes.SCREEN_SIZE);
     }
 
     public void setElectronApp(boolean electronApp)

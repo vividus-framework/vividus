@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.vividus.avro.steps;
 import java.io.IOException;
 import java.util.Set;
 
+import org.apache.avro.SchemaFormatter;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.SeekableByteArrayInput;
 import org.apache.avro.generic.GenericDatumReader;
@@ -67,7 +68,7 @@ public class AvroSteps
                 datumReader))
         {
             LOGGER.atInfo()
-                  .addArgument(() -> dataFileReader.getSchema().toString(false))
+                  .addArgument(() -> SchemaFormatter.getInstance("json/inline").format(dataFileReader.getSchema()))
                   .log("Avro schema: {}");
 
             StringBuilder json = new StringBuilder("[");
