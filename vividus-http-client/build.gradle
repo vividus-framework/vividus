@@ -4,7 +4,7 @@ dependencies {
     api(group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.5')
     implementation(group: 'org.apache.httpcomponents.client5', name: 'httpclient5-win', version: '5.2.3')
     implementation project(':vividus-util')
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0')
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.18.0')
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
 
