@@ -334,6 +334,55 @@ web.driver.chrome.experimental-options={"prefs": {"profile": {"cookie_controls_m
 batch-6.story.execution-timeout=PT15M
 ----
 
+== VIVIDUS initialization
+
+The task performs VIVIDUS initialization.
+
+Within the folder containing your *tests*, this means all configuration properties will be checked,
+including suites, profiles, environments, known issues, etc.
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew testVividusInitialization
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew testVividusInitialization
+----
+======
+
+== Verification
+
+=== Check
+
+This task run all checks.
+
+NOTE: For VIVIDUS tests this task will test VIVIDUS initialization and validate configuration of known issues.
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew check
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew check
+----
+======
+
 == Find and fix formatting issues
 https://github.com/diffplug/spotless[Spotless] checks refer to formatting and linting validations to enforce consistent
 code quality standards. Spotless automates the formatting of files based on predefined rules and integrates with linting
@@ -407,7 +456,7 @@ gradlew spotlessApply
 
 === Fixing Spotless violations
 
-If the `build` task is failed and the result like the following is shown in the console output, it means that some files
+If the <<build>> task is failed and the result like the following is shown in the console output, it means that some files
 do not comply with the Spotless rules.
 
 [source,shell]
@@ -436,3 +485,188 @@ Execution failed for task ':spotlessVividusCheck'.
 
 You can fix the violations manually or automatically by running the `spotlessApply` task. After fixing, review
 the changes and commit them to your repository. Following these steps will help keep your build stable and successful.
+
+== Build the project
+
+[id=build]
+=== Build
+
+Assembles the current project with tests.
+
+Run the build task to compile and assemble all project components.
+This will process source files, resolve dependencies, and generate build artifacts.
+
+NOTE: Ensure all prerequisites are installed before running the build process.
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew build
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew build
+----
+======
+
+=== Clean
+
+Deletes the build directory.
+
+Run the clean task to remove all files and folders generated during the build process.
+This helps ensure a fresh build environment by deleting any previous build artifacts.
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew clean
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew clean
+----
+======
+
+NOTE: Use this command before starting a new build to avoid issues caused by leftover files from previous builds.
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew clean build
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew clean build
+----
+======
+
+== IDE configuration
+
+To use certain IDEs for test development, you’ll need to generate configuration files.
+
+=== Eclipse
+
+==== Generate Eclipse configuration files
+
+This task will generate the necessary configuration files for Eclipse IDE.
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew eclipse
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew eclipse
+----
+======
+
+==== Clean Eclipse configuration files
+
+This task cleans (removes) all Eclipse IDE configuration files.
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew cleanEclipse
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew cleanEclipse
+----
+======
+
+=== IDEA
+
+==== Generate IntelliJ IDEA configuration files
+
+This task will generate the necessary configuration files for IntelliJ IDEA.
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew idea
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew idea
+----
+======
+
+==== Clean IntelliJ IDEA configuration files
+
+This task cleans (removes) all IntelliJ IDEA configuration files.
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew cleanIdea
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew cleanIdea
+----
+======
+
+==== Open in IntelliJ IDEA
+
+Opens the configured project with your tests in IntelliJ IDEA.
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew openIdea
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew openIdea
+----
+======
