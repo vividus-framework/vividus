@@ -15,7 +15,7 @@ dependencies {
     implementation(group: 'org.eclipse.angus', name: 'imap', version: '2.0.3')
 
     implementation(group: 'jakarta.inject', name: 'jakarta.inject-api', version: '2.0.1')
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0')
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.18.0')
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
 
