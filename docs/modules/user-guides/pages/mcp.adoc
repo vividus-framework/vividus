@@ -18,7 +18,44 @@ Please make sure to use the same version for all VIVIDUS dependencies.
 implementation(group: 'org.vividus', name: 'vividus-mcp-server')
 ----
 
-== Providers
+== AI Assistants
+
+=== GitHub Copilot in VS Code
+
+. Install https://code.visualstudio.com/download[Visual Studio Code]
+. Open the project with VIVIDUS tests in Visual Studio Code
+. https://code.visualstudio.com/docs/copilot/setup#_set-up-copilot-in-vs-code[Set up Copilot in VS Code] if it is not done yet
+. Create a new file at path `/.vscode/mcp.json` in the root of the project
+. Add the following configuration into `mcp.json` file and save it
++
+.mcp.json
+[source,json]
+----
+{
+  "servers": {
+    "vividus": {
+      "command": "/Users/Bob/Workspace/vividus-sample-tests/gradlew", <1>
+      "args": [
+        "startMcpServer",
+        "-q",
+        "-p",
+        "/Users/Bob/Workspace/vividus-sample-tests" <2>
+      ]
+    },
+    "playwright": { <3>
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
+----
+<1> The absolute path to the `gradlew` executable contained in the tests project
+<2> The absolute path to the tests project
+<3> The Playwright MCP server is optional and can be used to control browser and generate tests for web-applications
+. Start the MCP servers by clicking on the `▷ Start` buttons on the top of the servers names
+. Use Copilot in https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode[agent mode] to generate automated scenarios
 
 === Claude Desktop
 
@@ -27,31 +64,32 @@ Claude is a next generation AI assistant built by Anthropic and trained to be sa
 . Install https://claude.ai/download[Claude Desktop]
 . Open `Claude Desktop` and navigate to `Developer` tab in application `Settings`
 . Click `Edit Config` which opens `claude_desktop_config.json` file that contains MCP server configs
-. Add the following JSON into `claude_desktop_config.json` file and save it
+. Add the following configuration into `claude_desktop_config.json` file and save it
 +
 .claude_desktop_config.json
 [source,json]
 ----
 {
-    "mcpServers": {
-        "vividus-mcp-server": {
-            "command": "/Users/Bob/Workspace/vividus-sample-tests/gradlew", <1>
-            "args": [
-                "startMcpServer",
-                "-q",
-                "-p",
-                "/Users/Bob/Workspace/vividus-sample-tests" <2>
-            ]
-        },
-        "playwright": {
-            "command": "npx",
-            "args": [
-                "@playwright/mcp"
-            ]
-        }
+  "mcpServers": {
+    "vividus": {
+      "command": "/Users/Bob/Workspace/vividus-sample-tests/gradlew", <1>
+      "args": [
+          "startMcpServer",
+          "-q",
+          "-p",
+          "/Users/Bob/Workspace/vividus-sample-tests" <2>
+      ]
+    },
+    "playwright": { <3>
+      "command": "npx",
+      "args": [
+          "@playwright/mcp"
+      ]
     }
+  }
 }
 ----
-<1> [Mandatory] Absolute path to the `gradlew` execulable contained in the tests folder
-<2> [Mandatory] Absolute path to the tests folder
+<1> The absolute path to the `gradlew` executable contained in the tests project
+<2> The absolute path to the tests project
+<3> The Playwright MCP server is optional and can be used to control browser and generate tests for web-applications
 . Restart `Claude Desktop` application
