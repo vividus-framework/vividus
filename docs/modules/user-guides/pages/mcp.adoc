@@ -5,7 +5,7 @@ test scenarios leveraging those capabilities.
 
 IMPORTANT: LLM will access only those steps that are available from plugins included into your test project.
 
-== Pre-requisites
+== Prerequisites
 
 . Copy the below line to `dependencies` section of the project `build.gradle` file in your test project
 +
@@ -17,6 +17,11 @@ Please make sure to use the same version for all VIVIDUS dependencies.
 ----
 implementation(group: 'org.vividus', name: 'vividus-mcp-server')
 ----
+. Make sure to use https://github.com/vividus-framework/vividus-build-system?tab=readme-ov-file#migrating-from-20-to-30[Build System 3.0]
+. Update `gradlew` script in the root of your test project to the latest version:
+.. Go to https://github.com/vividus-framework/vividus-starter/blob/main/gradlew
+.. Copy content of the `gradlew` script
+.. Replace the content of the `gradlew` script in the root of the test project with the copied content
 
 == AI Assistants
 
