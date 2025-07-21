@@ -9,7 +9,7 @@ project.description = 'VIVIDUS extension for web application testing plugins'
      implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.9')
      implementation(group: 'org.springframework', name: 'spring-context')
      implementation(group: 'org.springframework', name: 'spring-core')
-     implementation(group: 'commons-io', name: 'commons-io', version: '2.19.0')
+     implementation(group: 'commons-io', name: 'commons-io', version: '2.20.0')
 
      testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.3')
      testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
