@@ -10,7 +10,7 @@ IMPORTANT: LLM will access only those steps that are available from plugins incl
 . Copy the below line to `dependencies` section of the project `build.gradle` file in your test project
 +
 [IMPORTANT]
-Please make sure to use the same version for all VIVIDUS dependencies.
+VIVIDUS MCP server is available starting from version `0.6.16-SNAPSHOT` and higher.
 +
 .build.gradle
 [source,gradle,subs="attributes+"]
