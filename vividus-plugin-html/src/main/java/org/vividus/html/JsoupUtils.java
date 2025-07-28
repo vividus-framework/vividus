@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.vividus.html;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.parser.Parser;
+import org.jsoup.parser.Tag;
 
 public final class JsoupUtils
 {
@@ -27,7 +29,9 @@ public final class JsoupUtils
 
     public static Document getDocument(String html, String baseUri)
     {
-        return Jsoup.parse(html, baseUri);
+        Parser parser = Parser.htmlParser();
+        parser.tagSet().onNewTag(tag -> tag.set(Tag.SelfClose));
+        return Jsoup.parse(html, baseUri, parser);
     }
 
     public static Document getDocument(String html)
