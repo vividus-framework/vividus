@@ -16,7 +16,7 @@ dependencies {
     implementation(group: 'jakarta.inject', name: 'jakarta.inject-api', version: '2.0.1')
     runtimeOnly(group: 'org.vividus', name: 'jbehave-spring', version: versions.jbehave)
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.3')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.4')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
