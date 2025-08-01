@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 public class PropertyMapper implements IPropertyMapper
 {
@@ -146,7 +147,7 @@ public class PropertyMapper implements IPropertyMapper
     {
         return propertyNames.stream().map(propertyName ->
         {
-            String propertyNameWithoutPrefix = StringUtils.removeStart(propertyName, propertyPrefix);
+            String propertyNameWithoutPrefix = Strings.CS.removeStart(propertyName, propertyPrefix);
             return StringUtils.substringBefore(propertyNameWithoutPrefix, propertyPrefixSeparator);
         }).collect(toSet());
     }
@@ -155,7 +156,7 @@ public class PropertyMapper implements IPropertyMapper
     {
         return properties.entrySet().stream()
                 .filter(e -> e.getKey().startsWith(propertyFamily))
-                .collect(toMap(e -> StringUtils.removeStart(e.getKey(), propertyFamily), Entry::getValue));
+                .collect(toMap(e -> Strings.CS.removeStart(e.getKey(), propertyFamily), Entry::getValue));
     }
 
     protected String getPropertyPrefixSeparator()

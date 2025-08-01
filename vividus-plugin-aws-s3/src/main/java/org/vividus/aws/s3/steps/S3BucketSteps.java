@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
@@ -175,7 +175,7 @@ public class S3BucketSteps
     public void fetchCsvObject(String objectKey, String bucketName, Set<VariableScope> scopes, String variableName)
             throws IOException
     {
-        String csvString = fetchObject(bucketName, StringUtils.appendIfMissing(objectKey, ".csv"));
+        String csvString = fetchObject(bucketName, Strings.CI.appendIfMissing(objectKey, ".csv"));
         List<Map<String, String>> csv = new CsvReader().readCsvString(csvString);
         variableContext.putVariable(scopes, variableName, csv);
     }

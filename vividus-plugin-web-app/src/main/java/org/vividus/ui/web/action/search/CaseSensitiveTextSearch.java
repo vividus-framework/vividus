@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.vividus.ui.web.action.search;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
@@ -53,7 +53,6 @@ public class CaseSensitiveTextSearch extends AbstractWebElementSearchAction
     public boolean matches(WebElement element, String text)
     {
         String elementText = getWebElementActions().getElementText(element);
-        return text.equals(elementText) || StringUtils.equalsIgnoreCase(elementText, text) && matchesToText(element,
-                text);
+        return text.equals(elementText) || Strings.CI.equals(elementText, text) && matchesToText(element, text);
     }
 }
