@@ -32,6 +32,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -252,7 +253,7 @@ public final class ConfigurationResolver
                 .filter(p -> p.startsWith(VIVIDUS_SYSTEM_PROPERTY_FAMILY))
                 .filter(p -> !p.startsWith(VIVIDUS_SYSTEM_PROPERTY_FAMILY + CONFIGURATION_PROPERTY_FAMILY))
                 .collect(Collectors.toMap(
-                    p -> StringUtils.removeStart(p, VIVIDUS_SYSTEM_PROPERTY_FAMILY), systemProperties::getProperty));
+                    p -> Strings.CS.removeStart(p, VIVIDUS_SYSTEM_PROPERTY_FAMILY), systemProperties::getProperty));
     }
 
     private static String getConfigurationPropertyValue(Properties configurationProperties,

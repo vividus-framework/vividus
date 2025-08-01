@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.vividus.util.property;
 
 import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.lang3.StringUtils.removeStart;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +27,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 public class PropertyParser implements IPropertyParser
 {
@@ -49,7 +49,7 @@ public class PropertyParser implements IPropertyParser
     {
         return getPropertiesByPrefix(propertyPrefix).entrySet()
                 .stream()
-                .collect(toMap(e -> removeStart(e.getKey(), propertyPrefix), Entry::getValue));
+                .collect(toMap(e -> Strings.CS.removeStart(e.getKey(), propertyPrefix), Entry::getValue));
     }
 
     @Override

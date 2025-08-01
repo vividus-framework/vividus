@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 
 import com.jayway.jsonpath.PathNotFoundException;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hamcrest.Matcher;
@@ -403,7 +403,7 @@ public class JsonSteps
             }
             else if (jsonValue instanceof Number)
             {
-                ComparisonRule rule = convertToEnum(StringUtils.removeStart(normalizedComparisonRule, "IS_"),
+                ComparisonRule rule = convertToEnum(Strings.CS.removeStart(normalizedComparisonRule, "IS_"),
                         ComparisonRule.class);
                 BigDecimal actualNumber = new BigDecimal(jsonValue.toString());
                 BigDecimal expectedNumber = NumberUtils.createBigDecimal(String.valueOf(expectedData));

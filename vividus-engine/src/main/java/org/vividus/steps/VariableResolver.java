@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 import com.google.common.base.CaseFormat;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jbehave.core.embedder.StoryControls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,7 +128,7 @@ public class VariableResolver implements DryRunAwareExecutor
         if (variableKey.contains(VARIABLE_START_MARKER))
         {
             updatedVariableKey = (String) resolveVariables(0, variableKey);
-            target = StringUtils.replaceOnce(value, variableKey, updatedVariableKey);
+            target = Strings.CS.replaceOnce(value, variableKey, updatedVariableKey);
         }
         else
         {
@@ -150,7 +150,7 @@ public class VariableResolver implements DryRunAwareExecutor
         {
             return variableValue;
         }
-        return StringUtils.replaceOnce(target, variablePlaceholder, variableValue.toString());
+        return Strings.CS.replaceOnce(target, variablePlaceholder, variableValue.toString());
     }
 
     private Object getVariableValue(String variableKey)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 public class DotNotationNamePropertyMapper extends PropertyMapper
 {
@@ -40,7 +41,7 @@ public class DotNotationNamePropertyMapper extends PropertyMapper
     {
         return propertyNames.stream().map(propertyName ->
         {
-            String propertyNameWithoutPrefix = StringUtils.removeStart(propertyName, propertyPrefix);
+            String propertyNameWithoutPrefix = Strings.CS.removeStart(propertyName, propertyPrefix);
             return StringUtils.substringBeforeLast(propertyNameWithoutPrefix, getPropertyPrefixSeparator());
         }).collect(toSet());
     }
@@ -54,7 +55,7 @@ public class DotNotationNamePropertyMapper extends PropertyMapper
             String key = entry.getKey();
             if (key.startsWith(propertyFamily))
             {
-                String objectKey = StringUtils.removeStart(key, propertyFamily);
+                String objectKey = Strings.CS.removeStart(key, propertyFamily);
                 if (!objectKey.contains(getPropertyPrefixSeparator()))
                 {
                     objectProperties.put(objectKey, entry.getValue());

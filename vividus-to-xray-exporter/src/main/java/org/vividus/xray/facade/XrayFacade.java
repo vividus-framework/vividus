@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -230,7 +231,7 @@ public class XrayFacade
     private void checkIfIssueEditable(JiraEntity jiraEntity) throws NonEditableIssueStatusException
     {
         String status = jiraEntity.getStatus();
-        if (editableStatuses.stream().noneMatch(s -> StringUtils.equalsIgnoreCase(s, status)))
+        if (editableStatuses.stream().noneMatch(s -> Strings.CI.equals(s, status)))
         {
             throw new NonEditableIssueStatusException(jiraEntity.getKey(), status);
         }

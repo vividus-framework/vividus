@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.vividus.util.ResourceUtils;
 
@@ -59,7 +59,7 @@ public class DynamicPlugin extends DefaultPlugin
 
         if (!fileLines.isEmpty())
         {
-            isTrue(StringUtils.endsWithAny(fileToGenerate, JS_EXTENSION, CSS_EXTENSION),
+            isTrue(Strings.CS.endsWithAny(fileToGenerate, JS_EXTENSION, CSS_EXTENSION),
                     "Generation of only JavaScript and CSS files is supported.");
 
             Path tempFile = ResourceUtils.createTempFile(fileToGenerate);

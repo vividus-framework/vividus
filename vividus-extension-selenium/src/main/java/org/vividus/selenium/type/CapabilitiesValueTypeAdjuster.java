@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.vividus.selenium.type;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 public final class CapabilitiesValueTypeAdjuster
 {
@@ -26,6 +26,6 @@ public final class CapabilitiesValueTypeAdjuster
 
     public static Object adjustType(String value)
     {
-        return StringUtils.equalsAnyIgnoreCase(value, "true", "false") ? Boolean.parseBoolean(value) : value;
+        return Strings.CI.equalsAny(value, "true", "false") ? Boolean.parseBoolean(value) : value;
     }
 }

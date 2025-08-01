@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
@@ -90,7 +90,7 @@ public class ResourceUtilsTests
         var resourceNameOrFilePath = folder.getRoot().getAbsolutePath();
         var exception = assertThrows(IllegalArgumentException.class,
                 () -> ResourceUtils.loadResourceOrFileAsByteArray(resourceNameOrFilePath));
-        assertEquals("Neither resource with name '" + StringUtils.prependIfMissing(resourceNameOrFilePath, "/")
+        assertEquals("Neither resource with name '" + Strings.CS.prependIfMissing(resourceNameOrFilePath, "/")
                 + "' nor file at path '" + resourceNameOrFilePath + "' is found", exception.getMessage());
     }
 

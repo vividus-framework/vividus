@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -107,7 +107,7 @@ public abstract class AbstractElementAction implements IElementAction
 
     private static String convertLocatorToReadableForm(By locator)
     {
-        return StringUtils.removeStart(locator.toString(), "By.");
+        return Strings.CI.removeStart(locator.toString(), "By.");
     }
 
     protected List<WebElement> filterElementsByVisibility(List<WebElement> elements, Visibility visibility,

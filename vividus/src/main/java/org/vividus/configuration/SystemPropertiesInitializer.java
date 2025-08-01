@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 public class SystemPropertiesInitializer
 {
@@ -44,7 +44,7 @@ public class SystemPropertiesInitializer
             {
                 String value = (String) entry.getValue();
                 value = propertiesProcessor.processProperty((String) entry.getKey(), value);
-                System.setProperty(StringUtils.removeStart(key, SYSTEM_PROPERTIES_PREFIX), value);
+                System.setProperty(Strings.CS.removeStart(key, SYSTEM_PROPERTIES_PREFIX), value);
                 iterator.remove();
             }
         }
