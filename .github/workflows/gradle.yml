@@ -343,7 +343,7 @@ jobs:
                                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                 -Pvividus.selenium.grid.password=${SAUCELABS_KEY}  \
                                                 -Pvividus.selenium.grid.capabilities.platformName="Windows 11" \
-                                                -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com,vividus-test-site-a92k.onrender.com"
+                                                -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains saucedemo.com,vividus-test-site-a92k.onrender.com"
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs system tests will be skipped
         fi
