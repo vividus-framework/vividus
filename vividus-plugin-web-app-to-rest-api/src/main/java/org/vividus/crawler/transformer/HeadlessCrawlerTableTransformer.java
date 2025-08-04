@@ -24,6 +24,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,9 +76,9 @@ public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTr
         {
             return;
         }
-        String mainApplicationPagePath = StringUtils.appendIfMissing(mainApplicationPage.getPath(), FORWARD_SLASH);
+        String mainApplicationPagePath = Strings.CS.appendIfMissing(mainApplicationPage.getPath(), FORWARD_SLASH);
         this.seedRelativeUrls.stream()
-                .map(seedRelativeUrl -> StringUtils.removeStart(seedRelativeUrl, FORWARD_SLASH))
+                .map(seedRelativeUrl -> Strings.CS.removeStart(seedRelativeUrl, FORWARD_SLASH))
                 .map(mainApplicationPagePath::concat)
                 .map(relativeUrl -> UriUtils.buildNewUrl(mainApplicationPage, relativeUrl))
                 .map(URI::toString)
