@@ -101,8 +101,8 @@ Then text `File has been successfully uploaded. Server received: 445508 bytes` e
 
 Scenario: Should not fail click step when element in Cross-Origin frame
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
-When I switch to frame located by `id(exampleCom)`
-When I click on element located by `xpath(//a[contains(text(), 'More')])`
+When I switch to frame located by `id(saucedemoCom)`
+When I click on element located by `id(login-button)`
 
 Scenario: Steps verification: "When I set focus on context element", "Then context element is $focusState", "When I press $keys on keyboard"
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
