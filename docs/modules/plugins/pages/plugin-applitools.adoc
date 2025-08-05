@@ -82,6 +82,10 @@ NOTE: The properties marked with *bold* are mandatory.
 |`true`
 |If `true` the viewport width and height are changed to the specified device's values prior to capturing the page source for rendering in UFG.
 
+|`ui.visual.applitools.before-render-screenshot-hook`
+|`<empty>`
+|The JS script executed prior to capturing a screenshot.
+
 |===
 
 ==== Cross-environment properties
