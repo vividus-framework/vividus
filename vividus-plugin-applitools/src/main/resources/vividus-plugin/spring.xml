@@ -20,6 +20,7 @@
         <property name="serverUri" value="${applitools.server-uri}" />
         <property name="appName" value="${applitools.app-name}" />
         <property name="baselineEnvName" value="${ui.visual.applitools.baseline-env-name}" />
+        <property name="beforeRenderScreenshotHook" value="${ui.visual.applitools.before-render-screenshot-hook}" />
     </bean>
     <bean class="org.vividus.visual.eyes.converter.ExamplesTableToRenderingBrowserInfoConverter" />
     <bean class="org.vividus.visual.eyes.converter.StringToAccessibilitySettingsConverter" />

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.visual.eyes.service;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Optional;
 
 import com.applitools.eyes.StepInfo;
 import com.applitools.eyes.StepInfo.ApiUrls;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.screenshot.AshotScreenshotTaker;
+import org.vividus.ui.action.JavascriptActions;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.visual.eyes.factory.ImageEyesFactory;
 import org.vividus.visual.eyes.model.ApplitoolsTestResults;
@@ -46,13 +48,16 @@ public class ImageVisualTestingService implements VisualTestingService<Applitool
     private final ImageEyesFactory eyesFactory;
     private final AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker;
     private final IHttpClient httpClient;
+    private final JavascriptActions javascriptActions;
 
     public ImageVisualTestingService(ImageEyesFactory eyesFactory,
-            AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker, IHttpClient httpClient)
+            AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker, IHttpClient httpClient,
+            JavascriptActions javascriptActions)
     {
         this.eyesFactory = eyesFactory;
         this.ashotScreenshotTaker = ashotScreenshotTaker;
         this.httpClient = httpClient;
+        this.javascriptActions = javascriptActions;
     }
 
     @Override
@@ -64,6 +69,9 @@ public class ImageVisualTestingService implements VisualTestingService<Applitool
         TestResults testResults;
         try
         {
+            Optional.ofNullable(applitoolsVisualCheck.getBeforeRenderScreenshotHook())
+                    .ifPresent(javascriptActions::executeScript);
+
             Screenshot screenshot = ashotScreenshotTaker.takeAshotScreenshot(applitoolsVisualCheck.getSearchContext(),
                     applitoolsVisualCheck.getScreenshotParameters());
             eyes.checkImage(screenshot.getImage());

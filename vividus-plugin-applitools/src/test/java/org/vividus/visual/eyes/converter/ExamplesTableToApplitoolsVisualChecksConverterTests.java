@@ -86,8 +86,8 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
         when(baselineIndexer.createIndexedBaseline(BASELINE)).thenReturn(BASELINE);
 
          // CHECKSTYLE:OFF
-        String table = "|executeApiKey  |readApiKey  |hostApp |hostOS |viewportSize|matchLevel|disableBrowserFetching|layoutBreakpoints|serverUri          |appName |batchName |baselineEnvName  |elementsToIgnore|areasToIgnore|baselineName |action   |accessibilityStandard|scaleRatio|properties                            |" + System.lineSeparator()
-                     + "|execute-api-key|read-api-key|host-app|host-os|1x1         |EXACT     |true                  |true             |https://example.com|app-name|batch-name|baseline-env-name|elements        |areas        |baseline-name|ESTABLISH|WCAG 2.1 - AA        |0.75      |Test type=Unit test, Plugin=Applitools|";
+        String table = "|executeApiKey  |readApiKey  |hostApp |hostOS |viewportSize|matchLevel|disableBrowserFetching|layoutBreakpoints|serverUri          |appName |batchName |baselineEnvName  |elementsToIgnore|areasToIgnore|baselineName |action   |accessibilityStandard|scaleRatio|properties                            |beforeRenderScreenshotHook|" + System.lineSeparator()
+                     + "|execute-api-key|read-api-key|host-app|host-os|1x1         |EXACT     |true                  |true             |https://example.com|app-name|batch-name|baseline-env-name|elements        |areas        |baseline-name|ESTABLISH|WCAG 2.1 - AA        |0.75      |Test type=Unit test, Plugin=Applitools|console.log(1);           |";
         // CHECKSTYLE:ON
         ExamplesTable applitoolsCheckTable = createTable(table);
 
@@ -110,6 +110,7 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
             () -> assertEquals(Set.of(locator), check.getElementsToIgnore()),
             () -> assertEquals(Set.of(locator), check.getAreasToIgnore()),
             () -> assertEquals(BASELINE, check.getBaselineName()),
+            () -> assertEquals("console.log(1);", check.getBeforeRenderScreenshotHook()),
             () -> assertEquals(VisualActionType.ESTABLISH, check.getAction()),
             () -> assertEquals(Optional.of(screenshotParameters), check.getScreenshotParameters()),
             () -> assertTrue(configuration.getSaveFailedTests()),
@@ -189,6 +190,7 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
         converter.setBaselineEnvName(baselineEnvName);
         converter.setDisableBrowserFetching(false);
         converter.setLayoutBreakpoints(false);
+        converter.setBeforeRenderScreenshotHook(null);
 
         List<ApplitoolsVisualCheck> checks = checksSupplier.get();
         assertThat(checks, hasSize(1));
@@ -208,6 +210,7 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
             () -> assertEquals(Set.of(), check.getElementsToIgnore()),
             () -> assertEquals(Set.of(), check.getAreasToIgnore()),
             () -> assertEquals(BASELINE, check.getBaselineName()),
+            () -> assertNull(check.getBeforeRenderScreenshotHook()),
             () -> assertEquals(VisualActionType.COMPARE_AGAINST, check.getAction()),
             () -> assertEquals(Optional.of(screenshotParameters), check.getScreenshotParameters()),
             () -> assertFalse(configuration.getSaveFailedTests()),

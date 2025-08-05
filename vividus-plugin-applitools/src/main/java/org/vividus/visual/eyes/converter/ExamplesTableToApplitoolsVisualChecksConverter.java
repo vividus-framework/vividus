@@ -67,12 +67,30 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     private static final String ACCESSIBILITY_STANDARD_OPTION = "accessibilityStandard";
     private static final String SCALE_RATIO = "scaleRatio";
     private static final String PROPERTIES = "properties";
+    private static final String BEFORE_RENDER_SCREENSHOT_HOOK = "beforeRenderScreenshotHook";
 
-    private static final List<String> SUPPORTED_OPTIONS = List.of(BASELINE_NAME_OPTION, ACTION_OPTION,
-            EXECUTE_API_KEY_OPTION, READ_API_KEY_OPTION, HOST_APP_OPTION, HOST_OS_OPTION, VIEWPORT_SIZE_OPTION,
-            MATCH_LEVEL_OPTION, DISABLE_BROWSER_FETCHING, SERVER_URI_OPTION, APP_NAME_OPTION, BATCH_NAME_OPTION,
-            BASELINE_ENV_NAME_OPTION, ELEMENTS_TO_IGNORE_OPTION, AREAS_TO_IGNORE_OPTION, ACCESSIBILITY_STANDARD_OPTION,
-            LAYOUT_BREAKPOINTS, SCALE_RATIO, PROPERTIES);
+    private static final List<String> SUPPORTED_OPTIONS = List.of(
+        BASELINE_NAME_OPTION,
+        ACTION_OPTION,
+        EXECUTE_API_KEY_OPTION,
+        READ_API_KEY_OPTION,
+        HOST_APP_OPTION,
+        HOST_OS_OPTION,
+        VIEWPORT_SIZE_OPTION,
+        MATCH_LEVEL_OPTION,
+        DISABLE_BROWSER_FETCHING,
+        SERVER_URI_OPTION,
+        APP_NAME_OPTION,
+        BATCH_NAME_OPTION,
+        BASELINE_ENV_NAME_OPTION,
+        ELEMENTS_TO_IGNORE_OPTION,
+        AREAS_TO_IGNORE_OPTION,
+        ACCESSIBILITY_STANDARD_OPTION,
+        LAYOUT_BREAKPOINTS,
+        SCALE_RATIO,
+        PROPERTIES,
+        BEFORE_RENDER_SCREENSHOT_HOOK
+    );
 
     private String executeApiKey;
     private String readApiKey;
@@ -85,6 +103,7 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     private URI serverUri;
     private String appName = "Application";
     private String baselineEnvName;
+    private String beforeRenderScreenshotHook;
 
     private final Map<String, BatchInfo> batchStorage = new ConcurrentHashMap<>();
 
@@ -113,8 +132,10 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
             String batchName = params.valueAs(BATCH_NAME_OPTION, String.class);
             String baselineName = params.valueAs(BASELINE_NAME_OPTION, String.class);
             VisualActionType action = params.valueAs(ACTION_OPTION, VisualActionType.class);
+            String hook = params.valueAs(BEFORE_RENDER_SCREENSHOT_HOOK, String.class, null);
 
-            ApplitoolsVisualCheck check = createCheck(batchName, baselineName, action);
+            ApplitoolsVisualCheck check = createCheck(batchName, baselineName, action, hook);
+
             Type locatorsType = new TypeLiteral<Set<Locator>>() { }.value;
             Type propertiesType = new TypeLiteral<List<String>>() { }.value;
 
@@ -145,16 +166,20 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     @Override
     public ApplitoolsVisualCheck create(String batchName, String baselineName, VisualActionType action)
     {
-        ApplitoolsVisualCheck check = createCheck(batchName, baselineName, action);
+        ApplitoolsVisualCheck check = createCheck(batchName, baselineName, action, beforeRenderScreenshotHook);
         configureEyes(check, executeApiKey, hostApp, hostOS, viewportSize, matchLevel, disableBrowserFetching,
                 layoutBreakpoints, serverUri, appName, baselineEnvName, readApiKey, Set.of(), Set.of(), null, null,
                 List.of());
         return check;
     }
 
-    private ApplitoolsVisualCheck createCheck(String batchName, String baselineName, VisualActionType action)
+    private ApplitoolsVisualCheck createCheck(String batchName, String baselineName, VisualActionType action,
+            String beforeRenderHook)
     {
-        return new ApplitoolsVisualCheck(batchName, baselineIndexer.createIndexedBaseline(baselineName), action);
+        ApplitoolsVisualCheck check = new ApplitoolsVisualCheck(batchName,
+                baselineIndexer.createIndexedBaseline(baselineName), action);
+        check.setBeforeRenderScreenshotHook(beforeRenderHook);
+        return check;
     }
 
     @SuppressWarnings("paramNum")
@@ -257,5 +282,10 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     public void setBaselineEnvName(String baselineEnvName)
     {
         this.baselineEnvName = baselineEnvName;
+    }
+
+    public void setBeforeRenderScreenshotHook(String beforeRenderScreenshotHook)
+    {
+        this.beforeRenderScreenshotHook = beforeRenderScreenshotHook;
     }
 }

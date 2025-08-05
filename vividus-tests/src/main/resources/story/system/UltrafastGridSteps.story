@@ -31,13 +31,14 @@ When I <action> baseline `ufg-context` in batch `<batchName>` with Applitools UF
 Scenario: Validation of step: 'When I run visual test with Applitools UFG using:$applitoolsConfigurations and matrix:$matrix' for full page with element cut
 When I reset context
 When I run visual test with Applitools UFG using:
-|baselineName              |batchName  |action  |elementsToIgnore|
-|ufg-full-page-element-cut |<batchName>|<action>|tagName(img)    |
+|baselineName              |batchName  |action  |elementsToIgnore|beforeRenderScreenshotHook                                       |
+|ufg-full-page-element-cut |<batchName>|<action>|tagName(img)    |document.querySelector('#myHeader').style.backgroundColor = 'red'|
  and matrix:
 |profile                |browser|viewportSize|deviceName|screenOrientation|version|
 |desktop                |firefox|1920x1080   |          |                 |       |
 |ios                    |       |            |iPhone 14 |portrait         |latest |
 |chrome_mobile_emulation|       |            |Galaxy S10|landscape        |       |
+When I refresh page
 
 
 Scenario: Validation of step: 'When I run visual test with Applitools UFG using:$applitoolsConfigurations and matrix:$matrix' for full page with area cut
