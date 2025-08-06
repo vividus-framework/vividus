@@ -37,7 +37,6 @@ class GetAllFeaturesVividusToolTests
 {
     private final GetAllFeaturesVividusTool tool = new GetAllFeaturesVividusTool();
 
-    @SuppressWarnings("unchecked")
     @Test
     void shouldReturnContentObject()
     {
@@ -59,7 +58,7 @@ class GetAllFeaturesVividusToolTests
 
             GetAllFeaturesResponse response = (GetAllFeaturesResponse) tool.getContent();
             assertThat(response.expressions().keySet(), hasSize(1));
-            assertThat(response.stepParameters().keySet(), hasSize(5));
+            assertThat(response.stepParameters().keySet(), hasSize(7));
             List<StepInfo> stepInfos = response.steps();
             assertThat(stepInfos, hasSize(1));
             StepInfo stepInfo = stepInfos.get(0);
