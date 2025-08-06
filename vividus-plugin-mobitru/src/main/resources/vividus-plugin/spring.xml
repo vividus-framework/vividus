@@ -24,7 +24,7 @@
     <bean id="mobitruSessionInfoLocalStorage" class="org.vividus.mobitru.selenium.MobitruSessionInfoLocalStorage" />
 
     <bean id="mobitruRecordingManager" class="org.vividus.mobitru.selenium.MobitruRecordingListener">
-        <constructor-arg index="0" value="${mobitru.video-recording-enabled}" />
+        <constructor-arg index="1" value="${mobitru.video-recording-enabled}" />
     </bean>
 
     <bean class="org.vividus.mobitru.client.MobitruFacadeImpl" >
