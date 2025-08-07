@@ -33,7 +33,7 @@ dependencies {
     implementation (project(':vividus-plugin-applitools')) {
         exclude group: 'com.applitools', module: 'eyes-universal-core-binaries'
     }
-    implementation(group: 'com.applitools', name: 'eyes-universal-core-alpine', version: '5.74.1')
+    implementation(group: 'com.applitools', name: 'eyes-universal-core-alpine', version: '5.75.0')
 
     implementation project(':vividus-plugin-avro')
     implementation project(':vividus-plugin-aws-dynamodb')
