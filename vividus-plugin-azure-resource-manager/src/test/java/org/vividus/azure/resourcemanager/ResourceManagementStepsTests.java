@@ -16,52 +16,33 @@
 
 package org.vividus.azure.resourcemanager;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Named.named;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
-import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.HttpMethod;
-import com.azure.core.http.HttpPipeline;
-import com.azure.core.http.HttpRequest;
-import com.azure.core.http.HttpResponse;
-import com.azure.core.management.AzureEnvironment;
-import com.azure.core.management.profile.AzureProfile;
-import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider;
 
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junitpioneer.jupiter.SetSystemProperty;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.azure.client.AzureResourceManagementClient;
 import org.vividus.context.VariableContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
-import org.vividus.softassert.ISoftAssert;
+import org.vividus.softassert.SoftAssert;
 import org.vividus.variable.VariableScope;
-
-import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceManagementStepsTests
 {
-    private static final String SUBSCRIPTION_ID_PROPERTY_NAME = "AZURE_SUBSCRIPTION_ID";
     private static final String SUBSCRIPTION_ID_PROPERTY_VALUE = "subscription-id";
 
     private static final String API_VERSION_NAME = "?api-version=";
@@ -75,6 +56,7 @@ class ResourceManagementStepsTests
     private static final String URL_DOMAIN = "https://management.azure.com/";
     private static final String REQUEST_BODY = "{\"resource\": \"body\"}";
     private static final String RESPONSE_BODY = "{\"key\":\"value\"}";
+    private static final String EMPTY_RESPONSE_BODY = "{ }";
     private static final String TEMPLATE_NAME =
             "/vividus-plugin/azure/resourcemanager/attachments/resource-as-json.ftl";
     private static final String BODY = "body";
@@ -82,161 +64,83 @@ class ResourceManagementStepsTests
     private static final String APPLICATION_JSON = "application/json";
     private static final String ATTACHMENT_TITLE = "Azure Resource JSON";
 
-    @Mock private TokenCredential tokenCredential;
-    @Mock private ISoftAssert softAssert;
+    private final ArgumentCaptor<Consumer<String>> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
+    private final ArgumentCaptor<Consumer<String>> errorCallbackCaptor = ArgumentCaptor.forClass(Consumer.class);
+
+    @Mock private AzureResourceManagementClient client;
     @Mock private VariableContext variableContext;
+    @Mock private SoftAssert softAssert;
     @Mock private IAttachmentPublisher attachmentPublisher;
+    @InjectMocks private ResourceManagementSteps steps;
 
-    private Stream<Named<BiConsumer<Consumer<ResourceManagementSteps>, String>>> createTestsCreatingResources()
+    @Test
+    void testSavingOfAzureResourceAsVariableUsingResourceUrl()
     {
-        return Stream.of(
-                named("successfulCreation", (test, expectedUrlPath) -> {
-                    testHttpRequestExecution(test, 200, expectedUrlPath, Optional.of(RESPONSE_BODY),
-                            httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()),
-                            () -> {
-                                verify(variableContext).putVariable(SCOPES, VAR_NAME, RESPONSE_BODY);
-                                verify(attachmentPublisher).publishAttachment(TEMPLATE_NAME,
-                                        Map.of(BODY, RESPONSE_BODY, CONTENT_TYPE, APPLICATION_JSON), ATTACHMENT_TITLE);
-                            });
-                }),
-                named("failedCreationWithBody", (test, expectedUrlPath) -> {
-                    testHttpRequestExecution(test, 404, expectedUrlPath, Optional.of(RESPONSE_BODY),
-                            httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()),
-                            () -> verifyFailedHttpRequestExecutionWithResponseBody(RESPONSE_BODY));
-                }),
-                named("failedCreationWithoutBody", (test, expectedUrlPath) -> {
-                    testHttpRequestExecution(test, 404, expectedUrlPath, Optional.empty(),
-                            httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()),
-                            () -> verifyFailedHttpRequestExecutionWithoutResponseBody(404));
-                })
-        );
-    }
-
-    @TestFactory
-    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
-    Stream<DynamicTest> testSavingOfAzureResourceAsVariable()
-    {
-        return DynamicTest.stream(createTestsCreatingResources(), test -> test.accept(
-                steps -> steps.saveAzureResourceAsVariable(AZURE_RESOURCE_IDENTIFIER, API_VERSION_VALUE, SCOPES,
-                        VAR_NAME),
-                URL_PATH)
-        );
-    }
-
-    @TestFactory
-    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
-    Stream<DynamicTest> testSavingOfAzureResourceAsVariableUsingResourceUrl()
-    {
-        return DynamicTest.stream(createTestsCreatingResources(), test -> test.accept(
-                steps -> steps.saveAzureResourceAsVariableWithResourceUrl(URL_DOMAIN + URL_PATH + API_VERSION_NAME
-                        + API_VERSION_VALUE, SCOPES, VAR_NAME),
-                URL_PATH)
-        );
-    }
-
-    private Stream<Named<BiConsumer<Consumer<ResourceManagementSteps>, String>>> createTestsExecutionOperations()
-    {
-        return Stream.of(
-                named("successfulOperation", (test, expectedUrlPath) -> {
-                    testHttpRequestExecution(test, 200, expectedUrlPath, Optional.of(RESPONSE_BODY),
-                            httpRequest -> assertHttpRequestWithBody(HttpMethod.POST, httpRequest),
-                            () -> {
-                                verify(variableContext).putVariable(SCOPES, VAR_NAME, RESPONSE_BODY);
-                                verify(attachmentPublisher).publishAttachment(TEMPLATE_NAME,
-                                        Map.of(BODY, RESPONSE_BODY, CONTENT_TYPE, APPLICATION_JSON), ATTACHMENT_TITLE);
-                            });
-                }),
-                named("failedOperation",
-                        (test, expectedUrlPath) -> testHttpRequestExecution(test, 404, expectedUrlPath,
-                                Optional.of(RESPONSE_BODY),
-                                httpRequest -> assertHttpRequestWithBody(HttpMethod.POST, httpRequest),
-                                () -> verifyFailedHttpRequestExecutionWithResponseBody(RESPONSE_BODY)
-                ))
-        );
-    }
-
-    @TestFactory
-    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
-    Stream<DynamicTest> testExecutionOfOperationAtAzureResource()
-    {
-        return DynamicTest.stream(createTestsExecutionOperations(), test -> test.accept(
-                steps -> steps.executeOperationAtAzureResource(AZURE_RESOURCE_IDENTIFIER, API_VERSION_VALUE,
-                        REQUEST_BODY, SCOPES, VAR_NAME),
-                URL_PATH)
-        );
+        steps.saveAzureResourceAsVariableWithResourceUrl(URL_DOMAIN + URL_PATH + API_VERSION_NAME
+                + API_VERSION_VALUE, SCOPES, VAR_NAME);
+        verify(client).executeHttpRequest(eq(HttpMethod.GET), eq(URL_DOMAIN + URL_PATH + API_VERSION_NAME
+                        + API_VERSION_VALUE), eq(Optional.empty()), consumerCaptor.capture(),
+                errorCallbackCaptor.capture());
+        consumerCaptor.getValue().accept(RESPONSE_BODY);
+        verify(variableContext).putVariable(SCOPES, VAR_NAME, RESPONSE_BODY);
+        verify(attachmentPublisher).publishAttachment(TEMPLATE_NAME,
+                Map.of(BODY, RESPONSE_BODY, CONTENT_TYPE, APPLICATION_JSON), ATTACHMENT_TITLE);
+        verifyErrorConsumer();
     }
 
     @Test
-    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
+    void testSavingOfAzureResourceAsVariable()
+    {
+        steps.saveAzureResourceAsVariable(AZURE_RESOURCE_IDENTIFIER, API_VERSION_VALUE, SCOPES, VAR_NAME);
+        verify(client).executeHttpRequest(eq(HttpMethod.GET), eq(AZURE_RESOURCE_IDENTIFIER),
+                eq(API_VERSION_VALUE), eq(Optional.empty()), consumerCaptor.capture(),
+                errorCallbackCaptor.capture());
+        consumerCaptor.getValue().accept(RESPONSE_BODY);
+        verify(variableContext).putVariable(SCOPES, VAR_NAME, RESPONSE_BODY);
+        verify(attachmentPublisher).publishAttachment(TEMPLATE_NAME,
+                Map.of(BODY, RESPONSE_BODY, CONTENT_TYPE, APPLICATION_JSON), ATTACHMENT_TITLE);
+    }
+
+    @Test
+    void testExecutionOfOperationAtAzureResource()
+    {
+        steps.executeOperationAtAzureResource(AZURE_RESOURCE_IDENTIFIER, API_VERSION_VALUE,
+                REQUEST_BODY, SCOPES, VAR_NAME);
+        verify(client).executeHttpRequest(eq(HttpMethod.POST), eq(AZURE_RESOURCE_IDENTIFIER), eq(API_VERSION_VALUE),
+                eq(Optional.of(REQUEST_BODY)), consumerCaptor.capture(), errorCallbackCaptor.capture());
+        consumerCaptor.getValue().accept(EMPTY_RESPONSE_BODY);
+        verifyNoInteractions(variableContext);
+        verifyNoInteractions(attachmentPublisher);
+    }
+
+    @Test
     void shouldConfigureAzureResource()
     {
-        testHttpRequestExecution(
-                steps -> steps.configureAzureResource(AZURE_RESOURCE_IDENTIFIER, REQUEST_BODY, API_VERSION_VALUE),
-                200, URL_PATH, Optional.of(RESPONSE_BODY),
-                httpRequest -> assertHttpRequestWithBody(HttpMethod.PUT, httpRequest),
-                () -> verifyNoInteractions(attachmentPublisher)
-        );
+        steps.configureAzureResource(AZURE_RESOURCE_IDENTIFIER, REQUEST_BODY, API_VERSION_VALUE);
+        verify(client).executeHttpRequest(eq(HttpMethod.PUT), eq(AZURE_RESOURCE_IDENTIFIER),
+                eq(API_VERSION_VALUE), eq(Optional.of(REQUEST_BODY)), consumerCaptor.capture(),
+                errorCallbackCaptor.capture());
+        consumerCaptor.getValue().accept(EMPTY_RESPONSE_BODY);
+        verifyNoInteractions(variableContext);
+        verifyNoInteractions(attachmentPublisher);
     }
 
     @Test
-    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
     void shouldDeleteAzureResource()
     {
-        testHttpRequestExecution(
-                steps -> steps.deleteAzureResource(AZURE_RESOURCE_IDENTIFIER, API_VERSION_VALUE),
-                200, URL_PATH, Optional.of(RESPONSE_BODY),
-                httpRequest -> assertEquals(HttpMethod.DELETE, httpRequest.getHttpMethod()),
-                () -> verifyNoInteractions(attachmentPublisher));
+        steps.deleteAzureResource(AZURE_RESOURCE_IDENTIFIER, API_VERSION_VALUE);
+        verify(client).executeHttpRequest(eq(HttpMethod.DELETE), eq(AZURE_RESOURCE_IDENTIFIER),
+                eq(API_VERSION_VALUE), eq(Optional.empty()), consumerCaptor.capture(),
+                errorCallbackCaptor.capture());
+        consumerCaptor.getValue().accept(EMPTY_RESPONSE_BODY);
+        verifyNoInteractions(variableContext);
+        verifyNoInteractions(attachmentPublisher);
     }
 
-    @SuppressWarnings("PMD.CloseResource")
-    private void testHttpRequestExecution(Consumer<ResourceManagementSteps> test, int statusCode,
-            String expectedUrlPath, Optional<String> responseAsString, Consumer<HttpRequest> httpRequestValidator,
-            Runnable additionalTest)
+    private void verifyErrorConsumer()
     {
-        var azureProfile = new AzureProfile(AzureEnvironment.AZURE);
-        try (MockedStatic<HttpPipelineProvider> httpPipelineProviderMock = mockStatic(HttpPipelineProvider.class))
-        {
-            var httpPipeline = mock(HttpPipeline.class);
-            httpPipelineProviderMock.when(() -> HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile))
-                    .thenReturn(httpPipeline);
-            var httpResponse = mock(HttpResponse.class);
-            when(httpResponse.getStatusCode()).thenReturn(statusCode);
-            responseAsString.ifPresent(s -> when(httpResponse.getBodyAsString()).thenReturn(Mono.just(s)));
-            var httpRequestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
-            when(httpPipeline.send(httpRequestCaptor.capture())).thenReturn(Mono.just(httpResponse));
-
-            var steps = new ResourceManagementSteps(azureProfile, tokenCredential, softAssert, variableContext,
-                    attachmentPublisher);
-            test.accept(steps);
-            var httpRequest = httpRequestCaptor.getValue();
-            assertEquals(URL_DOMAIN + expectedUrlPath + API_VERSION_NAME + API_VERSION_VALUE,
-                    httpRequest.getUrl().toString());
-            httpRequestValidator.accept(httpRequest);
-            additionalTest.run();
-        }
-    }
-
-    private void assertHttpRequestWithBody(HttpMethod httpMethod, HttpRequest httpRequest)
-    {
-        assertEquals(httpMethod, httpRequest.getHttpMethod());
-        assertEquals(REQUEST_BODY, new String(httpRequest.getBody().blockFirst().array(), StandardCharsets.UTF_8));
-        var expectedHeaders = Map.of(
-                "Content-Type", APPLICATION_JSON,
-                "Content-Length", Integer.toString(REQUEST_BODY.length())
-        );
-        assertEquals(expectedHeaders, httpRequest.getHeaders().toMap());
-    }
-
-    private void verifyFailedHttpRequestExecutionWithResponseBody(String response)
-    {
-        verify(softAssert).recordFailedAssertion(
-                "Azure REST API HTTP request execution is failed: " + response);
-    }
-
-    private void verifyFailedHttpRequestExecutionWithoutResponseBody(int responseCode)
-    {
-        verify(softAssert).recordFailedAssertion(
-                "Azure REST API HTTP request execution is failed with empty body and status code: " + responseCode);
+        String simulatedError = "Simulated error";
+        errorCallbackCaptor.getValue().accept(simulatedError);
+        verify(softAssert, times(1)).recordFailedAssertion(simulatedError);
     }
 }
