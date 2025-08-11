@@ -5,7 +5,9 @@ dependencies {
     implementation project(':vividus-extension-azure')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-reporter')
+    implementation project(':vividus-util')
     implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.53.1')
+    implementation(group: 'com.github.vividus-framework.JsonPath', name: 'json-path', version: versions.jsonPath)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.4')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
