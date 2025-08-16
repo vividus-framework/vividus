@@ -11,7 +11,7 @@ dependencies {
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '3.0')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.19.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
 }
