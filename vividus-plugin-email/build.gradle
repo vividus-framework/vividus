@@ -26,7 +26,7 @@ dependencies {
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
-    testImplementation(group: 'com.icegreen', name: 'greenmail', version: '2.1.4')
+    testImplementation(group: 'com.icegreen', name: 'greenmail', version: '2.1.5')
     testImplementation(group: 'org.eclipse.angus', name: 'smtp', version: '2.0.4')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
 }
