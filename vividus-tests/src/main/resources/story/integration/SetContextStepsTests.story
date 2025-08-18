@@ -33,7 +33,7 @@ Given I am on main application page
 When I go to the relative URL 'windows.html'
 Then page title is equal to `<windowsTitle>`
 When I click on element located by `id(timeout)`
-When I wait `PT3S` until tab with title that is equal to `<indexTitle>` appears and switch to it
+When I wait `PT10S` until tab with title that is equal to `<indexTitle>` appears and switch to it
 Then page title is equal to `<indexTitle>`
 When I close current tab
 Then page title is equal to `<windowsTitle>`
@@ -43,7 +43,7 @@ Given I am on main application page
 When I go to the relative URL 'windows.html'
 Then page title is equal to `<windowsTitle>`
 When I click on element located by `id(timeout)`
-When I wait `PT3S` until window with title that is equal to `<indexTitle>` appears and switch to it
+When I wait `PT10S` until window with title that is equal to `<indexTitle>` appears and switch to it
 Then page title is equal to `<indexTitle>`
 When I close current tab
 Then page title is equal to `<windowsTitle>`
@@ -51,13 +51,13 @@ Then page title is equal to `<windowsTitle>`
 
 Scenario: Verify steps: "When I switch to frame located by `$locator`", "When I switch back to page"
 Given I am on page with URL `${vividus-test-site-url}/nestedFrames.html`
-Then number of elements found by `tagName(h1)` is equal to `0`
+Then number of elements found by `id(login-button)` is equal to `0`
 !-- The following step is deprecated and should be replaced with new syntax during removal
 When I switch to frame located `id(parent)`
-When I switch to frame located by `id(exampleCom)`
-Then number of elements found by `tagName(h1)` is equal to `1`
+When I switch to frame located by `id(saucedemoCom)`
+Then number of elements found by `id(login-button)` is equal to `1`
 When I switch back to page
-Then number of elements found by `tagName(h1)` is equal to `0`
+Then number of elements found by `id(login-button)` is equal to `0`
 
 
 Scenario: Verify steps: "When I reset context" AND "When I change context to element located by `$locator`"

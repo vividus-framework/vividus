@@ -2,18 +2,6 @@
 
 VIVIDUS is a test automation tool that offers already implemented solution for testing of most popular application types.
 
-
-.VIVIDUS Supports Ukraine 🇺🇦
-****
-++++
-<h3 align="center">In solidarity, we ask that you consider financially supporting the organizations below:</h3>
-<br/>
-<p align="center">
-  <a href="https://epamuafund.rengiving.com/causes/159bdd2f71854adf8ed5251fe26d2fe0" target="_blank">EPAM Ukraine Assistance Fund</a>
-</p>
-++++
-****
-
 == Introduction
 
 A target user of VIVIDUS is a test engineer without programming skills but some technical knowledge to allocate and specify controls and elements of the application to VIVIDUS (or any other application substances as DB/API dataset or UI visual objects). VIVIDUS provides a ready-to-use implemented language to write executable tests, it's named - Test Actions Language. Test Actions Language is human-readable and written in Gherkin format to ensure the clarity of it to users of any technical level; on the other hand Test Actions Language is not limited to any specific application or domain as it’s commonly done in classical BDD approach.

@@ -4,13 +4,13 @@ dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-util')
     implementation project(':vividus-extension-azure')
-    implementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.36')
+    implementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.37')
     implementation(group: 'com.azure', name: 'azure-storage-queue')
     implementation(group: 'com.google.guava', name: 'guava', version: '33.4.8-jre')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.4')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.18.0')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.19.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
 }

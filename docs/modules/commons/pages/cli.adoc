@@ -390,7 +390,7 @@ tools. It offers a number of generic formatters (indentation correction, normali
 files, enforce file encoding, etc.) that help keep test files clean, readable, and consistent, reducing noise in version
 control and making collaboration easier.
 
-For files like `*.story`, `*.steps`, `*.table`, commonly used in VIVIDUS, the following Spotless rules are applied by default:
+For files like `\*.story`, `*.steps`, `*.table`, commonly used in VIVIDUS, the following Spotless rules are applied by default:
 
 .Spotless rules
 [cols="1,2", options="header"]
@@ -485,6 +485,37 @@ Execution failed for task ':spotlessVividusCheck'.
 
 You can fix the violations manually or automatically by running the `spotlessApply` task. After fixing, review
 the changes and commit them to your repository. Following these steps will help keep your build stable and successful.
+
+=== Git hook
+
+You can run
+
+[tabs]
+======
+macOS / Linux::
++
+[source,shell]
+----
+./gradlew spotlessInstallGitPrePushHook
+----
+
+Windows::
++
+[source,shell]
+----
+gradlew spotlessInstallGitPrePushHook
+----
+======
+
+and it will install a hook such that
+
+. When you perform Git push, it runs `spotlessCheck`
+. If formatting issues are found:
+    - It automatically runs `spotlessApply` to fix them
+    - Aborts the push with a message
+    - You can then commit the changes and push again
+
+This ensures your code is always clean before it leaves your machine.
 
 == Build the project
 

@@ -74,15 +74,15 @@ Meta:
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
 When I switch to frame located by `<frameId>`
 Then number of elements found by `<elementId>` is = `0`
-When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `200`, content `#{loadBinaryResource(page.html)}` and headers:
+When I mock HTTP responses with request URL which CONTAINS `saucedemo.com` using response code `200`, content `#{loadBinaryResource(page.html)}` and headers:
 |name        |value    |
 |Content-Type|text/html|
 When I refresh page
 When I switch to frame located by `<frameId>`
-Then number of elements found by `<elementId>` is = `1`
+When I wait until element located by `<elementId>` appears
 Examples:
-|frameId       |elementId|
-|id(exampleCom)|id(sw)   |
+|frameId         |elementId|
+|id(saucedemoCom)|id(sw)   |
 
 Scenario: Verify step When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode`, content `$payload` and headers:$headers
 Meta:
@@ -99,15 +99,15 @@ Meta:
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
 When I switch to frame located by `<frameId>`
 Then number of elements found by `<elementSelector>` is = `1`
-When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `404` and headers:
+When I mock HTTP responses with request URL which CONTAINS `saucedemo.com` using response code `404` and headers:
 |name          |value|
 |Content-Length|0    |
 When I refresh page
 When I switch to frame located by `<frameId>`
 Then number of elements found by `<elementSelector>` is = `0`
 Examples:
-|frameId       |elementSelector|
-|id(exampleCom)|cssSelector(h1)|
+|frameId         |elementSelector |
+|id(saucedemoCom)|id(login-button)|
 
 Scenario: Verify step When I clear proxy mocks
 Meta:

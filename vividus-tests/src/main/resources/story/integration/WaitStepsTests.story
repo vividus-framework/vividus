@@ -78,8 +78,8 @@ When I wait until page title contains `Alert`
 
 Scenario: Verify step: 'When I wait until frame with name `$frameName` appears and I switch to it'
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
-When I wait until frame with name `exampleCom` appears and I switch to it
-Then text `Example Domain` exists
+When I wait until frame with name `saucedemoCom` appears and I switch to it
+Then text `Swag Labs` exists
 
 Scenario: Verify step: 'Then element located by `$locator` appears in `$timeout`', 'When I wait until element located by `$locator` appears in `$timeout`'
 When I wait until element located by `id(non-existent-element)` appears in `PT4S`
