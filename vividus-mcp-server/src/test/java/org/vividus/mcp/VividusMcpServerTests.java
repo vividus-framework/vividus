@@ -36,8 +36,9 @@ import org.mockito.Mockito;
 import org.vividus.mcp.tool.VividusTool;
 import org.vividus.mcp.tool.VividusToolParameters;
 
-import io.modelcontextprotocol.server.McpServer.SyncSpecification;
+import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
+import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import io.modelcontextprotocol.spec.McpSchema.Tool;
@@ -48,11 +49,10 @@ class VividusMcpServerTests
     @Test
     void shouldStartSyncServer()
     {
-        try (MockedStatic<io.modelcontextprotocol.server.McpServer> mcpServerMock = Mockito
-                .mockStatic(io.modelcontextprotocol.server.McpServer.class))
+        try (MockedStatic<McpServer> mcpServerMock = Mockito.mockStatic(McpServer.class))
         {
-            SyncSpecification spec = mock();
-            mcpServerMock.when(() -> io.modelcontextprotocol.server.McpServer.sync(any())).thenReturn(spec);
+            McpServer.SingleSessionSyncSpecification spec = mock();
+            mcpServerMock.when(() -> McpServer.sync(any(StdioServerTransportProvider.class))).thenReturn(spec);
             when(spec.serverInfo("vividus-mcp-server", "0.6.16")).thenReturn(spec);
             when(spec.capabilities(any())).thenReturn(spec);
             ArgumentCaptor<List<SyncToolSpecification>> toolsSpecsCaptor = ArgumentCaptor.forClass(List.class);
@@ -84,7 +84,7 @@ class VividusMcpServerTests
         assertEquals(params.name(), tool.name());
         assertEquals(params.description(), tool.description());
         assertNull(tool.inputSchema().properties());
-        CallToolResult call = toolSpec.call().apply(null, null);
+        CallToolResult call = toolSpec.callHandler().apply(null, null);
         assertEquals(error, call.isError());
         TextContent textContent = (TextContent) call.content().get(0);
         assertEquals(content, textContent.text());
