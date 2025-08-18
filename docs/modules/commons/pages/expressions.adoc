@@ -308,10 +308,10 @@ Generates comma-separated values based on input.
 |
 [source,CSV]
 ----
-"first_name","last_name"
-"Bob","Dylan"
-"Bob","Dylan"
-"Bob","Dylan"
+"first_name";"last_name"
+"Bob";"Dylan"
+"Bob";"Dylan"
+"Bob";"Dylan"
 ----
 |===
 
