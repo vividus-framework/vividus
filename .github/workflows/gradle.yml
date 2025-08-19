@@ -158,7 +158,7 @@ jobs:
                                               -Pvividus.configuration.profiles=web_pw/headless/chromium \
                                               -Pvividus.batch-1.meta-filters="groovy: playwrightSupported || playwrightOnly" \
                                               -Pvividus.batch-1.resource-location=story/integration \
-                                              -Pvividus.batch-1.resource-include-patterns=*Steps*.story \
+                                              -Pvividus.batch-1.resource-include-patterns=**/*Steps*.story,DynamicVariablesTests.story \
                                               -Pvividus.allure.history-directory=output/history/playwright-integration-tests \
                                               -Pvividus.allure.executor.name="Github Actions (Vividus)" \
                                               -Pvividus.allure.executor.type=github \
