@@ -59,9 +59,13 @@ public class VividusMcpServer
     private McpServerFeatures.SyncToolSpecification asToolSpecification(VividusTool tool)
     {
         VividusToolParameters params = tool.getParameters();
-        return new McpServerFeatures.SyncToolSpecification(
-                new McpSchema.Tool(params.name(), params.description(), params.schema()), (exchange, args) ->
-                {
+        return McpServerFeatures.SyncToolSpecification.builder()
+                .tool(McpSchema.Tool.builder()
+                        .name(params.name())
+                        .description(params.description())
+                        .inputSchema(params.schema())
+                        .build())
+                .callHandler((exchange, request) -> {
                     try
                     {
                         String content = objectMapper.writeValueAsString(tool.getContent());
@@ -71,7 +75,8 @@ public class VividusMcpServer
                     {
                         return new McpSchema.CallToolResult(e.getMessage(), true);
                     }
-                });
+                })
+                .build();
     }
 
     public static class StepInfo
