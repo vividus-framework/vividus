@@ -21,42 +21,28 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import com.azure.core.credential.TokenCredential;
-import com.azure.core.http.ContentType;
-import com.azure.core.http.HttpHeaderName;
 import com.azure.core.http.HttpMethod;
-import com.azure.core.http.HttpPipeline;
-import com.azure.core.http.HttpRequest;
-import com.azure.core.http.HttpResponse;
-import com.azure.core.management.profile.AzureProfile;
-import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.annotations.When;
+import org.vividus.azure.client.AzureResourceManagementClient;
 import org.vividus.context.VariableContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
-import reactor.core.publisher.Mono;
-
 public class ResourceManagementSteps
 {
-    private static final String EXECUTION_FAILED = "Azure REST API HTTP request execution is failed";
-    private final HttpPipeline httpPipeline;
-    private final ISoftAssert softAssert;
+    private final AzureResourceManagementClient client;
     private final VariableContext variableContext;
-    private final AzureProfile azureProfile;
+    private final ISoftAssert softAssert;
     private final IAttachmentPublisher attachmentPublisher;
 
-    public ResourceManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential, ISoftAssert softAssert,
-            VariableContext variableContext, IAttachmentPublisher attachmentPublisher)
+    public ResourceManagementSteps(AzureResourceManagementClient client, VariableContext variableContext,
+                                   ISoftAssert softAssert, IAttachmentPublisher attachmentPublisher)
     {
-        this.httpPipeline = HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile);
-        this.softAssert = softAssert;
+        this.client = client;
         this.variableContext = variableContext;
-        this.azureProfile = azureProfile;
+        this.softAssert = softAssert;
         this.attachmentPublisher = attachmentPublisher;
     }
 
@@ -90,8 +76,9 @@ public class ResourceManagementSteps
     public void saveAzureResourceAsVariableWithResourceUrl(String azureResourceUrl, Set<VariableScope> scopes,
             String variableName)
     {
-        executeHttpRequest(HttpMethod.GET, azureResourceUrl, Optional.empty(),
-                putVariableWithAttachment(scopes, variableName));
+        client.executeHttpRequest(HttpMethod.GET, azureResourceUrl, Optional.empty(),
+                putVariableWithAttachment(scopes, variableName),
+                softAssert::recordFailedAssertion);
     }
 
     /**
@@ -129,8 +116,9 @@ public class ResourceManagementSteps
     public void saveAzureResourceAsVariable(String azureResourceIdentifier, String apiVersion,
             Set<VariableScope> scopes, String variableName)
     {
-        executeHttpRequest(HttpMethod.GET, azureResourceIdentifier, apiVersion, Optional.empty(),
-                putVariableWithAttachment(scopes, variableName));
+        client.executeHttpRequest(HttpMethod.GET, azureResourceIdentifier, apiVersion, Optional.empty(),
+                putVariableWithAttachment(scopes, variableName),
+                softAssert::recordFailedAssertion);
     }
 
     /**
@@ -170,8 +158,9 @@ public class ResourceManagementSteps
     public void executeOperationAtAzureResource(String azureOperationIdentifier, String apiVersion,
             String azureOperationBody, Set<VariableScope> scopes, String variableName)
     {
-        executeHttpRequest(HttpMethod.POST, azureOperationIdentifier, apiVersion, Optional.of(azureOperationBody),
-                putVariableWithAttachment(scopes, variableName));
+        client.executeHttpRequest(HttpMethod.POST, azureOperationIdentifier, apiVersion,
+                Optional.of(azureOperationBody), responseBody -> putVariableWithAttachment(scopes, variableName),
+                softAssert::recordFailedAssertion);
     }
 
     /**
@@ -199,8 +188,8 @@ public class ResourceManagementSteps
             + "API version `$apiVersion`")
     public void configureAzureResource(String azureResourceIdentifier, String azureResourceBody, String apiVersion)
     {
-        executeHttpRequest(HttpMethod.PUT, azureResourceIdentifier, apiVersion, Optional.of(azureResourceBody),
-                responseBody -> { });
+        client.executeHttpRequest(HttpMethod.PUT, azureResourceIdentifier, apiVersion, Optional.of(azureResourceBody),
+                responseBody -> { }, softAssert::recordFailedAssertion);
     }
 
     /**
@@ -225,45 +214,8 @@ public class ResourceManagementSteps
     @When("I delete Azure resource with identifier `$azureResourceIdentifier` using API version `$apiVersion`")
     public void deleteAzureResource(String azureResourceIdentifier, String apiVersion)
     {
-        executeHttpRequest(HttpMethod.DELETE, azureResourceIdentifier, apiVersion, Optional.empty(),
-                responseBody -> { });
-    }
-
-    private void executeHttpRequest(HttpMethod method, String azureResourceIdentifier, String apiVersion,
-            Optional<String> azureResourceBody, Consumer<String> responseBodyConsumer)
-    {
-        String url = String.format("%ssubscriptions/%s%s?api-version=%s",
-                azureProfile.getEnvironment().getResourceManagerEndpoint(), azureProfile.getSubscriptionId(),
-                StringUtils.prependIfMissing(azureResourceIdentifier, "/"), apiVersion);
-        executeHttpRequest(method, url, azureResourceBody, responseBodyConsumer);
-    }
-
-    private void executeHttpRequest(HttpMethod method, String azureResourceUrl, Optional<String> azureResourceBody,
-            Consumer<String> responseBodyConsumer)
-    {
-        HttpRequest httpRequest = new HttpRequest(method, azureResourceUrl);
-        azureResourceBody.ifPresent(requestBody -> {
-            httpRequest.setBody(requestBody);
-            httpRequest.setHeader(HttpHeaderName.CONTENT_TYPE, ContentType.APPLICATION_JSON);
-        });
-
-        try (HttpResponse httpResponse = httpPipeline.send(httpRequest).block())
-        {
-            Optional.ofNullable(httpResponse).map(HttpResponse::getBodyAsString).map(Mono::block).ifPresentOrElse(
-                    responseBody -> {
-                        if (httpResponse.getStatusCode() == HttpResponseStatus.OK.code())
-                        {
-                            responseBodyConsumer.accept(responseBody);
-                        }
-                        else
-                        {
-                            softAssert.recordFailedAssertion(EXECUTION_FAILED + ": " + responseBody);
-                        }
-                    }, () -> softAssert.recordFailedAssertion(EXECUTION_FAILED + " with empty body and status code: "
-                            + httpResponse.getStatusCode()
-                    )
-            );
-        }
+        client.executeHttpRequest(HttpMethod.DELETE, azureResourceIdentifier, apiVersion, Optional.empty(),
+                responseBody -> { }, softAssert::recordFailedAssertion);
     }
 
     private Consumer<String> putVariableWithAttachment(Set<VariableScope> scopes, String variableName)
