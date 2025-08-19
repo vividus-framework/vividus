@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,22 @@ public class ExcelDocumentValidationSteps
     {
         this.softAssert = softAssert;
         this.preserveCellFormatting = preserveCellFormatting;
+    }
+
+    /**
+     * Checks that excel document has a sheet with the specified name at the provided index.
+     *
+     * @param excelDocument Excel document data
+     * @param name Expected name of the sheet
+     * @param index Index of the sheet (0-based)
+     */
+    @Then("`$excelDocument` contains excel sheet with name `$name` at index `$index`")
+    public void validateExcelSheetNae(DataWrapper excelDocument, String name, int index)
+    {
+        getExtractor(excelDocument).getSheet(index).ifPresentOrElse(
+            sheet -> softAssert.assertEquals("The name of sheet at index " + index, name, sheet.getSheetName()),
+            () -> softAssert.recordFailedAssertion(format("Sheet with the index %d does not exist", index))
+        );
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,9 @@ import org.vividus.util.ResourceUtils;
 @ExtendWith(MockitoExtension.class)
 class ExcelDocumentValidationStepsTests
 {
-    @Mock
-    private ISoftAssert softAssert;
+    private  static final String SHEET_MAPPING = "Mapping";
 
+    @Mock private ISoftAssert softAssert;
     private ExcelDocumentValidationSteps steps;
 
     @BeforeEach
@@ -60,8 +60,8 @@ class ExcelDocumentValidationStepsTests
                 Arguments.of((BiConsumer<ExcelDocumentValidationSteps, List<CellRecord>>)
                     (s, r) -> s.excelSheetWithIndexHasRecords(createExcelData(), 0, r)),
                 Arguments.of((BiConsumer<ExcelDocumentValidationSteps, List<CellRecord>>)
-                    (s, r) -> s.excelSheetWithNameHasRecords(createExcelData(), "Mapping", r))
-                );
+                    (s, r) -> s.excelSheetWithNameHasRecords(createExcelData(), SHEET_MAPPING, r))
+        );
     }
 
     @ParameterizedTest
@@ -119,6 +119,22 @@ class ExcelDocumentValidationStepsTests
     {
         steps.excelSheetWithNameHasRecords(createExcelData(), "test", List.of());
         verify(softAssert).recordFailedAssertion("Sheet with the name test doesn't exist");
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void shouldContainExcelSheetWithName()
+    {
+        steps.validateExcelSheetNae(createExcelData(), SHEET_MAPPING, 0);
+        verify(softAssert).assertEquals("The name of sheet at index 0", SHEET_MAPPING, SHEET_MAPPING);
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void shouldRecordFailedAssertionIfExcelSheetWithIndexDoesNotExist()
+    {
+        steps.validateExcelSheetNae(createExcelData(), "AnyName", 10);
+        verify(softAssert).recordFailedAssertion("Sheet with the index 10 does not exist");
         verifyNoMoreInteractions(softAssert);
     }
 

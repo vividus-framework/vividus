@@ -256,6 +256,25 @@ to excel file at path `/home/collection.xslx`
 
 === Excel validations
 
+==== By sheet name and index
+ Checks that excel document has a sheet with the specified name at the provided index.
+
+[source,gherkin]
+----
+Then `$excelDocument` contains excel sheet with name `$name` at index `$index`
+----
+* `$excelDocument` - The excel document data to verify.
+* `$name` - The expected name of the sheet.
+* `$index` - The index of the sheet to verify (0-based).
+
+.Validate excel document sheet name
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true`
+Then response code is = `200`
+Then `${response-as-bytes}` contains excel sheet with name `Mapping` at index `0`
+----
+
 ==== By sheet name
 Checks that excel has a sheet with name *name* and specified *records*.
 
