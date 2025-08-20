@@ -28,5 +28,5 @@ dependencies {
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'com.icegreen', name: 'greenmail', version: '2.1.5')
     testImplementation(group: 'org.eclipse.angus', name: 'smtp', version: '2.0.4')
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.2')
 }

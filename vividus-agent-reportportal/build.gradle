@@ -22,5 +22,5 @@ dependencies {
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.19.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.2')
 }
