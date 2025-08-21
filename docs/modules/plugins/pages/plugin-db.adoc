@@ -414,7 +414,7 @@ SELECT *
 FROM launch_rockets
 WHERE country='USA'
 ` against `launches` and save result to scenario variable `usa-launches`
-Then `usa-launches[0].name` is equal to `Falcon 9`
+Then `${usa-launches[0].name}` is equal to `Falcon 9`
 ----
 
 === Execute update query

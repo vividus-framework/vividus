@@ -65,11 +65,11 @@ dependencies {
     implementation(group: 'org.slf4j', name: 'jul-to-slf4j') // JUL to SLF4J bridge
     implementation(group: 'org.slf4j', name: 'log4j-over-slf4j') // Log4J 1.x and Reload4J to SLF4J bridge
 
-    implementation platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.24.3')
+    implementation platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.25.1')
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-api')
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-core')
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-slf4j2-impl')
-    annotationProcessor platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.24.3')
+    annotationProcessor platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.25.1')
     annotationProcessor(group: 'org.apache.logging.log4j', name: 'log4j-core')
 
     implementation(group: 'de.vandermeer', name: 'asciitable', version: '0.3.2')
@@ -95,7 +95,7 @@ dependencies {
     implementation(group: 'io.github.classgraph', name: 'classgraph', version: '4.8.180')
     implementation(group:  'io.github.java-diff-utils', name: 'java-diff-utils', version: '4.16')
     implementation(group: 'org.apache.commons', name: 'commons-jexl3', version: '3.5.0')
-    implementation(group: 'net.datafaker', name: 'datafaker', version: '2.4.3')
+    implementation(group: 'net.datafaker', name: 'datafaker', version: '2.4.4')
 
     compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
@@ -105,7 +105,7 @@ dependencies {
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.19.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '2.3.0')
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.3')
     testImplementation(group: 'org.springframework', name: 'spring-test')
 
     integrationTestImplementation project(':vividus-plugin-azure-data-factory')
