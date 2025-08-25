@@ -76,11 +76,42 @@
                 <#include "/templates/http-body-container-fragment.ftl">
             </div>
         </#if>
+
+        <#if curlCommand??>
+            <h4 class="card-header">
+                <a class="btn button-info text-start" data-bs-toggle="collapse" href="#collapse-curl" role="button" aria-expanded="false" aria-controls="collapse-curl">cURL command</a>
+            </h4>
+            <div id="collapse-curl" class="collapse multi-collapse">
+                <div class="card card-body">
+                   <div class="container">
+                      <ul class="nav nav-tabs">
+                         <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#origin">Original</a></li>
+                      </ul>
+                      <div class="tab-content border rounded">
+                         <div id="origin" class="tab-pane container active show">
+                            <pre><code class="language-shell">${curlCommand}</code></pre>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+            </div>
+        </#if>
     </div>
 
     <script src="../../webjars/jquery/3.6.4/jquery.min.js"></script>
     <script src="../../webjars/bootstrap/5.3.1/js/bootstrap.min.js"></script>
     <script src="../../webjars/highlight.js/11.7.0/highlight.min.js"></script>
     <script src="../../webjars/vividus/js/code-prettifier.js"></script>
+
+    <script type="text/javascript">
+        function copyCurlCommand() {
+            var text = document.querySelector('#collapse-curl code').textContent;
+            navigator.clipboard.writeText(text);
+            document.getElementById("copy-toast").style.display = "inline";
+            setTimeout( function() {
+                document.getElementById("copy-toast").style.display = "none";
+            }, 1000);
+        }
+    </script>
 </body>
 </html>
