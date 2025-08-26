@@ -66,7 +66,7 @@ jobs:
           tests-history-cache-
 
     - name: Set up JDK 24
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         distribution: 'temurin'
         java-version: 24
@@ -107,14 +107,14 @@ jobs:
 
     - name: Upload coverage to Codecov
       if: ${{ !github.event.pull_request.head.repo.fork || github.ref == 'refs/heads/master'}}
-      uses: codecov/codecov-action@v5.4.3
+      uses: codecov/codecov-action@v5.5.0
       with:
         fail_ci_if_error: true
         token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Upload coverage to Codecov
       if: ${{ github.event.pull_request.head.repo.fork }}
-      uses: codecov/codecov-action@v5.4.3
+      uses: codecov/codecov-action@v5.5.0
 
     - name: VIVIDUS tasks validation
       run: |
@@ -462,7 +462,7 @@ jobs:
         kafka-topics: "vividus-topic,1"
 
     - name: Set up JDK 23
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         distribution: 'temurin'
         java-version: 23
@@ -541,7 +541,7 @@ jobs:
             mobile-tests-on-saucelabs-history-cache-
 
       - name: Set up JDK 23
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: 23
@@ -753,7 +753,7 @@ jobs:
             tests-on-browserstack-history-cache-
 
       - name: Set up JDK 23
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: 23
@@ -905,7 +905,7 @@ jobs:
             mobile-tests-on-mobitru-history-cache-
 
       - name: Set up JDK 23
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: 23
