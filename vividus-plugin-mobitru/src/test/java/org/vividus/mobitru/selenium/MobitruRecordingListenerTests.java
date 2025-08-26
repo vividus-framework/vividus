@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.vividus.mobitru.selenium;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -41,6 +44,7 @@ import org.vividus.mobitru.client.exception.MobitruOperationException;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
 import org.vividus.selenium.event.WebDriverCreateEvent;
+import org.vividus.testcontext.TestContext;
 
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
 class MobitruRecordingListenerTests
@@ -50,28 +54,42 @@ class MobitruRecordingListenerTests
     private static final String RECORDING_REPORT_NAME = String.format("Video Recording (%s).mp4",
             RECORDING_ID);
     private static final String UDID = "Z3CV103D2DO";
+    private static final String RECORDING_STARTED_FLAG = "recordingStarted";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(MobitruRecordingListener.class);
 
     @Mock private MobitruFacade mobitruFacade;
     @Mock private MobitruSessionInfoStorage mobitruSessionInfoStorage;
     @Mock private IAttachmentPublisher attachmentPublisher;
+    @Mock private TestContext testContext;
 
     @Test
     void shouldStartRecording() throws MobitruOperationException
     {
         when(mobitruSessionInfoStorage.getDeviceId()).thenReturn(Optional.of(UDID));
-        var mobitruRecordingListener = new MobitruRecordingListener(true, mobitruFacade, mobitruSessionInfoStorage,
-                attachmentPublisher);
+        when(testContext.get(eq(RECORDING_STARTED_FLAG), any(Supplier.class))).thenReturn(false);
+        var mobitruRecordingListener = new MobitruRecordingListener(testContext, true,
+                mobitruFacade, mobitruSessionInfoStorage, attachmentPublisher);
         mobitruRecordingListener.onSessionStart(mock(WebDriverCreateEvent.class));
         verify(mobitruFacade).startDeviceScreenRecording(UDID);
+        verify(testContext).put(RECORDING_STARTED_FLAG, true);
+    }
+
+    @Test
+    void shouldNotStartRecordingIfAlreadyStarted()
+    {
+        when(testContext.get(eq(RECORDING_STARTED_FLAG), any(Supplier.class))).thenReturn(true);
+        var mobitruRecordingListener = new MobitruRecordingListener(testContext, true,
+                mobitruFacade, mobitruSessionInfoStorage, attachmentPublisher);
+        mobitruRecordingListener.onSessionStart(mock(WebDriverCreateEvent.class));
+        verifyNoInteractions(mobitruSessionInfoStorage, mobitruFacade);
     }
 
     @Test
     void shouldNotStartRecordingIfDisabled()
     {
-        var mobitruRecordingListener = new MobitruRecordingListener(false, mobitruFacade, mobitruSessionInfoStorage,
-                attachmentPublisher);
+        var mobitruRecordingListener = new MobitruRecordingListener(testContext, false,
+                mobitruFacade, mobitruSessionInfoStorage, attachmentPublisher);
         mobitruRecordingListener.onSessionStart(mock(WebDriverCreateEvent.class));
         verifyNoInteractions(mobitruSessionInfoStorage, mobitruFacade);
     }
@@ -80,18 +98,31 @@ class MobitruRecordingListenerTests
     void shouldStartRecordingBeforeScenario() throws MobitruOperationException
     {
         when(mobitruSessionInfoStorage.getDeviceId()).thenReturn(Optional.of(UDID));
-        var mobitruRecordingListener = new MobitruRecordingListener(true, mobitruFacade, mobitruSessionInfoStorage,
-                attachmentPublisher);
+        when(testContext.get(eq(RECORDING_STARTED_FLAG), any(Supplier.class))).thenReturn(false);
+        var mobitruRecordingListener = new MobitruRecordingListener(testContext, true,
+                mobitruFacade, mobitruSessionInfoStorage, attachmentPublisher);
         mobitruRecordingListener.startRecordingBeforeScenario();
         verify(mobitruFacade).startDeviceScreenRecording(UDID);
+        verify(testContext).put(RECORDING_STARTED_FLAG, true);
+    }
+
+    @Test
+    void shouldNotStartRecordingIfAlreadyStartedBeforeScenario()
+    {
+        when(testContext.get(eq(RECORDING_STARTED_FLAG), any(Supplier.class))).thenReturn(true);
+        var mobitruRecordingListener = new MobitruRecordingListener(testContext, true,
+                mobitruFacade, mobitruSessionInfoStorage, attachmentPublisher);
+        mobitruRecordingListener.startRecordingBeforeScenario();
+        verifyNoInteractions(mobitruSessionInfoStorage, mobitruFacade);
     }
 
     @Test
     void shouldNotStartRecordingIfDriverIsNotInitialized()
     {
         when(mobitruSessionInfoStorage.getDeviceId()).thenReturn(Optional.empty());
-        var mobitruRecordingListener = new MobitruRecordingListener(true, mobitruFacade, mobitruSessionInfoStorage,
-                attachmentPublisher);
+        when(testContext.get(eq(RECORDING_STARTED_FLAG), any(Supplier.class))).thenReturn(false);
+        var mobitruRecordingListener = new MobitruRecordingListener(testContext, true,
+                mobitruFacade, mobitruSessionInfoStorage, attachmentPublisher);
         mobitruRecordingListener.startRecordingBeforeScenario();
         verifyNoInteractions(mobitruFacade);
     }
@@ -100,18 +131,30 @@ class MobitruRecordingListenerTests
     void shouldAttachRecordingOnSessionFinish() throws MobitruOperationException
     {
         when(mobitruSessionInfoStorage.getDeviceId()).thenReturn(Optional.of(UDID));
+        when(testContext.get(eq(RECORDING_STARTED_FLAG), any(Supplier.class))).thenReturn(true);
         var recording = new ScreenRecording(RECORDING_ID, BINARY_RESPONSE);
         when(mobitruFacade.stopDeviceScreenRecording(UDID)).thenReturn(recording);
-        var mobitruRecordingListener = new MobitruRecordingListener(true, mobitruFacade, mobitruSessionInfoStorage,
-                attachmentPublisher);
+        var mobitruRecordingListener = new MobitruRecordingListener(testContext, true,
+                mobitruFacade, mobitruSessionInfoStorage, attachmentPublisher);
         mobitruRecordingListener.onBeforeSessionStop(mock(BeforeWebDriverQuitEvent.class));
         verify(attachmentPublisher).publishAttachment(BINARY_RESPONSE, RECORDING_REPORT_NAME);
+        verify(testContext).put(RECORDING_STARTED_FLAG, false);
+    }
+
+    @Test
+    void shouldNotStopRecordingIfAlreadyStoppedOnSessionFinish()
+    {
+        when(testContext.get(eq(RECORDING_STARTED_FLAG), any(Supplier.class))).thenReturn(false);
+        var mobitruRecordingListener = new MobitruRecordingListener(testContext, true,
+                mobitruFacade, mobitruSessionInfoStorage, attachmentPublisher);
+        mobitruRecordingListener.onBeforeSessionStop(mock(BeforeWebDriverQuitEvent.class));
+        verifyNoInteractions(mobitruSessionInfoStorage, mobitruFacade);
     }
 
     @Test
     void shouldNotStopRecordingIfDisabled()
     {
-        var mobitruRecordingListener = new MobitruRecordingListener(false, mobitruFacade,
+        var mobitruRecordingListener = new MobitruRecordingListener(testContext, false, mobitruFacade,
                 mobitruSessionInfoStorage, attachmentPublisher);
         mobitruRecordingListener.onBeforeSessionStop(mock(BeforeWebDriverQuitEvent.class));
         verifyNoInteractions(mobitruSessionInfoStorage, mobitruFacade, attachmentPublisher);
@@ -121,20 +164,33 @@ class MobitruRecordingListenerTests
     void shouldPublishRecordingAfterScenario() throws MobitruOperationException
     {
         when(mobitruSessionInfoStorage.getDeviceId()).thenReturn(Optional.of(UDID));
+        when(testContext.get(eq(RECORDING_STARTED_FLAG), any(Supplier.class))).thenReturn(true);
         var recording = new ScreenRecording(RECORDING_ID, BINARY_RESPONSE);
         when(mobitruFacade.stopDeviceScreenRecording(UDID)).thenReturn(recording);
-        var mobitruRecordingListener = new MobitruRecordingListener(true, mobitruFacade, mobitruSessionInfoStorage,
-                attachmentPublisher);
+        var mobitruRecordingListener = new MobitruRecordingListener(testContext, true,
+                mobitruFacade, mobitruSessionInfoStorage, attachmentPublisher);
         mobitruRecordingListener.publishRecordingAfterScenario();
         verify(attachmentPublisher).publishAttachment(BINARY_RESPONSE, RECORDING_REPORT_NAME);
+        verify(testContext).put(RECORDING_STARTED_FLAG, false);
+    }
+
+    @Test
+    void shouldNotStopRecordingIfAlreadyStoppedAfterScenarios()
+    {
+        when(testContext.get(eq(RECORDING_STARTED_FLAG), any(Supplier.class))).thenReturn(false);
+        var mobitruRecordingListener = new MobitruRecordingListener(testContext, true,
+                mobitruFacade, mobitruSessionInfoStorage, attachmentPublisher);
+        mobitruRecordingListener.publishRecordingAfterScenario();
+        verifyNoInteractions(mobitruSessionInfoStorage, mobitruFacade);
     }
 
     @Test
     void shouldNotPublishRecordingIfDriverIsNotInitialized()
     {
         when(mobitruSessionInfoStorage.getDeviceId()).thenReturn(Optional.empty());
-        var mobitruRecordingListener = new MobitruRecordingListener(true, mobitruFacade, mobitruSessionInfoStorage,
-                attachmentPublisher);
+        when(testContext.get(eq(RECORDING_STARTED_FLAG), any(Supplier.class))).thenReturn(true);
+        var mobitruRecordingListener = new MobitruRecordingListener(testContext, true,
+                mobitruFacade, mobitruSessionInfoStorage, attachmentPublisher);
         mobitruRecordingListener.publishRecordingAfterScenario();
         verifyNoInteractions(mobitruFacade, attachmentPublisher);
     }
@@ -143,10 +199,11 @@ class MobitruRecordingListenerTests
     void shouldLogWarnOnStartWithoutThrow() throws MobitruOperationException
     {
         when(mobitruSessionInfoStorage.getDeviceId()).thenReturn(Optional.of(UDID));
+        when(testContext.get(eq(RECORDING_STARTED_FLAG), any(Supplier.class))).thenReturn(false);
         var exception = new MobitruOperationException(UDID);
         doThrow(exception).when(mobitruFacade).startDeviceScreenRecording(UDID);
-        var mobitruRecordingListener = new MobitruRecordingListener(true, mobitruFacade, mobitruSessionInfoStorage,
-                attachmentPublisher);
+        var mobitruRecordingListener = new MobitruRecordingListener(testContext, true,
+                mobitruFacade, mobitruSessionInfoStorage, attachmentPublisher);
         mobitruRecordingListener.onSessionStart(mock(WebDriverCreateEvent.class));
         assertEquals(List.of(
                 LoggingEvent.warn(exception, "Unable to start recording on the device with UUID {}", UDID)),
@@ -157,10 +214,11 @@ class MobitruRecordingListenerTests
     void shouldLogWarnOnStopWithoutThrow() throws MobitruOperationException
     {
         when(mobitruSessionInfoStorage.getDeviceId()).thenReturn(Optional.of(UDID));
+        when(testContext.get(eq(RECORDING_STARTED_FLAG), any(Supplier.class))).thenReturn(true);
         var exception = new MobitruOperationException(UDID);
         doThrow(exception).when(mobitruFacade).stopDeviceScreenRecording(UDID);
-        var mobitruRecordingListener = new MobitruRecordingListener(true, mobitruFacade, mobitruSessionInfoStorage,
-                attachmentPublisher);
+        var mobitruRecordingListener = new MobitruRecordingListener(testContext, true,
+                mobitruFacade, mobitruSessionInfoStorage, attachmentPublisher);
         mobitruRecordingListener.onBeforeSessionStop(mock(BeforeWebDriverQuitEvent.class));
         assertEquals(List.of(
                         LoggingEvent.warn(exception,
