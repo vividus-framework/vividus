@@ -33,7 +33,10 @@ implementation(group: 'org.vividus', name: 'vividus-mcp-server')
 . Create a new file at path `/.vscode/mcp.json` in the root of the project
 . Add the following configuration into `mcp.json` file and save it
 +
-.mcp.json
+[tabs]
+======
+macOS / Linux::
++
 [source,json]
 ----
 {
@@ -56,7 +59,34 @@ implementation(group: 'org.vividus', name: 'vividus-mcp-server')
   }
 }
 ----
-<1> The absolute path to the `gradlew` executable contained in the tests project
+
+Windows::
++
+[source,json]
+----
+{
+  "servers": {
+    "vividus": {
+      "command": "c:\\Users\\Bob\\Workspace\\vividus-sample-tests\\gradlew.bat", <1>
+      "args": [
+        "startMcpServer",
+        "-q",
+        "-p",
+        "c:\\Users\\Bob\\Workspace\\vividus-sample-tests" <2>
+      ]
+    },
+    "playwright": { <3>
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
+----
+======
++
+<1> The absolute path to the `gradlew` or `gradlew.bat` executable contained in the tests project
 <2> The absolute path to the tests project
 <3> The Playwright MCP server is optional and can be used to control browser and generate tests for web-applications
 . Start the MCP servers by clicking on the `▷ Start` buttons on the top of the servers names
@@ -71,7 +101,10 @@ Claude is a next generation AI assistant built by Anthropic and trained to be sa
 . Click `Edit Config` which opens `claude_desktop_config.json` file that contains MCP server configs
 . Add the following configuration into `claude_desktop_config.json` file and save it
 +
-.claude_desktop_config.json
+[tabs]
+======
+macOS / Linux::
++
 [source,json]
 ----
 {
@@ -94,7 +127,34 @@ Claude is a next generation AI assistant built by Anthropic and trained to be sa
   }
 }
 ----
-<1> The absolute path to the `gradlew` executable contained in the tests project
+
+Windows::
++
+[source,json]
+----
+{
+  "mcpServers": {
+    "vividus": {
+      "command": "c:\\Users\\Bob\\Workspace\\vividus-sample-tests\\gradlew.bat", <1>
+      "args": [
+          "startMcpServer",
+          "-q",
+          "-p",
+          "c:\\Users\\Bob\\Workspace\\vividus-sample-tests" <2>
+      ]
+    },
+    "playwright": { <3>
+      "command": "npx",
+      "args": [
+          "@playwright/mcp"
+      ]
+    }
+  }
+}
+----
+======
++
+<1> The absolute path to the `gradlew` or `gradlew.bat` executable contained in the tests project
 <2> The absolute path to the tests project
 <3> The Playwright MCP server is optional and can be used to control browser and generate tests for web-applications
 . Restart `Claude Desktop` application
