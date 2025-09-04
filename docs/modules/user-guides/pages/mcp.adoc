@@ -255,12 +255,13 @@ Prompt example to include auto-run of test cases after confirmation in chat:
 
 ```
 After generating the test script:
-1. Confirm test execution by responding `"Yes, execute the tests"`.
-2. Tests will be executed automatically with:
+1. Confirm test execution in agent chat by `"Yes, execute the tests"`.
+2. Execute test using сommand: ./gradlew runStories
+3. Automatically execute test with:
    - Chrome desktop profile.
    - Newly created story files.
    - Real-time execution logs.
-3. Results will be provided in the chat showing:
+4. Provide results in the chat showing:
    - Execution status.
    - Test results summary.
    - Any failures or errors.
