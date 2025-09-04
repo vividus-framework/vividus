@@ -251,7 +251,7 @@ This will generate multiple scenarios covering:
 
 Please be aware of token limits. Set up auto-execution only if you are confident and polish your prompt file.
 
-Prompt example to include auto-run of test cases after confirmation in chat:
+Extension of prompt `test-template.prompt.md` file to include auto-run of test cases after confirmation in chat:
 
 ```
 After generating the test script:
