@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -60,8 +61,8 @@ class ScenariosCounterTests
 
     @Test
     @StdIo
-    void testCounterIgnoresDescriptionsWithMethodNames(StdOut stdOut)
-            throws ParseException, ReflectiveOperationException, InitializationError
+    void testCounterIgnoresDescriptionsWithMethodNames(StdOut stdOut) throws ParseException,
+            ReflectiveOperationException, InitializationError, IOException
     {
         var root = Description.createSuiteDescription(ROOT);
         var beforeStories = Description.createTestDescription(Object.class, BEFORE);
@@ -86,8 +87,8 @@ class ScenariosCounterTests
 
     @Test
     @StdIo
-    void testMultipleChildDescriptions(StdOut stdOut)
-            throws ParseException, ReflectiveOperationException, InitializationError
+    void testMultipleChildDescriptions(StdOut stdOut) throws ParseException, ReflectiveOperationException,
+            InitializationError, IOException
     {
         var root = Description.createSuiteDescription(ROOT);
         var story = Description.createSuiteDescription(STORY);
@@ -112,7 +113,8 @@ class ScenariosCounterTests
     }
 
     @Test
-    void testDirectoryOptionIsPresent() throws ParseException, ReflectiveOperationException, InitializationError
+    void testDirectoryOptionIsPresent() throws ParseException, ReflectiveOperationException, InitializationError,
+            IOException
     {
         var root = Description.createSuiteDescription(ROOT);
 
@@ -132,23 +134,29 @@ class ScenariosCounterTests
 
     @Test
     @StdIo
-    void testHelpOptionIsPresent(StdOut stdOut) throws ParseException, ReflectiveOperationException, InitializationError
+    @SuppressWarnings("checkstyle:RegexpSingleline")
+    void testHelpOptionIsPresent(StdOut stdOut) throws ParseException, ReflectiveOperationException,
+            InitializationError, IOException
     {
         try (var vividus = mockStatic(Vividus.class))
         {
             ScenariosCounter.main(new String[] { "--help" });
             vividus.verify(Vividus::init);
-            assertThat(stdOut.capturedLines(), arrayContaining(
-                    "usage: ScenariosCounter",
-                    " -d,--dir <arg>   directory to count scenarios in (e.g. story/release).",
-                    " -h,--help        print this message."
-            ));
+            assertEquals("""
+                     usage:  ScenariosCounter
+                    
+                         Options         Since                     Description                \s
+                     -h, --help           --       print this message.                        \s
+                     -d, --dir <arg>      --       directory to count scenarios in (e.g.      \s
+                                                    story/release).                           \s
+                    
+                    """, stdOut.capturedString());
         }
     }
 
     @SuppressWarnings("try")
-    private void testCounter(String[] args, Description root, String dir)
-            throws ParseException, InitializationError, ReflectiveOperationException
+    private void testCounter(String[] args, Description root, String dir) throws ParseException, InitializationError,
+            ReflectiveOperationException, IOException
     {
         try (var beanFactory = mockStatic(BeanFactory.class);
              var ignored = mockConstruction(JUnit4StoryRunner.class,
