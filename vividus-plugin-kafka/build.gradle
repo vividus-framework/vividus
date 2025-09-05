@@ -17,7 +17,7 @@ dependencies {
     // 'spring-kafka' uses 'kafka-clients' 3.8.1, but it is needed to use 3.9.1
     // as it includes fix for https://issues.apache.org/jira/browse/KAFKA-17078
     // which allows to use Java 24
-    implementation(group: 'org.apache.kafka', name: 'kafka-clients', version: '3.9.1')
+    implementation(group: 'org.apache.kafka', name: 'kafka-clients', version: '4.1.0')
 
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
@@ -31,5 +31,5 @@ dependencies {
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.3')
 
     // https://github.com/spring-projects/spring-kafka/issues/3955#issuecomment-2971304102
-    testImplementation(group: 'org.apache.kafka', name: 'kafka_2.13', version: '3.9.1')
+    testImplementation(group: 'org.apache.kafka', name: 'kafka_2.13', version: '4.1.0')
 }
