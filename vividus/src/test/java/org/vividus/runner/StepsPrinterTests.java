@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.runner;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -47,14 +48,18 @@ class StepsPrinterTests
 
     @Test
     @StdIo
+    @SuppressWarnings("checkstyle:RegexpSingleline")
     void testPrintHelp(StdOut stdOut) throws IOException, ParseException
     {
         StepsPrinter.main(new String[] {"-h"});
-        assertThat(stdOut.capturedLines(), arrayContaining(
-                "usage: StepPrinter",
-                " -f,--file <arg>   Name of file to save steps",
-                " -h,--help         Print this message"
-        ));
+        assertEquals("""
+                 usage:  StepPrinter
+                
+                     Options          Since            Description       \s
+                 -h, --help            --       Print this message       \s
+                 -f, --file <arg>      --       Name of file to save steps
+                
+                """, stdOut.capturedString());
     }
 
     @Test

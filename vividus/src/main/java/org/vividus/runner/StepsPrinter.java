@@ -25,10 +25,10 @@ import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.apache.commons.io.FileUtils;
 import org.vividus.configuration.Vividus;
 import org.vividus.runner.StepsCollector.Step;
@@ -54,7 +54,7 @@ public final class StepsPrinter
 
         if (commandLine.hasOption(helpOption.getOpt()))
         {
-            new HelpFormatter().printHelp("StepPrinter", options);
+            HelpFormatter.builder().get().printHelp("StepPrinter", null, options, null, false);
             return;
         }
 

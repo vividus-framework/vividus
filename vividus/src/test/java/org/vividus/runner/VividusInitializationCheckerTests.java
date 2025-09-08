@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@ package org.vividus.runner;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -51,23 +51,28 @@ class VividusInitializationCheckerTests
 
     @Test
     @StdIo
-    void testPrintHelp(StdOut stdOut) throws ParseException
+    @SuppressWarnings("checkstyle:RegexpSingleline")
+    void testPrintHelp(StdOut stdOut) throws ParseException, IOException
     {
         try (var vividus = mockStatic(Vividus.class))
         {
             VividusInitializationChecker.main(new String[] {"-h"});
-            assertThat(stdOut.capturedLines(), arrayContaining(
-                    "usage: VividusInitializationChecker",
-                    " -h,--help                print this message.",
-                    " -i,--ignoreBeans <arg>   comma separated list of beans that are not",
-                    "                          instantiated during check (e.g. bean1,bean2)"
-            ));
+            assertEquals("""
+                     usage:  VividusInitializationChecker
+                    
+                             Options             Since                  Description             \s
+                     -h, --help                   --       print this message.                  \s
+                     -i, --ignoreBeans <arg>      --       comma separated list of beans that are
+                                                            not instantiated during check (e.g. \s
+                                                            bean1,bean2)                        \s
+                    
+                    """, stdOut.capturedString());
             vividus.verify(Vividus::init);
         }
     }
 
     @Test
-    void testNoArguments() throws ParseException
+    void testNoArguments() throws ParseException, IOException
     {
         try (var vividus = mockStatic(Vividus.class); var beanFactory = mockStatic(BeanFactory.class))
         {
@@ -82,7 +87,7 @@ class VividusInitializationCheckerTests
     }
 
     @Test
-    void shouldIgnoreAbstractBeans() throws ParseException
+    void shouldIgnoreAbstractBeans() throws ParseException, IOException
     {
         try (var vividus = mockStatic(Vividus.class); var beanFactory = mockStatic(BeanFactory.class))
         {
@@ -115,7 +120,7 @@ class VividusInitializationCheckerTests
     }
 
     @Test
-    void testIgnoreBeansOptionIsPresent() throws ParseException
+    void testIgnoreBeansOptionIsPresent() throws ParseException, IOException
     {
         try (var vividus = mockStatic(Vividus.class); var beanFactory = mockStatic(BeanFactory.class))
         {

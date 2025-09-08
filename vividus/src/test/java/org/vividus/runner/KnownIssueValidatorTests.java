@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.vividus.runner;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.emptyArray;
-import static org.hamcrest.Matchers.hasItemInArray;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -56,6 +56,22 @@ class KnownIssueValidatorTests
 {
     @Mock private IKnownIssueProvider knownIssueProvider;
     @Mock private KnownIssueChecker knownIssueChecker;
+
+    @Test
+    @StdIo
+    @SuppressWarnings("checkstyle:RegexpSingleline")
+    void testPrintHelp(StdOut stdOut) throws IOException, ParseException
+    {
+        KnownIssueValidator.main(new String[] {"-h"});
+        assertEquals("""
+                 usage:  KnownIssueValidator
+                
+                     Options          Since                 Description           \s
+                 -h, --help            --       print this message.               \s
+                 -f, --file <arg>      --       location of assertion failure list.
+                
+                """, stdOut.capturedString());
+    }
 
     @Test
     @StdIo
@@ -100,18 +116,6 @@ class KnownIssueValidatorTests
                 key + "       | " + matchedFailure,
                 "            | " + unmatchedFailure
         ));
-    }
-
-    @Test
-    @StdIo
-    void testHelpOptionIsPresent(StdOut stdOut) throws IOException, ParseException
-    {
-        try (var vividus = Mockito.mockStatic(Vividus.class))
-        {
-            KnownIssueValidator.main(new String[] { "--help" });
-            assertThat(stdOut.capturedLines(), hasItemInArray("usage: KnownIssueValidator"));
-            vividus.verifyNoInteractions();
-        }
     }
 
     @Test
