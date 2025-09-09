@@ -150,7 +150,7 @@ class ScenariosCounterTests
                      -d, --dir <arg>      --       directory to count scenarios in (e.g.      \s
                                                     story/release).                           \s
                     
-                    """, stdOut.capturedString());
+                    """, stdOut.capturedString().replace("\r", ""));
         }
     }
 

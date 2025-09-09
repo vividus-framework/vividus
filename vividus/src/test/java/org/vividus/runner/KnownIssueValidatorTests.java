@@ -70,7 +70,7 @@ class KnownIssueValidatorTests
                  -h, --help            --       print this message.               \s
                  -f, --file <arg>      --       location of assertion failure list.
                 
-                """, stdOut.capturedString());
+                """, stdOut.capturedString().replace("\r", ""));
     }
 
     @Test
