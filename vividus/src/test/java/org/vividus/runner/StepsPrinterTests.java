@@ -59,7 +59,7 @@ class StepsPrinterTests
                  -h, --help            --       Print this message       \s
                  -f, --file <arg>      --       Name of file to save steps
                 
-                """, stdOut.capturedString());
+                """, stdOut.capturedString().replace("\r", ""));
     }
 
     @Test
