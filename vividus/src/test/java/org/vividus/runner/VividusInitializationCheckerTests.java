@@ -66,7 +66,7 @@ class VividusInitializationCheckerTests
                                                             not instantiated during check (e.g. \s
                                                             bean1,bean2)                        \s
                     
-                    """, stdOut.capturedString());
+                    """, stdOut.capturedString().replace("\r", ""));
             vividus.verify(Vividus::init);
         }
     }
