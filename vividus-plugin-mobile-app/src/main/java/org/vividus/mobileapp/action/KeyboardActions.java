@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,8 +44,9 @@ public class KeyboardActions
     private final GenericWebDriverManager genericWebDriverManager;
     private final ISearchActions searchActions;
     private final boolean realDevice;
+    private final boolean useWorkaroundToHideKeyboardOnIOs;
 
-    public KeyboardActions(boolean realDevice, TouchActions touchActions,
+    public KeyboardActions(boolean realDevice, boolean useWorkaroundToHideKeyboardOnIOs, TouchActions touchActions,
             IWebDriverProvider webDriverProvider, GenericWebDriverManager genericWebDriverManager,
             ISearchActions searchActions)
     {
@@ -54,6 +55,7 @@ public class KeyboardActions
         this.webDriverProvider = webDriverProvider;
         this.genericWebDriverManager = genericWebDriverManager;
         this.searchActions = searchActions;
+        this.useWorkaroundToHideKeyboardOnIOs = useWorkaroundToHideKeyboardOnIOs;
     }
 
     /**
@@ -85,8 +87,8 @@ public class KeyboardActions
         // 1. https://github.com/appium/WebDriverAgent/blob/master/WebDriverAgentLib/Commands/FBCustomCommands.m#L107
         // 2. The keyboard is not shown in some cases: e.g. when trying to clear an empty field. So we need to check
         // whether the keyboard is shown at first
-        if (genericWebDriverManager.isIOS() && webDriverProvider.getUnwrapped(HasOnScreenKeyboard.class)
-                .isKeyboardShown())
+        if (useWorkaroundToHideKeyboardOnIOs && genericWebDriverManager.isIOS() && webDriverProvider.getUnwrapped(
+                HasOnScreenKeyboard.class).isKeyboardShown())
         {
             String tagName = getTagNameSafely(webElement);
             /*
