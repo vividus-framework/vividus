@@ -127,6 +127,24 @@ a|Defines whether the tests run on real device
 
 !===
 
+|`mobile-environment.ios.use-workaround-to-hide-keyboard`
+ a|`true` +
+ `false`
+
+ |`true`
+
+ a|
+Controls whether an iOS-specific workaround to hide the on-screen keyboard is applied. When enabled (default), VIVIDUS
+attempts to dismiss the keyboard by tapping the last button on the iOS keyboard when it is shown.
+For `XCUIElementTypeTextView` on real devices the workaround is not applied; tap outside the text view to close the
+keyboard. Disable the workaround (`false`) to rely solely on the underlying Appium behavior.
+
+[CAUTION]
+====
+This workaround may slow down test execution.
+====
+
+
 |`mobile-environment.device.folder-for-file-upload`
 |`string`
 
@@ -712,7 +730,9 @@ The atomic actions performed are:
 For `iOS` real devices the hide keyboard action works only for
 `XCUIElementTypeTextField` elements and skipped for `XCUIElementTypeTextView`
 elements, in case of `XCUIElementTypeTextView` element tap outside the text view
-is performed to close the keyboard.
+is performed to close the keyboard. The behavior is controlled by
+`mobile-environment.ios.use-workaround-to-hide-keyboard` property;
+set it to `false` to rely solely on the underlying Appium behavior.
 
 [source,gherkin]
 ----
@@ -761,7 +781,9 @@ The atomic actions performed are:
 For `iOS` real devices the hide keyboard action works only for
 `XCUIElementTypeTextField` elements and skipped for `XCUIElementTypeTextView`
 elements, in case of `XCUIElementTypeTextView` element tap outside the text view
-is performed to close the keyboard.
+is performed to close the keyboard. The behavior is controlled by
+`mobile-environment.ios.use-workaround-to-hide-keyboard` property;
+set it to `false` to rely solely on the underlying Appium behavior.
 
 [source,gherkin]
 ----

@@ -799,6 +799,7 @@ jobs:
                                                 -Pvividus.configuration.profiles=browserstack/mobile_app/ios,mobile_app/ios \
                                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                 -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
+                                                -Pvividus.mobile-environment.ios.use-workaround-to-hide-keyboard=false \
                                                 -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="VIVIDUS iOS System Tests" \
                                                 -Pvividus.allure.history-directory=output/history/bs-ios-system-tests \
                                                 -Pvividus.allure.report-directory=output/reports/bs-ios-allure \
@@ -995,6 +996,7 @@ jobs:
                                                 -Pvividus.configuration.profiles=mobitru/mobile_app,mobile_app/ios \
                                                 -Pvividus.selenium.grid.username=${MOBITRU_USER} \
                                                 -Pvividus.selenium.grid.password=${MOBITRU_KEY} \
+                                                -Pvividus.mobile-environment.ios.use-workaround-to-hide-keyboard=false \
                                                 -Pvividus.allure.history-directory=output/history/mt-ios-system-tests \
                                                 -Pvividus.allure.report-directory=output/reports/mt-ios-allure \
                                                 -Pvividus.allure.executor.name="Github Actions (Vividus)" \
