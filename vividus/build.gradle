@@ -78,7 +78,7 @@ dependencies {
     implementation(group: 'org.apache.groovy', name: 'groovy', version: '4.0.28')
 
     // Spring
-    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.10')
+    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.11')
     implementation(group: 'org.springframework', name: 'spring-context')
     implementation(group: 'org.springframework.vault', name: 'spring-vault-core', version: '3.2.0')
 
