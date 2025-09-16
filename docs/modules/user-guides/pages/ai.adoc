@@ -1,11 +1,13 @@
-= How to use VIVIDUS MCP server to create automated scenarios
 
-The VIVIDUS MCP server exposes core VIVIDUS functionalities to LLMs via the MCP protocol, enabling generation of automated
+= How to create VIVIDUS automated tests with the help of AI
+
+VIVIDUS offers MCP server that exposes core VIVIDUS functionalities to LLMs via the
+https://modelcontextprotocol.io/docs/getting-started/intro[MCP protocol], enabling generation of automated
 test scenarios leveraging those capabilities.
 
 IMPORTANT: LLM will access only those steps that are available from plugins included into your test project.
 
-== Prerequisites
+== Install MCP server
 
 . Copy the below line to `dependencies` section of the project `build.gradle` file in your test project
 +
@@ -23,10 +25,15 @@ implementation(group: 'org.vividus', name: 'vividus-mcp-server')
 .. Copy content of the `gradlew` script
 .. Replace the content of the `gradlew` script in the root of the test project with the copied content
 
-== AI Assistants
+. If the project was imported to the IDE before adding new dependency,
+xref:ROOT:getting-started.adoc#_use_ide_for_the_tests_development[re-generate]
+the configuration files for the used IDE and then refresh the project in the used IDE.
 
-=== GitHub Copilot in VS Code
+== Configure AI Assistant
 
+.GitHub Copilot in VS Code
+[%collapsible]
+====
 . Install https://code.visualstudio.com/download[Visual Studio Code]
 . Open the project with VIVIDUS tests in Visual Studio Code
 . https://code.visualstudio.com/docs/copilot/setup#_set-up-copilot-in-vs-code[Set up Copilot in VS Code] if it is not done yet
@@ -91,9 +98,11 @@ Windows::
 <3> The Playwright MCP server is optional and can be used to control browser and generate tests for web-applications
 . Start the MCP servers by clicking on the `▷ Start` buttons on the top of the servers names
 . Use Copilot in https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode[agent mode] to generate automated scenarios
+====
 
-=== Claude Desktop
-
+.Claude Desktop
+[%collapsible]
+====
 Claude is a next generation AI assistant built by Anthropic and trained to be safe, accurate, and secure to help you do your best work.
 
 . Install https://claude.ai/download[Claude Desktop]
@@ -158,6 +167,7 @@ Windows::
 <2> The absolute path to the tests project
 <3> The Playwright MCP server is optional and can be used to control browser and generate tests for web-applications
 . Restart `Claude Desktop` application
+====
 
 == VIVIDUS Website Testing Guide with GitHub Copilot 
 
