@@ -4,7 +4,9 @@ dependencies {
     implementation project(':vividus')
     implementation project(':vividus-util')
 
-    implementation(group: 'io.modelcontextprotocol.sdk', name: 'mcp', version: '0.13.0')
+    implementation platform(group: 'io.modelcontextprotocol.sdk', name: 'mcp-bom', version: '0.13.0')
+    implementation(group: 'io.modelcontextprotocol.sdk', name: 'mcp-core')
+    implementation(group: 'io.modelcontextprotocol.sdk', name: 'mcp-json-jackson2')
 
     implementation platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.25.1')
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-core')
