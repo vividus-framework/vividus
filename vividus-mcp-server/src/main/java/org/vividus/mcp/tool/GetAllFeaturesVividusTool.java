@@ -27,36 +27,37 @@ import org.vividus.runner.StepsCollector.Step;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonUtils;
 
+import io.modelcontextprotocol.spec.McpSchema;
+
 public class GetAllFeaturesVividusTool implements VividusTool
 {
     private final JsonUtils jsonUtils = new JsonUtils();
 
     @SuppressWarnings("LineLength")
     @Override
-    public VividusToolParameters getParameters()
+    public McpSchema.Tool getMcpTool()
     {
-        return new VividusToolParameters(
-            "vividus_get_all_features",
-            """
-            Return a list of available VIVIDUS automation tool features. CRITICAL CONSTRAINTS:
-            * exact syntax of steps, step parameters and expressions must be preserved.
-            * do NOT create, modify, or assume any steps that are not explicitly listed.
-            * all the parameter values for steps must be must be extracted from web page to preserve letter case and not from the user input.
-            * caseInsensitiveText locator strategy must be used for any web element interactions involving text.
-            * cssSelector locator strategy must use standard CSS selector.
-            * all steps that accept locator and contain substeps are contextual, meaning that locators in substeps must be build relatively to the parent locator.
-            * when a user asks for a list of steps provide exact steps without generalization.
-            """,
-            """
-            {
-              "type" : "object",
-              "id" : "urn:jsonschema:Operation",
-              "properties" : {},
-              "required" : [],
-              "additionalProperties" : false
-            }
-            """
-        );
+        return McpSchema.Tool.builder()
+                .name("vividus_get_all_features")
+                .description("""
+                Return a list of available VIVIDUS automation tool features. CRITICAL CONSTRAINTS:
+                * exact syntax of steps, step parameters and expressions must be preserved.
+                * do NOT create, modify, or assume any steps that are not explicitly listed.
+                * all the parameter values for steps must be must be extracted from web page to preserve letter case and not from the user input.
+                * caseInsensitiveText locator strategy must be used for any web element interactions involving text.
+                * cssSelector locator strategy must use standard CSS selector.
+                * all steps that accept locator and contain substeps are contextual, meaning that locators in substeps must be build relatively to the parent locator.
+                * when a user asks for a list of steps provide exact steps without generalization.
+                """)
+                .inputSchema(new McpSchema.JsonSchema(
+                        "object",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                ))
+                .build();
     }
 
     @Override

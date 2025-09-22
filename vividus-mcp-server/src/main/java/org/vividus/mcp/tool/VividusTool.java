@@ -16,9 +16,11 @@
 
 package org.vividus.mcp.tool;
 
+import io.modelcontextprotocol.spec.McpSchema;
+
 public interface VividusTool
 {
-    VividusToolParameters getParameters();
+    McpSchema.Tool getMcpTool();
 
     Object getContent();
 }
