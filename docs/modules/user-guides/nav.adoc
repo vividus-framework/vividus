@@ -7,4 +7,4 @@
 ** xref:pipeline-with-proxy.adoc[Jenkins pipeline with browser proxy]
 * Mobile Testing
 ** xref:appium-setup.adoc[Appium Setup]
-* xref:mcp.adoc[MCP Server]
+* xref:ai.adoc[AI-assisted test automation]
