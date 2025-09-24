@@ -22,8 +22,9 @@ import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.vividus.mcp.tool.VividusTool;
-import org.vividus.mcp.tool.VividusToolParameters;
 
+import io.modelcontextprotocol.json.McpJsonMapper;
+import io.modelcontextprotocol.json.jackson.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
@@ -46,7 +47,8 @@ public class VividusMcpServer
     {
         List<SyncToolSpecification> toolSpecs = tools.stream().map(this::asToolSpecification).toList();
 
-        McpServerTransportProvider transportProvider = new StdioServerTransportProvider(objectMapper);
+        McpJsonMapper mcpJsonMapper = new JacksonMcpJsonMapper(objectMapper);
+        McpServerTransportProvider transportProvider = new StdioServerTransportProvider(mcpJsonMapper);
         McpServer.sync(transportProvider)
                  .serverInfo("vividus-mcp-server", "0.6.16")
                  .capabilities(McpSchema.ServerCapabilities.builder()
@@ -58,13 +60,8 @@ public class VividusMcpServer
 
     private McpServerFeatures.SyncToolSpecification asToolSpecification(VividusTool tool)
     {
-        VividusToolParameters params = tool.getParameters();
         return McpServerFeatures.SyncToolSpecification.builder()
-                .tool(McpSchema.Tool.builder()
-                        .name(params.name())
-                        .description(params.description())
-                        .inputSchema(params.schema())
-                        .build())
+                .tool(tool.getMcpTool())
                 .callHandler((exchange, request) -> {
                     try
                     {
