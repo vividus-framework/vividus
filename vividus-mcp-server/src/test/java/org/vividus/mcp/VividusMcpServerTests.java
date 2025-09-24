@@ -33,12 +33,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.vividus.mcp.tool.GetAllFeaturesVividusTool;
 import org.vividus.mcp.tool.VividusTool;
-import org.vividus.mcp.tool.VividusToolParameters;
 
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
+import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import io.modelcontextprotocol.spec.McpSchema.Tool;
@@ -79,10 +80,9 @@ class VividusMcpServerTests
 
     private void verifyTool(VividusTool testTool, SyncToolSpecification toolSpec, boolean error, String content)
     {
-        VividusToolParameters params = testTool.getParameters();
+        McpSchema.Tool mcpTool = testTool.getMcpTool();
         Tool tool = toolSpec.tool();
-        assertEquals(params.name(), tool.name());
-        assertEquals(params.description(), tool.description());
+        assertEquals(mcpTool, tool);
         assertNull(tool.inputSchema().properties());
         CallToolResult call = toolSpec.callHandler().apply(null, null);
         assertEquals(error, call.isError());
@@ -90,14 +90,8 @@ class VividusMcpServerTests
         assertEquals(content, textContent.text());
     }
 
-    private static final class TestVividusTool implements VividusTool
+    private static final class TestVividusTool extends GetAllFeaturesVividusTool
     {
-        @Override
-        public VividusToolParameters getParameters()
-        {
-            return new VividusToolParameters("name", "description", "{}");
-        }
-
         @Override
         public Object getContent()
         {
