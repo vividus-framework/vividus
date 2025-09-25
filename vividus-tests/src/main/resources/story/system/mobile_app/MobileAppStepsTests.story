@@ -10,8 +10,8 @@ Examples:
 
 Scenario: Verify step: 'Given I start mobile application with capabilities:$capabilities'
 Given I start mobile application with capabilities:
-|name|value     |
-|app |${app-url}|
+| name       | value      |
+| appium:app | ${app-url} |
 
 
 Scenario: VerifyStep: 'When I execute javascript `$wcript` and save result to $scopes variable `$variableName`'
