@@ -96,7 +96,7 @@ class UfgStepsTests
         steps.performCheck(VisualActionType.ESTABLISH, BASELINE_NAME, BATCH_NAME,
                 new IRenderingBrowserInfo[] { renderInfo });
 
-        verify(configuration).addBrowsers(new IRenderingBrowserInfo[] { renderInfo });
+        verify(configuration).addBrowsers(renderInfo);
         verify(softAssert).assertTrue(CHECK_PASSED, true);
     }
 
@@ -105,7 +105,7 @@ class UfgStepsTests
     {
         steps.performCheck(List.of(applitoolsVisualCheck), new IRenderingBrowserInfo[] { renderInfo });
 
-        verify(configuration).addBrowsers(new IRenderingBrowserInfo[] { renderInfo });
+        verify(configuration).addBrowsers(renderInfo);
         verify(softAssert).assertTrue(CHECK_PASSED, true);
     }
 

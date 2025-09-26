@@ -189,7 +189,8 @@ class ProxyAgentStoryReporterTests
             @Override
             public Boolean answer(InvocationOnMock invocation)
             {
-                return ++count != 1;
+                count++;
+                return count != 1;
             }
         });
         proxyAgentStoryReporter.beforeScenario(scenario);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,7 +51,7 @@ public class DeprecatedStepNotificationFactory
         String[] stepParams = stepMatcher.map(this::getParametersFromStep).orElseGet(() -> new String[0]);
 
         String notification;
-        try (Formatter newStep = new Formatter())
+        try (Formatter newStep = new Formatter(Locale.ROOT))
         {
             newStep.format(replacementFormatPattern, (Object[]) stepParams);
             notification = String.format(
