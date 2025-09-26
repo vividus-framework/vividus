@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -72,6 +73,7 @@ public final class DeprecatedStepsReplacer
     private static final Pattern NESTED_STEPS_TABLE_PATTERN = Pattern.compile("(\\v|^).\\h*step\\h*.\\v");
     private static final Pattern COMPOSITE_DEPRECATION_NOTIFICATION
             = Pattern.compile("!--\\s+DEPRECATED: The step .* is deprecated and will be removed in .*");
+    private static final String STORY_FILE_EXTENSION = "story";
 
     private final Configuration configuration;
     private final Keywords keywords;
@@ -126,7 +128,7 @@ public final class DeprecatedStepsReplacer
         String resourceContent = storyLoader.loadResourceAsText(resourcePath);
 
         Map<String, List<String>> steps;
-        if ("story".equals(FilenameUtils.getExtension(resourcePath)))
+        if (STORY_FILE_EXTENSION.equals(FilenameUtils.getExtension(resourcePath)))
         {
             RegexStoryParser storyParser = new RegexStoryParser(new ExamplesTableFactory(keywords, null, null)
             {
@@ -195,7 +197,7 @@ public final class DeprecatedStepsReplacer
 
                     if (!deprecatedStepFormatPattern.isEmpty())
                     {
-                        try (Formatter formatter = new Formatter())
+                        try (Formatter formatter = new Formatter(Locale.ROOT))
                         {
                             formatter.format(deprecatedStepFormatPattern, (Object[]) stepParameters);
                             String escapedDeprecatedStep = Pattern.quote(step);
@@ -215,10 +217,13 @@ public final class DeprecatedStepsReplacer
                 }
             }
         }
-        return currentLevelNestedSteps.isEmpty()
-                ? processedContent
-                : replaceStepsInSection(processedContent, resourceName, resourceSection, currentLevelNestedSteps,
-                        ++currentNestingLevel);
+        if (currentLevelNestedSteps.isEmpty())
+        {
+            return processedContent;
+        }
+        currentNestingLevel++;
+        return replaceStepsInSection(processedContent, resourceName, resourceSection, currentLevelNestedSteps,
+                currentNestingLevel);
     }
 
     private String getActualStepFormatPattern(StepCandidate stepCandidate)
