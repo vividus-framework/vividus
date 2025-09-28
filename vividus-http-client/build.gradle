@@ -1,7 +1,7 @@
 project.description = 'VIVIDUS HTTP client'
 
 dependencies {
-    api(group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.5')
+    api(group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.5.1')
     implementation(group: 'org.apache.httpcomponents.client5', name: 'httpclient5-win', version: '5.2.3')
     implementation project(':vividus-util')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.19.0')
