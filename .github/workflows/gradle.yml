@@ -77,21 +77,11 @@ jobs:
     - name: Build
       env:
         MATRIX_PLATFORM: ${{ matrix.platform }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       shell: bash
       run: |
         if [[ $MATRIX_PLATFORM = "ubuntu-latest" ]]; then
-          if [[ -n $SONAR_TOKEN ]]; then
-            ./gradlew build sonar -Dsonar.host.url=https://sonarcloud.io \
-                                  -Dsonar.organization=vividus \
-                                  -Dsonar.projectKey=vividus-framework_vividus \
-                                  -Ptest.testLogging.exceptionFormat=full
-          else
-            echo No SONAR_TOKEN, SonarCloud analysis will be skipped
-            ./gradlew build -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=768m" \
-                            -Ptest.testLogging.exceptionFormat=full
-          fi
+          ./gradlew build -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=768m" \
+                          -Ptest.testLogging.exceptionFormat=full
         else
           ./gradlew build -x spotbugsMain -x spotbugsTest -x spotbugsIntegrationTest \
                           -x pmdMain -x pmdTest -x pmdIntegrationTest \
@@ -115,6 +105,20 @@ jobs:
     - name: Upload coverage to Codecov
       if: ${{ github.event.pull_request.head.repo.fork }}
       uses: codecov/codecov-action@v5.5.1
+
+    - name: SonarQube Cloud analysis
+      if: matrix.platform == 'ubuntu-latest'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed by Sonar to get PR information, if any
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      shell: bash
+      run: |
+        if [[ -n $SONAR_TOKEN ]]; then
+          ./gradlew sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=vividus -Dsonar.projectKey=vividus-framework_vividus \
+                          -Ptest.testLogging.exceptionFormat=full --no-parallel
+        else
+          echo No SONAR_TOKEN, SonarQube Cloud analysis is skipped
+        fi
 
     - name: VIVIDUS tasks validation
       run: |
