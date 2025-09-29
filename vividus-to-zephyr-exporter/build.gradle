@@ -32,7 +32,7 @@ dependencies {
     implementation project(':vividus-exporter-commons')
 
     implementation(group: 'com.google.guava', name: 'guava', version: '33.5.0-jre')
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.18.0')
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.19.0')
 
     implementation(group: 'com.jayway.jsonpath', name: 'json-path')
 

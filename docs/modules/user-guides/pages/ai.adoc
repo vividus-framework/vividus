@@ -315,21 +315,23 @@ Refactoring Approaches:
 *  Share existing code with AI (add context).
 *  Request specific improvements.
 *  Apply design patterns.
-
++
 [tabs]
---
-.BDD
+======
+BDD::
++
 [source]
 ----
 Refactor these test scenarios to follow BDD approach and extract common steps into composite steps.
 ----
 
-.DDD
+DDD::
++
 [source]
 ----
 Refactor these test scenarios to follow DDD approach and add examples tables to add variety of test data.
 ----
---
+======
 
 === Q: What to do when AI starts hallucinating after previously working well?
 
