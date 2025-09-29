@@ -114,8 +114,7 @@ jobs:
       shell: bash
       run: |
         if [[ -n $SONAR_TOKEN ]]; then
-          ./gradlew sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=vividus -Dsonar.projectKey=vividus-framework_vividus \
-                          -Ptest.testLogging.exceptionFormat=full --no-parallel
+          ./gradlew sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=vividus -Dsonar.projectKey=vividus-framework_vividus --no-parallel
         else
           echo No SONAR_TOKEN, SonarQube Cloud analysis is skipped
         fi
