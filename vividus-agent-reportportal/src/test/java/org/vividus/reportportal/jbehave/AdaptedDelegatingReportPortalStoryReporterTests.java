@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.Optional;
 
 import com.epam.reportportal.jbehave.ReportPortalStoryReporter;
@@ -149,7 +150,7 @@ class AdaptedDelegatingReportPortalStoryReporterTests
                 Assertions.assertAll(
                         () -> assertEquals(id, saveLogRQ.getItemUuid()),
                         () -> assertEquals("ERROR", saveLogRQ.getLevel()),
-                        () -> assertTrue(saveLogRQ.getLogTime().getTime()
+                        () -> assertTrue(((Date) saveLogRQ.getLogTime()).getTime()
                             <= LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()),
                         () -> assertTrue(saveLogRQ.getMessage()
                             .matches("(?s)java.lang.AssertionError.+(.+\\.java.+)+.+")));
