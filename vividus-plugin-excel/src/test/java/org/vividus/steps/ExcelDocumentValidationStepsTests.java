@@ -89,18 +89,18 @@ class ExcelDocumentValidationStepsTests
             ));
 
         String expectFirst = "a string matching the pattern '\\d+'";
-        verifyMissmatch("C1", null, expectFirst);
-        verifyMissmatch("C2", null, expectFirst);
-        verifyMissmatch("C3", null, expectFirst);
+        verifyMismatch("C1", null, expectFirst);
+        verifyMismatch("C2", null, expectFirst);
+        verifyMismatch("C3", null, expectFirst);
 
         String expectSecond = "null";
-        verifyMissmatch("A5", "Product2", expectSecond);
-        verifyMissmatch("B5", "Price2", expectSecond);
+        verifyMismatch("A5", "Product2", expectSecond);
+        verifyMismatch("B5", "Price2", expectSecond);
 
         verifyNoMoreInteractions(softAssert);
     }
 
-    private void verifyMissmatch(String addr, String actual, String matcherAsString)
+    private void verifyMismatch(String addr, String actual, String matcherAsString)
     {
         verify(softAssert).assertThat(eq(format("Cell at address '%s'", addr)), eq(actual),
                 argThat(arg -> arg.toString().equals(matcherAsString)));
@@ -125,7 +125,7 @@ class ExcelDocumentValidationStepsTests
     @Test
     void shouldContainExcelSheetWithName()
     {
-        steps.validateExcelSheetNae(createExcelData(), SHEET_MAPPING, 0);
+        steps.validateExcelSheetName(createExcelData(), SHEET_MAPPING, 0);
         verify(softAssert).assertEquals("The name of sheet at index 0", SHEET_MAPPING, SHEET_MAPPING);
         verifyNoMoreInteractions(softAssert);
     }
@@ -133,8 +133,24 @@ class ExcelDocumentValidationStepsTests
     @Test
     void shouldRecordFailedAssertionIfExcelSheetWithIndexDoesNotExist()
     {
-        steps.validateExcelSheetNae(createExcelData(), "AnyName", 10);
+        steps.validateExcelSheetName(createExcelData(), "AnyName", 10);
         verify(softAssert).recordFailedAssertion("Sheet with the index 10 does not exist");
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void shouldValidateExcelSheetRowCountByIndex()
+    {
+        steps.validateExcelSheetRowCount(createExcelData(), 5, 0);
+        verify(softAssert).assertEquals("Number of rows in sheet with index 0", 5, 5);
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void shouldRecordFailedAssertionWhenSheetNotFoundByIndexForRowCount()
+    {
+        steps.validateExcelSheetRowCount(createExcelData(), 5, 3);
+        verify(softAssert).recordFailedAssertion("Sheet with the index 3 does not exist");
         verifyNoMoreInteractions(softAssert);
     }
 

@@ -326,3 +326,21 @@ Then `${response-as-bytes}` contains excel sheet with index `0` and records:
 !B3        !Price                  !
 !C1:C5     !                       !
 ----
+
+=== Validate Excel sheet row count by index
+
+Validates that an Excel sheet at the specified index contains exactly the expected number of rows. The row count includes all rows in the sheet, including headers and empty rows.
+
+[source,gherkin]
+----
+Then `$excelDocument` contains exactly `$expectedRowCount` rows in sheet with index `$sheetIndex`
+----
+
+* `$excelDocument` - The excel document data to verify.
+* `$expectedRowCount` - The expected number of rows in the sheet.
+* `$sheetIndex` - The index of the sheet (0-based).
+
+.Validate Excel sheet row count by index
+----
+Then `${excel-data}` contains exactly `42` rows in sheet with index `0`
+----

@@ -22,6 +22,7 @@ import static java.util.Map.entry;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -62,12 +63,10 @@ public class ExcelDocumentValidationSteps
      * @param index Index of the sheet (0-based)
      */
     @Then("`$excelDocument` contains excel sheet with name `$name` at index `$index`")
-    public void validateExcelSheetNae(DataWrapper excelDocument, String name, int index)
+    public void validateExcelSheetName(DataWrapper excelDocument, String name, int index)
     {
-        getExtractor(excelDocument).getSheet(index).ifPresentOrElse(
-            sheet -> softAssert.assertEquals("The name of sheet at index " + index, name, sheet.getSheetName()),
-            () -> softAssert.recordFailedAssertion(format("Sheet with the index %d does not exist", index))
-        );
+        validateSheetWithIndex(excelDocument, index,
+                sheet -> softAssert.assertEquals("The name of sheet at index " + index, name, sheet.getSheetName()));
     }
 
     /**
@@ -118,6 +117,33 @@ public class ExcelDocumentValidationSteps
     public void excelSheetWithNameHasRecords(DataWrapper excelDocument, String name, List<CellRecord> records)
     {
         checkRecords(excelDocument, records, e -> e.getSheet(name), "name " + name);
+    }
+
+    /**
+     * Checks that excel document contains a sheet with the specified index and exactly the expected number of rows.
+     * The row count includes all rows in the sheet, including headers and empty rows.
+     *
+     * @param excelDocument    Excel document data
+     * @param expectedRowCount Expected number of rows in the sheet
+     * @param sheetIndex       Index of the sheet (0-based)
+     */
+    @Then("`$excelDocument` contains exactly `$expectedRowCount` rows in sheet with index `$sheetIndex`")
+    public void validateExcelSheetRowCount(DataWrapper excelDocument, int expectedRowCount, int sheetIndex)
+    {
+        validateSheetWithIndex(excelDocument, sheetIndex,
+            sheet -> {
+                int actualRowCount = sheet.getLastRowNum() + 1;
+                softAssert.assertEquals(format("Number of rows in sheet with index %d", sheetIndex), expectedRowCount,
+                    actualRowCount);
+            }
+        );
+    }
+
+    private void validateSheetWithIndex(DataWrapper excelDocument, int index, Consumer<Sheet> sheetValidation)
+    {
+        getExtractor(excelDocument).getSheet(index).ifPresentOrElse(sheetValidation,
+                () -> softAssert.recordFailedAssertion(format("Sheet with the index %d does not exist", index))
+        );
     }
 
     private void checkRecords(DataWrapper excelDoc, List<CellRecord> records, Function<IExcelSheetsExtractor,
