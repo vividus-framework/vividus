@@ -3,11 +3,11 @@ project.description = 'VIVIDUS plugin for YAML'
 dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-soft-assert')
-    implementation(group: 'io.github.yaml-path', name: 'yaml-path', version: '0.0.12')
+    implementation('io.github.yaml-path:yaml-path:0.0.12')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.4')
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.20.0')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation platform('org.mockito:mockito-bom:5.20.0')
+    testImplementation('org.mockito:mockito-junit-jupiter')
 }

@@ -15,10 +15,10 @@ the `platform` function to ensure that the versions from the BOM are used:
 [source,gradle,subs="attributes+"]
 ----
 dependencies {
-    implementation platform(group: 'org.vividus', name: 'vividus-bom', version: '{current-version}') <1>
-    implementation(group: 'org.vividus', name: 'vividus') <2>
-    implementation(group: 'org.vividus', name: 'vividus-plugin-web-app') <3>
-    implementation(group: 'org.vividus', name: 'vividus-plugin-html') <3>
+    implementation platform('org.vividus:vividus-bom:{current-version}') <1>
+    implementation('org.vividus:vividus') <2>
+    implementation('org.vividus:vividus-plugin-web-app') <3>
+    implementation('org.vividus:vividus-plugin-html') <3>
 }
 ----
 <1> `vividus-bom` is the BOM. Versions for the core and plugins do not need to be specified as they are managed by this BOM.
@@ -62,9 +62,9 @@ explicitly specified in the dependencies block.
 [source,gradle,subs="attributes+"]
 ----
 dependencies {
-    implementation platform(group: 'org.vividus', name: 'vividus-bom', version: '{current-version}')
-    implementation(group: 'org.vividus', name: 'vividus')
-    implementation(group: 'org.vividus', name: 'vividus-plugin-web-app', version: '0.6.13')
+    implementation platform('org.vividus:vividus-bom:{current-version}')
+    implementation('org.vividus:vividus')
+    implementation('org.vividus:vividus-plugin-web-app:0.6.13')
 }
 ----
 

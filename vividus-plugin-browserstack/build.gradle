@@ -9,15 +9,15 @@ dependencies {
 
     runtimeOnly project(':vividus-plugin-rest-api')
 
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
-    implementation(group: 'org.slf4j', name: 'slf4j-api')
-    implementation(group: 'com.browserstack', name: 'automate-client-java', version: '0.15')
-    implementation(group: 'com.browserstack', name: 'browserstack-local-java', version: '1.1.7')
+    implementation platform('org.slf4j:slf4j-bom:2.0.17')
+    implementation('org.slf4j:slf4j-api')
+    implementation('com.browserstack:automate-client-java:0.15')
+    implementation('com.browserstack:browserstack-local-java:1.1.7')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.4')
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.20.0')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.3')
+    testImplementation platform('org.mockito:mockito-bom:5.20.0')
+    testImplementation('org.mockito:mockito-junit-jupiter')
+    testImplementation('com.github.valfirst:slf4j-test:3.0.3')
 }
