@@ -138,3 +138,8 @@ When I initialize scenario variable `expectedTable` with values:
 |19           |TRUE         |361          |
 Then `${expectedTable}` is equal to table:
 {transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=DifferentTypes, range=B1:D2;B3:D3}
+
+Scenario: Validate step 'Then `$excelDocument` contains exactly `$expectedRowCount` rows in sheet with index `$sheetIndex`'
+Meta:
+    @requirementId 6017
+Then `${response-as-bytes}` contains exactly `5` rows in sheet with index `0`
