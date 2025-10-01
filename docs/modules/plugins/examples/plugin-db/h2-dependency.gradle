@@ -1,1 +1,1 @@
-implementation(group: 'com.h2database', name: 'h2', version: '2.4.240')
+implementation('com.h2database:h2:2.4.240')

@@ -10,7 +10,7 @@ dependencies {
     // The latest WinRm4J release (0.12.3) has a bug when certificate checks can't be disabled for Basic Authentication.
     // This bug is fixed in `master` branch: https://github.com/cloudsoft/winrm4j/commit/42c704c19cb3b15bc46030d0dc54cc1df09d3720.
     // Thus it's needed to use Jitpack build with the need fix.
-    implementation(group: 'com.github.cloudsoft.winrm4j', name: 'winrm4j', version: '806a943a3d')
+    implementation('com.github.cloudsoft.winrm4j:winrm4j:806a943a3d')
 
     // Jar Hell brings `org.apache.httpcomponents:httpasyncclient:4.1.5` transitive dependency which has a "fix":
     // https://github.com/apache/httpasyncclient/commit/94b061bae5fe247cf3e69b487a78b457f20ca2e2#diff-7883e3d4bc544069649256a8c5307241332cb06ed434bd613b0aa31630746d05
@@ -18,17 +18,17 @@ dependencies {
     // Apache CXF team implemented the fix: https://github.com/apache/cxf/commit/efa7f6d730fe6e1facf92d86821fa15bc123d201
     // and reported an issue: https://issues.apache.org/jira/browse/HTTPASYNC-168 (Won't Fix).
     // So it's needed to use Apache CXF (`3.4.7` or higher) or (`3.5.2` or higher).
-    implementation(group: 'org.apache.cxf', name: 'cxf-rt-transports-http', version: "${cxfVersion}")
-    implementation(group: 'org.apache.cxf', name: 'cxf-rt-transports-http-hc', version: "${cxfVersion}")
-    implementation(group: 'org.apache.cxf', name: 'cxf-rt-frontend-jaxws', version: "${cxfVersion}")
+    implementation("org.apache.cxf:cxf-rt-transports-http:${cxfVersion}")
+    implementation("org.apache.cxf:cxf-rt-transports-http-hc:${cxfVersion}")
+    implementation("org.apache.cxf:cxf-rt-frontend-jaxws:${cxfVersion}")
 
-    implementation(group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.1')
-    implementation(group: 'javax.jws', name: 'javax.jws-api', version: '1.1')
-    implementation(group: 'com.sun.xml.messaging.saaj', name: 'saaj-impl', version: '1.5.3')
+    implementation('javax.xml.ws:jaxws-api:2.3.1')
+    implementation('javax.jws:javax.jws-api:1.1')
+    implementation('com.sun.xml.messaging.saaj:saaj-impl:1.5.3')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.4')
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.20.0')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation platform('org.mockito:mockito-bom:5.20.0')
+    testImplementation('org.mockito:mockito-junit-jupiter')
 }

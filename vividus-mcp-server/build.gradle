@@ -4,16 +4,16 @@ dependencies {
     implementation project(':vividus')
     implementation project(':vividus-util')
 
-    implementation platform(group: 'io.modelcontextprotocol.sdk', name: 'mcp-bom', version: '0.13.1')
-    implementation(group: 'io.modelcontextprotocol.sdk', name: 'mcp-core')
-    implementation(group: 'io.modelcontextprotocol.sdk', name: 'mcp-json-jackson2')
+    implementation platform('io.modelcontextprotocol.sdk:mcp-bom:0.13.1')
+    implementation('io.modelcontextprotocol.sdk:mcp-core')
+    implementation('io.modelcontextprotocol.sdk:mcp-json-jackson2')
 
-    implementation platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.25.2')
-    implementation(group: 'org.apache.logging.log4j', name: 'log4j-core')
+    implementation platform('org.apache.logging.log4j:log4j-bom:2.25.2')
+    implementation('org.apache.logging.log4j:log4j-core')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.4')
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.20.0')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation platform('org.mockito:mockito-bom:5.20.0')
+    testImplementation('org.mockito:mockito-junit-jupiter')
 }

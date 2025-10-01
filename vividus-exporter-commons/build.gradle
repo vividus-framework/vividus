@@ -10,13 +10,13 @@ configurations.all {
 
 dependencies {
     implementation project(':vividus-util')
-    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter', version: "${springBootVersion}")
-    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version: "${springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter:${springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-log4j2:${springBootVersion}")
 
-    testImplementation (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "${springBootVersion}")
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.4')
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.20.0')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation platform('org.mockito:mockito-bom:5.20.0')
+    testImplementation('org.mockito:mockito-junit-jupiter')
 }

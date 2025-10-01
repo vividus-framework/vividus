@@ -5,20 +5,20 @@ dependencies {
     implementation project(':vividus-reporter')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
-    api(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '4.1.1')
-    implementation(group: 'com.github.vividus-framework.JsonPath', name: 'json-path', version: versions.jsonPath)
-    implementation(group: 'com.github.vividus-framework.JsonPath', name: 'json-path-assert', version: versions.jsonPath)
-    implementation(group: 'com.flipkart.zjsonpatch', name: 'zjsonpatch', version: '0.4.16')
-    implementation platform(group: 'io.qameta.allure', name: 'allure-bom', version: '2.30.0')
-    implementation(group: 'io.qameta.allure', name: 'allure-jsonunit') {
+    api('net.javacrumbs.json-unit:json-unit:4.1.1')
+    implementation("com.github.vividus-framework.JsonPath:json-path:${versions.jsonPath}")
+    implementation("com.github.vividus-framework.JsonPath:json-path-assert:${versions.jsonPath}")
+    implementation('com.flipkart.zjsonpatch:zjsonpatch:0.4.16')
+    implementation platform('io.qameta.allure:allure-bom:2.30.0')
+    implementation('io.qameta.allure:allure-jsonunit') {
         exclude (group: 'io.qameta.allure')
     }
-    implementation(group: 'com.networknt', name: 'json-schema-validator', version: '1.5.9');
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.5.0-jre')
+    implementation('com.networknt:json-schema-validator:1.5.9')
+    implementation('com.google.guava:guava:33.5.0-jre')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.4')
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.20.0')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation platform('org.mockito:mockito-bom:5.20.0')
+    testImplementation('org.mockito:mockito-junit-jupiter')
 }

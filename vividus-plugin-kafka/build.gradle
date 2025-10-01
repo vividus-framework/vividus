@@ -11,25 +11,25 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation platform(group: 'org.springframework.kafka', name: 'spring-kafka-bom', version: '3.3.10')
-    implementation(group: 'org.springframework.kafka', name: 'spring-kafka')
+    implementation platform('org.springframework.kafka:spring-kafka-bom:3.3.10')
+    implementation('org.springframework.kafka:spring-kafka')
 
     // 'spring-kafka' uses 'kafka-clients' 3.8.1, but it is needed to use 3.9.1
     // as it includes fix for https://issues.apache.org/jira/browse/KAFKA-17078
     // which allows to use Java 24
-    implementation(group: 'org.apache.kafka', name: 'kafka-clients', version: '3.9.1')
+    implementation('org.apache.kafka:kafka-clients:3.9.1')
 
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
-    implementation(group: 'org.slf4j', name: 'slf4j-api')
+    implementation platform('org.slf4j:slf4j-bom:2.0.17')
+    implementation('org.slf4j:slf4j-api')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.4')
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.20.0')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
-    testImplementation(group: 'org.springframework.kafka', name: 'spring-kafka-test')
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.3')
+    testImplementation platform('org.mockito:mockito-bom:5.20.0')
+    testImplementation('org.mockito:mockito-junit-jupiter')
+    testImplementation('org.springframework.kafka:spring-kafka-test')
+    testImplementation('com.github.valfirst:slf4j-test:3.0.3')
 
     // https://github.com/spring-projects/spring-kafka/issues/3955#issuecomment-2971304102
-    testImplementation(group: 'org.apache.kafka', name: 'kafka_2.13', version: '3.9.1')
+    testImplementation('org.apache.kafka:kafka_2.13:3.9.1')
 }

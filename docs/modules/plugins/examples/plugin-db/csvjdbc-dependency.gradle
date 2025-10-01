@@ -1,1 +1,1 @@
-implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.46')
+implementation('net.sourceforge.csvjdbc:csvjdbc:1.0.46')

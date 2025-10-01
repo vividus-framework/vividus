@@ -54,9 +54,9 @@ dependencies {
     implementation project(':vividus-plugin-xml')
     implementation project(':vividus-plugin-yaml')
 
-    implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.46')
-    implementation(group: 'com.h2database', name: 'h2', version: '2.4.240')
+    implementation('net.sourceforge.csvjdbc:csvjdbc:1.0.46')
+    implementation('com.h2database:h2:2.4.240')
 
     // Zstd decompression support, need to add explicitly as it's not a transitive dependency of netty out-of-the-box
-    implementation(group: 'com.github.luben', name: 'zstd-jni', version: '1.5.7-4')
+    implementation('com.github.luben:zstd-jni:1.5.7-4')
 }
