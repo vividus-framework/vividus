@@ -60,7 +60,7 @@ dependencies {
     implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-properties')
     implementation("com.github.vividus-framework.JsonPath:json-path:${versions.jsonPath}")
 
-    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation platform('org.junit:junit-bom:6.0.0')
     testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testRuntimeOnly('org.junit.vintage:junit-vintage-engine')
