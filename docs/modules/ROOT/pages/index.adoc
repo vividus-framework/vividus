@@ -39,4 +39,4 @@ There are various channels which you can ask questions on.
 - Use #support channel in https://vividus-support.vercel.app/[Slack].
 - Create an issue for your question at https://github.com/vividus-framework/vividus/issues/new/choose[GitHub].
 - Email us using team@vividus.dev.
-- Follow and tag us on https://twitter.com/vividus_tool[Twitter].
+- Follow and tag us on https://x.com/vividus_tool[X].

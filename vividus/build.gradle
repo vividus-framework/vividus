@@ -59,54 +59,54 @@ dependencies {
     implementation project(':vividus-util')
 
     // Logging SLF4J + Log4j2
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.17')
-    implementation(group: 'org.slf4j', name: 'slf4j-api')
-    implementation(group: 'org.slf4j', name: 'jcl-over-slf4j') // Replace commons-logging with SLF4J
-    implementation(group: 'org.slf4j', name: 'jul-to-slf4j') // JUL to SLF4J bridge
-    implementation(group: 'org.slf4j', name: 'log4j-over-slf4j') // Log4J 1.x and Reload4J to SLF4J bridge
+    implementation platform('org.slf4j:slf4j-bom:2.0.17')
+    implementation('org.slf4j:slf4j-api')
+    implementation('org.slf4j:jcl-over-slf4j') // Replace commons-logging with SLF4J
+    implementation('org.slf4j:jul-to-slf4j') // JUL to SLF4J bridge
+    implementation('org.slf4j:log4j-over-slf4j') // Log4J 1.x and Reload4J to SLF4J bridge
 
-    implementation platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.25.2')
-    implementation(group: 'org.apache.logging.log4j', name: 'log4j-api')
-    implementation(group: 'org.apache.logging.log4j', name: 'log4j-core')
-    implementation(group: 'org.apache.logging.log4j', name: 'log4j-slf4j2-impl')
-    annotationProcessor platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.25.2')
-    annotationProcessor(group: 'org.apache.logging.log4j', name: 'log4j-core')
+    implementation platform('org.apache.logging.log4j:log4j-bom:2.25.2')
+    implementation('org.apache.logging.log4j:log4j-api')
+    implementation('org.apache.logging.log4j:log4j-core')
+    implementation('org.apache.logging.log4j:log4j-slf4j2-impl')
+    annotationProcessor platform('org.apache.logging.log4j:log4j-bom:2.25.2')
+    annotationProcessor('org.apache.logging.log4j:log4j-core')
 
-    implementation(group: 'de.vandermeer', name: 'asciitable', version: '0.3.2')
+    implementation('de.vandermeer:asciitable:0.3.2')
 
     // Meta filters based on Groovy
-    implementation(group: 'org.apache.groovy', name: 'groovy', version: '5.0.1')
+    implementation('org.apache.groovy:groovy:5.0.1')
 
     // Spring
-    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.11')
-    implementation(group: 'org.springframework', name: 'spring-context')
-    implementation(group: 'org.springframework.vault', name: 'spring-vault-core', version: '3.2.0')
+    implementation platform('org.springframework:spring-framework-bom:6.2.11')
+    implementation('org.springframework:spring-context')
+    implementation('org.springframework.vault:spring-vault-core:3.2.0')
 
-    implementation(group: 'jakarta.inject', name: 'jakarta.inject-api', version: '2.0.1')
-    implementation(group: 'commons-cli', name: 'commons-cli', version: '1.10.0')
+    implementation('jakarta.inject:jakarta.inject-api:2.0.1')
+    implementation('commons-cli:commons-cli:1.10.0')
     // jasypt
-    implementation(group: 'org.jasypt', name: 'jasypt-spring4', version: '1.9.3')
+    implementation('org.jasypt:jasypt-spring4:1.9.3')
 
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.19.0')
-    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: '4.5.0')
-    implementation(group: 'commons-codec', name: 'commons-codec', version: '1.19.0')
-    implementation(group: 'org.hamcrest', name: 'hamcrest', version: '3.0')
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.5.0-jre')
-    implementation(group: 'io.github.classgraph', name: 'classgraph', version: '4.8.180')
-    implementation(group:  'io.github.java-diff-utils', name: 'java-diff-utils', version: '4.16')
-    implementation(group: 'org.apache.commons', name: 'commons-jexl3', version: '3.5.0')
-    implementation(group: 'net.datafaker', name: 'datafaker', version: '2.5.1')
+    implementation('org.apache.commons:commons-lang3:3.19.0')
+    implementation('org.apache.commons:commons-collections4:4.5.0')
+    implementation('commons-codec:commons-codec:1.19.0')
+    implementation('org.hamcrest:hamcrest:3.0')
+    implementation('com.google.guava:guava:33.5.0-jre')
+    implementation('io.github.classgraph:classgraph:4.8.180')
+    implementation('io.github.java-diff-utils:java-diff-utils:4.16')
+    implementation('org.apache.commons:commons-jexl3:3.5.0')
+    implementation('net.datafaker:datafaker:2.5.1')
 
-    compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
+    compileOnly("com.github.spotbugs:spotbugs-annotations:${spotbugsVersion}")
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.4')
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.20.0')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
-    testImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '2.3.0')
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.3')
-    testImplementation(group: 'org.springframework', name: 'spring-test')
+    testImplementation platform('org.mockito:mockito-bom:5.20.0')
+    testImplementation('org.mockito:mockito-junit-jupiter')
+    testImplementation('org.junit-pioneer:junit-pioneer:2.3.0')
+    testImplementation('com.github.valfirst:slf4j-test:3.0.3')
+    testImplementation('org.springframework:spring-test')
 
     integrationTestImplementation project(':vividus-plugin-azure-data-factory')
     integrationTestImplementation project(':vividus-plugin-avro')
@@ -127,16 +127,16 @@ dependencies {
     integrationTestImplementation(project(':vividus-mcp-server')) {
         exclude module: 'vividus'
     }
-    integrationTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.4')
-    integrationTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    integrationTestImplementation platform('org.junit:junit-bom:5.13.4')
+    integrationTestImplementation('org.junit.jupiter:junit-jupiter')
     integrationTestRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    integrationTestImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '2.3.0')
+    integrationTestImplementation('org.junit-pioneer:junit-pioneer:2.3.0')
 
-    systemTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.4')
-    systemTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    systemTestImplementation platform('org.junit:junit-bom:5.13.4')
+    systemTestImplementation('org.junit.jupiter:junit-jupiter')
     systemTestRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    systemTestImplementation platform(group: 'org.testcontainers', name: 'testcontainers-bom', version: '1.21.3')
-    systemTestImplementation(group: 'org.testcontainers', name: 'testcontainers')
-    systemTestImplementation(group: 'org.testcontainers', name: 'junit-jupiter')
-    systemTestImplementation(group: 'org.testcontainers', name: 'vault')
+    systemTestImplementation platform('org.testcontainers:testcontainers-bom:1.21.3')
+    systemTestImplementation('org.testcontainers:testcontainers')
+    systemTestImplementation('org.testcontainers:junit-jupiter')
+    systemTestImplementation('org.testcontainers:vault')
 }

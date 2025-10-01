@@ -5,13 +5,13 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.11')
-    implementation(group: 'org.springframework', name: 'spring-websocket')
-    implementation(group: 'org.eclipse.jetty.ee10.websocket', name: 'jetty-ee10-websocket-jakarta-client', version: '12.1.1')
+    implementation platform('org.springframework:spring-framework-bom:6.2.11')
+    implementation('org.springframework:spring-websocket')
+    implementation('org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jakarta-client:12.1.1')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.13.4')
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.20.0')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation platform('org.mockito:mockito-bom:5.20.0')
+    testImplementation('org.mockito:mockito-junit-jupiter')
 }

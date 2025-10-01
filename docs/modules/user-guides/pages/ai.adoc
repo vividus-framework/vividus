@@ -17,7 +17,7 @@ VIVIDUS MCP server is available starting from version `0.6.16-SNAPSHOT` and high
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-mcp-server')
+implementation('org.vividus:vividus-mcp-server')
 ----
 . Make sure to use https://github.com/vividus-framework/vividus-build-system?tab=readme-ov-file#migrating-from-20-to-30[Build System 3.0]
 . Update `gradlew` script in the root of your test project to the latest version:
