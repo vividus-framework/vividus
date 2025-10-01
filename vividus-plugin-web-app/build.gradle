@@ -11,7 +11,7 @@ dependencies {
     api project(':vividus-extension-selenium')
     api project(':vividus-extension-web-app')
 
-    implementation('com.codeborne:selenide:7.9.3')
+    implementation('com.codeborne:selenide:7.10.1')
 
     api platform('org.seleniumhq.selenium:selenium-bom:4.33.0')
     implementation('org.seleniumhq.selenium:selenium-chrome-driver')
