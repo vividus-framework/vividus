@@ -1,14 +1,18 @@
 Composite: Then a link with the URL '$URL' exists
+!-- DEPRECATED: 0.7.0, Then number of elements found by `linkUrl(%1$s)` is equal to `1`
 Then number of elements found by `linkUrl(<URL>)` is equal to `1`
 
 Composite: Then a link with the URL containing '$URLpart' exists
+!-- DEPRECATED: 0.7.0, Then number of elements found by `linkUrlPart(%1$s)` is equal to `1`
 Then number of elements found by `linkUrlPart(<URLpart>)` is equal to `1`
 
 Composite: Then the page title is '$pageTitle'
+!-- DEPRECATED: 0.7.0, Then page title is equal to `%1$s`
 Priority: 1
 Then page title is equal to `<pageTitle>`
 
 Composite: Then the page title contains the text '$text'
+!-- DEPRECATED: 0.7.0, Then page title contains `%1$s`
 Priority: 1
 Then page title contains `<text>`
 
@@ -19,10 +23,12 @@ When I execute sequence of actions:
 |ENTER_TEXT|<text>   |
 
 Composite: Then an element with the name '$elementName' containing text '$text' exists
+!-- DEPRECATED: 0.7.0, Then number of elements found by `name(%1$s)->filter.textPart(%2$s)` is equal to `1`
 Priority: 1
 Then number of elements found by `name(<elementName>)->filter.textPart(<text>)` is equal to `1`
 
 Composite: Then an element with the name '$elementName' and text '$text' exists
+!-- DEPRECATED: 0.7.0, Then number of elements found by `name(%1$s)->filter.caseSensitiveText(%2$s)` is equal to `1`
 Then number of elements found by `name(<elementName>)->filter.caseSensitiveText(<text>)` is equal to `1`
 
 Composite: Then a [$state] element with the name '$elementName' and text '$text' exists
@@ -31,9 +37,11 @@ Priority: 1
 Then number of elements found by `name(<elementName>)->filter.caseSensitiveText(<text>).state(<state>)` is equal to `1`
 
 Composite: Then an element with the name '$elementName' exists
+!-- DEPRECATED: 0.7.0, Then number of elements found by `name(%1$s)` is equal to `1`
 Then number of elements found by `name(<elementName>)` is equal to `1`
 
 Composite: Then an element with the name '$elementName' does not exist
+!-- DEPRECATED: 0.7.0, Then number of elements found by `name(%1$s)` is equal to `0`
 Then number of elements found by `name(<elementName>)` is equal to `0`
 
 Composite: Then a [$state] element with the name '$elementName' exists
@@ -41,6 +49,7 @@ Composite: Then a [$state] element with the name '$elementName' exists
 Then number of elements found by `name(<elementName>)->filter.state(<state>)` is equal to `1`
 
 Composite: Then an element with the tag '$elementTag' and text '$text' exists
+!-- DEPRECATED: 0.7.0, Then number of elements found by `tagName(%1$s)->filter.caseSensitiveText(%2$s)` is equal to `1`
 Then number of elements found by `tagName(<elementTag>)->filter.caseSensitiveText(<text>)` is equal to `1`
 
 Composite: Then a [$state] element with the tag '$elementTag' does not exist
@@ -52,12 +61,15 @@ Composite: Then a [$state] element with the tag '$elementTag' exists
 Then number of elements found by `tagName(<elementTag>)->filter.state(<state>)` is equal to `1`
 
 Composite: When I click on an element with the attribute '$attributeType'='$attributeValue'
+!-- DEPRECATED: 0.7.0, When I click on element located by `xpath(.//*[@%1$s='%2$s'])`
 When I click on element located by `xpath(.//*[@<attributeType>='<attributeValue>'])`
 
 Composite: When I click on an element with the text '$text'
+!-- DEPRECATED: 0.7.0, When I click on element located by `caseSensitiveText(%1$s)`
 When I click on element located by `caseSensitiveText(<text>)`
 
 Composite: Then an element with the attribute '$attributeType'='$attributeValue' exists
+!-- DEPRECATED: 0.7.0, Then number of elements found by `xpath(.//*[@%1$s='%2$s'])` is equal to `1`
 Then number of elements found by `xpath(.//*[@<attributeType>='<attributeValue>'])` is equal to `1`
 
 Composite: Then a [$state] element with the attribute '$attributeType'='$attributeValue' exists
@@ -65,15 +77,19 @@ Composite: Then a [$state] element with the attribute '$attributeType'='$attribu
 Then number of elements found by `xpath(.//*[@<attributeType>='<attributeValue>'])->filter.state(<state>)` is equal to `1`
 
 Composite: Then an element with the tag '$elementTag' and attribute '$attributeType'='$attributeValue' exists
+!-- DEPRECATED: 0.7.0, Then number of elements found by `xpath(.//%1$s[@%2$s='%3$s'])` is equal to `1`
 Then number of elements found by `xpath(.//<elementTag>[@<attributeType>='<attributeValue>'])` is equal to `1`
 
 Composite: Then an element with the attribute '$attributeType' containing '$attributeValue' exists
+!-- DEPRECATED: 0.7.0, Then number of elements found by `xpath(.//*[contains(@%1$s, '%2$s')])` is equal to `1`
 Then number of elements found by `xpath(.//*[contains(@<attributeType>, '<attributeValue>')])` is equal to `1`
 
 Composite: Then at least one element with the attribute '$attributeType'='$attributeValue' exists
+!-- DEPRECATED: 0.7.0, Then number of elements found by `xpath(.//*[@%1$s='%2$s'])` is greater than or equal to `1`
 Then number of elements found by `xpath(.//*[@<attributeType>='<attributeValue>'])` is greater than or equal to `1`
 
 Composite: Then an element by the cssSelector '$cssSelector' exists
+!-- DEPRECATED: 0.7.0, Then number of elements found by `cssSelector(%1$s)` is equal to `1`
 Then number of elements found by `cssSelector(<cssSelector>)` is equal to `1`
 
 Composite: When I hover a mouse over a button with the name '$buttonName'
