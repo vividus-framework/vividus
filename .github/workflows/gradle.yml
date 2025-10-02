@@ -80,8 +80,7 @@ jobs:
       shell: bash
       run: |
         if [[ $MATRIX_PLATFORM = "ubuntu-latest" ]]; then
-          ./gradlew build -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=768m" \
-                          -Ptest.testLogging.exceptionFormat=full
+          ./gradlew build -Ptest.testLogging.exceptionFormat=full
         else
           ./gradlew build -x spotbugsMain -x spotbugsTest -x spotbugsIntegrationTest \
                           -x pmdMain -x pmdTest -x pmdIntegrationTest \
