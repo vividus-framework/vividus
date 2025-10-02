@@ -75,11 +75,20 @@ public final class HashExpressionProcessors extends DelegatingExpressionProcesso
     
     private static String calculateHmac(String algorithm, String key, String data) {
         try {
-            String algo = algorithm.replace("-", "").toUpperCase();
-            if (!algo.startsWith("HMAC")) {
+            String normalized = algorithm.trim().toUpperCase(Locale.ROOT);
+            if (!normalized.startsWith("HMAC")) {
                 throw new IllegalArgumentException("Unsupported HMAC algorithm: " + algorithm);
             }
-            String macAlgorithm = "Hmac" + algo.substring(4); // e.g. HmacSHA256
+            String digestPart = normalized.substring(4);
+            if (digestPart.startsWith("-")) {
+                digestPart = digestPart.substring(1);
+            }
+            if (digestPart.isEmpty()) {
+                throw new IllegalArgumentException("Unsupported HMAC algorithm: " + algorithm);
+            }
+            String macAlgorithm = digestPart.startsWith("SHA3")
+                    ? "Hmac" + digestPart
+                    : "Hmac" + digestPart.replace("-", "");
             Mac mac = Mac.getInstance(macAlgorithm);
             SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), macAlgorithm);
             mac.init(secretKeySpec);
