@@ -30,6 +30,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
+import org.jspecify.annotations.Nullable;
 import org.vividus.configuration.BeanFactory;
 
 public final class StepsCollector
@@ -66,10 +67,6 @@ public final class StepsCollector
                     method.getDeclaringClass().getProtectionDomain().getCodeSource().getLocation().toString());
             step.setLocation(baseFileName.replaceAll("-\\d+\\.\\d+\\.\\d+.*", EMPTY));
         }
-        else
-        {
-            step.setLocation(EMPTY);
-        }
         return step;
     }
 
@@ -87,7 +84,7 @@ public final class StepsCollector
         private final String pattern;
         private boolean deprecated;
         private boolean compositeInStepsFile;
-        private String location;
+        @Nullable private String location;
 
         public Step(String startingWord, String pattern)
         {
@@ -139,7 +136,7 @@ public final class StepsCollector
         public int compareTo(Step anotherStep)
         {
             return Comparator.comparing(Step::isCompositeInStepsFile)
-                    .thenComparing(Step::getLocation)
+                    .thenComparing(Comparator.comparing(Step::getLocation, Comparator.nullsLast(String::compareTo)))
                     .thenComparing(Step::getStartingWord)
                     .thenComparing(Step::getPattern)
                     .compare(this, anotherStep);
