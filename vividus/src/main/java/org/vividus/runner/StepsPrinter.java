@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
@@ -61,7 +62,8 @@ public final class StepsPrinter
         Vividus.init();
         Set<Step> steps = StepsCollector.getSteps();
 
-        int maxLocationLength = steps.stream().map(Step::getLocation).mapToInt(String::length).max().orElse(0);
+        int maxLocationLength = steps.stream().map(Step::getLocation).filter(Objects::nonNull).mapToInt(String::length)
+                .max().orElse(0);
 
         List<String> stepsLines = steps.stream()
                 .map(s -> String.format("%-" + (maxLocationLength + 1) + "s %-24s%s %s",

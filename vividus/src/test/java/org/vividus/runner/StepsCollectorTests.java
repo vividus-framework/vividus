@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
@@ -57,18 +58,19 @@ class StepsCollectorTests
                     List.of(plainStep, deprecatedSteps, deprecatedCompositeStep));
             List<Step> steps = StepsCollector.getSteps().stream().sorted().toList();
             assertEquals(3, steps.size());
-            assertStep(steps.get(0), GIVEN, GIVEN_PATTERN, false, false);
-            assertStep(steps.get(1), WHEN, WHEN_PATTERN, true, false);
-            assertStep(steps.get(2), THEN, THEN_PATTERN, true, true);
+            assertStep(steps.get(0), GIVEN, GIVEN_PATTERN, false, false, StringUtils.EMPTY);
+            assertStep(steps.get(1), WHEN, WHEN_PATTERN, true, false, StringUtils.EMPTY);
+            assertStep(steps.get(2), THEN, THEN_PATTERN, true, true, null);
         }
     }
 
-    private void assertStep(Step step, String word, String pattern, boolean deprecated, boolean composite)
+    private void assertStep(Step step, String word, String pattern, boolean deprecated, boolean composite,
+            String location)
     {
         Step actualStep = new Step(word, pattern);
         actualStep.setDeprecated(deprecated);
         actualStep.setCompositeInStepsFile(composite);
-        actualStep.setLocation("");
+        actualStep.setLocation(location);
         assertEquals(step, actualStep);
     }
 
