@@ -2,7 +2,7 @@ project.description = 'VIVIDUS plugin for Amazon DynamoDB'
 
 dependencies {
     api project(':vividus-engine')
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.791')
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.792')
     implementation('com.amazonaws:aws-java-sdk-dynamodb')
     implementation('com.amazonaws:aws-java-sdk-sts')
     implementation project(':vividus-extension-aws')
