@@ -22,5 +22,5 @@ dependencies {
     testImplementation platform('org.mockito:mockito-bom:5.20.0')
     testImplementation('org.mockito:mockito-junit-jupiter')
     testImplementation('com.github.valfirst:slf4j-test:3.0.3')
-    testImplementation('nl.jqno.equalsverifier:equalsverifier:4.1')
+    testImplementation('nl.jqno.equalsverifier:equalsverifier:4.2')
 }
