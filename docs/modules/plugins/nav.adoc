@@ -5,6 +5,7 @@
 *** xref:plugin-aws-kinesis.adoc[Kinesis]
 *** xref:plugin-aws-lambda.adoc[Lambda]
 *** xref:plugin-aws-s3.adoc[S3]
+*** xref:plugin-aws-secrets-manager.adoc[Secrets Manager]
 ** xref:azure.adoc[Azure]
 *** xref:plugin-azure-resource-manager.adoc[Resource Manager]
 *** xref:plugin-azure-cosmos-db.adoc[Cosmos DB]
