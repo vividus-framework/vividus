@@ -18,23 +18,9 @@ When I close mobile application
 
 
 Scenario: Verify step: 'Given I start mobile application with capabilities:$capabilities'
-Meta:
-    @targetPlatform ios
 Given I start mobile application with capabilities:
 |name|value     |
 |app |${app-url}|
-
-
-Scenario: Verify step: 'Given I start mobile application with capabilities:$capabilities'
-Meta:
-    @targetPlatform android
-Given I start mobile application with capabilities:
-|name           |value     |
-|app            |${app-url}|
-|platformVersion|10.0      |
-!-- Platform version 10 is using here as AndroidDriver getSystemBars() returns wrong values for Android 12.
-!-- https://github.com/appium/appium/issues/16390. It leads to failed visual check. Should be fixed in Appium 1.22.3,
-!-- which is not supported by SauceLab yet.
 
 
 Scenario: Step verification: When I $actionType baseline with name `$name`
