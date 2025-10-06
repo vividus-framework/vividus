@@ -6,7 +6,6 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
     api('net.javacrumbs.json-unit:json-unit:4.1.1')
-    implementation("com.github.vividus-framework.JsonPath:json-path:${versions.jsonPath}")
     implementation("com.github.vividus-framework.JsonPath:json-path-assert:${versions.jsonPath}")
     implementation('com.flipkart.zjsonpatch:zjsonpatch:0.4.16')
     implementation platform('io.qameta.allure:allure-bom:2.30.0')

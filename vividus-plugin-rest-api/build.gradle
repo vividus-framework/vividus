@@ -12,7 +12,6 @@ dependencies {
     implementation platform('org.springframework:spring-framework-bom:6.2.11')
     implementation('org.springframework:spring-web')
     implementation('org.apache.commons:commons-lang3:3.19.0')
-    implementation("com.github.vividus-framework.JsonPath:json-path:${versions.jsonPath}")
     implementation("com.github.vividus-framework.JsonPath:json-path-assert:${versions.jsonPath}")
     implementation('org.hamcrest:hamcrest:3.0')
     implementation('org.apache.tika:tika-core:3.2.3')
