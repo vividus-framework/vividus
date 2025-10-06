@@ -52,13 +52,13 @@ dependencies {
     api('com.fasterxml.jackson.core:jackson-databind')
     api('com.fasterxml.jackson.datatype:jackson-datatype-jdk8')
     api('org.apache.commons:commons-lang3:3.19.0')
+    api("com.github.vividus-framework.JsonPath:json-path:${versions.jsonPath}")
 
     implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
 
     implementation('org.apache.commons:commons-collections4:4.5.0')
     implementation('commons-io:commons-io:2.20.0')
     implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-properties')
-    implementation("com.github.vividus-framework.JsonPath:json-path:${versions.jsonPath}")
 
     testImplementation platform('org.junit:junit-bom:5.13.4')
     testImplementation('org.junit.jupiter:junit-jupiter')
