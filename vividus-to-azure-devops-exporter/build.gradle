@@ -36,7 +36,7 @@ dependencies {
     implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
 
     testImplementation('org.springframework.boot:spring-boot-starter-test')
-    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation platform('org.junit:junit-bom:6.0.0')
     testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation platform('org.mockito:mockito-bom:5.20.0')
