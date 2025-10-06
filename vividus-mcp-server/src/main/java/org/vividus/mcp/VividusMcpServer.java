@@ -19,8 +19,11 @@ package org.vividus.mcp;
 import java.io.IOException;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.jspecify.annotations.Nullable;
 import org.vividus.mcp.tool.VividusTool;
 
 import io.modelcontextprotocol.json.McpJsonMapper;
@@ -79,9 +82,10 @@ public class VividusMcpServer
     public static class StepInfo
     {
         private final String name;
+        @JsonInclude(Include.NON_NULL)
         private final String module;
 
-        public StepInfo(String name, String module)
+        public StepInfo(@Nullable String name, String module)
         {
             this.name = name;
             this.module = module;
