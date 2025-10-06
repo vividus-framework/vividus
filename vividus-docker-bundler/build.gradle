@@ -40,6 +40,7 @@ dependencies {
     implementation project(':vividus-plugin-aws-kinesis')
     implementation project(':vividus-plugin-aws-lambda')
     implementation project(':vividus-plugin-aws-s3')
+    implementation project(':vividus-plugin-aws-secrets-manager')
     implementation project(':vividus-plugin-azure-cosmos-db')
     implementation project(':vividus-plugin-azure-data-factory')
     implementation project(':vividus-plugin-azure-event-grid')

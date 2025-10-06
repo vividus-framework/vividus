@@ -1,0 +1,15 @@
+project.description = 'VIVIDUS plugin for AWS Secrets Manager'
+
+dependencies {
+    api project(':vividus-engine')
+    implementation project(':vividus-util')
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.792')
+    implementation('com.amazonaws:aws-java-sdk-secretsmanager')
+    implementation('com.google.guava:guava:33.5.0-jre')
+
+    testImplementation platform('org.junit:junit-bom:5.14.0')
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    testImplementation platform('org.mockito:mockito-bom:5.20.0')
+    testImplementation('org.mockito:mockito-junit-jupiter')
+}
