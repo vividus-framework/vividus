@@ -164,6 +164,7 @@ public class BatchedEmbedder extends Embedder
         EmbedderControls embedderControls = new EmbedderControls();
         embedderControls.useStoryTimeouts(
                 Long.toString(batchConfiguration.getStoryExecutionTimeout().toSeconds()));
+        embedderControls.useRunTimeout(Long.toString(batchConfiguration.getExecutionTimeout().toSeconds()));
         Optional.ofNullable(batchConfiguration.getThreads())
                 .ifPresent(embedderControls::useThreads);
         embedderControls.doIgnoreFailureInStories(true);

@@ -72,6 +72,10 @@ NOTE: The properties marked with *bold* are mandatory.
 |`<empty>`
 |If set the value overrides global setting `scenario.fail-fast`.
 
+|`batch-<batch-number>.execution-timeout`
+|`PT10H`
+|The max duration of execution tests of batch in {durations-format-link} format. Overrides value specified via `batch.execution-timeout`.
+
 |`batch-<batch-number>.story.execution-timeout`
 |`PT2H`
 |The max duration of the single story in the batch in {durations-format-link} format. Overrides value specified via `story.execution-timeout`.
@@ -88,9 +92,13 @@ NOTE: The properties marked with *bold* are mandatory.
 |`false`
 |If set to `true` the scenario execution will be stopped after the first failed assertion
 
+|`batch.execution-timeout`
+|`PT10H`
+|The max duration of the single batch in {durations-format-link} format. Could be overridden via corresponding batch setting.
+
 |`story.execution-timeout`
 |`PT2H`
-|The max duration of the single story in {durations-format-link} format. Could be overriden via corresponging batch setting.
+|The max duration of the single story in {durations-format-link} format. Could be overridden via corresponding batch setting.
 
 |`story.example-index-format`
 |`\u0020[0]`
