@@ -667,8 +667,7 @@ jobs:
                                                 -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                 -Pvividus.allure.executor.report-name="SauceLabs Android System tests report" \
                                                 -Pvividus.variables.app-url=storage:filename=vividus-test-app-android-$TEST_APP_VERSION.zip \
-                                                -Pvividus.statistics.print-failures=true \
-                                                -Pvividus.batch-1.resource-include-patterns=VisualTesting.story
+                                                -Pvividus.statistics.print-failures=true
 
       - name: SauceLabs - Android - Mobile App - Publish system tests report
         if: always()
