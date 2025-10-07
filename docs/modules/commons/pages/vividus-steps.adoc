@@ -445,6 +445,24 @@ Examples:
 file:///${examples-table-temporary-file}
 ----
 
+=== File Existence Validation
+
+Checks if a file with the specified name exists at the given path.
+
+[source,gherkin]s
+----
+Then file with name `$fileName` exists by path `$filePath`
+----
+
+* `$fileName` - The name of the file to check (e.g. report_20231015.xlsx)
+* `$filePath` - The path where the file should exist
+
+.Verify file existence validation
+[source,gherkin]
+----
+Given I initialize scenario variable `temp-file-content` with value `Some value`
+When I create temporary file with name `report_20231015.xlsx` and content `${temp-file-content}` and put path to scenario variable `temp-file-path`
+Then file with name `report_20231015.xlsx` exists by path `temp-file-path`----
 
 == ZIP archives
 === Save ZIP archive entries
