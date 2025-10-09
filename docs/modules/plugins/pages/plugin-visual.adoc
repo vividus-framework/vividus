@@ -125,12 +125,12 @@ To use custom configuration per step, two new steps were implemented.
 
 [source,gherkin]
 ----
-When I $visualAction baseline with `$baselineName` using screenshot configuration:$screenshotConfiguration
+When I $visualAction baseline with name `$baselineName` using screenshot configuration:$screenshotConfiguration
 ----
 
 [source,gherkin]
 ----
-When I $visualAction baseline with `$baselineName` ignoring:$ignoringElement using screenshot configuration:$screenshotConfiguration
+When I $visualAction baseline with name `$baselineName` ignoring:$ignoringElement using screenshot configuration:$screenshotConfiguration
 ----
 
 ==== *Examples of usage property based web configuration:*
@@ -150,7 +150,7 @@ web.screenshot.strategy=custom
 
 [source,gherkin]
 ----
-When I <action> baseline with `scrollable-element-context` using screenshot configuration:
+When I <action> baseline with name `scrollable-element-context` using screenshot configuration:
 |scrollableElement                    |webHeaderToCut|webFooterToCut|scrollTimeout|shootingStrategy|
 |By.xpath(//div[@class="page__inner"])|80            |0             |PT1S         |SIMPLE          |
 ----
@@ -239,7 +239,7 @@ mobile.screenshot.strategy=custom
 
 [source,gherkin]
 ----
-When I <action> baseline with `scrollable-element-context` using screenshot configuration:
+When I <action> baseline with name `scrollable-element-context` using screenshot configuration:
 |cutTop           |shootingStrategy|
 |51               |VIEWPORT        |
 ----
