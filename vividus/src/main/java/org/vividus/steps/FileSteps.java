@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
 import org.vividus.variable.VariableScope;
 
@@ -35,6 +38,7 @@ import jakarta.inject.Inject;
 public class FileSteps
 {
     @Inject private VariableContext variableContext;
+    @Inject private ISoftAssert softAssert;
 
     /**
      * Creates temporary file with specified content and puts path to that file to variable with specified name.
@@ -73,5 +77,25 @@ public class FileSteps
     public void createFile(String fileContent, String filePath) throws IOException
     {
         FileUtils.writeStringToFile(new File(filePath), fileContent, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Checks if a file with the specified name exists at the given path
+     * @param fileName The name of the file to check
+     * @param filePath The path where the file should exist
+     */
+    @Then("file with name `$fileName` exists by path `$filePath`")
+    public void doesFileExist(String fileName, String filePath)
+    {
+        if (fileName == null || filePath == null)
+        {
+            softAssert.recordFailedAssertion("fileName and filePath must not be null");
+            return;
+        }
+        Path fullPath = Paths.get(filePath, fileName);
+        File file = fullPath.toFile();
+        softAssert.assertTrue(
+                String.format("File '%s' does not exist at path '%s'", fileName, filePath),
+                file.exists());
     }
 }
