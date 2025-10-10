@@ -26,7 +26,7 @@ dependencies {
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation platform('org.mockito:mockito-bom:5.20.0')
     testImplementation('org.mockito:mockito-junit-jupiter')
-    testImplementation('com.icegreen:greenmail:2.1.6')
+    testImplementation('com.icegreen:greenmail:2.1.7')
     testImplementation('org.eclipse.angus:smtp:2.0.5')
     testImplementation('com.github.valfirst:slf4j-test:3.0.3')
 }
