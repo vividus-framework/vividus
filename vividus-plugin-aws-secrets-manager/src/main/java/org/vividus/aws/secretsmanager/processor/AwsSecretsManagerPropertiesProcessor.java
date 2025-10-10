@@ -17,6 +17,7 @@
 package org.vividus.aws.secretsmanager.processor;
 
 import java.time.Duration;
+import java.util.Properties;
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
@@ -37,6 +38,7 @@ public class AwsSecretsManagerPropertiesProcessor extends AbstractPropertiesProc
     private static final String PATH_SEPARATOR = "/";
     private static final String AWS_DEFAULT_PROFILE = "default";
     private static final String PROPERTY_REGEX = "([^\\s]+?\\s*,\\s*)?[^\\s]+/[^\\s]+";
+    private static final String PROCESSOR_ENABLED_PROPERTY = "secrets-manager.aws-secrets-manager.processor.enabled";
 
     private final LoadingCache<SecretId, String> secretsCache = CacheBuilder.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(1)).build(new CacheLoader<>()
@@ -69,11 +71,18 @@ public class AwsSecretsManagerPropertiesProcessor extends AbstractPropertiesProc
     }
 
     @Override
+    public Properties processProperties(Properties properties)
+    {
+        this.setProcessorEnabled(Boolean.parseBoolean(properties.getProperty(PROCESSOR_ENABLED_PROPERTY)));
+        return super.processProperties(properties);
+    }
+
+    @Override
     protected String processValue(String propertyName, String partOfPropertyValueToProcess)
     {
         Validate.isTrue(partOfPropertyValueToProcess.matches(PROPERTY_REGEX),
                 "The expected property value format is AWS_SECRETS_MANAGER(profile, secret/secret_key) "
-                + "or AWS_SECRETS_MANAGER(secret/secret_key)");
+                        + "or AWS_SECRETS_MANAGER(secret/secret_key)");
         String[] configVariables = partOfPropertyValueToProcess.split(",", 2);
 
         String profile = AWS_DEFAULT_PROFILE;

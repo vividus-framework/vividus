@@ -24,6 +24,8 @@ import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
+import java.util.Properties;
+
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClient;
@@ -44,6 +46,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class AwsSecretsManagerPropertiesProcessorTests
 {
+    private static final String PROCESSOR_ENABLED_PROPERTY = "secrets-manager.aws-secrets-manager.processor.enabled";
+    private static final String TRUE = "true";
+
     private AwsSecretsManagerPropertiesProcessor processor;
 
     @BeforeEach
@@ -59,6 +64,7 @@ class AwsSecretsManagerPropertiesProcessorTests
     @ParameterizedTest
     void shouldProcessValue(String profile, String secretId, String valueToProcess)
     {
+        enableProcessor();
         String secretString = "{\"key\":\"value\"}";
         GetSecretValueResult result = new GetSecretValueResult().withSecretString(secretString);
 
@@ -85,9 +91,25 @@ class AwsSecretsManagerPropertiesProcessorTests
     @Test
     void shouldThrowExceptionForInvalidFormat()
     {
+        enableProcessor();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> processor.processValue("test", "invalid-format"));
         assertEquals("The expected property value format is AWS_SECRETS_MANAGER(profile, secret/secret_key) "
                 + "or AWS_SECRETS_MANAGER(secret/secret_key)", exception.getMessage());
+    }
+
+    @Test
+    void shouldNotProcessPropertiesWhenProcessorDisabled()
+    {
+        var secret = "secret/test";
+        processor.processProperties(new Properties());
+        assertEquals(String.format(secret), processor.processValueIfProcessorEnabled("property", secret));
+    }
+
+    private void enableProcessor()
+    {
+        var properties = new Properties();
+        properties.put(PROCESSOR_ENABLED_PROPERTY, TRUE);
+        processor.processProperties(properties);
     }
 }
