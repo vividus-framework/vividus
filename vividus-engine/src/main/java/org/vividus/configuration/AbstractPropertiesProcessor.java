@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 public abstract class AbstractPropertiesProcessor implements PropertiesProcessor
 {
     private final Pattern propertyPattern;
+    private boolean processorEnabled = true;
 
     protected AbstractPropertiesProcessor(String processorRegexMarker)
     {
@@ -53,11 +54,22 @@ public abstract class AbstractPropertiesProcessor implements PropertiesProcessor
         while (matcher.find())
         {
             String expressionForProcessing = matcher.group(1);
-            String processedPartOfValue = processValue(propertyName, matcher.group(2));
+            String processedPartOfValue = processValueIfProcessorEnabled(propertyName, matcher.group(2));
             processedValue = processedValue.replace(expressionForProcessing, processedPartOfValue);
         }
         return processedValue;
     }
 
+    public String processValueIfProcessorEnabled(String propertyName, String partOfPropertyValueToProcess)
+    {
+        return processorEnabled ? processValue(propertyName, partOfPropertyValueToProcess)
+                : partOfPropertyValueToProcess;
+    }
+
     protected abstract String processValue(String propertyName, String partOfPropertyValueToProcess);
+
+    public void setProcessorEnabled(boolean processorEnabled)
+    {
+        this.processorEnabled = processorEnabled;
+    }
 }

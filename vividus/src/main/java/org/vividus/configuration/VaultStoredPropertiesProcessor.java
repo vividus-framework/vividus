@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ public class VaultStoredPropertiesProcessor extends AbstractPropertiesProcessor
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultStoredPropertiesProcessor.class);
     private static final Pattern SECRET_PATTERN = Pattern.compile("(?<engine>[^/]+)/(?<path>.+)/(?<key>[^/]+)$");
+    private static final String VAULT_PROCESSOR_ENABLED_PROPERTY = "vault.processor.enabled";
 
     private Properties properties;
     private VaultTemplate vaultTemplate;
@@ -52,6 +53,7 @@ public class VaultStoredPropertiesProcessor extends AbstractPropertiesProcessor
     public Properties processProperties(Properties properties)
     {
         this.properties = properties;
+        this.setProcessorEnabled(Boolean.parseBoolean(properties.getProperty(VAULT_PROCESSOR_ENABLED_PROPERTY)));
         return super.processProperties(properties);
     }
 
