@@ -560,7 +560,7 @@ jobs:
                                                   -Pvividus.configuration.profiles=saucelabs/web,web/tablet/${profile} \
                                                   -Pvividus.configuration.suites=system \
                                                   -Pvividus.batch-1.resource-include-patterns=HealthCheck.story,IPadVisualStepsTests.story \
-                                                  -Pvividus.selenium.grid.capabilities.deviceName="iPad (7th generation) Simulator" \
+                                                  -Pvividus.selenium.grid.capabilities.deviceName="iPad (8th generation) Simulator" \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                   -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
           done
