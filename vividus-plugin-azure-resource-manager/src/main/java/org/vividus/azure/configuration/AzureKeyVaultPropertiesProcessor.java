@@ -35,6 +35,7 @@ public class AzureKeyVaultPropertiesProcessor extends AbstractPropertiesProcesso
     private static final String ENVIRONMENT_PROPERTY = "azure.environment";
     private static final String KEY_VAULT_NAME_PROPERTY = "secrets-manager.azure-key-vault.name";
     private static final String KEY_VAULT_API_VERSION_PROPERTY = "secrets-manager.azure-key-vault.api-version";
+    private static final String KEY_VAULT_PROCESSOR_ENABLED_PROPERTY = "secrets-manager.azure-key-vault.enabled";
 
     private static final Map<String, AzureEnvironment> ENVIRONMENT_MAP = Map.of(
             "AZURE", AzureEnvironment.AZURE,
@@ -59,6 +60,7 @@ public class AzureKeyVaultPropertiesProcessor extends AbstractPropertiesProcesso
                 .orElse(AzureEnvironment.AZURE);
         this.keyVaultName = properties.getProperty(KEY_VAULT_NAME_PROPERTY);
         this.apiVersion = properties.getProperty(KEY_VAULT_API_VERSION_PROPERTY);
+        this.setEnabled(Boolean.parseBoolean(properties.getProperty(KEY_VAULT_PROCESSOR_ENABLED_PROPERTY)));
         return super.processProperties(properties);
     }
 

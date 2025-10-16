@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 public abstract class AbstractPropertiesProcessor implements PropertiesProcessor
 {
     private final Pattern propertyPattern;
+    private boolean enabled = true;
 
     protected AbstractPropertiesProcessor(String processorRegexMarker)
     {
@@ -33,6 +34,10 @@ public abstract class AbstractPropertiesProcessor implements PropertiesProcessor
     @Override
     public Properties processProperties(Properties properties)
     {
+        if (!enabled)
+        {
+            return properties;
+        }
         for (Map.Entry<Object, Object> entry : properties.entrySet())
         {
             Object propertyValue = entry.getValue();
@@ -60,4 +65,9 @@ public abstract class AbstractPropertiesProcessor implements PropertiesProcessor
     }
 
     protected abstract String processValue(String propertyName, String partOfPropertyValueToProcess);
+
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
 }
