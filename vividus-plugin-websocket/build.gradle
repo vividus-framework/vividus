@@ -5,7 +5,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation platform('org.springframework:spring-framework-bom:6.2.11')
+    implementation platform('org.springframework:spring-framework-bom:6.2.12')
     implementation('org.springframework:spring-websocket')
     implementation('org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jakarta-client:12.1.2')
 

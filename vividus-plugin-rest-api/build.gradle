@@ -9,7 +9,7 @@ dependencies {
     implementation project(':vividus-test-context')
     implementation project(':vividus-util')
 
-    implementation platform('org.springframework:spring-framework-bom:6.2.11')
+    implementation platform('org.springframework:spring-framework-bom:6.2.12')
     implementation('org.springframework:spring-web')
     implementation('org.apache.commons:commons-lang3:3.19.0')
     implementation("com.github.vividus-framework.JsonPath:json-path-assert:${versions.jsonPath}")
