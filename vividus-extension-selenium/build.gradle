@@ -19,7 +19,7 @@ configurations {
      implementation project(':vividus-soft-assert')
      api project(':vividus-extension-ui')
 
-     api platform('org.seleniumhq.selenium:selenium-bom:4.33.0')
+     api platform('org.seleniumhq.selenium:selenium-bom:4.37.0')
      api('org.seleniumhq.selenium:selenium-api')
      api('org.seleniumhq.selenium:selenium-support')
      api('org.seleniumhq.selenium:selenium-remote-driver')
