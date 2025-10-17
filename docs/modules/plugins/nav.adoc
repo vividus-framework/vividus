@@ -43,6 +43,7 @@
 * xref:plugin-mobile-app.adoc[Mobile Application]
 * xref:plugin-mongodb.adoc[MongoDB]
 * xref:plugin-db.adoc[Relational Database]
+* xref:plugin-redis.adoc[Redis]
 * xref:plugin-rest-api.adoc[REST API]
 * xref:plugin-shell.adoc[Shell]
 * xref:plugin-visual.adoc[Visual Testing]

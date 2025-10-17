@@ -1,0 +1,12 @@
+project.description = 'VIVIDUS plugin for Redis'
+
+dependencies {
+    api project(':vividus-engine')
+    implementation('redis.clients:jedis:7.0.0')
+
+    testImplementation platform('org.junit:junit-bom:5.14.0')
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    testImplementation platform('org.mockito:mockito-bom:5.20.0')
+    testImplementation('org.mockito:mockito-junit-jupiter')
+}

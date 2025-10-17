@@ -1,0 +1,34 @@
+= Redis Plugin
+
+The plugin provides a functionality to interact with https://redis.io/[Redis].
+
+:plugin-short-name: redis
+include::partial$plugin-installation.adoc[]
+
+== Properties
+
+It's allowed to configure an unlimited number of Redis connections via the mechanism of the dynamic properties. The properties prefix example is:
+```properties
+redis.connection.my-redis-instance=redis://username:password@hostname:port?ssl=true&connectTimeout=5000
+```
+where `my-redis-instance` is a key used to refer a Redis connection in the steps. The key is defined by users, must be unique and can't contain dots.
+
+== Steps
+
+=== Flush database
+
+Removes all keys from the specified Redis database.
+
+[source,gherkin]
+----
+When I flush `$dbIndex` database on `$instanceKey` Redis instance
+----
+
+- `dbIndex` — the non-negative index of the Redis database to flush
+- `instanceKey` — the key identifying the Redis instance in the <<_properties,connections config>>
+
+.Flush database keys
+[source,gherkin]
+----
+When I flush `0` database on `my-redis` Redis instance
+----
