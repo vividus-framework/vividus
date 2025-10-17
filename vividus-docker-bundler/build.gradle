@@ -65,6 +65,7 @@ dependencies {
     implementation project(':vividus-plugin-mobitru')
     implementation project(':vividus-plugin-mongodb')
     implementation project(':vividus-plugin-parquet')
+    implementation project(':vividus-plugin-redis')
     implementation project(':vividus-plugin-rest-api')
     implementation project(':vividus-plugin-saucelabs')
     implementation project(':vividus-plugin-shell')
