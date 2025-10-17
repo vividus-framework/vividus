@@ -1841,7 +1841,7 @@ When I execute steps while counter is less than or equal to 10 with increment 1 
 |When I add `#{generate(regexify '[a-z]{3000}')}` to field located by `id(description)`|
 ----
 
-.Use paste instead of typing for large text
+.Use clipboard instead of typing large text
 [source,gherkin]
 ----
 When I execute javascript `navigator.clipboard.writeText("#{generate(regexify '[a-z]{30000}')}");`
