@@ -37,7 +37,7 @@ dependencies {
 
     implementation('org.zeroturnaround:zt-zip:1.17')
 
-    implementation('net.javacrumbs.json-unit:json-unit:4.1.1')
+    implementation('net.javacrumbs.json-unit:json-unit:5.0.0')
 
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation platform('org.junit:junit-bom:5.13.4')
