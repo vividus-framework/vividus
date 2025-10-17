@@ -1824,3 +1824,29 @@ Then `${current-page-url}` matches `.+\/relative\/url.+`
 
 * `$\{current-page-url}` is the <<Current page URL,current page URL>> dynamic variable.
 * `.+\/relative\/url.+` is a regular expression to match the expected part of the page URL.
+
+=== Typing large text into the field
+
+Sometimes, large amounts of text may be entered into the field very slowly, only partially,
+or not at all. This happens because the system types the text character by character.
+With large texts, this becomes inefficient, may cause performance issues, timeouts, or truncation.
+
+The following workarounds can be used:
+
+.Add large text to the field in chunks
+[source,gherkin]
+----
+When I execute steps while counter is less than or equal to 10 with increment 1 starting from 1:
+|step|
+|When I add `#{generate(regexify '[a-z]{3000}')}` to field located by `id(description)`|
+----
+
+.Use clipboard instead of typing large text
+[source,gherkin]
+----
+When I execute javascript `navigator.clipboard.writeText("#{generate(regexify '[a-z]{30000}')}");`
+When I execute sequence of actions:
+|type    |argument                |
+|CLICK   |id(description)         |
+|KEY_DOWN|OS_INDEPENDENT_CONTROL,V|
+----
