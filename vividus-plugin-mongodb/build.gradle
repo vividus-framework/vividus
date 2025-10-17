@@ -6,7 +6,7 @@ dependencies {
     implementation('org.mongodb:mongodb-driver-sync:5.6.1')
     implementation('jakarta.inject:jakarta.inject-api:2.0.1')
 
-    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation platform('org.junit:junit-bom:6.0.0')
     testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation platform('org.mockito:mockito-bom:5.20.0')
