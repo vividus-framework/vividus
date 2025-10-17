@@ -1825,9 +1825,9 @@ Then `${current-page-url}` matches `.+\/relative\/url.+`
 * `$\{current-page-url}` is the <<Current page URL,current page URL>> dynamic variable.
 * `.+\/relative\/url.+` is a regular expression to match the expected part of the page URL.
 
-=== Add large text to the field
+=== Typing large text into the field
 
-Sometimes, when filling out a form automatically, large amounts of text may be entered very slowly, only partially,
+Sometimes, large amounts of text may be entered into the field very slowly, only partially,
 or not at all. This happens because the system types the text character by character.
 With large texts, this becomes inefficient, may cause performance issues, timeouts, or truncation.
 
