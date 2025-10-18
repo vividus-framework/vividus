@@ -99,7 +99,7 @@ dependencies {
 
     compileOnly("com.github.spotbugs:spotbugs-annotations:${spotbugsVersion}")
 
-    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation platform('org.junit:junit-bom:6.0.0')
     testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation platform('org.mockito:mockito-bom:5.20.0')
@@ -127,12 +127,12 @@ dependencies {
     integrationTestImplementation(project(':vividus-mcp-server')) {
         exclude module: 'vividus'
     }
-    integrationTestImplementation platform('org.junit:junit-bom:5.13.4')
+    integrationTestImplementation platform('org.junit:junit-bom:6.0.0')
     integrationTestImplementation('org.junit.jupiter:junit-jupiter')
     integrationTestRuntimeOnly('org.junit.platform:junit-platform-launcher')
     integrationTestImplementation('org.junit-pioneer:junit-pioneer:2.3.0')
 
-    systemTestImplementation platform('org.junit:junit-bom:5.13.4')
+    systemTestImplementation platform('org.junit:junit-bom:6.0.0')
     systemTestImplementation('org.junit.jupiter:junit-jupiter')
     systemTestRuntimeOnly('org.junit.platform:junit-platform-launcher')
     systemTestImplementation platform('org.testcontainers:testcontainers-bom:1.21.3')

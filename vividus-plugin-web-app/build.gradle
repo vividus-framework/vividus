@@ -30,7 +30,7 @@ dependencies {
     implementation('org.slf4j:slf4j-api')
     implementation('jakarta.inject:jakarta.inject-api:2.0.1')
 
-    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation platform('org.junit:junit-bom:6.0.0')
     testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation('org.hamcrest:hamcrest:3.0')
