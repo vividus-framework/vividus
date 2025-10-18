@@ -78,7 +78,7 @@ dependencies {
     implementation('org.apache.groovy:groovy:5.0.1')
 
     // Spring
-    implementation platform('org.springframework:spring-framework-bom:6.2.11')
+    implementation platform('org.springframework:spring-framework-bom:6.2.12')
     implementation('org.springframework:spring-context')
     implementation('org.springframework.vault:spring-vault-core:3.2.0')
 

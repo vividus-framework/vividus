@@ -9,7 +9,7 @@ dependencies {
     implementation('org.apache.commons:commons-lang3:3.19.0')
     implementation platform('org.slf4j:slf4j-bom:2.0.17')
     implementation('org.slf4j:slf4j-api')
-    implementation platform('org.springframework:spring-framework-bom:6.2.11')
+    implementation platform('org.springframework:spring-framework-bom:6.2.12')
     implementation('org.springframework:spring-beans')
     implementation('org.springframework:spring-context')
     implementation('com.google.guava:guava:33.5.0-jre')
