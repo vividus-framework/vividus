@@ -86,7 +86,7 @@ dependencies {
     implementation('com.ibm.db2.jcc:db2jcc:db2jcc4')
     implementation('net.sourceforge.csvjdbc:csvjdbc:1.0.46')
     implementation('com.h2database:h2:2.4.240')
-    implementation('net.snowflake:snowflake-jdbc:3.26.1')
+    implementation('net.snowflake:snowflake-jdbc:3.27.0')
 }
 
 tasks.register('copyRuntimeLibs', Copy) {
