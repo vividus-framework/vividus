@@ -42,6 +42,6 @@ Scenario: Verify `context-source-code` dynamic variable
 Meta:
     @playwrightSupported
 When I reset context
-Then `${context-source-code}` matches `^(<!DOCTYPE html>)?<html><head>.+`
+Then `${context-source-code}` matches `^(<!DOCTYPE html>)?<html lang="en-US"><head>.+`
 When I change context to element located by `name(vividus-logo)`
 Then `${context-source-code}` matches `^<img name.+`
