@@ -9,7 +9,7 @@ dependencies {
     implementation platform('org.slf4j:slf4j-bom:2.0.17')
     implementation('org.slf4j:slf4j-api')
     implementation('org.apache.commons:commons-lang3:3.19.0')
-    implementation('com.github.mwiede:jsch:2.27.3')
+    implementation('com.github.mwiede:jsch:2.27.4')
 
     testImplementation platform('org.junit:junit-bom:5.13.4')
     testImplementation('org.junit.jupiter:junit-jupiter')
