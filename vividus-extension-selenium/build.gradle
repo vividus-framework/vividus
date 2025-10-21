@@ -7,7 +7,7 @@ configurations {
 }
 
  ext {
-     browserupProxyVersion = '3.2.1'
+     browserupProxyVersion = '3.2.2'
 }
 
  dependencies {
