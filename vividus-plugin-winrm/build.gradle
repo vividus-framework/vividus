@@ -26,7 +26,7 @@ dependencies {
     implementation('javax.jws:javax.jws-api:1.1')
     implementation('com.sun.xml.messaging.saaj:saaj-impl:1.5.3')
 
-    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation platform('org.junit:junit-bom:6.0.0')
     testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation platform('org.mockito:mockito-bom:5.20.0')

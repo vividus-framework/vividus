@@ -60,7 +60,7 @@ dependencies {
     implementation('commons-io:commons-io:2.20.0')
     implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-properties')
 
-    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation platform('org.junit:junit-bom:6.0.0')
     testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testRuntimeOnly('org.junit.vintage:junit-vintage-engine')

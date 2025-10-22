@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,11 @@ class IteratingTableTransformerTests
     @ParameterizedTest
     // CHECKSTYLE:OFF
     // @formatter:off
-    @CsvSource({
-            "'',                                          'startInclusive' is not set in ExamplesTable properties",
-            "'startInclusive=1',                          'endInclusive' is not set in ExamplesTable properties",
-            "'endInclusive=2',                            'startInclusive' is not set in ExamplesTable properties",
-            "'startInclusive=2, endInclusive=1',          'startInclusive' value must be less than or equal to 'endInclusive' value"
+    @CsvSource(quoteCharacter = '|', value = {
+            "||,                                 'startInclusive' is not set in ExamplesTable properties",
+            "|startInclusive=1|,                 'endInclusive' is not set in ExamplesTable properties",
+            "|endInclusive=2|,                   'startInclusive' is not set in ExamplesTable properties",
+            "|startInclusive=2, endInclusive=1|, 'startInclusive' value must be less than or equal to 'endInclusive' value"
     })
     // CHECKSTYLE:ON
     // @formatter:on
