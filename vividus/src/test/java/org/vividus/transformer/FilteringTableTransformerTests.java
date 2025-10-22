@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,15 +150,15 @@ class FilteringTableTransformerTests
     @ParameterizedTest
     // CHECKSTYLE:OFF
     // @formatter:off
-    @CsvSource({
-            "'',                                   'At least one of the following properties should be specified: ''byMaxColumns'', ''byMaxRows'', ''byColumnNames'', ''column.<regex placeholder>'', ''byRowIndexes'', ''byRandomRows'''",
-            "'byMaxColumns=1, byColumnNames=key2', Conflicting properties declaration found: 'byMaxColumns' and 'byColumnNames'",
-            "'byMaxRows=1, byRowIndexes=1;2',      Conflicting properties declaration found: 'byMaxRows' and 'byRowIndexes'",
-            "'byRandomRows=1, byMaxRows=1',        Conflicting properties declaration found: 'byRandomRows' and 'byMaxRows'",
-            "'byRandomRows=1, byRowIndexes=1;2',   Conflicting properties declaration found: 'byRandomRows' and 'byRowIndexes'",
-            "'column.demo=.*, byMaxRows=2',        'Filtering by regex is not allowed to be used together with the following properties: ''byMaxColumns'', ''byColumnNames'', ''byMaxRows'', ''byRowIndexes'', ''byRandomRows'''",
-            "'byColumnNames=key11;key2;key13',     'byColumnNames' refers columns missing in ExamplesTable: key11; key13",
-            "'byRowIndexes=5-4;12',                'byRowIndexes' has invalid range of indexes: 5-4. The start index must be less than or equal to the end index."
+    @CsvSource(quoteCharacter = '|', value = {
+            "||,                                   |At least one of the following properties should be specified: 'byMaxColumns', 'byMaxRows', 'byColumnNames', 'column.<regex placeholder>', 'byRowIndexes', 'byRandomRows'|",
+            "|byMaxColumns=1, byColumnNames=key2|, Conflicting properties declaration found: 'byMaxColumns' and 'byColumnNames'",
+            "|byMaxRows=1, byRowIndexes=1;2|,      Conflicting properties declaration found: 'byMaxRows' and 'byRowIndexes'",
+            "|byRandomRows=1, byMaxRows=1|,        Conflicting properties declaration found: 'byRandomRows' and 'byMaxRows'",
+            "|byRandomRows=1, byRowIndexes=1;2|,   Conflicting properties declaration found: 'byRandomRows' and 'byRowIndexes'",
+            "|column.demo=.*, byMaxRows=2|,        |Filtering by regex is not allowed to be used together with the following properties: 'byMaxColumns', 'byColumnNames', 'byMaxRows', 'byRowIndexes', 'byRandomRows'|",
+            "|byColumnNames=key11;key2;key13|,     'byColumnNames' refers columns missing in ExamplesTable: key11; key13",
+            "|byRowIndexes=5-4;12|,                'byRowIndexes' has invalid range of indexes: 5-4. The start index must be less than or equal to the end index."
     })
     // CHECKSTYLE:ON
     // @formatter:on
