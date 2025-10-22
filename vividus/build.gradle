@@ -137,6 +137,6 @@ dependencies {
     systemTestRuntimeOnly('org.junit.platform:junit-platform-launcher')
     systemTestImplementation platform('org.testcontainers:testcontainers-bom:2.0.1')
     systemTestImplementation('org.testcontainers:testcontainers')
-    systemTestImplementation('org.testcontainers:junit-jupiter')
-    systemTestImplementation('org.testcontainers:vault')
+    systemTestImplementation('org.testcontainers:testcontainers-junit-jupiter')
+    systemTestImplementation('org.testcontainers:testcontainers-vault')
 }
