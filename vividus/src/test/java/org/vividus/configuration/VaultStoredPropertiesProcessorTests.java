@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,9 @@ import org.springframework.web.client.RestTemplate;
 @ExtendWith(TestLoggerFactoryExtension.class)
 class VaultStoredPropertiesProcessorTests
 {
+    private static final String VAULT_PROCESSOR_ENABLED_PROPERTY = "secrets-manager.vault.enabled";
+    private static final String TRUE = "true";
+
     private final TestLogger logger = TestLoggerFactory.getTestLogger(VaultStoredPropertiesProcessor.class);
 
     @ParameterizedTest
@@ -82,6 +85,9 @@ class VaultStoredPropertiesProcessorTests
     {
         try (var processor = new VaultStoredPropertiesProcessor())
         {
+            var properties = new Properties();
+            properties.put(VAULT_PROCESSOR_ENABLED_PROPERTY, TRUE);
+            processor.processProperties(properties);
             var propertyName = "invalid-property";
             var exception = assertThrows(IllegalArgumentException.class,
                     () -> processor.processValue(propertyName, fullSecretPath));
@@ -98,6 +104,7 @@ class VaultStoredPropertiesProcessorTests
         var vaultNamespaceValue = "ns1/ns2";
         var properties = new Properties();
         properties.put(vaultNamespaceProperty, vaultNamespaceValue);
+        properties.put(VAULT_PROCESSOR_ENABLED_PROPERTY, TRUE);
 
         MutablePropertySources propertySources = mock();
         var result = "pa$$w0rd";
@@ -124,6 +131,7 @@ class VaultStoredPropertiesProcessorTests
                             when(operations.get("vividus")).thenReturn(vaultResponse);
                         }))
         {
+            processor.processProperties(properties);
             var actual = processor.processValue("my-super-password", "secret/vividus/test");
             assertEquals(result, actual);
 
@@ -178,10 +186,7 @@ class VaultStoredPropertiesProcessorTests
     })
     void shouldPrintLogAboutDeprecation(String propertyValue) throws IOException
     {
-        try (var processor = new VaultStoredPropertiesProcessor())
-        {
-            processor.processProperty("old-property-name", propertyValue);
-        }
+        new VaultStoredPropertiesProcessor().processProperty("old-property-name", propertyValue);
         assertThat(logger.getLoggingEvents(), is(List.of(
                 warn("`VAULT(...)` placeholder is deprecated and will be removed in VIVIDUS 0.7.0, "
                         + "please use `HASHI_CORP_VAULT(...)` placeholder instead."))));
@@ -196,10 +201,15 @@ class VaultStoredPropertiesProcessorTests
     })
     void shouldNotPrintLogAboutDeprecation(String propertyValue) throws IOException
     {
-        try (var processor = new VaultStoredPropertiesProcessor())
-        {
-            processor.processProperty("new-property-name", propertyValue);
-        }
+        new VaultStoredPropertiesProcessor().processProperty("new-property-name", propertyValue);
         assertEquals(0, logger.getLoggingEvents().size());
+    }
+
+    @Test
+    void shouldNotProcessPropertiesWhenProcessorDisabled() throws IOException
+    {
+        var properties = new Properties();
+        properties.put("property", "HASHI_CORP_VAULT(secret/vividus/test/username)");
+        assertEquals(properties, new VaultStoredPropertiesProcessor().processProperties(properties));
     }
 }
