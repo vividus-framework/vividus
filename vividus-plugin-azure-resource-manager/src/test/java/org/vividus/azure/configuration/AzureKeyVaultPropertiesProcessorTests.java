@@ -44,17 +44,31 @@ class AzureKeyVaultPropertiesProcessorTests
     private static final String KEY_VAULT_NAME_PROPERTY = "secrets-manager.azure-key-vault.name";
     private static final String API_VERSION_PROPERTY = "secrets-manager.azure-key-vault.api-version";
     private static final String KEY_VAULT_ENVIRONMENT_PROPERTY = "azure.environment";
+    private static final String KEY_VAULT_PROCESSOR_ENABLED_PROPERTY = "secrets-manager.azure-key-vault.enabled";
     private static final String KEY_VAULT_NAME = "testkeyvault";
     private static final String PROPERTY_NAME = "property-name";
     private static final String SECRET_NAME = "variables-userPassword";
     private static final String ENVIRONMENT = "AZURE";
+    private static final String TRUE = "true";
+
+    @Test
+    void shouldNotProcessPropertiesWhenProcessorDisabled()
+    {
+        var processor = new AzureKeyVaultPropertiesProcessor();
+        Properties properties = new Properties();
+        properties.put(KEY_VAULT_NAME_PROPERTY, KEY_VAULT_NAME);
+        properties.put(KEY_VAULT_ENVIRONMENT_PROPERTY, ENVIRONMENT);
+        properties.put(PROPERTY_NAME, "AZURE_KEY_VAULT(variables-userPassword)");
+        assertEquals(properties, processor.processProperties(properties));
+    }
 
     @Test
     void shouldFailToProcessPropertiesWithoutKeyVaultName()
     {
         var properties = new Properties();
-        properties.put(KEY_VAULT_ENVIRONMENT_PROPERTY, KEY_VAULT_NAME);
-        properties.setProperty(KEY_VAULT_NAME_PROPERTY, "");
+        properties.put(KEY_VAULT_ENVIRONMENT_PROPERTY, ENVIRONMENT);
+        properties.put(KEY_VAULT_NAME_PROPERTY, "");
+        properties.put(KEY_VAULT_PROCESSOR_ENABLED_PROPERTY, TRUE);
         var processor = new AzureKeyVaultPropertiesProcessor();
         processor.processProperties(properties);
         var exception = assertThrows(IllegalArgumentException.class,
@@ -72,6 +86,7 @@ class AzureKeyVaultPropertiesProcessorTests
         properties.put(KEY_VAULT_NAME_PROPERTY, KEY_VAULT_NAME);
         properties.put(KEY_VAULT_ENVIRONMENT_PROPERTY, ENVIRONMENT);
         properties.put(API_VERSION_PROPERTY, "7.6");
+        properties.put(KEY_VAULT_PROCESSOR_ENABLED_PROPERTY, TRUE);
 
         String firstExpectedResult = "admin_12345";
         String secondSecretName = "variables-hello";
@@ -108,6 +123,7 @@ class AzureKeyVaultPropertiesProcessorTests
         properties.put(KEY_VAULT_NAME_PROPERTY, KEY_VAULT_NAME);
         properties.put(KEY_VAULT_ENVIRONMENT_PROPERTY, ENVIRONMENT);
         properties.put(API_VERSION_PROPERTY, "-1");
+        properties.put(KEY_VAULT_PROCESSOR_ENABLED_PROPERTY, TRUE);
 
         try (MockedConstruction<AzureResourceManagementClient> mocked =
                      mockConstruction(AzureResourceManagementClient.class, (mockClient, context) ->
