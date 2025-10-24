@@ -100,7 +100,7 @@ Given multipart request:
 |file  |file-key2 |${temp-file-path}|text/plain |               |
 |string|string-key|string1          |text/plain |               |
 |binary|binary-key|raw              |text/plain |raw.txt        |
-When I execute HTTP POST request for resource with URL `https://httpbin.org/post`
+When I execute HTTP POST request for resource with URL `https://httpbingo.org/post`
 Then `${responseCode}` is equal to `200`
 Then JSON element from `${json-context}` by JSON path `$.files.file-key` is equal to `"#{loadResource(/data/file.txt)}"`
 Then JSON element from `${json-context}` by JSON path `$.files.file-key2` is equal to `"${temp-file-content}"`
