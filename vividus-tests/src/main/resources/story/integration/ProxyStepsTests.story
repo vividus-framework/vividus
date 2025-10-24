@@ -20,10 +20,10 @@ Then number of HTTP GET, POST requests with URL pattern `https://httpbingo\.org/
 Scenario: Verify URL and URL query HTTP message parts in step "When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save $httpMessagePart to $scopes variable `$variableName`"
 Meta:
     @issueId 1248; 1388
-Given I am on page with URL `https://www.google.com/search?q=vividus`
-When I capture HTTP GET or POST request with URL pattern `.*/search.*=vividus` and save URL to scenario variable `URL`
-Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
-When I capture HTTP GET request with URL pattern `.*/search.*=vividus` and save URL query to scenario variable `query`
+Given I am on page with URL `https://httpbingo.org/get?q=vividus`
+When I capture HTTP GET or POST request with URL pattern `.*/get.*=vividus` and save URL to scenario variable `URL`
+Then `${URL}` is equal to `https://httpbingo.org/get?q=vividus`
+When I capture HTTP GET request with URL pattern `.*/get.*=vividus` and save URL query to scenario variable `query`
 Then `${query.q[0]}` is equal to `vividus`
 Then `${query.q}` is equal to `[vividus]`
 Then `${query}` is equal to `{q=[vividus]}`
