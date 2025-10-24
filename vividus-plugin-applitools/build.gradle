@@ -10,7 +10,7 @@ dependencies {
     implementation project(':vividus-util')
 
     implementation('com.applitools:eyes-images-java5:5.79.0')
-    implementation('com.applitools:eyes-selenium-java5:5.81.0')
+    implementation('com.applitools:eyes-selenium-java5:5.81.6')
     implementation platform('org.slf4j:slf4j-bom:2.0.17')
     implementation('org.slf4j:slf4j-api')
 
