@@ -2,7 +2,7 @@ project.description = 'VIVIDUS to Zephyr exporter'
 
 buildscript {
     ext {
-        springBootVersion = '3.5.6'
+        springBootVersion = '3.5.7'
     }
 
     repositories {
