@@ -89,7 +89,7 @@ jobs:
 
     - name: Publish unit and integration tests reports
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: Unit and Integration Tests - Reports - ${{ matrix.platform }}
         path: vividus/output/reports/tests
@@ -128,7 +128,7 @@ jobs:
 
     - name: Publish integration tests report
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: Integration Tests - Report - ${{ matrix.platform }}
         path: vividus-tests/output/reports/allure
@@ -173,7 +173,7 @@ jobs:
 
     - name: Publish Playwright integration tests report
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: Playwright Integration Tests - Report - ${{ matrix.platform }}
         path: vividus-tests/output/reports/allure
@@ -231,7 +231,7 @@ jobs:
 
     - name: Publish system tests report
       if: matrix.platform == 'ubuntu-latest' && always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: System Tests - Report
         path: vividus-tests/output/reports/allure
@@ -491,7 +491,7 @@ jobs:
 
     - name: Publish system Kafka tests report
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: System Kafka Tests - Report
         path: vividus-tests/output/reports/allure
@@ -607,7 +607,7 @@ jobs:
 
       - name: SauceLabs - iOS - Mobile App - Publish system tests report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: SauceLabs - System Tests - Report - iOS
           path: vividus-tests/output/reports/sl-ios-allure
@@ -640,7 +640,7 @@ jobs:
 
       - name: SauceLabs - iOS Proxy - Mobile App - Publish system tests report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: SauceLabs - System Tests With Proxy - Report - iOS
           path: vividus-tests/output/reports/sl-ios-proxy-allure
@@ -671,7 +671,7 @@ jobs:
 
       - name: SauceLabs - Android - Mobile App - Publish system tests report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: SauceLabs - System Tests - Report - Android
           path: vividus-tests/output/reports/sl-android-allure
@@ -704,7 +704,7 @@ jobs:
 
       - name: SauceLabs - Android Proxy - Mobile App - Publish system tests report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: SauceLabs - System Tests With Proxy - Report - Android
           path: vividus-tests/output/reports/sl-android-proxy-allure
@@ -826,7 +826,7 @@ jobs:
 
       - name: BrowserStack - iOS - Mobile App - Publish system tests report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: BrowserStack - System Tests - Report - iOS
           path: vividus-tests/output/reports/bs-ios-allure
@@ -857,7 +857,7 @@ jobs:
 
       - name: BrowserStack - Android - Mobile App - Publish system tests report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: BrowserStack - System Tests - Report - Android
           path: vividus-tests/output/reports/bs-android-allure
@@ -928,7 +928,7 @@ jobs:
 
       - name: Mobitru - Android - Mobile - Web - Publish system tests report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Mobitru - System Tests - Report - Web Android
           path: vividus-tests/output/reports/mt-android-web-allure
@@ -949,7 +949,7 @@ jobs:
 
       - name: Mobitru - IOS - Mobile - Web - Publish system tests report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Mobitru - System Tests - Report - Web IOS
           path: vividus-tests/output/reports/mt-ios-web-allure
@@ -981,7 +981,7 @@ jobs:
 
       - name: Mobitru - Android - Mobile App - Publish system tests report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Mobitru - System Tests - Report - Android
           path: vividus-tests/output/reports/mt-android-allure
@@ -1013,7 +1013,7 @@ jobs:
 
       - name: Mobitru - iOS - Mobile App - Publish system tests report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Mobitru - System Tests - Report - iOS
           path: vividus-tests/output/reports/mt-ios-allure
