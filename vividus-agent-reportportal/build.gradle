@@ -10,7 +10,7 @@ dependencies {
 
     // ReportPortal
     implementation('com.epam.reportportal:logger-java-log4j:5.4.0')
-    implementation('com.epam.reportportal:agent-java-jbehave:5.5.1') {
+    implementation('com.epam.reportportal:agent-java-jbehave:5.5.2') {
         exclude module: 'jbehave-core'
     }
     implementation platform('org.slf4j:slf4j-bom:2.0.17')
