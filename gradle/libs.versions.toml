@@ -1,0 +1,50 @@
+[libraries]
+
+apache-commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.19.0" }
+apache-commons-collections4 = { module = "org.apache.commons:commons-collections4", version = "4.5.0" }
+apache-commons-text = { module = "org.apache.commons:commons-text", version = "1.14.0" }
+apache-commons-codec = { module = "commons-codec:commons-codec", version = "1.19.0" }
+apache-commons-io = { module = "commons-io:commons-io", version = "2.20.0" }
+guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
+
+slf4j-bom = { module = "org.slf4j:slf4j-bom", version = "2.0.17" }
+slf4j-api = { module = "org.slf4j:slf4j-api" }
+slf4j-jclOverSlf4j = { module = "org.slf4j:jcl-over-slf4j" }
+slf4j-julToSlf4j = { module = "org.slf4j:jul-to-slf4j" }
+slf4j-log4jOverSlf4j = { module = "org.slf4j:log4j-over-slf4j" }
+
+spring-bom = { module = "org.springframework:spring-framework-bom", version = "6.2.12" }
+spring-beans = { module = "org.springframework:spring-beans" }
+spring-context = { module = "org.springframework:spring-context" }
+spring-core = { module = "org.springframework:spring-core" }
+spring-web = { module = "org.springframework:spring-web" }
+spring-jdbc = { module = "org.springframework:spring-jdbc" }
+spring-websocket = { module = "org.springframework:spring-websocket" }
+spring-test = { module = "org.springframework:spring-test" }
+
+jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version = "2.20.0" }
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core" }
+jackson-dataformat-properties = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-properties" }
+jackson-dataformat-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml" }
+
+jakarta-injectApi = { module = "jakarta.inject:jakarta.inject-api", version = "2.0.1" }
+tika-core = { module = "org.apache.tika:tika-core", version = "3.2.3" }
+jsonUnit = { module = "net.javacrumbs.json-unit:json-unit", version = "5.0.0" }
+
+h2 = { module = "com.h2database:h2", version = "2.4.240" }
+csvjdbc = { module = "net.sourceforge.csvjdbc:csvjdbc", version = "1.0.46" }
+
+hamcrest = { module = "org.hamcrest:hamcrest", version = "3.0" }
+
+junit-bom = { module = "org.junit:junit-bom", version = "6.0.0" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platformLauncher = { module = "org.junit.platform:junit-platform-launcher" }
+junit-vintageEngine = { module = "org.junit.vintage:junit-vintage-engine" }
+
+mockito-bom = { module = "org.mockito:mockito-bom", version = "5.20.0" }
+mockito-junitJupiter = { module = "org.mockito:mockito-junit-jupiter" }
+mockito-core = { module = "org.mockito:mockito-core" }
+
+junitPioneer = { module = "org.junit-pioneer:junit-pioneer", version = "2.3.0" }
+slf4jTest = { module = "com.github.valfirst:slf4j-test", version = "3.0.3" }
+equalsverifier = { module = "nl.jqno.equalsverifier:equalsverifier", version = "4.1" }

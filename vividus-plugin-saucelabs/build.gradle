@@ -5,14 +5,14 @@ dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-extension-selenium')
 
-    implementation('com.google.guava:guava:33.5.0-jre')
+    implementation(libs.guava)
     implementation('com.saucelabs:ci-sauce:2.6')
 
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation('org.junit.jupiter:junit-jupiter')
-    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform('org.mockito:mockito-bom:5.20.0')
-    testImplementation('org.mockito:mockito-junit-jupiter')
-    testImplementation('com.github.valfirst:slf4j-test:3.0.3')
-    testImplementation('nl.jqno.equalsverifier:equalsverifier:4.1')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
+    testImplementation(libs.slf4jTest)
+    testImplementation(libs.equalsverifier)
 }
