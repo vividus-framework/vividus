@@ -32,20 +32,20 @@ dependencies {
     implementation project(':vividus-facade-jira')
     implementation project(':vividus-exporter-commons')
 
-    implementation('org.apache.commons:commons-lang3:3.19.0')
-    implementation('org.apache.commons:commons-collections4:4.5.0')
+    implementation(libs.apache.commons.lang3)
+    implementation(libs.apache.commons.collections4)
 
     implementation('org.zeroturnaround:zt-zip:1.17')
 
-    implementation('net.javacrumbs.json-unit:json-unit:5.0.0')
+    implementation(libs.jsonUnit)
 
     testImplementation('org.springframework.boot:spring-boot-starter-test')
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation('org.junit.jupiter:junit-jupiter')
-    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform('org.mockito:mockito-bom:5.20.0')
-    testImplementation('org.mockito:mockito-junit-jupiter')
-    testImplementation('com.github.valfirst:slf4j-test:3.0.3')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
+    testImplementation(libs.slf4jTest)
 }
 
 configurations.all {

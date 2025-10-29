@@ -6,10 +6,10 @@ dependencies {
     api("org.vividus:jbehave-core:${versions.jbehave}")
     implementation project(':vividus-test-context')
 
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation('org.junit.jupiter:junit-jupiter')
-    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation('org.hamcrest:hamcrest:3.0')
-    testImplementation platform('org.mockito:mockito-bom:5.20.0')
-    testImplementation('org.mockito:mockito-junit-jupiter')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation(libs.hamcrest)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
 }

@@ -32,16 +32,16 @@ dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-exporter-commons')
 
-    implementation platform('com.fasterxml.jackson:jackson-bom:2.20.0')
-    implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
+    implementation platform(libs.jackson.bom)
+    implementation(libs.jackson.dataformat.xml)
 
     testImplementation('org.springframework.boot:spring-boot-starter-test')
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation('org.junit.jupiter:junit-jupiter')
-    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform('org.mockito:mockito-bom:5.20.0')
-    testImplementation('org.mockito:mockito-junit-jupiter')
-    testImplementation('com.github.valfirst:slf4j-test:3.0.3')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
+    testImplementation(libs.slf4jTest)
 }
 
 configurations.all {

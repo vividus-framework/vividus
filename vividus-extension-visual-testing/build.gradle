@@ -8,14 +8,14 @@ dependencies {
 
     implementation project(':vividus-extension-selenium')
 
-    implementation platform('org.slf4j:slf4j-bom:2.0.17')
-    implementation('org.slf4j:slf4j-api')
-    implementation('jakarta.inject:jakarta.inject-api:2.0.1')
+    implementation platform(libs.slf4j.bom)
+    implementation(libs.slf4j.api)
+    implementation(libs.jakarta.injectApi)
 
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation('org.junit.jupiter:junit-jupiter')
-    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform('org.mockito:mockito-bom:5.20.0')
-    testImplementation('org.mockito:mockito-junit-jupiter')
-    testImplementation('com.github.valfirst:slf4j-test:3.0.3')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
+    testImplementation(libs.slf4jTest)
 }

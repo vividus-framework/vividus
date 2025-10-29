@@ -20,16 +20,16 @@ dependencies {
 
     compileOnly("com.github.spotbugs:spotbugs-annotations:${spotbugsVersion}")
 
-    implementation platform('org.slf4j:slf4j-bom:2.0.17')
-    implementation('org.slf4j:slf4j-api')
+    implementation platform(libs.slf4j.bom)
+    implementation(libs.slf4j.api)
 
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation('org.junit.jupiter:junit-jupiter')
-    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation('org.hamcrest:hamcrest:3.0')
-    testImplementation platform('org.mockito:mockito-bom:5.20.0')
-    testImplementation('org.mockito:mockito-junit-jupiter')
-    testImplementation('com.github.valfirst:slf4j-test:3.0.3')
-    testImplementation('nl.jqno.equalsverifier:equalsverifier:4.1')
-    testImplementation('org.junit-pioneer:junit-pioneer:2.3.0')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation(libs.hamcrest)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
+    testImplementation(libs.slf4jTest)
+    testImplementation(libs.equalsverifier)
+    testImplementation(libs.junitPioneer)
 }

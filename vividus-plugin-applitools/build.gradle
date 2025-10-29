@@ -11,13 +11,13 @@ dependencies {
 
     implementation('com.applitools:eyes-images-java5:5.79.0')
     implementation('com.applitools:eyes-selenium-java5:5.81.0')
-    implementation platform('org.slf4j:slf4j-bom:2.0.17')
-    implementation('org.slf4j:slf4j-api')
+    implementation platform(libs.slf4j.bom)
+    implementation(libs.slf4j.api)
 
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation('org.junit.jupiter:junit-jupiter')
-    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform('org.mockito:mockito-bom:5.20.0')
-    testImplementation('org.mockito:mockito-junit-jupiter')
-    testImplementation('com.github.valfirst:slf4j-test:3.0.3')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
+    testImplementation(libs.slf4jTest)
 }

@@ -4,11 +4,11 @@ dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-util')
     implementation('org.mongodb:mongodb-driver-sync:5.6.1')
-    implementation('jakarta.inject:jakarta.inject-api:2.0.1')
+    implementation(libs.jakarta.injectApi)
 
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation('org.junit.jupiter:junit-jupiter')
-    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform('org.mockito:mockito-bom:5.20.0')
-    testImplementation('org.mockito:mockito-junit-jupiter')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
 }

@@ -6,12 +6,12 @@ dependencies {
     implementation project(':vividus-soft-assert')
 
     api('org.apache.poi:poi-ooxml:5.4.1')
-    implementation('org.apache.commons:commons-lang3:3.19.0')
+    implementation(libs.apache.commons.lang3)
 
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation('org.junit.jupiter:junit-jupiter')
-    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation('org.hamcrest:hamcrest:3.0')
-    testImplementation platform('org.mockito:mockito-bom:5.20.0')
-    testImplementation('org.mockito:mockito-junit-jupiter')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation(libs.hamcrest)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
 }

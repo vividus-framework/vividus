@@ -19,16 +19,16 @@ dependencies {
     // which allows to use Java 24
     implementation('org.apache.kafka:kafka-clients:3.9.1')
 
-    implementation platform('org.slf4j:slf4j-bom:2.0.17')
-    implementation('org.slf4j:slf4j-api')
+    implementation platform(libs.slf4j.bom)
+    implementation(libs.slf4j.api)
 
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation('org.junit.jupiter:junit-jupiter')
-    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-    testImplementation platform('org.mockito:mockito-bom:5.20.0')
-    testImplementation('org.mockito:mockito-junit-jupiter')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
     testImplementation('org.springframework.kafka:spring-kafka-test')
-    testImplementation('com.github.valfirst:slf4j-test:3.0.3')
+    testImplementation(libs.slf4jTest)
 
     // https://github.com/spring-projects/spring-kafka/issues/3955#issuecomment-2971304102
     testImplementation('org.apache.kafka:kafka_2.13:3.9.1')
