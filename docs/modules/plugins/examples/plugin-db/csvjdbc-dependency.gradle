@@ -1,1 +1,0 @@
-implementation('net.sourceforge.csvjdbc:csvjdbc:1.0.46')

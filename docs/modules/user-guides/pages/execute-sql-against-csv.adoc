@@ -19,7 +19,7 @@ implementation('org.vividus:vividus-plugin-db')
 [source,gradle,subs="attributes+"]
 ----
 implementation('org.vividus:vividus-plugin-csv')
-implementation('net.sourceforge.csvjdbc:csvjdbc:1.0.46')
+implementation('net.sourceforge.csvjdbc:csvjdbc')
 ----
 
 . Configure connection to the CSV xref:ROOT:glossary.adoc#_resource[resources]
