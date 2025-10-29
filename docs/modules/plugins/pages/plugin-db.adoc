@@ -31,7 +31,7 @@ implementation('org.vividus:vividus-plugin-db')
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-include::example$plugin-db/postgresql-dependency.gradle[]
+implementation('org.postgresql:postgresql')
 ----
 +
 NOTE: In case Maven repository does not contain driver you need, please refer to the documentation of your database to define suitable JDBC driver.
@@ -79,7 +79,7 @@ Here are some examples of setting different databases connection for most popula
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/mysql-dependency.gradle[]
+implementation('com.mysql:mysql-connector-j')
 ----
 
 .environment.properties
@@ -103,7 +103,7 @@ jdbc:mysql://host:port/database?parameters
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/sqlserver-dependency.gradle[]
+implementation('com.microsoft.sqlserver:mssql-jdbc')
 ----
 
 .`environment.properties` to connect using port number
@@ -139,7 +139,7 @@ jdbc:sqlserver://serverName\instanceName:portNumber;parameter1=value1;parameter2
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/sqlserver-dependency.gradle[]
+implementation('com.microsoft.sqlserver:mssql-jdbc')
 ----
 
 .environment.properties
@@ -163,7 +163,7 @@ jdbc:sqlserver://serverName:portNumber;parameter1=value1;parameter2=value2
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/postgresql-dependency.gradle[]
+implementation('org.postgresql:postgresql')
 ----
 
 .environment.properties
@@ -187,7 +187,7 @@ jdbc:postgresql://host:port/database?parameters
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/oracle-dependency.gradle[]
+implementation('com.oracle.database.jdbc:ojdbc10')
 ----
 
 .environment.properties
@@ -238,7 +238,7 @@ Please see the xref:user-guides:execute-sql-against-csv.adoc[step-by-step guide]
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/csvjdbc-dependency.gradle[]
+implementation('net.sourceforge.csvjdbc:csvjdbc')
 ----
 
 .environment.properties
@@ -264,7 +264,7 @@ finished. Please see the xref:user-guides:use-in-memory-db-to-manage-test-data.a
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/h2-dependency.gradle[]
+implementation('com.h2database:h2')
 ----
 
 .environment.properties
@@ -286,7 +286,7 @@ jdbc:h2:mem:databaseName
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/snowflake-dependency.gradle[]
+implementation('net.snowflake:snowflake-jdbc')
 ----
 
 .environment.properties

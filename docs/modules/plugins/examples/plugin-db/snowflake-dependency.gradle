@@ -1,1 +1,0 @@
-implementation('net.snowflake:snowflake-jdbc:3.27.0')

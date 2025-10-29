@@ -12,7 +12,7 @@ tests end. The test data can be created from SQL files located in the project.
 [source,gradle,subs="attributes+"]
 ----
 implementation('org.vividus:vividus-plugin-db')
-implementation('com.h2database:h2:2.4.240')
+implementation('com.h2database:h2')
 ----
 
 . Configure connection to the H2 database and initialization
