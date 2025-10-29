@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.vividus.context.DynamicConfigurationManager;
 import org.vividus.context.VariableContext;
 import org.vividus.ssh.context.SshTestContext;
 import org.vividus.ssh.exec.SshOutput;
+import org.vividus.ssh.factory.SshSessionFactory;
 import org.vividus.ssh.sftp.SftpCommand;
 import org.vividus.ssh.sftp.SftpOutput;
 import org.vividus.variable.VariableScope;
@@ -62,6 +63,7 @@ class SshStepsTests
     @Mock private VariableContext variableContext;
     @Mock private Map<String, CommandExecutionManager<?>> commandExecutionManagers;
     @Mock private SshTestContext sshTestContext;
+    @Mock private SshSessionFactory sshSessionFactory;
     @InjectMocks private SshSteps sshSteps;
 
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
@@ -89,7 +91,8 @@ class SshStepsTests
     void shouldFailToConfigureDynamicConnection(String tableAsString)
     {
         var connectionParametersTable = new ExamplesTable(tableAsString);
-        var steps = new SshSteps(null, variableContext, commandExecutionManagers, sshTestContext);
+        var steps = new SshSteps(null, variableContext, commandExecutionManagers, sshTestContext,
+                sshSessionFactory);
         var key = "invalid-connection";
         var exception = assertThrows(IllegalArgumentException.class,
                 () -> steps.configureSshConnection(key, connectionParametersTable));
@@ -106,7 +109,8 @@ class SshStepsTests
         when(executionManager.run(SSH_CONNECTION_PARAMETERS, commands)).thenReturn(output);
         when(sshConnectionParameters.getConfiguration(SERVER)).thenReturn(SSH_CONNECTION_PARAMETERS);
 
-        var steps = new SshSteps(sshConnectionParameters, variableContext, commandExecutionManagers, sshTestContext);
+        var steps = new SshSteps(sshConnectionParameters, variableContext, commandExecutionManagers, sshTestContext,
+                sshSessionFactory);
         var actual = steps.executeCommands(commands, SERVER, Protocol.SSH);
 
         assertEquals(output, actual);
