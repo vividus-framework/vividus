@@ -9,7 +9,7 @@ dependencies {
     implementation platform(libs.slf4j.bom)
     implementation(libs.slf4j.api)
     implementation(libs.apache.commons.lang3)
-    implementation('com.github.mwiede:jsch:2.27.4')
+    implementation('com.github.mwiede:jsch:2.27.5')
 
     testImplementation platform(libs.junit.bom)
     testImplementation(libs.junit.jupiter)
