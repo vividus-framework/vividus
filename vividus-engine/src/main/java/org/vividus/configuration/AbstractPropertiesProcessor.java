@@ -30,16 +30,21 @@ public abstract class AbstractPropertiesProcessor implements PropertiesProcessor
         this.propertyPattern = Pattern.compile("(" + processorRegexMarker + "\\((.+?)\\)" + ")");
     }
 
+    protected abstract boolean isEnabled(Properties properties);
+
     @Override
     public Properties processProperties(Properties properties)
     {
-        for (Map.Entry<Object, Object> entry : properties.entrySet())
+        if (isEnabled(properties))
         {
-            Object propertyValue = entry.getValue();
-            if (propertyValue instanceof String propertyValueAsString)
+            for (Map.Entry<Object, Object> entry : properties.entrySet())
             {
-                String newValue = processProperty((String) entry.getKey(), propertyValueAsString);
-                entry.setValue(newValue);
+                Object propertyValue = entry.getValue();
+                if (propertyValue instanceof String propertyValueAsString)
+                {
+                    String newValue = processProperty((String) entry.getKey(), propertyValueAsString);
+                    entry.setValue(newValue);
+                }
             }
         }
         return properties;

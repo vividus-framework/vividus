@@ -24,6 +24,8 @@ import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
+import java.util.Properties;
+
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClient;
@@ -89,5 +91,13 @@ class AwsSecretsManagerPropertiesProcessorTests
                 () -> processor.processValue("test", "invalid-format"));
         assertEquals("The expected property value format is AWS_SECRETS_MANAGER(profile, secret/secret_key) "
                 + "or AWS_SECRETS_MANAGER(secret/secret_key)", exception.getMessage());
+    }
+
+    @Test
+    void shouldNotProcessPropertiesWhenProcessorDisabled()
+    {
+        var properties = new Properties();
+        properties.put("property", "AWS_SECRETS_MANAGER(profile, secret/test)");
+        assertEquals(properties, processor.processProperties(properties));
     }
 }

@@ -17,6 +17,7 @@
 package org.vividus.aws.secretsmanager.processor;
 
 import java.time.Duration;
+import java.util.Properties;
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
@@ -37,6 +38,7 @@ public class AwsSecretsManagerPropertiesProcessor extends AbstractPropertiesProc
     private static final String PATH_SEPARATOR = "/";
     private static final String AWS_DEFAULT_PROFILE = "default";
     private static final String PROPERTY_REGEX = "([^\\s]+?\\s*,\\s*)?[^\\s]+/[^\\s]+";
+    private static final String PROCESSOR_ENABLED_PROPERTY = "secrets-manager.aws-secrets-manager.enabled";
 
     private final LoadingCache<SecretId, String> secretsCache = CacheBuilder.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(1)).build(new CacheLoader<>()
@@ -66,6 +68,12 @@ public class AwsSecretsManagerPropertiesProcessor extends AbstractPropertiesProc
     public AwsSecretsManagerPropertiesProcessor()
     {
         super("AWS_SECRETS_MANAGER");
+    }
+
+    @Override
+    public boolean isEnabled(Properties properties)
+    {
+        return Boolean.parseBoolean(properties.getProperty(PROCESSOR_ENABLED_PROPERTY));
     }
 
     @Override
