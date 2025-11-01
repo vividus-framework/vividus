@@ -5,7 +5,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
     implementation project(':vividus-extension-azure')
-    implementation('com.azure.resourcemanager:azure-resourcemanager-appservice:2.53.4')
+    implementation('com.azure.resourcemanager:azure-resourcemanager-appservice:2.53.5')
     implementation platform(libs.slf4j.bom)
     implementation(libs.slf4j.api)
 
