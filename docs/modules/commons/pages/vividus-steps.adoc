@@ -445,7 +445,25 @@ Examples:
 file:///${examples-table-temporary-file}
 ----
 
+=== File Existence Validation
 
+Checks that a regular file exists at the given path.
+
+[source,gherkin]
+----
+Then file exists at path `$filePath`
+----
+
+* `$filePath` - The full path to the file (including the file name).
+
+.Verify file existence validation
+[source,gherkin]
+----
+Given I initialize scenario variable `test-dir` with value `${java.io.tmpdir}`
+Given I initialize scenario variable `temp-file-content` with value `Sample report content`
+When I create file with content `${temp-file-content}` at path `${test-dir}/report_20231015.xlsx`
+Then file exists at path `${test-dir}/report_20231015.xlsx`
+----
 == ZIP archives
 === Save ZIP archive entries
 
