@@ -5,7 +5,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
     implementation project(':vividus-plugin-csv')
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.792')
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.793')
     implementation('com.amazonaws:aws-java-sdk-s3')
     implementation project(':vividus-extension-aws')
     implementation platform(libs.slf4j.bom)
