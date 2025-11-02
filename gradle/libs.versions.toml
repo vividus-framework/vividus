@@ -42,7 +42,7 @@ snowflake-jdbc = { module = "net.snowflake:snowflake-jdbc", version = "3.27.1" }
 
 hamcrest = { module = "org.hamcrest:hamcrest", version = "3.0" }
 
-junit-bom = { module = "org.junit:junit-bom", version = "6.0.0" }
+junit-bom = { module = "org.junit:junit-bom", version = "6.0.1" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-platformLauncher = { module = "org.junit.platform:junit-platform-launcher" }
 junit-vintageEngine = { module = "org.junit.vintage:junit-vintage-engine" }
