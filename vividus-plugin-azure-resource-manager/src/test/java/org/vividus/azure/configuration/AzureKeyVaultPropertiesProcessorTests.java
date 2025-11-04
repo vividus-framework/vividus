@@ -39,26 +39,37 @@ import org.vividus.azure.client.AzureResourceManagementClient;
 @ExtendWith(MockitoExtension.class)
 class AzureKeyVaultPropertiesProcessorTests
 {
-    private static final String URL = "https://testkeyvault.vault.azure.net/secrets/%s?api-version=7.6";
-    private static final String RESPONSE = "{\"value\":\"%s\"}";
     private static final String KEY_VAULT_NAME_PROPERTY = "secrets-manager.azure-key-vault.name";
     private static final String API_VERSION_PROPERTY = "secrets-manager.azure-key-vault.api-version";
     private static final String KEY_VAULT_ENVIRONMENT_PROPERTY = "azure.environment";
+    private static final String KEY_VAULT_PROCESSOR_ENABLED_PROPERTY = "secrets-manager.azure-key-vault.enabled";
     private static final String KEY_VAULT_NAME = "testkeyvault";
     private static final String PROPERTY_NAME = "property-name";
     private static final String SECRET_NAME = "variables-userPassword";
     private static final String ENVIRONMENT = "AZURE";
+    private static final String TRUE = "true";
+    private static final String PROPERTY_VALUE = "AZURE_KEY_VAULT(variables-userPassword)";
+
+    @Test
+    void shouldNotProcessPropertiesWhenProcessorDisabled()
+    {
+        Properties properties = new Properties();
+        properties.put(KEY_VAULT_NAME_PROPERTY, KEY_VAULT_NAME);
+        properties.put(KEY_VAULT_ENVIRONMENT_PROPERTY, ENVIRONMENT);
+        properties.put(PROPERTY_NAME, PROPERTY_VALUE);
+        assertEquals(properties, new AzureKeyVaultPropertiesProcessor().processProperties(properties));
+    }
 
     @Test
     void shouldFailToProcessPropertiesWithoutKeyVaultName()
     {
         var properties = new Properties();
-        properties.put(KEY_VAULT_ENVIRONMENT_PROPERTY, KEY_VAULT_NAME);
-        properties.setProperty(KEY_VAULT_NAME_PROPERTY, "");
-        var processor = new AzureKeyVaultPropertiesProcessor();
-        processor.processProperties(properties);
+        properties.put(KEY_VAULT_ENVIRONMENT_PROPERTY, ENVIRONMENT);
+        properties.put(KEY_VAULT_NAME_PROPERTY, "");
+        properties.put(KEY_VAULT_PROCESSOR_ENABLED_PROPERTY, TRUE);
+        properties.put(PROPERTY_NAME, PROPERTY_VALUE);
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> processor.processValue(PROPERTY_NAME, SECRET_NAME));
+                () -> new AzureKeyVaultPropertiesProcessor().processProperties(properties));
         assertEquals(
                 String.format("Secrets can't be read from Azure Key Vault. "
                         + "Please, provide Azure Key Vault name as value into property `%s`", KEY_VAULT_NAME_PROPERTY),
@@ -68,36 +79,41 @@ class AzureKeyVaultPropertiesProcessorTests
     @Test
     void shouldProcessPropertiesWithKeyVaultNameWithoutClient()
     {
+        String firstExpectedResult = "admin_12345";
+        String secondSecretName = "variables-hello";
+        String secondExpectedResult = "hello world";
+        String secondPropertyName = "property-name-2";
+        String url = "https://testkeyvault.vault.azure.net/secrets/%s?api-version=7.6";
+        String response = "{\"value\":\"%s\"}";
+
         Properties properties = new Properties();
         properties.put(KEY_VAULT_NAME_PROPERTY, KEY_VAULT_NAME);
         properties.put(KEY_VAULT_ENVIRONMENT_PROPERTY, ENVIRONMENT);
         properties.put(API_VERSION_PROPERTY, "7.6");
-
-        String firstExpectedResult = "admin_12345";
-        String secondSecretName = "variables-hello";
-        String secondExpectedResult = "hello world";
+        properties.put(KEY_VAULT_PROCESSOR_ENABLED_PROPERTY, TRUE);
+        properties.put(PROPERTY_NAME, PROPERTY_VALUE);
+        properties.put(secondPropertyName, "AZURE_KEY_VAULT(variables-hello)");
 
         try (MockedConstruction<AzureResourceManagementClient> client = Mockito.mockConstruction(
                 AzureResourceManagementClient.class, (mock, context) -> {
                     doAnswer(invocation -> {
                         Consumer<String> consumer = invocation.getArgument(3);
-                        consumer.accept(String.format(RESPONSE, firstExpectedResult));
+                        consumer.accept(String.format(response, firstExpectedResult));
                         return null;
-                    }).when(mock).executeHttpRequest(eq(HttpMethod.GET), eq(String.format(URL, SECRET_NAME)),
+                    }).when(mock).executeHttpRequest(eq(HttpMethod.GET), eq(String.format(url, SECRET_NAME)),
                         eq(Optional.empty()), any(Consumer.class), any(Consumer.class));
                     doAnswer(invocation -> {
                         Consumer<String> consumer = invocation.getArgument(3);
-                        consumer.accept(String.format(RESPONSE, secondExpectedResult));
+                        consumer.accept(String.format(response, secondExpectedResult));
                         return null;
-                    }).when(mock).executeHttpRequest(eq(HttpMethod.GET), eq(String.format(URL, secondSecretName)),
+                    }).when(mock).executeHttpRequest(eq(HttpMethod.GET), eq(String.format(url, secondSecretName)),
                             eq(Optional.empty()), any(Consumer.class), any(Consumer.class));
                 }
         ))
         {
-            var processor = new AzureKeyVaultPropertiesProcessor();
-            processor.processProperties(properties);
-            assertEquals(firstExpectedResult, processor.processValue(PROPERTY_NAME, SECRET_NAME));
-            assertEquals(secondExpectedResult, processor.processValue(PROPERTY_NAME, secondSecretName));
+            var updatedProperties = new AzureKeyVaultPropertiesProcessor().processProperties(properties);
+            assertEquals(firstExpectedResult, updatedProperties.getProperty(PROPERTY_NAME));
+            assertEquals(secondExpectedResult, updatedProperties.getProperty(secondPropertyName));
         }
     }
 
@@ -108,6 +124,8 @@ class AzureKeyVaultPropertiesProcessorTests
         properties.put(KEY_VAULT_NAME_PROPERTY, KEY_VAULT_NAME);
         properties.put(KEY_VAULT_ENVIRONMENT_PROPERTY, ENVIRONMENT);
         properties.put(API_VERSION_PROPERTY, "-1");
+        properties.put(KEY_VAULT_PROCESSOR_ENABLED_PROPERTY, TRUE);
+        properties.put(PROPERTY_NAME, PROPERTY_VALUE);
 
         try (MockedConstruction<AzureResourceManagementClient> mocked =
                      mockConstruction(AzureResourceManagementClient.class, (mockClient, context) ->
@@ -120,10 +138,8 @@ class AzureKeyVaultPropertiesProcessorTests
                          }).when(mockClient).executeHttpRequest(any(), any(), any(), any(), any());
                      }))
         {
-            var processor = new AzureKeyVaultPropertiesProcessor();
-            processor.processProperties(properties);
             var exception = assertThrows(IllegalArgumentException.class,
-                    () -> processor.processValue(PROPERTY_NAME, SECRET_NAME));
+                    () -> new AzureKeyVaultPropertiesProcessor().processProperties(properties));
             assertEquals(String.format("Unable to extract value from secret with name `%s` for Azure Key Vault `%s`",
                             SECRET_NAME, KEY_VAULT_NAME), exception.getMessage());
         }

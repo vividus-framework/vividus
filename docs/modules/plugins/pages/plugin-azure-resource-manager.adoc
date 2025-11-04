@@ -38,7 +38,7 @@ Azure subscription must be configured via `AZURE_SUBSCRIPTION_ID` environment va
 
 NOTE: The properties marked with *bold* are mandatory.
 
-[cols="3,1,1,3", options="header"]
+[cols="1,1,3", options="header"]
 |===
 |Property name
 |Default
@@ -51,6 +51,10 @@ NOTE: The properties marked with *bold* are mandatory.
 |[subs=+quotes]`secrets-manager.azure-key-vault.api-version`
 |`7.6`
 |Client API version
+
+|[subs=+quotes]`secrets-manager.azure-key-vault.enabled`
+|`true`
+|Defines whether VIVIDUS retrieves secrets from Azure Key Vault. If set to `false`, values from Azure Key Vault will not be retrieved. Can be used when access to Azure Key Vault is restricted, e.g. for local debugging, to override only the required properties instead of all processed ones.
 
 |===
 
