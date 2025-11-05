@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,20 @@
 
 package org.vividus.json.steps;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import com.networknt.schema.JsonSchemaException;
+import com.networknt.schema.SchemaException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.ISoftAssert;
@@ -67,9 +68,11 @@ class JsonSchemaValidationStepsTests
     {
         var schema = "{\"$schema\": \"https://wrong-specification\"}";
         steps.validateJsonAgainstSchema(any(), schema);
-        verify(softAssert).recordFailedAssertion(
-                argThat((ArgumentMatcher<Exception>) e -> e instanceof JsonSchemaException
-                        && "'https://wrong-specification' is unrecognizable schema".equals(e.getMessage())));
+        var errorCaptor = ArgumentCaptor.forClass(Throwable.class);
+        verify(softAssert).recordFailedAssertion(errorCaptor.capture());
+        var error = errorCaptor.getValue();
+        assertInstanceOf(SchemaException.class, error);
+        assertEquals("Failed to load dialect 'https://wrong-specification'", error.getMessage());
         verifyNoMoreInteractions(softAssert);
     }
 
@@ -80,8 +83,8 @@ class JsonSchemaValidationStepsTests
         steps.validateJsonAgainstSchema(loadResource("not-valid-against-schema.json"), schema);
         var lineSeparator = System.lineSeparator();
         var errorMessage = "JSON is not valid against schema:" + lineSeparator
-                + "1) $.tags: integer found, array expected," + lineSeparator
-                + "2) $: required property 'price' not found";
+                + "1) /tags: integer found, array expected," + lineSeparator
+                + "2) : required property 'price' not found";
         verify(softAssert).recordAssertion(false, errorMessage);
         verifyNoMoreInteractions(softAssert);
     }
