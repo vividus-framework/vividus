@@ -166,3 +166,44 @@ When I copy local file located at `$filePath` to path `$destination` on $connect
 ----
 When I copy local file located at `local-file.txt` to path `remote-file.txt` on my-host over SFTP
 ----
+
+=== Port forwarding
+
+Opens an SSH session and forwards a local port to a remote host and port using the provided parameters.
+All the opened SSH sessions will be closed after all the batches are executed.
+
+[source,gherkin]
+----
+When I forward port through SSH using parameters:$parameters
+----
+
+* `$parameters` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with SSH port forwarding and connection parameters.
++
+NOTE: The parameters marked with *bold* are mandatory.
+
+[cols="3,1,1,3", options="header"]
+|===
+|Name
+|Acceptable values
+|Default
+|Description
+
+|[subs=+quotes]`*local-port*`
+|0..65535
+|
+|The local TCP port to bind on the client machine. Incoming connections to this port are sent through the SSH tunnel
+
+|[subs=+quotes]`*remote-port*`
+|0..65535
+|
+|The TCP port on the `remote-host` that receives the forwarded traffic
+
+|[subs=+quotes]`*remote-host*`
+|hostname or IP
+|
+|The target host (reachable from the SSH server) to which the forwarded traffic should be delivered. This can be an internal host not directly accessible from the client
+
+:connection-parameters-prefix:
+include::partial$ssh-connection-parameters-commons.adoc[]
+
+|===

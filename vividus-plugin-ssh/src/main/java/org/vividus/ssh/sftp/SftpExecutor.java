@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.vividus.ssh.Commands;
 import org.vividus.ssh.JSchExecutor;
 import org.vividus.ssh.SingleCommand;
 import org.vividus.ssh.SshConnectionParameters;
+import org.vividus.ssh.factory.SshSessionFactory;
 
 import jakarta.inject.Named;
 
@@ -36,8 +37,9 @@ public class SftpExecutor extends JSchExecutor<ChannelSftp, SftpOutput>
 {
     private final ISoftAssert softAssert;
 
-    public SftpExecutor(ISoftAssert softAssert)
+    public SftpExecutor(SshSessionFactory sshSessionFactory, ISoftAssert softAssert)
     {
+        super(sshSessionFactory);
         this.softAssert = softAssert;
     }
 

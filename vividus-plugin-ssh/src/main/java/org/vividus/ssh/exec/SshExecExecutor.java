@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,18 @@ import com.jcraft.jsch.ChannelExec;
 
 import org.vividus.ssh.Commands;
 import org.vividus.ssh.SshConnectionParameters;
+import org.vividus.ssh.factory.SshSessionFactory;
 
 import jakarta.inject.Named;
 
 @Named
 public class SshExecExecutor extends SshExecutor<ChannelExec>
 {
+    public SshExecExecutor(SshSessionFactory sshSessionFactory)
+    {
+        super(sshSessionFactory);
+    }
+
     @Override
     public String getChannelType()
     {

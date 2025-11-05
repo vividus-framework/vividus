@@ -16,37 +16,46 @@
 
 package org.vividus.ssh;
 
-import java.util.Optional;
-
 import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.Parameter;
 
 @AsParameters
-public class SshConnectionParameters extends SshSessionParameters
+public class SshPortForwardingParameters extends SshSessionParameters
 {
-    @Parameter(name = "channel-type")
-    private Optional<String> channelType = Optional.empty();
+    @Parameter(name = "local-port")
+    private int localPort;
+    @Parameter(name = "remote-port")
+    private int remotePort;
+    @Parameter(name = "remote-host")
+    private String remoteHost;
 
-    @Parameter(name = "pseudo-terminal-enabled")
-    private boolean pseudoTerminalEnabled;
-
-    public boolean isPseudoTerminalEnabled()
+    public int getLocalPort()
     {
-        return pseudoTerminalEnabled;
+        return localPort;
     }
 
-    public void setPseudoTerminalEnabled(boolean pseudoTerminalEnabled)
+    public void setLocalPort(int localPort)
     {
-        this.pseudoTerminalEnabled = pseudoTerminalEnabled;
+        this.localPort = localPort;
     }
 
-    public Optional<String> getChannelType()
+    public int getRemotePort()
     {
-        return channelType;
+        return remotePort;
     }
 
-    public void setChannelType(Optional<String> channelType)
+    public void setRemotePort(int remotePort)
     {
-        this.channelType = channelType;
+        this.remotePort = remotePort;
+    }
+
+    public String getRemoteHost()
+    {
+        return remoteHost;
+    }
+
+    public void setRemoteHost(String remoteHost)
+    {
+        this.remoteHost = remoteHost;
     }
 }
