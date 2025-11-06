@@ -1,7 +1,7 @@
 project.description = 'VIVIDUS extension for Azure Cloud'
 
 dependencies {
-    api platform('com.azure:azure-sdk-bom:1.3.0')
+    api platform('com.azure:azure-sdk-bom:1.3.2')
     api('com.azure:azure-identity')
 
     testImplementation platform(libs.junit.bom)
