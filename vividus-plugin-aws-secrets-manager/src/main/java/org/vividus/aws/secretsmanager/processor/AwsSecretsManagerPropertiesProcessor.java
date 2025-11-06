@@ -24,6 +24,7 @@ import com.amazonaws.services.secretsmanager.AWSSecretsManager;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClient;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
+import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -57,6 +58,12 @@ public class AwsSecretsManagerPropertiesProcessor extends AbstractPropertiesProc
 
                         GetSecretValueResult response = client.getSecretValue(getSecretValueRequest);
                         return response.getSecretString();
+                    }
+                    catch (ResourceNotFoundException thrown)
+                    {
+                        throw new IllegalArgumentException(String.format(
+                                "The requested secret '%s' was not found in AWS Secrets Manager using profile '%s'",
+                                secretId.secret, secretId.profile), thrown);
                     }
                     finally
                     {

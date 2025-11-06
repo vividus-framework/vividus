@@ -32,6 +32,7 @@ import com.amazonaws.services.secretsmanager.AWSSecretsManagerClient;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class AwsSecretsManagerPropertiesProcessorTests
 {
+    private static final String PROP_NAME = "property_name";
+
     private AwsSecretsManagerPropertiesProcessor processor;
 
     @BeforeEach
@@ -78,7 +81,7 @@ class AwsSecretsManagerPropertiesProcessorTests
             ArgumentCaptor<GetSecretValueRequest> requestCaptor = ArgumentCaptor.forClass(GetSecretValueRequest.class);
             when(client.getSecretValue(requestCaptor.capture())).thenReturn(result);
 
-            String value = processor.processValue("property_name", valueToProcess);
+            String value = processor.processValue(PROP_NAME, valueToProcess);
             assertEquals("value", value);
             assertEquals(secretId, requestCaptor.getValue().getSecretId());
         }
@@ -99,5 +102,33 @@ class AwsSecretsManagerPropertiesProcessorTests
         var properties = new Properties();
         properties.put("property", "AWS_SECRETS_MANAGER(profile, secret/test)");
         assertEquals(properties, processor.processProperties(properties));
+    }
+
+    @Test
+    void shouldHandleResourceNotFoundExceptionFromCache()
+    {
+        String valueToProcess = "profileX, secretName/key";
+
+        try (MockedStatic<AWSSecretsManagerClient> clientStatic = mockStatic(AWSSecretsManagerClient.class);
+                MockedConstruction<ProfileCredentialsProvider> credentialsProviderMock = mockConstruction(
+                        ProfileCredentialsProvider.class,
+                        (mock, context) -> assertEquals("profileX", context.arguments().get(0))))
+        {
+            AWSSecretsManagerClientBuilder builder = mock(AWSSecretsManagerClientBuilder.class);
+            AWSSecretsManager client = mock(AWSSecretsManager.class);
+
+            clientStatic.when(AWSSecretsManagerClient::builder).thenReturn(builder);
+            when(builder.withCredentials(any(ProfileCredentialsProvider.class))).thenReturn(builder);
+            when(builder.build()).thenReturn(client);
+
+            when(client.getSecretValue(any(GetSecretValueRequest.class)))
+                    .thenThrow(new com.amazonaws.services.secretsmanager.model.ResourceNotFoundException("not found"));
+
+            UncheckedExecutionException exception = assertThrows(UncheckedExecutionException.class,
+                    () -> processor.processValue(PROP_NAME, valueToProcess));
+            assertEquals(
+                    "The requested secret 'secretName' was not found in AWS Secrets Manager using profile 'profileX'",
+                    exception.getCause().getMessage());
+        }
     }
 }
