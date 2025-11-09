@@ -4,7 +4,7 @@ apache-commons-lang3 = { module = "org.apache.commons:commons-lang3", version = 
 apache-commons-collections4 = { module = "org.apache.commons:commons-collections4", version = "4.5.0" }
 apache-commons-text = { module = "org.apache.commons:commons-text", version = "1.14.0" }
 apache-commons-codec = { module = "commons-codec:commons-codec", version = "1.20.0" }
-apache-commons-io = { module = "commons-io:commons-io", version = "2.20.0" }
+apache-commons-io = { module = "commons-io:commons-io", version = "2.21.0" }
 guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
 
 slf4j-bom = { module = "org.slf4j:slf4j-bom", version = "2.0.17" }
