@@ -20,7 +20,7 @@ dependencies {
     implementation('org.seleniumhq.selenium:selenium-ie-driver')
     implementation('org.seleniumhq.selenium:selenium-safari-driver')
     implementation('junit:junit:4.13.2')
-    implementation('io.github.bonigarcia:webdrivermanager:6.3.2') {
+    implementation('io.github.bonigarcia:webdrivermanager:6.3.3') {
         exclude group: 'com.github.docker-java'
     }
     implementation platform(libs.spring.bom)
