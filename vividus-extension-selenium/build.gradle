@@ -30,7 +30,7 @@ configurations {
      api("com.github.valfirst.browserup-proxy:browserup-proxy-core:${browserupProxyVersion}")
      implementation("com.github.valfirst.browserup-proxy:browserup-proxy-mitm:${browserupProxyVersion}")
 
-     implementation platform('com.google.zxing:zxing-parent:3.5.3')
+     implementation platform('com.google.zxing:zxing-parent:3.5.4')
      implementation('com.google.zxing:core')
      implementation('com.google.zxing:javase')
 
