@@ -83,7 +83,7 @@ dependencies {
     implementation('org.springframework.vault:spring-vault-core:3.2.0')
 
     implementation(libs.jakarta.injectApi)
-    implementation('commons-cli:commons-cli:1.10.0')
+    implementation('commons-cli:commons-cli:1.11.0')
     // jasypt
     implementation('org.jasypt:jasypt-spring4:1.9.3')
 
