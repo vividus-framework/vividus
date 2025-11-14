@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,18 +100,39 @@ public class ExecutableSteps
         stepsToExecute.execute(Optional.empty());
     }
 
-    /** If the variable with name is not set into context executes steps.
+    /**
+     * Executes steps if variable is not set.
      * <b>Example:</b>
-     * <br> When variable 'token' is not set perform:
-     * <br> |When I login|
+     * <br> When variable 'token' is not set I do:
+     * <br> |step                |
+     * <br> |When I login        |
      * @param name variable name to check
      * @param stepsToExecute steps to execute
      */
     @When("variable `$name` is not set I do:$stepsToExecute")
     @Alias("variable '$name' is not set I do:$stepsToExecute")
-    public void ifVariableNotSetPerformSteps(String name, SubSteps stepsToExecute)
+    public void performStepsIfVariableIsNotSet(String name, SubSteps stepsToExecute)
     {
         if (variableContext.getVariable(name) == null)
+        {
+            stepsToExecute.execute(Optional.empty());
+        }
+    }
+
+    /**
+     * Executes steps if variable is set.
+     * <b>Example:</b>
+     * <br> When variable 'user' is set I do:
+     * <br> |step                |
+     * <br> |When I do something |
+     * @param name variable name to check
+     * @param stepsToExecute steps to execute
+     */
+    @When("variable `$name` is set I do:$stepsToExecute")
+    @Alias("variable '$name' is set I do:$stepsToExecute")
+    public void performStepsIfVariableIsSet(String name, SubSteps stepsToExecute)
+    {
+        if (variableContext.getVariable(name) != null)
         {
             stepsToExecute.execute(Optional.empty());
         }
