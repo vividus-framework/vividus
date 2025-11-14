@@ -104,6 +104,22 @@ When variable `varName` is not set I do:
 Then `${iterator}` is = `2`
 
 
+Scenario: Verify step: When variable `$name` is set I do:$stepsToExecute
+
+Given I initialize story variable `setVar` with value `someValue`
+Given I initialize story variable `iterator` with value `0`
+When variable `setVar` is set I do:
+{headerSeparator=!, valueSeparator=!}
+!step                                                                                !
+!Then `${iterator}` is = `0`                                                         !
+!Given I initialize story variable `iterator` with value `#{eval(${iterator} + 1)}`  !
+!When variable 'setVar' is set I do:                                                 !
+!|step                                                                              |!
+!|Then `${iterator}` is = `1`                                                       |!
+!|Given I initialize story variable `iterator` with value `#{eval(${iterator} + 1)}`|!
+Then `${iterator}` is = `2`
+
+
 Scenario: Verify step: When I execute steps:$stepsToExecute
 Meta:
     @requirementId 1800

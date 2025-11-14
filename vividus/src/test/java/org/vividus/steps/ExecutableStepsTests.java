@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ class ExecutableStepsTests
 {
     private static final String KEY = "key";
     private static final String ITERATION_VARIABLE = "iterationVariable";
+    private static final String VALUE = "value";
     private static final String ONE = "1";
     private static final String THREE = "3";
     private static final String X = "x";
@@ -92,15 +93,30 @@ class ExecutableStepsTests
     @Test
     void shouldRunStepsIfVariableIsNotSet()
     {
-        executableSteps.ifVariableNotSetPerformSteps(KEY, subSteps);
+        executableSteps.performStepsIfVariableIsNotSet(KEY, subSteps);
         verify(subSteps).execute(Optional.empty());
     }
 
     @Test
-    void shouldNotRunStepsIfVariableIsSet()
+    void shouldNotRunStepsIfVariableIsNotSetWhenVariableIsSet()
     {
-        when(variableContext.getVariable(KEY)).thenReturn("value");
-        executableSteps.ifVariableNotSetPerformSteps(KEY, subSteps);
+        when(variableContext.getVariable(KEY)).thenReturn(VALUE);
+        executableSteps.performStepsIfVariableIsNotSet(KEY, subSteps);
+        verifyNoInteractions(subSteps);
+    }
+
+    @Test
+    void shouldRunStepsIfVariableIsSet()
+    {
+        when(variableContext.getVariable(KEY)).thenReturn(VALUE);
+        executableSteps.performStepsIfVariableIsSet(KEY, subSteps);
+        verify(subSteps).execute(Optional.empty());
+    }
+
+    @Test
+    void shouldNotRunStepsIfVariableIsSetWhenVariableIsNotSet()
+    {
+        executableSteps.performStepsIfVariableIsSet(KEY, subSteps);
         verifyNoInteractions(subSteps);
     }
 

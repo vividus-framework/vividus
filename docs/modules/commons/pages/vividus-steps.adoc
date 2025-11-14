@@ -361,7 +361,7 @@ When the condition `#{eval(${numberOfOuterElements} == 1)}` is true I do
 
 === Execute steps if a variable is not set
 
-Execute steps if the variable with specified name is not set into context.
+Execute steps if the variable with specified name is not set.
 
 [source,gherkin]
 ----
@@ -396,6 +396,33 @@ When variable `token` is not set I do:
 !|step                                                                                               |!
 !|Given I initialize story variable `api-key` with value `as38der4535fdERAnA443mIlb`                 |!
 ----
+
+=== Execute steps if a variable is set
+
+Execute steps if the variable with specified name is set.
+
+[source,gherkin]
+----
+When variable `$name` is set I do:$stepsToExecute
+----
+
+Alias:
+[source,gherkin]
+----
+When variable '$name' is set I do:$stepsToExecute
+----
+
+* `$name` - The variable name to check.
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column `step` containing the steps to execute if variable `$name` is set.
+
+.Execute steps if variable `user` is already set
+[source,gherkin]
+----
+When variable `user` is set I do:
+| step                                          |
+| When I perform some action for logged in user |
+----
+
 
 == Files
 === Create a file
