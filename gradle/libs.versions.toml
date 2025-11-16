@@ -29,7 +29,7 @@ jackson-dataformat-xml = { module = "com.fasterxml.jackson.dataformat:jackson-da
 
 jakarta-injectApi = { module = "jakarta.inject:jakarta.inject-api", version = "2.0.1" }
 tika-core = { module = "org.apache.tika:tika-core", version = "3.2.3" }
-jsonUnit = { module = "net.javacrumbs.json-unit:json-unit", version = "5.0.0" }
+jsonUnit = { module = "net.javacrumbs.json-unit:json-unit", version = "5.1.0" }
 
 h2 = { module = "com.h2database:h2", version = "2.4.240" }
 csvjdbc = { module = "net.sourceforge.csvjdbc:csvjdbc", version = "1.0.46" }

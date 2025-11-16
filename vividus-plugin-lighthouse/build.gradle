@@ -19,5 +19,5 @@ dependencies {
     testImplementation platform(libs.mockito.bom)
     testImplementation(libs.mockito.junitJupiter)
     testImplementation(libs.slf4jTest)
-    testImplementation('net.javacrumbs.json-unit:json-unit:5.0.0')
+    testImplementation('net.javacrumbs.json-unit:json-unit:5.1.0')
 }
