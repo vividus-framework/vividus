@@ -8,7 +8,7 @@ dependencies {
     api(libs.jsonUnit)
     implementation("com.github.vividus-framework.JsonPath:json-path-assert:${versions.jsonPath}")
     implementation('com.flipkart.zjsonpatch:zjsonpatch:0.4.16')
-    implementation platform('io.qameta.allure:allure-bom:2.30.0')
+    implementation platform('io.qameta.allure:allure-bom:2.31.0')
     implementation('io.qameta.allure:allure-jsonunit') {
         exclude (group: 'io.qameta.allure')
     }
