@@ -1,6 +1,6 @@
 [libraries]
 
-apache-commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.19.0" }
+apache-commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.20.0" }
 apache-commons-collections4 = { module = "org.apache.commons:commons-collections4", version = "4.5.0" }
 apache-commons-text = { module = "org.apache.commons:commons-text", version = "1.14.0" }
 apache-commons-codec = { module = "commons-codec:commons-codec", version = "1.20.0" }
