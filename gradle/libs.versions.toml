@@ -34,7 +34,7 @@ jsonUnit = { module = "net.javacrumbs.json-unit:json-unit", version = "5.1.0" }
 h2 = { module = "com.h2database:h2", version = "2.4.240" }
 csvjdbc = { module = "net.sourceforge.csvjdbc:csvjdbc", version = "1.0.46" }
 mysql-connector-j = { module = "com.mysql:mysql-connector-j", version = "9.5.0" }
-mssql-jdbc = { module = "com.microsoft.sqlserver:mssql-jdbc", version = "13.2.1.jre11" }
+mssql-jdbc = { module = "com.microsoft.sqlserver:mssql-jdbc", version = "13.3.0.jre11-preview" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.7.8" }
 oracle-ojdbc10 = { module = "com.oracle.database.jdbc:ojdbc10", version = "19.29.0.0" }
 db2jcc = { module = "com.ibm.db2.jcc:db2jcc", version = "db2jcc4" }
