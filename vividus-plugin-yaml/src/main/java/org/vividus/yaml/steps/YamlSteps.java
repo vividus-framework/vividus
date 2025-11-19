@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class YamlSteps
     @When("I save YAML element value from `$yaml` by YAML path `$yamlPath` to $scopes variable `$variableName`")
     public void saveYamlValueToVariable(String yaml, String yamlPath, Set<VariableScope> scopes, String variableName)
     {
-        Set<Object> result = YamlPath.from(yaml).read(yamlPath);
+        Set<Object> result = getElements(yaml, yamlPath);
         if (result.isEmpty())
         {
             softAssert.recordFailedAssertion(String.format("No YAML element is found by YAML path '%s'", yamlPath));
@@ -74,5 +74,32 @@ public class YamlSteps
                     "Value of YAML element found by YAML path '%s' must be either null, or boolean, or string, or"
                             + " integer, or float, but found %s", yamlPath, actualType));
         }
+    }
+
+    /**
+     * Saves the number of YAML elements found by the YAML path into the variable with the specified name and scope
+     *
+     * @param yaml         The YAML used to find YAML elements.
+     * @param yamlPath     The YAML path used to find YAML elements.
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The name of the variable to save the number of found YAML elements.
+     */
+    @When("I save number of elements from `$yaml` by YAML path `$yamlPath` to $scopes variable `$variableName`")
+    public void saveNumberOfYamlElements(String yaml, String yamlPath, Set<VariableScope> scopes, String variableName)
+    {
+        Set<Object> result = getElements(yaml, yamlPath);
+        variableContext.putVariable(scopes, variableName, result.size());
+    }
+
+    private static Set<Object> getElements(String yaml, String yamlPath)
+    {
+        return YamlPath.from(yaml).read(yamlPath);
     }
 }
