@@ -46,10 +46,10 @@ When I run visual test with Applitools UFG using:
 |baselineName           |batchName  |action  |areasToIgnore|
 |ufg-full-page-area-cut |<batchName>|<action>|<firstP>     |
  and matrix:
-|profile                |browser|viewportSize|deviceName|screenOrientation|version|
-|desktop                |firefox|1920x1080   |          |                 |       |
-|ios                    |       |            |iPhone 14 |landscape        |latest |
-|chrome_mobile_emulation|       |            |Galaxy S10|portrait         |       |
+|profile                |browser|viewportSize|deviceName|screenOrientation|version         |
+|desktop                |firefox|1920x1080   |          |                 |                |
+|ios                    |       |            |iPhone 14 |landscape        |one version back|
+|chrome_mobile_emulation|       |            |Galaxy S10|portrait         |                |
 
 
 Scenario: Validation of step: 'When I run visual test with Applitools UFG using:$applitoolsConfigurations and matrix:$matrix' for context element with element cut
