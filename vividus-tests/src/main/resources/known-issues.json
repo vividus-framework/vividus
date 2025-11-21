@@ -58,7 +58,7 @@
     "assertionPattern": ".*",
     "scenarioPattern": "Known issue should be detected in sub-steps",
     "storyPattern": "Known issues",
-    "stepPattern": "When I use composite step in known-issues",
+    "stepPattern": "When I use composite step broken param in fail fast known issue",
     "failScenarioFast": true
   },
   "VVD-10": {

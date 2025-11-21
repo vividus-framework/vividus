@@ -36,8 +36,8 @@ Scenario: Known issue should be detected in sub-steps
 Meta:
     @issueId 1094
 When the condition `#{eval( true )}` is true I do
-|step                                     |
-|When I use composite step in known-issues|
+|step                                                           |
+|When I use composite step broken param in fail fast known issue|
 !-- The next step should not be performed
 Then `true` is equal to `false`
 
