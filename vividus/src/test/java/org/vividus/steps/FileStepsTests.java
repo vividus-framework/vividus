@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,18 @@
 package org.vividus.steps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
@@ -32,17 +36,27 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
 class FileStepsTests
 {
+    private static final String FILE_CONTENT = "content";
+    private static final String FILE_NAME = "test.txt";
+
     @Mock
     private VariableContext variableContext;
+
+    @Mock
+    private ISoftAssert softAssert;
 
     @InjectMocks
     private FileSteps fileSteps;
@@ -50,15 +64,14 @@ class FileStepsTests
     @Test
     void testSaveResponseBodyToFile() throws IOException
     {
-        String content = "content";
         String pathVariable = "path";
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        fileSteps.createTemporaryFile("test.txt", new DataWrapper(content), scopes, pathVariable);
+        fileSteps.createTemporaryFile(FILE_NAME, new DataWrapper(FILE_CONTENT), scopes, pathVariable);
         verify(variableContext).putVariable(eq(scopes), eq(pathVariable), argThat(path ->
         {
             try
             {
-                return FileUtils.readFileToString(new File((String) path), StandardCharsets.UTF_8).equals(content);
+                return FILE_CONTENT.equals(FileUtils.readFileToString(new File((String) path), StandardCharsets.UTF_8));
             }
             catch (IOException e)
             {
@@ -71,8 +84,49 @@ class FileStepsTests
     void testSaveStringVariableToFile(@TempDir Path tempDir) throws IOException
     {
         String tempFilePath = tempDir.resolve("temp").resolve("any.txt").toString();
-        String fileContent = "file-content";
-        fileSteps.createFile(fileContent, tempFilePath);
-        assertEquals(fileContent, FileUtils.readFileToString(new File(tempFilePath), StandardCharsets.UTF_8));
+        fileSteps.createFile(FILE_CONTENT, tempFilePath);
+        assertEquals(FILE_CONTENT, FileUtils.readFileToString(new File(tempFilePath), StandardCharsets.UTF_8));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = "   ")
+    void shouldFailOnInvalidPath(String path)
+    {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> fileSteps.assertPathExists(path)
+        );
+        assertEquals("File path must not be null, empty or blank", exception.getMessage());
+    }
+
+    @Test
+    void testShouldPassWhenPathExists(@TempDir Path tempDir) throws IOException
+    {
+        Path filePath = tempDir.resolve(FILE_NAME);
+        Files.writeString(filePath, FILE_CONTENT, StandardCharsets.UTF_8);
+        fileSteps.assertPathExists(filePath.toString());
+        verify(softAssert)
+                .recordPassedAssertion("File '" + filePath + "' exists");
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void testShouldFailWhenPathDoesNotExist(@TempDir Path tempDir)
+    {
+        Path invalidFilePath = tempDir.resolve("non-existent.txt");
+        fileSteps.assertPathExists(invalidFilePath.toString());
+        verify(softAssert).recordFailedAssertion(String.format(
+                "File '%s' does not exist", invalidFilePath));
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void shouldFailWhenPathIsInvalid()
+    {
+        String invalidPath = "invalid\0path";
+        fileSteps.assertPathExists(invalidPath);
+        verify(softAssert).recordFailedAssertion(startsWith("Invalid path '" + invalidPath + "':"));
+        verifyNoMoreInteractions(softAssert);
     }
 }
