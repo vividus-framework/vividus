@@ -2,7 +2,7 @@ project.description = 'VIVIDUS plugin for Redis'
 
 dependencies {
     api project(':vividus-engine')
-    implementation('redis.clients:jedis:7.0.0')
+    implementation('redis.clients:jedis:7.1.0')
 
     testImplementation platform(libs.junit.bom)
     testImplementation(libs.junit.jupiter)
