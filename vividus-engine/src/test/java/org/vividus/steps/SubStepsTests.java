@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -44,12 +45,12 @@ import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.Step;
 import org.jbehave.core.steps.StepResult;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.steps.SubSteps.DecoratingResultStep;
 
 @ExtendWith(MockitoExtension.class)
 class SubStepsTests
@@ -61,18 +62,6 @@ class SubStepsTests
     @Mock private Keywords keywords;
     @Mock private Embedder embedder;
     private SubSteps subSteps;
-
-    @BeforeEach
-    void beforeEach()
-    {
-        var storyManager = mock(StoryManager.class);
-        when(storyManager.getContext()).thenReturn(context);
-        when(embedder.storyManager()).thenReturn(storyManager);
-
-        Configuration configuration = mock(Configuration.class);
-        when(context.configuration()).thenReturn(configuration);
-        when(configuration.keywords()).thenReturn(keywords);
-    }
 
     @Test
     void testExecuteSubStepWithParameters()
@@ -108,6 +97,7 @@ class SubStepsTests
     @Test
     void testExecuteSubStepsWithFirstFailed()
     {
+        mockConfiguration();
         var stepResult1 = mock(StepResult.class);
         UUIDExceptionWrapper exception = new UUIDExceptionWrapper(new IllegalArgumentException());
         when(stepResult1.getFailure()).thenReturn(exception);
@@ -140,6 +130,7 @@ class SubStepsTests
     @Test
     void testExecuteSubStepsWithIgnoringStepsFailure()
     {
+        mockConfiguration();
         var stepResult1 = mock(StepResult.class);
         var step1 = mock(Step.class);
         when(step1.perform(storyReporter, null)).thenReturn(stepResult1);
@@ -214,8 +205,21 @@ class SubStepsTests
         }, ordered -> { });
     }
 
+    @Test
+    void shouldDelegateAsPlainStringInvocation()
+    {
+        var step = mock(Step.class);
+        DecoratingResultStep decoratingStep = new DecoratingResultStep(step, keywords,
+                EMPTY_STEP_CONTEXT_INFO_PROVIDER);
+
+        decoratingStep.asPlainString(keywords);
+
+        verify(step).asPlainString(keywords);
+    }
+
     private void testExecuteSubSteps(StepResult stepResult, Consumer<Step> test, Consumer<InOrder> stepResultVerifier)
     {
+        mockConfiguration();
         var step = mock(Step.class);
         when(step.perform(storyReporter, null)).thenReturn(stepResult);
 
@@ -230,6 +234,17 @@ class SubStepsTests
         ordered.verify(step).perform(storyReporter, null);
         stepResultVerifier.accept(ordered);
         ordered.verify(context).stateIs(newState);
+    }
+
+    private void mockConfiguration()
+    {
+        var storyManager = mock(StoryManager.class);
+        when(storyManager.getContext()).thenReturn(context);
+        when(embedder.storyManager()).thenReturn(storyManager);
+
+        Configuration configuration = mock(Configuration.class);
+        when(context.configuration()).thenReturn(configuration);
+        when(configuration.keywords()).thenReturn(keywords);
     }
 
     private State mockStepRun(State state, Consumer<Step> stepRunner, StepResult stepResult)
