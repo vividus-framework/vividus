@@ -20,11 +20,15 @@ import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
 
 public class RedisSteps
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisSteps.class);
+
     private final Map<String, String> connections;
 
     public RedisSteps(Map<String, String> connections)
@@ -50,6 +54,7 @@ public class RedisSteps
         {
             jedis.select(dbIndex);
             jedis.flushDB();
+            LOGGER.info("The database with {} ID has been flushed", dbIndex);
         }
     }
 }

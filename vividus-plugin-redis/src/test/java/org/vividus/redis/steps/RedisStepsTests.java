@@ -16,22 +16,34 @@
 
 package org.vividus.redis.steps;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 
+import java.util.List;
 import java.util.Map;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import redis.clients.jedis.Jedis;
 
+@ExtendWith(TestLoggerFactoryExtension.class)
 class RedisStepsTests
 {
     private static final String INSTANCE = "instance";
     private static final String LOCALHOST = "localhost";
     private static final Map<String, String> CONNECTIONS = Map.of(INSTANCE, LOCALHOST);
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(RedisSteps.class);
 
     @Test
     void shouldFlushDatabase()
@@ -49,6 +61,7 @@ class RedisStepsTests
             verify(jedisMock).select(index);
             verify(jedisMock).flushDB();
             verify(jedisMock).close();
+            assertThat(logger.getLoggingEvents(), is(List.of(info("The database with {} ID has been flushed", index))));
         }
     }
 
@@ -59,6 +72,7 @@ class RedisStepsTests
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
                 () -> redisSteps.flushDatabase(0, "unknown"));
         assertEquals("Connection with key 'unknown' does not exist", thrown.getMessage());
+        assertThat(logger.getLoggingEvents(), is(List.of()));
     }
 
     @Test
@@ -68,5 +82,6 @@ class RedisStepsTests
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
                 () -> redisSteps.flushDatabase(-1, INSTANCE));
         assertEquals("Database index must be a non-negative integer", thrown.getMessage());
+        assertThat(logger.getLoggingEvents(), is(List.of()));
     }
 }
