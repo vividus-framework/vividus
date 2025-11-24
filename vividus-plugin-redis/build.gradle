@@ -9,4 +9,5 @@ dependencies {
     testRuntimeOnly(libs.junit.platformLauncher)
     testImplementation platform(libs.mockito.bom)
     testImplementation(libs.mockito.junitJupiter)
+    testImplementation(libs.slf4jTest)
 }
