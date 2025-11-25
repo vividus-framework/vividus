@@ -34,7 +34,7 @@ jobs:
 
     steps:
     - name: Checkout (including submodules and tags)
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         submodules: recursive
         fetch-depth: 0
@@ -428,7 +428,7 @@ jobs:
 
     steps:
     - name: Checkout (including submodules and tags)
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         submodules: recursive
         fetch-depth: 0
@@ -513,7 +513,7 @@ jobs:
 
     steps:
       - name: Checkout (including submodules and tags)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0
@@ -724,7 +724,7 @@ jobs:
 
     steps:
       - name: Checkout (including submodules and tags)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0
@@ -877,7 +877,7 @@ jobs:
 
     steps:
       - name: Checkout (including submodules and tags)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0
