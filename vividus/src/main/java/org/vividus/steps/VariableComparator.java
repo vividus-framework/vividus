@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ public abstract class VariableComparator
 {
     public boolean compare(Object variable1, ComparisonRule condition, Object variable2)
     {
-        if (ComparisonRule.EQUAL_TO.equals(condition))
+        if (ComparisonRule.EQUAL_TO == condition)
         {
             if (isEmptyOrListOfMaps(variable1) && isEmptyOrListOfMaps(variable2))
             {

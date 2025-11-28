@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class BatchedPerformableTree extends PerformableTree
     @Override
     public void performBeforeOrAfterStories(RunContext context, Stage stage)
     {
-        if (Stage.BEFORE.equals(stage))
+        if (Stage.BEFORE == stage)
         {
             List<Story> currentBatchStories = getRoot().getStories().stream()
                     .filter(p -> p.getStatus() == null)
@@ -41,7 +41,7 @@ public class BatchedPerformableTree extends PerformableTree
                     .toList();
             IDENTICAL_STORY_NAMES_RESOLVER.resolveIdenticalNames(currentBatchStories);
         }
-        if (reportBeforeStories && Stage.BEFORE.equals(stage) || Stage.AFTER.equals(stage)
+        if (reportBeforeStories && Stage.BEFORE == stage || Stage.AFTER == stage
                 && (reportAfterStories || failFast && !context.getFailures().isEmpty()))
         {
             super.performBeforeOrAfterStories(context, stage);
