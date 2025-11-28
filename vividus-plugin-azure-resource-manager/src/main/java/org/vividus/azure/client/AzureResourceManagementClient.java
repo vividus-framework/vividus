@@ -29,7 +29,7 @@ import com.azure.core.http.HttpResponse;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import reactor.core.publisher.Mono;
@@ -78,7 +78,7 @@ public class AzureResourceManagementClient
     {
         String url = String.format("%ssubscriptions/%s%s?api-version=%s",
                 azureProfile.getEnvironment().getResourceManagerEndpoint(), azureProfile.getSubscriptionId(),
-                StringUtils.prependIfMissing(azureResourceIdentifier, "/"), apiVersion);
+                Strings.CS.prependIfMissing(azureResourceIdentifier, "/"), apiVersion);
         executeHttpRequest(method, url, azureResourceBody, responseBodyConsumer, errorCallback);
     }
 

@@ -76,7 +76,7 @@ public class XrayFacade
         this.jiraClientProvider = jiraClientProvider;
         this.objectMapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .setSerializationInclusion(Include.NON_NULL)
+                .setDefaultPropertyInclusion(Include.NON_NULL)
                 .registerModule(new SimpleModule().addSerializer(ManualTestCase.class, manualTestSerializer)
                                                   .addSerializer(CucumberTestCase.class, cucumberTestSerializer));
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.vividus.azure.devops.VividusToAzureDevOpsApplication;
 import org.vividus.azure.devops.configuration.AzureDevOpsExporterOptions;
 import org.vividus.azure.devops.exporter.AzureDevOpsExporter;
@@ -36,8 +36,8 @@ import org.vividus.azure.devops.facade.AzureDevOpsFacade;
 @SpringBootTest(classes = VividusToAzureDevOpsApplication.class)
 class AzureDevOpsExporterIntegrationTests
 {
-    @MockBean private AzureDevOpsExporterOptions options;
-    @MockBean private AzureDevOpsFacade facade;
+    @MockitoBean private AzureDevOpsExporterOptions options;
+    @MockitoBean private AzureDevOpsFacade facade;
     @Autowired private AzureDevOpsExporter exporter;
 
     @Test

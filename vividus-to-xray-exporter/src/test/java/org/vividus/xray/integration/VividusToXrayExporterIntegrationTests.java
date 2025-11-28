@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.vividus.xray.VividusToXrayExporterApplication;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.exporter.XrayExporter;
@@ -42,9 +42,9 @@ import org.vividus.xray.factory.TestCaseFactory;
 })
 class VividusToXrayExporterIntegrationTests
 {
-    @MockBean private XrayExporterOptions xrayExporterOptions;
-    @SpyBean private XrayFacade xrayFacade;
-    @SpyBean private TestCaseFactory testCaseFactory;
+    @MockitoBean private XrayExporterOptions xrayExporterOptions;
+    @MockitoSpyBean private XrayFacade xrayFacade;
+    @MockitoSpyBean private TestCaseFactory testCaseFactory;
     @Autowired private XrayExporter xrayExporter;
 
     @Test
