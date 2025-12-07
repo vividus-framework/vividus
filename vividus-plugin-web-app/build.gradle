@@ -24,7 +24,7 @@ dependencies {
         exclude group: 'com.github.docker-java'
     }
     // Supports DevTools protocol for Chrome v142+
-    implementation('org.seleniumhq.selenium:selenium-devtools-v142:4.38.0') {
+    implementation('org.seleniumhq.selenium:selenium-devtools-v142:4.39.0') {
         exclude group: 'org.seleniumhq.selenium'
     }
     implementation platform(libs.spring.bom)
