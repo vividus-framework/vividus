@@ -4,7 +4,7 @@ dependencies {
     implementation project(':vividus')
     implementation project(':vividus-util')
 
-    implementation platform('io.modelcontextprotocol.sdk:mcp-bom:0.16.0')
+    implementation platform('io.modelcontextprotocol.sdk:mcp-bom:0.17.0')
     implementation('io.modelcontextprotocol.sdk:mcp-core')
     implementation('io.modelcontextprotocol.sdk:mcp-json-jackson2')
 
