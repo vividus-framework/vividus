@@ -16,7 +16,7 @@ dependencies {
 
     api project(':vividus-extension-web-app')
     api project(':vividus-extension-ui')
-    api('com.microsoft.playwright:playwright:1.56.0')
+    api('com.microsoft.playwright:playwright:1.57.0')
 
     compileOnly("com.github.spotbugs:spotbugs-annotations:${spotbugsVersion}")
 
