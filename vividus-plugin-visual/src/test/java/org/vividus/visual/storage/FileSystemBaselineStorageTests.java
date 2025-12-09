@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,8 @@ import org.hamcrest.io.FileMatchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.vividus.resource.ResourceLoadException;
 import org.vividus.util.ResourceUtils;
 
@@ -53,6 +55,7 @@ import pazone.ashot.util.ImageTool;
 class FileSystemBaselineStorageTests
 {
     private static final String BASELINE = "baseline";
+    private static final String BASELINE_PATH = "/path1/path2/" + BASELINE;
     private static final File BASELINES_FOLDER = new File("./baselines");
     private static final String DEFAULT_EXTENSION = ".png";
 
@@ -94,19 +97,25 @@ class FileSystemBaselineStorageTests
                 + "'.+[\\\\/]baselines[\\\\/]corrupted_image.png' is broken or has unsupported format"));
     }
 
-    @Test
-    void shouldSaveBaselineIntoFolder(@TempDir File folder) throws IOException
+    @ParameterizedTest
+    @ValueSource(strings = { BASELINE, BASELINE_PATH })
+    void shouldSaveBaselineIntoFolder(String baseline, @TempDir File folder) throws IOException
     {
         fileSystemBaselineStorage.setBaselinesFolder(folder);
         Screenshot screenshot = mock(Screenshot.class);
-        BufferedImage baseline = loadBaseline();
-        when(screenshot.getImage()).thenReturn(baseline);
-        fileSystemBaselineStorage.saveBaseline(screenshot, BASELINE);
-        File baselineFile = new File(folder, BASELINE + DEFAULT_EXTENSION);
+        BufferedImage baselineImage = loadBaseline();
+        when(screenshot.getImage()).thenReturn(baselineImage);
+        fileSystemBaselineStorage.saveBaseline(screenshot, baseline);
+        File baselineFile = new File(folder, baseline + DEFAULT_EXTENSION);
         assertThat(baselineFile, FileMatchers.anExistingFile());
-        assertThat(logger.getLoggingEvents(), is(List.of(info("Baseline saved to: {}",
-                baselineFile.getAbsolutePath()))));
-        assertThat(ImageIO.read(baselineFile), ImageTool.equalImage(baseline));
+        String loggingMessage = "Baseline saved to: {}";
+        assertThat(logger.getLoggingEvents(), is(List.of(info(loggingMessage, baselineFile.getAbsolutePath()))));
+        assertThat(ImageIO.read(baselineFile), ImageTool.equalImage(baselineImage));
+        logger.clear();
+
+        fileSystemBaselineStorage.saveBaseline(screenshot, baseline);
+        assertThat(ImageIO.read(baselineFile), ImageTool.equalImage(baselineImage));
+        assertThat(logger.getLoggingEvents(), is(List.of(info(loggingMessage, baselineFile.getAbsolutePath()))));
     }
 
     private BufferedImage loadBaseline()
