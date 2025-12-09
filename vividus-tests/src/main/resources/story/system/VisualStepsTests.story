@@ -23,6 +23,12 @@ When I <action> baseline with name `full-page`
 When I <action> baseline with name `full-page` using storage `filesystem`
 
 
+Scenario: Validation of step When I $actionType baseline with name `$name` with folders in baseline name
+When I <action> baseline with name `/folder/images/full-page` using storage `filesystem`
+When I establish baseline with name `/folder/images/full-page` using storage `filesystem`
+When I compare_against baseline with name `/folder/images/full-page` using storage `filesystem`
+
+
 Scenario: Validation of step When I $actionType baseline with name `$name` for context element
 When I change context to element located by `<firstP>`
 When I <action> baseline with name `context`

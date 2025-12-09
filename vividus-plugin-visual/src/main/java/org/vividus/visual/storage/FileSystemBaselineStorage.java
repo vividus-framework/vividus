@@ -26,6 +26,7 @@ import javax.imageio.ImageIO;
 
 import com.google.common.base.Suppliers;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +79,7 @@ public class FileSystemBaselineStorage implements BaselineStorage
     public void saveBaseline(Screenshot toSave, String baselineName) throws IOException
     {
         File baselineToSave = new File(baselineFolderResolver.get(), appendExtension(baselineName));
+        FileUtils.forceMkdirParent(baselineToSave);
         ImageUtils.writeAsPng(toSave.getImage(), baselineToSave);
         LOGGER.atInfo().addArgument(baselineToSave::getAbsolutePath).log("Baseline saved to: {}");
     }
