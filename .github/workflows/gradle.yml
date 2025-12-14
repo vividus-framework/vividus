@@ -40,7 +40,7 @@ jobs:
         fetch-depth: 0
 
     - name: Cache ~/.gradle/caches
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle') }}
@@ -48,7 +48,7 @@ jobs:
           ${{ runner.os }}-gradle-caches-
 
     - name: Cache ~/.gradle/wrapper
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.gradle/wrapper
         key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('vividus-build-system/**/wrapper/gradle-wrapper.properties') }}
@@ -57,7 +57,7 @@ jobs:
 
     - name: Cache tests history
       if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest'
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         save-always: true
         path: vividus-tests/output/history
@@ -434,7 +434,7 @@ jobs:
         fetch-depth: 0
 
     - name: Restore cached ~/.gradle/caches
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       with:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle') }}
@@ -442,7 +442,7 @@ jobs:
           ${{ runner.os }}-gradle-caches-
 
     - name: Restore cached ~/.gradle/wrapper
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       with:
         path: ~/.gradle/wrapper
         key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('vividus-build-system/**/wrapper/gradle-wrapper.properties') }}
@@ -450,7 +450,7 @@ jobs:
           ${{ runner.os }}-gradle-wrapper-
 
     - name: Restore cached tests history
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       with:
         path: vividus-tests/output/history
         key: kafka-tests-history-cache-${{ github.sha }}
@@ -498,7 +498,7 @@ jobs:
 
     - name: Cache tests history
       if: always() && github.ref == 'refs/heads/master'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v5
       with:
         path: vividus-tests/output/history
         key: kafka-tests-history-cache-${{ github.sha }}
@@ -519,7 +519,7 @@ jobs:
           fetch-depth: 0
 
       - name: Restore cached ~/.gradle/caches
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle') }}
@@ -527,7 +527,7 @@ jobs:
             ${{ runner.os }}-gradle-caches-
 
       - name: Restore cached ~/.gradle/wrapper
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('vividus-build-system/**/wrapper/gradle-wrapper.properties') }}
@@ -535,7 +535,7 @@ jobs:
             ${{ runner.os }}-gradle-wrapper-
 
       - name: Restore cached tests history
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: vividus-tests/output/history
           key: mobile-tests-on-saucelabs-history-cache-${{ github.sha }}
@@ -711,7 +711,7 @@ jobs:
 
       - name: Cache tests history
         if: always() && github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: vividus-tests/output/history
           key: mobile-tests-on-saucelabs-history-cache-${{ github.sha }}
@@ -730,7 +730,7 @@ jobs:
           fetch-depth: 0
 
       - name: Restore cached ~/.gradle/caches
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle') }}
@@ -738,7 +738,7 @@ jobs:
             ${{ runner.os }}-gradle-caches-
 
       - name: Restore cached ~/.gradle/wrapper
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('vividus-build-system/**/wrapper/gradle-wrapper.properties') }}
@@ -746,7 +746,7 @@ jobs:
             ${{ runner.os }}-gradle-wrapper-
 
       - name: Restore cached tests history
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: vividus-tests/output/history
           key: tests-on-browserstack-history-cache-${{ github.sha }}
@@ -864,7 +864,7 @@ jobs:
 
       - name: Cache tests history
         if: always() && github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: vividus-tests/output/history
           key: tests-on-browserstack-history-cache-${{ github.sha }}
@@ -883,7 +883,7 @@ jobs:
           fetch-depth: 0
 
       - name: Restore cached ~/.gradle/caches
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle') }}
@@ -891,7 +891,7 @@ jobs:
             ${{ runner.os }}-gradle-caches-
 
       - name: Restore cached ~/.gradle/wrapper
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('vividus-build-system/**/wrapper/gradle-wrapper.properties') }}
@@ -899,7 +899,7 @@ jobs:
             ${{ runner.os }}-gradle-wrapper-
 
       - name: Restore cached tests history
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: vividus-tests/output/history
           key: mobile-tests-on-mobitru-history-cache-${{ github.sha }}
@@ -1021,7 +1021,7 @@ jobs:
 
       - name: Cache tests history
         if: always() && github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: vividus-tests/output/history
           key: mobile-tests-on-mobitru-history-cache-${{ github.sha }}
