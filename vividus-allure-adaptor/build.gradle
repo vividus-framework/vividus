@@ -14,7 +14,7 @@ dependencies {
     implementation("io.qameta.allure:allure-plugin-api:${allureReportVersion}")
     implementation("io.qameta.allure.plugins:behaviors-plugin:${allureReportVersion}")
 
-    implementation platform('io.qameta.allure:allure-bom:2.31.0')
+    implementation platform('io.qameta.allure:allure-bom:2.32.0')
     implementation('io.qameta.allure:allure-java-commons')
 
     implementation platform(libs.spring.bom)
