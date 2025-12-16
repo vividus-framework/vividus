@@ -26,7 +26,7 @@ dependencies {
     testRuntimeOnly(libs.junit.platformLauncher)
     testImplementation platform(libs.mockito.bom)
     testImplementation(libs.mockito.junitJupiter)
-    testImplementation('com.icegreen:greenmail:2.1.7')
+    testImplementation('com.icegreen:greenmail:2.1.8')
     testImplementation('org.eclipse.angus:smtp:2.0.5')
     testImplementation(libs.slf4jTest)
 }
