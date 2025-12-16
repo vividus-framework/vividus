@@ -47,7 +47,7 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-platformLauncher = { module = "org.junit.platform:junit-platform-launcher" }
 junit-vintageEngine = { module = "org.junit.vintage:junit-vintage-engine" }
 
-mockito-bom = { module = "org.mockito:mockito-bom", version = "5.20.0" }
+mockito-bom = { module = "org.mockito:mockito-bom", version = "5.21.0" }
 mockito-junitJupiter = { module = "org.mockito:mockito-junit-jupiter" }
 mockito-core = { module = "org.mockito:mockito-core" }
 
