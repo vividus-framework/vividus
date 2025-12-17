@@ -8,7 +8,7 @@ dependencies {
     implementation('io.modelcontextprotocol.sdk:mcp-core')
     implementation('io.modelcontextprotocol.sdk:mcp-json-jackson2')
 
-    implementation platform('org.apache.logging.log4j:log4j-bom:2.25.2')
+    implementation platform('org.apache.logging.log4j:log4j-bom:2.25.3')
     implementation('org.apache.logging.log4j:log4j-core')
 
     testImplementation platform(libs.junit.bom)
