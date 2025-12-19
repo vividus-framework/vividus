@@ -114,7 +114,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
         }
         if (overrideBaselines && !comparisonResult.isPassed())
         {
-            getBaselineStorage(visualCheck).saveBaseline(checkpoint, visualCheck.getBaselineName());
+            getBaselineStorage(visualCheck).saveDelta(checkpoint, visualCheck.getBaselineName());
         }
 
         return comparisonResult;

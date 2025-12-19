@@ -23,7 +23,8 @@
     <bean class="org.vividus.visual.engine.DiffMarkupPolicyFactory" />
 
     <bean id="filesystem" class="org.vividus.visual.storage.FileSystemBaselineStorage">
-        <property name="baselinesFolder" value="${ui.visual.baseline-storage.filesystem.folder}" />
+        <constructor-arg index="0" value="${ui.visual.baseline-storage.filesystem.folder}" />
+        <constructor-arg index="1" value="${ui.visual.baseline-storage.filesystem.delta-folder}" />
     </bean>
 
     <util:list id="stepBeanNames-Visual">

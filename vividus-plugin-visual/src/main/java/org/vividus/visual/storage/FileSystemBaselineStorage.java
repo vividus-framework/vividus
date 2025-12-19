@@ -28,6 +28,7 @@ import com.google.common.base.Suppliers;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Strings;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.resource.ResourceLoadException;
@@ -40,17 +41,26 @@ public class FileSystemBaselineStorage implements BaselineStorage
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemBaselineStorage.class);
 
-    private File baselinesFolder;
+    private final Supplier<File> baselineFolderResolver;
+    private final Supplier<File> deltaFolderResolver;
 
-    private final Supplier<File> baselineFolderResolver = Suppliers.memoize(() -> {
-        if (!baselinesFolder.isAbsolute())
+    public FileSystemBaselineStorage(File baselinesFolder, @Nullable File deltaFolder)
+    {
+        this.baselineFolderResolver = Suppliers.memoize(() -> resolveFolder(baselinesFolder));
+        this.deltaFolderResolver = deltaFolder == null ? baselineFolderResolver
+                : Suppliers.memoize(() -> resolveFolder(deltaFolder));
+    }
+
+    private static File resolveFolder(File folder)
+    {
+        if (!folder.isAbsolute())
         {
             String replacement = "/";
             return ResourceUtils.loadFile(FileSystemBaselineStorage.class,
-                            Strings.CS.removeStart(baselinesFolder.toString(), ".").replace("\\", replacement));
+                            Strings.CS.removeStart(folder.toString(), ".").replace("\\", replacement));
         }
-        return baselinesFolder;
-    });
+        return folder;
+    }
 
     @Override
     public Optional<Screenshot> getBaseline(String baselineName) throws IOException
@@ -76,16 +86,22 @@ public class FileSystemBaselineStorage implements BaselineStorage
     }
 
     @Override
-    public void saveBaseline(Screenshot toSave, String baselineName) throws IOException
+    public void saveBaseline(Screenshot screenshot, String baselineName) throws IOException
     {
-        File baselineToSave = new File(baselineFolderResolver.get(), appendExtension(baselineName));
-        FileUtils.forceMkdirParent(baselineToSave);
-        ImageUtils.writeAsPng(toSave.getImage(), baselineToSave);
-        LOGGER.atInfo().addArgument(baselineToSave::getAbsolutePath).log("Baseline saved to: {}");
+        saveBaseline(baselineFolderResolver.get(), screenshot, baselineName);
     }
 
-    public void setBaselinesFolder(File baselinesFolder)
+    @Override
+    public void saveDelta(Screenshot screenshot, String baselineName) throws IOException
     {
-        this.baselinesFolder = baselinesFolder;
+        saveBaseline(deltaFolderResolver.get(), screenshot, baselineName);
+    }
+
+    private void saveBaseline(File file, Screenshot screenshot, String baselineName) throws IOException
+    {
+        File baselineToSave = new File(file, appendExtension(baselineName));
+        FileUtils.forceMkdirParent(baselineToSave);
+        ImageUtils.writeAsPng(screenshot.getImage(), baselineToSave);
+        LOGGER.atInfo().addArgument(baselineToSave::getAbsolutePath).log("Baseline saved to: {}");
     }
 }

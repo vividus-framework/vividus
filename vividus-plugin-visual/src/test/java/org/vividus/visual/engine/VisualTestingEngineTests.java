@@ -270,7 +270,7 @@ class VisualTestingEngineTests
                 () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
                 () -> assertNull(checkResult.getDiff()),
                 () -> assertFalse(checkResult.isPassed()));
-        verify(baselineStorage).saveBaseline(argThat(s -> finalImage.equals(s.getImage())), eq(BASELINE));
+        verify(baselineStorage).saveDelta(argThat(s -> finalImage.equals(s.getImage())), eq(BASELINE));
         assertThat(testLogger.getLoggingEvents(), is(empty()));
     }
 
