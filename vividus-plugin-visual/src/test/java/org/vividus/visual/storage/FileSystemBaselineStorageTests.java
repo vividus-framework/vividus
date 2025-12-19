@@ -58,24 +58,29 @@ class FileSystemBaselineStorageTests
     private static final String BASELINE_PATH = "/path1/path2/" + BASELINE;
     private static final File BASELINES_FOLDER = new File("./baselines");
     private static final String DEFAULT_EXTENSION = ".png";
+    private static final String SAVE_BASELINE_LOG_MESSAGE = "Baseline saved to: {}";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(FileSystemBaselineStorage.class);
-    private final FileSystemBaselineStorage fileSystemBaselineStorage = new FileSystemBaselineStorage();
+
+    private FileSystemBaselineStorage createStorage(File baseline, File delta)
+    {
+        return new FileSystemBaselineStorage(baseline, delta);
+    }
 
     @Test
     void shouldLoadBaselineFromFileSystem() throws IOException
     {
-        fileSystemBaselineStorage.setBaselinesFolder(BASELINES_FOLDER);
+        FileSystemBaselineStorage storage = createStorage(BASELINES_FOLDER, null);
         BufferedImage baseline = loadBaseline();
-        assertThat(fileSystemBaselineStorage.getBaseline(BASELINE).get().getImage(), ImageTool.equalImage(baseline));
+        assertThat(storage.getBaseline(BASELINE).get().getImage(), ImageTool.equalImage(baseline));
     }
 
     @Test
     void shouldReturnEmptyImageForMissingBaseline(@TempDir File baselineFolder) throws IOException
     {
-        fileSystemBaselineStorage.setBaselinesFolder(baselineFolder);
+        FileSystemBaselineStorage storage = createStorage(baselineFolder, null);
         String baselineName = "missing_baseline";
-        assertEquals(fileSystemBaselineStorage.getBaseline(baselineName), Optional.empty());
+        assertEquals(storage.getBaseline(baselineName), Optional.empty());
         assertThat(logger.getLoggingEvents(), is(List.of(warn("Unable to find a baseline at the path: {}",
                 baselineFolder.toPath().resolve(baselineName + DEFAULT_EXTENSION).toFile()))));
     }
@@ -83,16 +88,16 @@ class FileSystemBaselineStorageTests
     @Test
     void shouldThrowIllegalArgumentExceptionForNotExistingFolder()
     {
-        fileSystemBaselineStorage.setBaselinesFolder(new File("no_such_folder"));
-        assertThrows(IllegalArgumentException.class, () -> fileSystemBaselineStorage.getBaseline(BASELINE));
+        FileSystemBaselineStorage storage = createStorage(new File("no_such_folder"), null);
+        assertThrows(IllegalArgumentException.class, () -> storage.getBaseline(BASELINE));
     }
 
     @Test
     void shouldThrowExceptionWhenBaselineNotLoaded() throws IOException
     {
-        fileSystemBaselineStorage.setBaselinesFolder(BASELINES_FOLDER);
+        FileSystemBaselineStorage storage = createStorage(BASELINES_FOLDER, null);
         ResourceLoadException exception = assertThrows(ResourceLoadException.class,
-            () -> fileSystemBaselineStorage.getBaseline("corrupted_image"));
+            () -> storage.getBaseline("corrupted_image"));
         assertThat(exception.getMessage(), Matchers.matchesRegex("The baseline at the path "
                 + "'.+[\\\\/]baselines[\\\\/]corrupted_image.png' is broken or has unsupported format"));
     }
@@ -101,21 +106,59 @@ class FileSystemBaselineStorageTests
     @ValueSource(strings = { BASELINE, BASELINE_PATH })
     void shouldSaveBaselineIntoFolder(String baseline, @TempDir File folder) throws IOException
     {
-        fileSystemBaselineStorage.setBaselinesFolder(folder);
+        FileSystemBaselineStorage storage = createStorage(folder, null);
         Screenshot screenshot = mock(Screenshot.class);
         BufferedImage baselineImage = loadBaseline();
         when(screenshot.getImage()).thenReturn(baselineImage);
-        fileSystemBaselineStorage.saveBaseline(screenshot, baseline);
+        storage.saveBaseline(screenshot, baseline);
         File baselineFile = new File(folder, baseline + DEFAULT_EXTENSION);
         assertThat(baselineFile, FileMatchers.anExistingFile());
-        String loggingMessage = "Baseline saved to: {}";
-        assertThat(logger.getLoggingEvents(), is(List.of(info(loggingMessage, baselineFile.getAbsolutePath()))));
+        assertThat(logger.getLoggingEvents(), is(List.of(info(SAVE_BASELINE_LOG_MESSAGE,
+                baselineFile.getAbsolutePath()))));
         assertThat(ImageIO.read(baselineFile), ImageTool.equalImage(baselineImage));
         logger.clear();
 
-        fileSystemBaselineStorage.saveBaseline(screenshot, baseline);
+        storage.saveBaseline(screenshot, baseline);
         assertThat(ImageIO.read(baselineFile), ImageTool.equalImage(baselineImage));
-        assertThat(logger.getLoggingEvents(), is(List.of(info(loggingMessage, baselineFile.getAbsolutePath()))));
+        assertThat(logger.getLoggingEvents(), is(List.of(info(SAVE_BASELINE_LOG_MESSAGE,
+                baselineFile.getAbsolutePath()))));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { BASELINE, BASELINE_PATH })
+    void shouldSaveBaselineIntoDeltaFolderWhenConfigured(String baseline, @TempDir File baselinesFolder,
+            @TempDir File deltaFolder) throws IOException
+    {
+        FileSystemBaselineStorage storage = createStorage(baselinesFolder, deltaFolder);
+        Screenshot screenshot = mock(Screenshot.class);
+        BufferedImage baselineImage = loadBaseline();
+        when(screenshot.getImage()).thenReturn(baselineImage);
+        storage.saveDelta(screenshot, baseline);
+
+        File baselineFileInDelta = new File(deltaFolder, baseline + DEFAULT_EXTENSION);
+        File baselineFileInBaselines = new File(baselinesFolder, baseline + DEFAULT_EXTENSION);
+
+        assertThat(baselineFileInDelta, FileMatchers.anExistingFile());
+        assertThat(baselineFileInBaselines, Matchers.not(FileMatchers.anExistingFile()));
+        assertThat(ImageIO.read(baselineFileInDelta), ImageTool.equalImage(baselineImage));
+        assertThat(logger.getLoggingEvents(), is(List.of(info(SAVE_BASELINE_LOG_MESSAGE,
+                baselineFileInDelta.getAbsolutePath()))));
+    }
+
+    @Test
+    void shouldSaveBaselineIntoBaselineFolderWhenDeltaIsNotConfigured(@TempDir File baselinesFolder) throws IOException
+    {
+        FileSystemBaselineStorage storage = createStorage(baselinesFolder, null);
+        Screenshot screenshot = mock(Screenshot.class);
+        BufferedImage baselineImage = loadBaseline();
+        when(screenshot.getImage()).thenReturn(baselineImage);
+        storage.saveDelta(screenshot, BASELINE);
+
+        File baselineFileInBaselines = new File(baselinesFolder, BASELINE + DEFAULT_EXTENSION);
+
+        assertThat(ImageIO.read(baselineFileInBaselines), ImageTool.equalImage(baselineImage));
+        assertThat(logger.getLoggingEvents(), is(List.of(info(SAVE_BASELINE_LOG_MESSAGE,
+                baselineFileInBaselines.getAbsolutePath()))));
     }
 
     private BufferedImage loadBaseline()

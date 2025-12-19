@@ -543,6 +543,13 @@ The baseline storage is used by default. User is able to specify either embedded
 |`./baseline`
 |The path to the folder for saving baselines (root folder is `src/main/resources`).
 For example, `ui.visual.baseline-storage.filesystem.folder=C:/Workspace/vividus-tests/src/main/resources/baselines`
+
+|`ui.visual.baseline-storage.filesystem.delta-folder`
+|`string`
+|
+|The path to the folder for saving baseline comparisons delta, unlike `ui.visual.baseline-storage.filesystem.folder` delta folder contains only mismatched baselines simplifying their management. This property requires `ui.visual.override-baselines` to be set to `true` otherwise it has no effect.
+For example, `ui.visual.baseline-storage.filesystem.delta-folder=C:/Workspace/vividus-tests/src/main/resources/delta`
+
 |===
 
 TIP: In order to store new baselines in the source folder use absolute path to the baselines folder.
