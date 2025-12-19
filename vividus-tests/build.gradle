@@ -9,6 +9,8 @@ tasks.publish.enabled = false
 runStories.treatKnownIssuesOnlyAsPassed = true
 debugStories.treatKnownIssuesOnlyAsPassed = true
 
+ext.ignoreBeans='dynamoDbSteps,kinesisSteps,lambdaSteps,s3BucketSteps'
+
 dependencies {
     implementation project(':vividus')
     implementation project(':vividus-plugin-accessibility')
