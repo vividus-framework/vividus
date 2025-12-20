@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -42,7 +44,6 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.codehaus.plexus.util.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -88,7 +89,7 @@ class BrowserStackLocalManagerTests
             assertThat(parameters, aMapWithSize(4));
             verifyParameters(parameters, mainIdentifier);
             String pacPath = parameters.get("-pac-file");
-            String pac = FileUtils.fileRead(pacPath, StandardCharsets.UTF_8.toString());
+            String pac = Files.readString(Paths.get(pacPath), StandardCharsets.UTF_8);
             assertEquals("function FindProxyForURL(url, host) "
                     + "{ if (shExpMatch(host, \"*.browserstack.com\")) { return \"DIRECT\"; }"
                     + "return \"PROXY localhost:52377\"; }", pac);
