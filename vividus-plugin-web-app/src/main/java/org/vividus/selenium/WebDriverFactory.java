@@ -30,7 +30,6 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.HasAuthentication;
 import org.openqa.selenium.UsernameAndPassword;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.events.EventFiringDecorator;
@@ -128,13 +127,9 @@ public class WebDriverFactory extends GenericWebDriverFactory
                 {
                     type.prepareCapabilities(toUpdate);
                     configureProxy(type, toUpdate);
-                    if (type == WebDriverType.CHROME)
+                    if (type == WebDriverType.CHROME || type == WebDriverType.EDGE)
                     {
-                        WebDriverConfiguration configuration = getWebDriverConfiguration(type, false);
-                        ChromeOptions chromeOptions = new ChromeOptions();
-                        chromeOptions.addArguments(configuration.getCommandLineArguments());
-                        configuration.getExperimentalOptions().forEach(chromeOptions::setExperimentalOption);
-                        return chromeOptions.merge(toUpdate);
+                        return type.mergeToRemoteOptions(toUpdate, getWebDriverConfiguration(type, false));
                     }
                     return toUpdate;
                 })
