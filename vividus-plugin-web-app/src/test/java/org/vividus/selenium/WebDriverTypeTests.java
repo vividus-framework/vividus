@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.selenium;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -34,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -329,5 +332,18 @@ class WebDriverTypeTests
             type.setDriverExecutablePath(Optional.empty());
             verify(webDriverManager).setup();
         }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = WebDriverType.class, names = { "CHROME", "EDGE" }, mode = EnumSource.Mode.EXCLUDE)
+    void shouldNotSupportPassingCliArgsForRemoteSession(WebDriverType type)
+    {
+        var capabilities = new DesiredCapabilities();
+        var configuration = new WebDriverConfiguration();
+        var exception = assertThrows(UnsupportedOperationException.class,
+                () -> type.mergeToRemoteOptions(capabilities, configuration));
+        assertEquals(
+                "CLI arguments are not supported for " + type.name().toLowerCase(Locale.ROOT) + " running remotely",
+                exception.getMessage());
     }
 }

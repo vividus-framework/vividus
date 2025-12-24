@@ -240,15 +240,20 @@ jobs:
       if: matrix.platform == 'ubuntu-latest'
       shell: bash
       run: |
-        declare -a profiles=( firefox edge )
-        for profile in "${profiles[@]}"; do
-          ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
-                                                -Pvividus.configuration.profiles=web/headless/${profile}
-        done
+        ./gradlew :vividus-tests:debugStories -Pvividus.configuration.profiles=web/headless/firefox \
+                                              -Pvividus.configuration.suites=health_check
         # New headless Chrome is used in CI, it will be made default in VIVIDUS 0.7.0 if testing passes (see more: https://developer.chrome.com/docs/chromium/new-headless)
-        ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
-                                              -Pvividus.configuration.profiles=web/headless/chrome \
-                                              -Pvividus.web.driver.chrome.command-line-arguments="--headless=new --hide-scrollbars"
+        # 0 - Default, 1 - Allow, 2 - Block
+        ./gradlew :vividus-tests:debugStories -Pvividus.configuration.profiles=web/headless/chrome \
+                                              -Pvividus.web.driver.chrome.command-line-arguments="--headless=new --hide-scrollbars" \
+                                              -Pvividus.web.driver.chrome.experimental-options='{"prefs": {"profile": {"default_content_setting_values": {"geolocation": 1}}}}' \
+                                              -Pvividus.configuration.suites= \
+                                              -Pvividus.batch-1.resource-location=story/web/permissions
+        # 0 - Default, 1 - Allow, 2 - Block
+        ./gradlew :vividus-tests:debugStories -Pvividus.configuration.profiles=web/headless/edge \
+                                              -Pvividus.web.driver.edge.experimental-options='{"prefs": {"profile": {"default_content_setting_values": {"geolocation": 1}}}}' \
+                                              -Pvividus.configuration.suites= \
+                                              -Pvividus.batch-1.resource-location=story/web/permissions
 
 
     - name: LambdaTest - Desktop - Web - System tests
@@ -779,10 +784,21 @@ jobs:
           BROWSERSTACK_KEY: ${{ secrets.BROWSERSTACK_KEY }}
         shell: bash
         run: |
-          declare -a profiles=( iexplore chrome firefox edge safari )
+          declare -a profiles=( iexplore firefox safari )
           for profile in "${profiles[@]}"; do
-            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
-                                                  -Pvividus.configuration.profiles=browserstack/web,web/desktop/${profile} \
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.profiles=browserstack/web,web/desktop/${profile} \
+                                                  -Pvividus.configuration.suites=health_check \
+                                                  -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
+                                                  -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
+                                                  -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="VIVIDUS BrowserStack Integration Tests"
+          done
+          declare -a geolocationProfiles=( chrome edge )
+          for profile in "${geolocationProfiles[@]}"; do
+            # 0 - Default, 1 - Allow, 2 - Block
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.profiles=browserstack/web,web/desktop/${profile} \
+                                                  -Pvividus.web.driver.${profile}.experimental-options='{"prefs": {"profile": {"default_content_setting_values": {"geolocation": 1}}}}' \
+                                                  -Pvividus.configuration.suites= \
+                                                  -Pvividus.batch-1.resource-location=story/web/permissions \
                                                   -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
                                                   -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="VIVIDUS BrowserStack Integration Tests"
