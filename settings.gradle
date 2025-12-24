@@ -22,6 +22,7 @@ include 'vividus-extension-web-app'
 include 'vividus-extension-ui'
 
 include 'vividus-plugin-accessibility'
+include 'vividus-plugin-activemq'
 include 'vividus-plugin-applitools'
 include 'vividus-plugin-avro'
 include 'vividus-plugin-aws-dynamodb'
