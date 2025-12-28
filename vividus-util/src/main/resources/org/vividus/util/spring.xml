@@ -22,6 +22,12 @@
         </constructor-arg>
     </bean>
 
+    <bean id="jsonJackson3Utils-LowerCamelCase" class="org.vividus.util.json.JsonJackson3Utils">
+        <constructor-arg>
+            <util:constant static-field="tools.jackson.databind.PropertyNamingStrategies.LOWER_CAMEL_CASE"/>
+        </constructor-arg>
+    </bean>
+
     <bean id="locationProvider" class="org.vividus.util.LocationProvider">
         <property name="locale" value="${location.locale}" />
     </bean>

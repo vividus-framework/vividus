@@ -47,10 +47,16 @@ test {
 
 dependencies {
     api('org.freemarker:freemarker:2.3.34')
+
     api platform(libs.jackson.bom)
     api(libs.jackson.core)
-    api('com.fasterxml.jackson.core:jackson-databind')
+    api(libs.jackson.databind)
     api('com.fasterxml.jackson.datatype:jackson-datatype-jdk8')
+
+    api platform(libs.jackson3.bom)
+    api(libs.jackson3.core)
+    api(libs.jackson3.databind)
+
     api(libs.apache.commons.lang3)
     api("com.github.vividus-framework.JsonPath:json-path:${versions.jsonPath}")
 
