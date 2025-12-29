@@ -18,7 +18,6 @@ package org.vividus.json.steps;
 
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.networknt.schema.Error;
 import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaException;
@@ -27,16 +26,18 @@ import com.networknt.schema.SpecificationVersion;
 
 import org.jbehave.core.annotations.Then;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.util.json.JsonUtils;
+import org.vividus.util.json.JsonJackson3Utils;
+
+import tools.jackson.databind.JsonNode;
 
 public class JsonSchemaValidationSteps
 {
     private static final String LINE_SEPARATOR = System.lineSeparator();
 
-    private final JsonUtils jsonUtils;
+    private final JsonJackson3Utils jsonUtils;
     private final ISoftAssert softAssert;
 
-    public JsonSchemaValidationSteps(JsonUtils jsonUtils, ISoftAssert softAssert)
+    public JsonSchemaValidationSteps(JsonJackson3Utils jsonUtils, ISoftAssert softAssert)
     {
         this.jsonUtils = jsonUtils;
         this.softAssert = softAssert;
