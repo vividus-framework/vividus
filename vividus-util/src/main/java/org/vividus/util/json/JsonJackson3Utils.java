@@ -17,8 +17,10 @@
 package org.vividus.util.json;
 
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.MapperFeature;
 import tools.jackson.databind.PropertyNamingStrategies;
 import tools.jackson.databind.PropertyNamingStrategy;
+import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 public class JsonJackson3Utils
@@ -32,11 +34,21 @@ public class JsonJackson3Utils
 
     public JsonJackson3Utils(PropertyNamingStrategy propertyNamingStrategy)
     {
-        jsonMapper = JsonMapper.builder().propertyNamingStrategy(propertyNamingStrategy).build();
+        jsonMapper = JsonMapper.builder()
+                // For backward-compatibility, to remove in 0.7.0
+                .enable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+                // For backward-compatibility, to remove in 0.7.0
+                .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+                .propertyNamingStrategy(propertyNamingStrategy).build();
     }
 
     public JsonNode readTree(String jsonString)
     {
         return jsonMapper.readTree(jsonString);
+    }
+
+    public String toJson(Object object)
+    {
+        return jsonMapper.writeValueAsString(object);
     }
 }

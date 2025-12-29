@@ -17,24 +17,15 @@
 package org.vividus.json.expression;
 
 import org.jbehave.core.expressions.SingleArgExpressionProcessor;
-import org.vividus.util.json.JsonUtils;
+import org.vividus.util.json.JsonJackson3Utils;
 
+/**
+ * Formats any JSON into a one line.
+ */
 public class JsonExpressionProcessor extends SingleArgExpressionProcessor<String>
 {
-    private static final JsonUtils JSON_UTILS = new JsonUtils();
-
-    JsonExpressionProcessor()
+    public JsonExpressionProcessor(JsonJackson3Utils jsonUtils)
     {
-        super("formatToOneLineJson", JsonExpressionProcessor::formatToOneLineJson);
-    }
-
-    /**
-     * Formats any JSON into a one line.
-     * @param json the input JSON
-     * @return one line formatted JSON
-     */
-    private static String formatToOneLineJson(String json)
-    {
-        return JSON_UTILS.readTree(json).toString();
+        super("formatToOneLineJson", json -> jsonUtils.readTree(json).toString());
     }
 }
