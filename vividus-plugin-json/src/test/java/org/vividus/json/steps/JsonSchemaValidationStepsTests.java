@@ -34,7 +34,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
-import org.vividus.util.json.JsonUtils;
+import org.vividus.util.json.JsonJackson3Utils;
 
 @ExtendWith(MockitoExtension.class)
 class JsonSchemaValidationStepsTests
@@ -47,7 +47,7 @@ class JsonSchemaValidationStepsTests
     @BeforeEach
     void beforeEach()
     {
-        steps = new JsonSchemaValidationSteps(new JsonUtils(), softAssert);
+        steps = new JsonSchemaValidationSteps(new JsonJackson3Utils(), softAssert);
     }
 
     @ParameterizedTest
