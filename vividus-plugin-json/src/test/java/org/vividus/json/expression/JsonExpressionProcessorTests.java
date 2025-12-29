@@ -21,19 +21,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.util.json.JsonJackson3Utils;
 
-@ExtendWith(MockitoExtension.class)
 class JsonExpressionProcessorTests
 {
-    @InjectMocks private JsonExpressionProcessor processor;
+    private final JsonExpressionProcessor processor = new JsonExpressionProcessor(new JsonJackson3Utils());
 
     @Test
     void shouldFormatJsonToOneLine()
     {
-        String json = """
+        var json = """
             {
                 "title": "Berserk",
                 "year": 1997,

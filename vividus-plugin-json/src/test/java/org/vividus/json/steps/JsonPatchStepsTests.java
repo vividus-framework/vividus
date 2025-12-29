@@ -20,8 +20,6 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -42,10 +40,10 @@ class JsonPatchStepsTests
     private VariableContext variableContext;
 
     @Test
-    void patchJsonFile() throws JsonProcessingException
+    void patchJsonFile()
     {
-        Set<VariableScope> variableScope = Set.of(VariableScope.SCENARIO);
-        JsonPatchSteps jsonPatchSteps = new JsonPatchSteps(variableContext, new JsonJackson3Utils());
+        var variableScope = Set.of(VariableScope.SCENARIO);
+        var jsonPatchSteps = new JsonPatchSteps(variableContext, new JsonJackson3Utils());
         jsonPatchSteps.patchJsonFile(SOURCE_JSON, PATCH_JSON, variableScope, VARIABLE_NAME);
         verify(variableContext).putVariable(variableScope, VARIABLE_NAME, EXPECTED_RESULT);
     }

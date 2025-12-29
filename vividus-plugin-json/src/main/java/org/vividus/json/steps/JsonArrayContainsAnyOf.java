@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,22 @@
 
 package org.vividus.json.steps;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Collection;
 
 import org.apache.commons.lang3.Validate;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.vividus.util.json.JsonUtils;
+import org.vividus.util.json.JsonJackson3Utils;
 
 import net.javacrumbs.jsonunit.core.ParametrizedMatcher;
+import tools.jackson.databind.JsonNode;
 
 public class JsonArrayContainsAnyOf extends BaseMatcher<Object> implements ParametrizedMatcher
 {
-    private List<JsonNode> expectedNodes;
-    private final JsonUtils jsonUtils;
+    private Collection<JsonNode> expectedNodes;
+    private final JsonJackson3Utils jsonUtils;
 
-    public JsonArrayContainsAnyOf(JsonUtils jsonUtils)
+    public JsonArrayContainsAnyOf(JsonJackson3Utils jsonUtils)
     {
         this.jsonUtils = jsonUtils;
     }
@@ -47,7 +45,7 @@ public class JsonArrayContainsAnyOf extends BaseMatcher<Object> implements Param
     @Override
     public boolean matches(Object actual)
     {
-        List<JsonNode> actualNodes = convert(jsonUtils.toJson(actual));
+        Collection<JsonNode> actualNodes = convert(jsonUtils.toJson(actual));
         return actualNodes.stream().anyMatch(expectedNodes::contains);
     }
 
@@ -57,13 +55,11 @@ public class JsonArrayContainsAnyOf extends BaseMatcher<Object> implements Param
         description.appendText("JSON does not contains any of elements from ").appendValue(expectedNodes);
     }
 
-    private List<JsonNode> convert(String jsonArray)
+    private Collection<JsonNode> convert(String jsonArray)
     {
         JsonNode node = jsonUtils.readTree(jsonArray);
         Validate.isTrue(node.isArray(), "Expected type `ARRAY`, but found `%s`: %s", node.getNodeType(),
-            node.toPrettyString());
-        List<JsonNode> result = new ArrayList<>();
-        node.elements().forEachRemaining(result::add);
-        return result;
+                node.toPrettyString());
+        return node.values();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import org.hamcrest.Description;
 import org.hamcrest.StringDescription;
 import org.junit.jupiter.api.Test;
@@ -34,7 +30,11 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.vividus.util.json.JsonUtils;
+import org.vividus.util.json.JsonJackson3Utils;
+
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.ObjectNode;
 
 class JsonArrayContainsAnyOfTests
 {
@@ -44,7 +44,7 @@ class JsonArrayContainsAnyOfTests
     private static final JsonNodeFactory NODE_FACTORY = JsonNodeFactory.instance;
     private static final ObjectNode JSON_OBJECT_NODE = NODE_FACTORY.objectNode().put(KEY, VALUE);
 
-    private final JsonArrayContainsAnyOf matcher = new JsonArrayContainsAnyOf(new JsonUtils());
+    private final JsonArrayContainsAnyOf matcher = new JsonArrayContainsAnyOf(new JsonJackson3Utils());
 
     @SuppressWarnings("checkstyle:NoWhitespaceBefore")
     static Stream<Arguments> positiveParametersProvider()
@@ -80,7 +80,8 @@ class JsonArrayContainsAnyOfTests
     @Test
     void shouldThrowExceptionParameterNotArray()
     {
-        performValidationTest(() -> matcher.setParameter(JSON_OBJECT_NODE.toString()));
+        String jsonObjectNodeAsString = JSON_OBJECT_NODE.toString();
+        performValidationTest(() -> matcher.setParameter(jsonObjectNodeAsString));
     }
 
     @Test
@@ -91,14 +92,14 @@ class JsonArrayContainsAnyOfTests
 
     private void performValidationTest(Executable executable)
     {
-        Exception exception = assertThrows(IllegalArgumentException.class, executable);
-        assertEquals(String.format("Expected type `ARRAY`, but found `%s`: %s", JSON_OBJECT_NODE.getNodeType(),
-            JSON_OBJECT_NODE.toPrettyString()), exception.getMessage());
+        var exception = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals(String.format("Expected type `ARRAY`, but found `OBJECT`: %s", JSON_OBJECT_NODE.toPrettyString()),
+                exception.getMessage());
     }
 
     private static ArrayNode createArrayNode(String... values)
     {
-        ArrayNode arrayNode = NODE_FACTORY.arrayNode();
+        var arrayNode = NODE_FACTORY.arrayNode();
         Stream.of(values).forEach(arrayNode::add);
         return arrayNode;
     }
