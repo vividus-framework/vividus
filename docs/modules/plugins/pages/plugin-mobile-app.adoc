@@ -485,9 +485,6 @@ IMPORTANT: On iOS simulator to delete photo or video from "Camera Roll" you need
 accomplish it by deleting following files: */Media/PhotoData/Photos.sqlite*, */Media/PhotoData/Photos.sqlite-shm*,
 */Media/PhotoData/Photos.sqlite-wal*. And then restart simulator.
 
-:web-view-info: (see http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information)
-
-
 ==== Download the file from the device
 
 Downloads the file from the device/emulator/simulator and saves its content to a variable.
@@ -524,10 +521,11 @@ Navigates back to the previous view.
 When I navigate back
 ----
 
+:hybrid-apps-info: (see https://appium.github.io/appium-xcuitest-driver/latest/guides/hybrid/[Automating hybrid iOS apps] and https://github.com/appium/appium-uiautomator2-driver?tab=readme-ov-file#hybrid-mode[Automating hybrid Android apps] for more information)
 
 === Switch to Web view by name
 
-Switches context to a web view with name that matches the rule {web-view-info}. Also, Appium capabilities for https://appium.github.io/appium-xcuitest-driver/5.6/capabilities/#web-context[iOS] and https://github.com/appium/appium-uiautomator2-driver#web-context[Android] are available for the fine-tuning configuration.
+Switches context to a web view with name that matches the rule {hybrid-apps-info}. Also, Appium capabilities for https://appium.github.io/appium-xcuitest-driver/latest/reference/capabilities/#web-context[iOS] and https://github.com/appium/appium-uiautomator2-driver#web-context[Android] are available for the fine-tuning configuration.
 
 [source,gherkin]
 ----
@@ -548,7 +546,7 @@ Then number of elements found by `xpath(html)` is equal to `1`
 
 === Switch to native context
 
-Switches context to a mobile native context. See http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information.
+Switches context to a mobile native context {hybrid-apps-info}.
 
 [source,gherkin]
 ----
