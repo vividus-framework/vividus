@@ -47,7 +47,7 @@
 
     <bean id="touchSteps" class="org.vividus.mobileapp.steps.TouchSteps" />
 
-    <bean id="setContextSteps" class="org.vividus.mobileapp.steps.SetContextSteps" />
+    <bean id="mobileNativeContextSteps" class="org.vividus.steps.ui.MobileNativeContextSteps" />
 
     <bean id="elementSteps" class="org.vividus.mobileapp.steps.ElementSteps" />
 
@@ -150,7 +150,7 @@
         <idref bean="keyboardSteps" />
         <idref bean="deviceSteps" />
         <idref bean="elementSteps" />
-        <idref bean="setContextSteps" />
+        <idref bean="mobileNativeContextSteps" />
         <idref bean="iOSPerformanceSteps" />
         <idref bean="networkSteps" />
     </util:list>

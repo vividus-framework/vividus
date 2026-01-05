@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.mobileapp.steps;
+package org.vividus.steps.ui;
 
 import static java.util.function.Predicate.not;
 
@@ -32,14 +32,14 @@ import org.vividus.steps.StringComparisonRule;
 
 import io.appium.java_client.remote.SupportsContextSwitching;
 
-public class SetContextSteps
+public class MobileNativeContextSteps
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SetContextSteps.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MobileNativeContextSteps.class);
 
     private final IWebDriverProvider webDriverProvider;
     private final ISoftAssert softAssert;
 
-    public SetContextSteps(IWebDriverProvider webDriverProvider, ISoftAssert softAssert)
+    public MobileNativeContextSteps(IWebDriverProvider webDriverProvider, ISoftAssert softAssert)
     {
         this.webDriverProvider = webDriverProvider;
         this.softAssert = softAssert;

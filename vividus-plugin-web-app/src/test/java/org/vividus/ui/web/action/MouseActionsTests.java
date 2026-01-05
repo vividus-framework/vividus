@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,19 +108,14 @@ class MouseActionsTests
         ordered.verifyNoMoreInteractions();
     }
 
-    private void testClick(boolean newPageLoaded)
-    {
-        ClickResult result = mouseActions.click(webElement);
-        verifyWebElement(1, newPageLoaded, result);
-    }
-
     @Test
     void clickElementWithoutAlert()
     {
         WebElement body = mockBodySearch();
         doThrow(WebDriverException.class).when(body).isDisplayed();
         when(alertActions.waitForAlert(webDriver)).thenReturn(Boolean.FALSE);
-        testClick(true);
+        ClickResult result = mouseActions.click(webElement);
+        verifyWebElement(1, true, result);
         verify(uiContext).reset();
     }
 
@@ -129,7 +124,8 @@ class MouseActionsTests
     {
         mockBodySearch();
         when(alertActions.waitForAlert(webDriver)).thenReturn(Boolean.TRUE);
-        testClick(false);
+        ClickResult result = mouseActions.click(webElement);
+        verifyWebElement(1, false, result);
         verifyNoInteractions(uiContext);
     }
 
@@ -137,15 +133,15 @@ class MouseActionsTests
     void clickElementNull()
     {
         mouseActions.click(null);
-        verifyNoInteractions(webDriverProvider);
-        verifyNoInteractions(uiContext);
+        verifyNoInteractions(webDriverProvider, uiContext);
     }
 
     @Test
     void clickElementExpectedException()
     {
         mockBodySearch();
-        testClick(false);
+        ClickResult result = mouseActions.click(webElement);
+        verifyWebElement(1, false, result);
         verify(alertActions).waitForAlert(webDriver);
         verifyNoInteractions(uiContext);
     }
@@ -209,6 +205,17 @@ class MouseActionsTests
         doThrow(e).doNothing().when(webElement).click();
         ClickResult result = mouseActions.click(webElement);
         verifyWebElement(2, false, result);
+    }
+
+    @Test
+    void shouldClickInMobileNativeContext()
+    {
+        when(webDriverManager.isContextSwitchedToMobileNative()).thenReturn(true);
+        ClickResult result = mouseActions.click(webElement);
+        verify(webElement).click();
+        assertTrue(result.isClicked());
+        assertFalse(result.isNewPageLoaded());
+        verifyNoInteractions(alertActions, waitActions, eventBus, uiContext);
     }
 
     private WebElement mockBodySearch()
