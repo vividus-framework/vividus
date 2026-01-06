@@ -1788,7 +1788,7 @@ When I configure browser permissions:
 When running web tests on real mobile devices or emulators/simulators, it may be necessary to interact with components
 from the native mobile context (e.g., permission pop-ups). The following steps can be used to achieve this.
 
-=== Switch to native context
+==== Switch to mobile native context
 
 Switches context to a mobile native context.
 
@@ -1807,7 +1807,7 @@ When I click on element located by `xpath(.//android.widget.Button[@text='Allow 
 When I switch to web view with name that is equal to `CHROMIUM`
 ----
 
-=== Switch to web view by name
+==== Switch to web view by name
 
 Switches context to a web view with name that matches the specified comparison rule.
 
@@ -1827,6 +1827,39 @@ When I click on element located by `buttonName(Where am I?)`
 When I switch to native context
 When I click on element located by `id(Allow)`
 When I switch to web view with name that contains `WEBVIEW`
+----
+
+==== Execute steps in mobile native context
+Executes the provided steps in the mobile native context. If the current context is not the mobile native
+context, it switches to the mobile native context, executes the provided steps, and then switches back to the
+original context. The key advantage of this step is that it is not needed to know the name of the original context.
+
+[source,gherkin]
+----
+When I execute steps in native context:$stepsToExecute
+----
+
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
+
+.Allow to use device location on Android
+[source,gherkin]
+----
+Given I am on page with URL `https://the-internet.herokuapp.com/geolocation`
+When I click on element located by `buttonName(Where am I?)`
+When I execute steps in native context:
+| step                                                                                                        |
+| When I click on element located by `xpath(.//android.widget.Button[@text='Allow while visiting the site'])` |
+
+----
+
+.Allow to use device location on iOS
+[source,gherkin]
+----
+Given I am on page with URL `https://the-internet.herokuapp.com/geolocation`
+When I click on element located by `buttonName(Where am I?)`
+When I execute steps in native context:
+| step                                           |
+| When I click on element located by `id(Allow)` |
 ----
 
 == Tips & Tricks

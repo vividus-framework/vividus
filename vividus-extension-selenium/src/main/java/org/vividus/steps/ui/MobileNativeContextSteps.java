@@ -19,6 +19,7 @@ package org.vividus.steps.ui;
 import static java.util.function.Predicate.not;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import org.hamcrest.Matcher;
@@ -29,6 +30,7 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IGenericWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.StringComparisonRule;
+import org.vividus.steps.SubSteps;
 
 import io.appium.java_client.remote.SupportsContextSwitching;
 
@@ -37,11 +39,14 @@ public class MobileNativeContextSteps
     private static final Logger LOGGER = LoggerFactory.getLogger(MobileNativeContextSteps.class);
 
     private final IWebDriverProvider webDriverProvider;
+    private final IGenericWebDriverManager webDriverManager;
     private final ISoftAssert softAssert;
 
-    public MobileNativeContextSteps(IWebDriverProvider webDriverProvider, ISoftAssert softAssert)
+    public MobileNativeContextSteps(IWebDriverProvider webDriverProvider, IGenericWebDriverManager webDriverManager,
+            ISoftAssert softAssert)
     {
         this.webDriverProvider = webDriverProvider;
+        this.webDriverManager = webDriverManager;
         this.softAssert = softAssert;
     }
 
@@ -63,7 +68,8 @@ public class MobileNativeContextSteps
     @When("I switch to web view with name that $comparisonRule `$value`")
     public void switchToWebViewByName(StringComparisonRule rule, String value)
     {
-        List<String> webViews = getContextSwitchingDriver().getContextHandles()
+        SupportsContextSwitching contextSwitchingDriver = getContextSwitchingDriver();
+        List<String> webViews = contextSwitchingDriver.getContextHandles()
                 .stream()
                 .filter(not(IGenericWebDriverManager.NATIVE_APP_CONTEXT::equals))
                 .toList();
@@ -90,8 +96,21 @@ public class MobileNativeContextSteps
         {
             String webView = matchedWebViews.get(0);
             LOGGER.atInfo().addArgument(webView).log("Switching to web view with the name '{}'");
-            getContextSwitchingDriver().context(webView);
+            contextSwitchingDriver.context(webView);
         }
+    }
+
+    /**
+     * Executes the provided steps in the mobile native context. If the current context is not the mobile native
+     * context, it switches to the mobile native context, executes the provided steps, and then switches back to the
+     * original context.
+     *
+     * @param stepsToExecute The ExamplesTable with a single column containing the steps to execute
+     */
+    @When("I execute steps in native context:$stepsToExecute")
+    public void executeStepsInNativeContext(SubSteps stepsToExecute)
+    {
+        webDriverManager.performActionInNativeContext(driver -> stepsToExecute.execute(Optional.empty()));
     }
 
     private SupportsContextSwitching getContextSwitchingDriver()

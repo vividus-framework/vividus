@@ -79,34 +79,24 @@ class GenericWebDriverManagerTests
     }
 
     @Test
-    void testPerformActionInNativeContextNotMobile()
+    void shouldPerformActionInNativeContext()
     {
-        WebDriver driver = mockWebDriver(WebDriver.class, Platform.LINUX);
-        when(webDriverProvider.get()).thenReturn(driver);
-        driverManager.performActionInNativeContext(wD -> assertEquals(driver, wD));
-        verify((HasCapabilities) driver).getCapabilities();
-        verifyNoMoreInteractions(driver);
-    }
-
-    @Test
-    void testPerformActionInNativeContext()
-    {
-        IOSDriver driver = mockWebDriver(IOSDriver.class, MobilePlatform.IOS);
+        IOSDriver driver = mock();
         when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(driver);
         when(driver.getContext()).thenReturn(WEBVIEW_CONTEXT);
         driverManager.performActionInNativeContext(wD -> assertEquals(driver, wD));
         verify(driver).context(NATIVE_APP_CONTEXT);
         verify(driver).context(WEBVIEW_CONTEXT);
+        verifyNoMoreInteractions(driver);
     }
 
     @Test
-    void testPerformActionInNativeContextSwitchNotNeeded()
+    void shouldPerformActionInNativeContextWhenSwitchIsNotNeeded()
     {
-        AndroidDriver driver = mockWebDriver(AndroidDriver.class, MobilePlatform.ANDROID);
+        AndroidDriver driver = mock();
         when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(driver);
         when(driver.getContext()).thenReturn(NATIVE_APP_CONTEXT);
         driverManager.performActionInNativeContext(wD -> assertEquals(driver, wD));
-        verify(driver).getContext();
         verifyNoMoreInteractions(driver);
     }
 

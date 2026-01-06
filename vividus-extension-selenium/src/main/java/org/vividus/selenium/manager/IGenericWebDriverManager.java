@@ -28,6 +28,12 @@ public interface IGenericWebDriverManager
 
     Dimension getSize();
 
+    /**
+     * Runs the given action in the mobile native context. If the current context is not the mobile native context, it
+     * switches to the mobile native context, runs the action, and then switches back to the original context.
+     *
+     * @param consumer the consumer to be executed, accepts the {@link WebDriver} instance as an argument.
+     */
     void performActionInNativeContext(Consumer<WebDriver> consumer);
 
     boolean isContextSwitchedToMobileNative();

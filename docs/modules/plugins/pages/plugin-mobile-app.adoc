@@ -544,7 +544,7 @@ Then number of elements found by `xpath(html)` is equal to `1`
 ----
 
 
-=== Switch to native context
+=== Switch to mobile native context
 
 Switches context to a mobile native context {hybrid-apps-info}.
 
