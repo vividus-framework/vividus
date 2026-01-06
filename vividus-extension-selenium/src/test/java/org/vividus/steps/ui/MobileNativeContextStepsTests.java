@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.mobileapp.steps;
+package org.vividus.steps.ui;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -45,7 +45,7 @@ import org.vividus.steps.StringComparisonRule;
 import io.appium.java_client.remote.SupportsContextSwitching;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
-class SetContextStepsTests
+class MobileNativeContextStepsTests
 {
     private static final String WEB_VIEW_MAIN = "WEBVIEW_MAIN";
     private static final String WEB_VIEWS_FOUND = "Web views found: {}";
@@ -53,16 +53,16 @@ class SetContextStepsTests
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private ISoftAssert softAssert;
     @Mock private SupportsContextSwitching contextSwitchingDriver;
-    @InjectMocks private SetContextSteps setContextSteps;
+    @InjectMocks private MobileNativeContextSteps steps;
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(SetContextSteps.class);
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(MobileNativeContextSteps.class);
 
     @Test
     void shouldSwitchToNativeContext()
     {
         when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(contextSwitchingDriver);
 
-        setContextSteps.switchToNativeContext();
+        steps.switchToNativeContext();
 
         verify(contextSwitchingDriver).context(IGenericWebDriverManager.NATIVE_APP_CONTEXT);
         verifyNoMoreInteractions(contextSwitchingDriver, webDriverProvider);
@@ -77,7 +77,7 @@ class SetContextStepsTests
         when(contextSwitchingDriver.getContextHandles())
                 .thenReturn(Set.of(IGenericWebDriverManager.NATIVE_APP_CONTEXT, WEB_VIEW_MAIN));
 
-        setContextSteps.switchToWebViewByName(StringComparisonRule.IS_EQUAL_TO, WEB_VIEW_MAIN);
+        steps.switchToWebViewByName(StringComparisonRule.IS_EQUAL_TO, WEB_VIEW_MAIN);
 
         verify(contextSwitchingDriver).context(WEB_VIEW_MAIN);
         verifyNoMoreInteractions(softAssert, contextSwitchingDriver, webDriverProvider);
@@ -93,7 +93,7 @@ class SetContextStepsTests
         when(contextSwitchingDriver.getContextHandles()).thenReturn(
                 Set.of(IGenericWebDriverManager.NATIVE_APP_CONTEXT));
 
-        setContextSteps.switchToWebViewByName(StringComparisonRule.IS_EQUAL_TO, WEB_VIEW_MAIN);
+        steps.switchToWebViewByName(StringComparisonRule.IS_EQUAL_TO, WEB_VIEW_MAIN);
 
         verify(softAssert).recordFailedAssertion("No web views found");
         verifyNoMoreInteractions(softAssert, contextSwitchingDriver, webDriverProvider);
@@ -107,7 +107,7 @@ class SetContextStepsTests
         when(contextSwitchingDriver.getContextHandles())
                 .thenReturn(Set.of(IGenericWebDriverManager.NATIVE_APP_CONTEXT, WEB_VIEW_MAIN));
 
-        setContextSteps.switchToWebViewByName(StringComparisonRule.DOES_NOT_CONTAIN, WEB_VIEW_MAIN);
+        steps.switchToWebViewByName(StringComparisonRule.DOES_NOT_CONTAIN, WEB_VIEW_MAIN);
 
         verify(softAssert).recordFailedAssertion("The number of web views with name that does not contain"
                 + " 'WEBVIEW_MAIN' is expected to be 1, but got 0");
