@@ -20,12 +20,16 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -41,6 +45,7 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IGenericWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.StringComparisonRule;
+import org.vividus.steps.SubSteps;
 
 import io.appium.java_client.remote.SupportsContextSwitching;
 
@@ -51,8 +56,8 @@ class MobileNativeContextStepsTests
     private static final String WEB_VIEWS_FOUND = "Web views found: {}";
 
     @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private IGenericWebDriverManager webDriverManager;
     @Mock private ISoftAssert softAssert;
-    @Mock private SupportsContextSwitching contextSwitchingDriver;
     @InjectMocks private MobileNativeContextSteps steps;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(MobileNativeContextSteps.class);
@@ -60,6 +65,7 @@ class MobileNativeContextStepsTests
     @Test
     void shouldSwitchToNativeContext()
     {
+        SupportsContextSwitching contextSwitchingDriver = mock();
         when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(contextSwitchingDriver);
 
         steps.switchToNativeContext();
@@ -73,6 +79,7 @@ class MobileNativeContextStepsTests
     @Test
     void shouldSwitchToWebViewByName()
     {
+        SupportsContextSwitching contextSwitchingDriver = mock();
         when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(contextSwitchingDriver);
         when(contextSwitchingDriver.getContextHandles())
                 .thenReturn(Set.of(IGenericWebDriverManager.NATIVE_APP_CONTEXT, WEB_VIEW_MAIN));
@@ -89,6 +96,7 @@ class MobileNativeContextStepsTests
     @Test
     void shouldFailToSwitchToWebViewWhenNoWebViewIsAvailable()
     {
+        SupportsContextSwitching contextSwitchingDriver = mock();
         when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(contextSwitchingDriver);
         when(contextSwitchingDriver.getContextHandles()).thenReturn(
                 Set.of(IGenericWebDriverManager.NATIVE_APP_CONTEXT));
@@ -103,6 +111,7 @@ class MobileNativeContextStepsTests
     @Test
     void shouldFailSwitchingToWebViewIfNoWebViewMatchesTheRule()
     {
+        SupportsContextSwitching contextSwitchingDriver = mock();
         when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(contextSwitchingDriver);
         when(contextSwitchingDriver.getContextHandles())
                 .thenReturn(Set.of(IGenericWebDriverManager.NATIVE_APP_CONTEXT, WEB_VIEW_MAIN));
@@ -114,5 +123,18 @@ class MobileNativeContextStepsTests
         verifyNoMoreInteractions(softAssert, contextSwitchingDriver, webDriverProvider);
         assertThat(logger.getLoggingEvents(), is(List.of(
                 info(WEB_VIEWS_FOUND, Set.of(WEB_VIEW_MAIN).toString()))));
+    }
+
+    @Test
+    void shouldExecuteStepsInMobileNativeContext()
+    {
+        doNothing().when(webDriverManager).performActionInNativeContext(argThat(c -> {
+            c.accept(null);
+            return true;
+        }));
+        SubSteps subSteps = mock();
+        steps.executeStepsInNativeContext(subSteps);
+
+        verify(subSteps).execute(Optional.empty());
     }
 }
