@@ -18,7 +18,7 @@ dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-plugin-csv')
 
-    implementation('org.apache.parquet:parquet-avro:1.16.0')
+    implementation('org.apache.parquet:parquet-avro:1.17.0')
     implementation("org.apache.hadoop:hadoop-common:${hadoopVersion}") {
         exclude group: 'org.slf4j', module: 'slf4j-reload4j'
     }
