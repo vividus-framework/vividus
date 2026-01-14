@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,10 +59,7 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
 
     private AShot createAShot(WebScreenshotParameters screenshotParameters)
     {
-        ShootingStrategy decorated = getBaseShootingStrategy();
-
-        decorated = decorateWithFixedCutStrategy(decorated, screenshotParameters.getNativeHeaderToCut(),
-                screenshotParameters.getNativeFooterToCut());
+        ShootingStrategy decorated = getBaseShootingStrategy(screenshotParameters);
 
         decorated = decorateWithViewportPasting(decorated, screenshotParameters)
                 .withDebugger(screenshotDebugger)
@@ -107,7 +104,7 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
 
     private AShot createAShot(String strategyName, WebScreenshotParameters screenshotParameters)
     {
-        ShootingStrategy baseShootingStrategy = getBaseShootingStrategy();
+        ShootingStrategy baseShootingStrategy = getBaseShootingStrategy(screenshotParameters);
         ShootingStrategy shootingStrategy;
         @SuppressWarnings("checkstyle:Indentation")
         CoordsProvider coordsProvider = switch (strategyName)
@@ -136,8 +133,14 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
                 .coordsProvider(new ScrollBarHidingCoordsProviderDecorator(coordsProvider, scrollbarHandler));
     }
 
-    private ShootingStrategy getBaseShootingStrategy()
+    private ShootingStrategy getBaseShootingStrategy(WebScreenshotParameters screenshotParameters)
     {
-        return ShootingStrategies.scaling((float) javascriptActions.getDevicePixelRatio());
+        ShootingStrategy shootingStrategy = ShootingStrategies.scaling((float) javascriptActions.getDevicePixelRatio());
+        if (screenshotParameters != null)
+        {
+            shootingStrategy = decorateWithFixedCutStrategy(shootingStrategy,
+                    screenshotParameters.getNativeHeaderToCut(), screenshotParameters.getNativeFooterToCut());
+        }
+        return shootingStrategy;
     }
 }
