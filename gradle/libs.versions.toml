@@ -22,7 +22,7 @@ spring-jdbc = { module = "org.springframework:spring-jdbc" }
 spring-websocket = { module = "org.springframework:spring-websocket" }
 spring-test = { module = "org.springframework:spring-test" }
 
-jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version = "2.20.1" }
+jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version = "2.21.0" }
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
 jackson-dataformat-properties = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-properties" }
