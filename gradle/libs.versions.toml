@@ -28,7 +28,7 @@ jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
 jackson-dataformat-properties = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-properties" }
 jackson-dataformat-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml" }
 
-jackson3-bom = { module = "tools.jackson:jackson-bom", version = "3.0.3" }
+jackson3-bom = { module = "tools.jackson:jackson-bom", version = "3.0.4" }
 jackson3-core = { module = "tools.jackson.core:jackson-core" }
 jackson3-databind = { module = "tools.jackson.core:jackson-databind" }
 
