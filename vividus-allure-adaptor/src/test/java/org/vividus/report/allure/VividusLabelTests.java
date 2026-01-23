@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,14 +44,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junitpioneer.jupiter.SetSystemProperty;
 
+import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.model.Link;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
 class VividusLabelTests
 {
     private static final String ISSUE_ID = "issueId";
+    private static final String PRIORITY = "priority";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(VividusLabel.class);
 
@@ -109,12 +112,23 @@ class VividusLabelTests
     @Test
     void shouldExtractPriority()
     {
-        var metaKey = "priority";
-        var storyMeta = createMeta(metaKey, "3");
-        var scenarioMeta = createMeta(metaKey, "4");
+        var storyMeta = createMeta(PRIORITY, "3");
+        var scenarioMeta = createMeta(PRIORITY, "4");
         var metaValues = VividusLabel.PRIORITY.extractMetaValues(storyMeta, scenarioMeta);
-        assertEquals(metaValues, Set.of(entry(metaKey, "minor")));
+        assertEquals(metaValues, Set.of(entry(PRIORITY, "minor")));
         assertThat(logger.getLoggingEvents(), is(empty()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "10", "-1", "medium" })
+    void shouldWarnIfExtractedPriorityIsInvalid(String invalidValue)
+    {
+        var scenarioMeta = createMeta(PRIORITY, invalidValue);
+        var metaValues = VividusLabel.PRIORITY.extractMetaValues(Meta.EMPTY, scenarioMeta);
+        assertThat(metaValues, is(empty()));
+        assertThat(logger.getLoggingEvents(),
+                equalTo(List.of(warn("The {} meta value must be a number in a range from 1 to {}, but got {}", PRIORITY,
+                        SeverityLevel.values().length, invalidValue))));
     }
 
     @ParameterizedTest

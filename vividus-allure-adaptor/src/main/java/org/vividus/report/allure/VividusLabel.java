@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,7 @@ public enum VividusLabel
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
+    @SuppressWarnings("NoNullForCollectionReturn")
     private static Set<Entry<String, String>> extractSeverityMetaValues(String metaName, Meta scenarioMeta)
     {
         return scenarioMeta.getOptionalProperty(metaName)
@@ -107,6 +108,16 @@ public enum VividusLabel
                                 "Meta @severity is deprecated and will be removed in VIVIDUS 0.7.0. Please use "
                                 + "@priority meta instead");
                     }
+
+                    int levelsQty = SeverityLevel.values().length;
+                    String severityMatcher = "[1-%d]{1}".formatted(levelsQty);
+                    if (!metaValue.matches(severityMatcher))
+                    {
+                        LOGGER.warn("The {} meta value must be a number in a range from 1 to {}, but got {}",
+                                metaName, levelsQty, metaValue);
+                        return null;
+                    }
+
                     return Integer.parseInt(metaValue);
                 })
                 .map(severity -> SeverityLevel.values()[severity - 1])
