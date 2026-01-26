@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.jbehave.core.model.ExamplesTable;
+import org.jspecify.annotations.Nullable;
 import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.screenshot.IgnoreStrategy;
 
@@ -27,6 +29,6 @@ public interface ScreenshotParametersFactory<C extends ScreenshotConfiguration>
 {
     Optional<ScreenshotParameters> create();
 
-    ScreenshotParameters create(Optional<C> screenshotConfiguration, String sourceKey,
+    ScreenshotParameters create(@Nullable ExamplesTable screenshotConfiguration, String sourceKey,
             Map<IgnoreStrategy, Set<Locator>> ignores);
 }
