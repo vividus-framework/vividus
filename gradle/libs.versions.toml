@@ -3,7 +3,7 @@
 apache-commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.20.0" }
 apache-commons-collections4 = { module = "org.apache.commons:commons-collections4", version = "4.5.0" }
 apache-commons-text = { module = "org.apache.commons:commons-text", version = "1.15.0" }
-apache-commons-codec = { module = "commons-codec:commons-codec", version = "1.20.0" }
+apache-commons-codec = { module = "commons-codec:commons-codec", version = "1.21.0" }
 apache-commons-io = { module = "commons-io:commons-io", version = "2.21.0" }
 guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
 
