@@ -43,7 +43,7 @@ mssql-jdbc = { module = "com.microsoft.sqlserver:mssql-jdbc", version = "13.3.0.
 postgresql = { module = "org.postgresql:postgresql", version = "42.7.8" }
 oracle-ojdbc10 = { module = "com.oracle.database.jdbc:ojdbc10", version = "19.29.0.0" }
 db2jcc = { module = "com.ibm.db2.jcc:db2jcc", version = "db2jcc4" }
-snowflake-jdbc = { module = "net.snowflake:snowflake-jdbc", version = "3.28.0" }
+snowflake-jdbc = { module = "net.snowflake:snowflake-jdbc", version = "4.0.0" }
 
 hamcrest = { module = "org.hamcrest:hamcrest", version = "3.0" }
 
