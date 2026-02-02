@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.vividus.ui.web.screenshot.WebCutOptions;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 
 import pazone.ashot.AShot;
+import pazone.ashot.CdpShootingStrategy;
 import pazone.ashot.CuttingDecorator;
 import pazone.ashot.ElementCroppingDecorator;
 import pazone.ashot.ScalingDecorator;
@@ -164,6 +165,30 @@ class WebAshotFactoryTests
 
         var simple = getShootingStrategy(scalingDecorator);
         assertThat(simple, is(instanceOf(SimpleShootingStrategy.class)));
+    }
+
+    @Test
+    void shouldCreateAshotWithoutCdpShootingStrategy() throws IllegalAccessException
+    {
+        var screenshotParameters = new WebScreenshotParameters();
+        screenshotParameters.setNativeFooterToCut(TEN);
+        screenshotParameters.setShootingStrategy(Optional.of("CDP"));
+
+        when(javascriptActions.getDevicePixelRatio()).thenReturn(2d);
+
+        var aShot = factory.create(Optional.of(screenshotParameters));
+
+        var baseStrategy = getShootingStrategy(aShot);
+        assertThat(baseStrategy, is(instanceOf(ElementCroppingDecorator.class)));
+
+        var nativeCuttingDecorator = getShootingStrategy(baseStrategy);
+        assertThat(nativeCuttingDecorator, is(instanceOf(CuttingDecorator.class)));
+
+        var scalingDecorator = getShootingStrategy(nativeCuttingDecorator);
+        assertThat(scalingDecorator, is(instanceOf(ScalingDecorator.class)));
+
+        var simple = getShootingStrategy(scalingDecorator);
+        assertThat(simple, is(instanceOf(CdpShootingStrategy.class)));
     }
 
     private AShot createAshot(boolean hideScrollbars)

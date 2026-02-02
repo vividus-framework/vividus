@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,9 @@ import java.util.Optional;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.WebDriverUtils;
 import org.vividus.ui.screenshot.ScreenshotFileNameGenerator;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.ui.screenshot.ScreenshotTaker;
@@ -76,7 +78,7 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotParameters>
     private pazone.ashot.Screenshot takeScreenshot(SearchContext searchContext, AShot aShot)
     {
         pazone.ashot.Screenshot screenshot = searchContext instanceof WebDriver webDriver
-                ? aShot.takeScreenshot(webDriver)
+                ? aShot.takeScreenshot(WebDriverUtils.unwrap(webDriver, RemoteWebDriver.class))
                 : aShot.takeScreenshot(getWebDriverProvider().get(), (WebElement) searchContext);
 
         screenshotDebugger.debug(this.getClass(), "After_AShot", screenshot.getImage());
