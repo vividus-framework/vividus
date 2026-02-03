@@ -580,3 +580,38 @@ Uses Azure Blob Storage container as a baseline source. In order to use this sto
 |Describes the name of container with the baselines.
 
 |===
+
+== Shooting Strategies
+
+=== SIMPLE
+
+The simplest screenshot strategy that captures a single screenshot of the visible viewport without
+any scrolling or stitching. This strategy is fast and reliable but only captures what's currently
+visible on the screen.
+
+*Use cases:*
+
+* Testing specific visible elements or sections
+* Quick visual checks where full page capture is not needed
+
+=== VIEWPORT_PASTING
+
+A strategy that captures the entire page by taking multiple viewport screenshots while scrolling
+through the page, then stitching them together. This creates a complete picture of the full page content.
+
+*Use cases:*
+
+* Full page visual testing
+* Testing long scrollable pages
+
+=== CDP
+
+Uses Chrome DevTools Protocol to capture screenshots. This strategy leverages browser-native capabilities
+for efficient and accurate screenshot capture.
+
+IMPORTANT: Can be used only in Chrome/Chromium-based browsers.
+
+*Use cases:*
+
+* High-performance screenshot capture in Chrome/Chromium browsers
+* Full page screenshots without scrolling

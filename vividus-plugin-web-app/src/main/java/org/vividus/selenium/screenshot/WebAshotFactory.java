@@ -24,6 +24,7 @@ import org.vividus.ui.web.screenshot.WebCutOptions;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 
 import pazone.ashot.AShot;
+import pazone.ashot.CdpShootingStrategy;
 import pazone.ashot.ShootingStrategies;
 import pazone.ashot.ShootingStrategy;
 import pazone.ashot.coordinates.CoordsProvider;
@@ -33,6 +34,8 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
     public static final int DEFAULT_STICKY_HEADER_HEIGHT = 100;
     public static final int DEFAULT_STICKY_FOOTER_HEIGHT = 100;
     private static final int SCROLL_TIMEOUT = 500;
+
+    private static final String CDP_SHOOTING_STRATEGY = "CDP";
 
     private final ScreenshotDebugger screenshotDebugger;
     private final IScrollbarHandler scrollbarHandler;
@@ -104,6 +107,15 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
 
     private AShot createAShot(String strategyName, WebScreenshotParameters screenshotParameters)
     {
+        if (CDP_SHOOTING_STRATEGY.equals(strategyName))
+        {
+            ShootingStrategy shootingStrategy = decorateBaseShootingStrategy(new CdpShootingStrategy(),
+                    screenshotParameters);
+            shootingStrategy = decorateStrategyWithCropping(shootingStrategy, screenshotParameters);
+
+            return new AShot().shootingStrategy(shootingStrategy);
+        }
+
         ShootingStrategy baseShootingStrategy = getBaseShootingStrategy(screenshotParameters);
         ShootingStrategy shootingStrategy;
         @SuppressWarnings("checkstyle:Indentation")
@@ -125,9 +137,7 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
                     String.format("Unknown shooting strategy with the name: %s", strategyName));
         };
         shootingStrategy = decorateWithScrollbarHiding(shootingStrategy, screenshotParameters);
-        shootingStrategy = screenshotParameters == null
-                ? shootingStrategy
-                : decorateWithCropping(shootingStrategy, screenshotParameters);
+        shootingStrategy = decorateStrategyWithCropping(shootingStrategy, screenshotParameters);
 
         return new AShot().shootingStrategy(shootingStrategy)
                 .coordsProvider(new ScrollBarHidingCoordsProviderDecorator(coordsProvider, scrollbarHandler));
@@ -135,12 +145,26 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
 
     private ShootingStrategy getBaseShootingStrategy(WebScreenshotParameters screenshotParameters)
     {
-        ShootingStrategy shootingStrategy = ShootingStrategies.scaling((float) javascriptActions.getDevicePixelRatio());
+        return decorateBaseShootingStrategy(ShootingStrategies.simple(), screenshotParameters);
+    }
+
+    private ShootingStrategy decorateBaseShootingStrategy(ShootingStrategy baseShootingStrategy,
+            WebScreenshotParameters screenshotParameters)
+    {
+        ShootingStrategy shootingStrategy = ShootingStrategies.scaling(baseShootingStrategy,
+                (float) javascriptActions.getDevicePixelRatio());
         if (screenshotParameters != null)
         {
             shootingStrategy = decorateWithFixedCutStrategy(shootingStrategy,
                     screenshotParameters.getNativeHeaderToCut(), screenshotParameters.getNativeFooterToCut());
         }
         return shootingStrategy;
+    }
+
+    private ShootingStrategy decorateStrategyWithCropping(ShootingStrategy shootingStrategy,
+            WebScreenshotParameters screenshotParameters)
+    {
+        return screenshotParameters == null ? shootingStrategy
+                : decorateWithCropping(shootingStrategy, screenshotParameters);
     }
 }
