@@ -8,7 +8,7 @@ Before:
 Scope: STORY
 Given I am on page with URL `${vividus-test-site-url}/stickyHeader.html`
 Examples:
-|action         |firstP             |
+|action         |firstP          |
 |COMPARE_AGAINST|xpath((.//p)[1])|
 
 
@@ -159,3 +159,14 @@ When I change context to element located by `id(story)`
 When I <action> baseline with name `context-check-with-outer-ignores` ignoring:
 |AREA                                                                       |
 |By.xpath(//h1[@title='Text area section']),By.xpath(//label[@for='story']) |
+When I reset context
+
+
+Scenario: Validation of CDP shooting strategy
+Given I am on page with URL `${vividus-test-site-url}/stickyHeader.html`
+When I <action> baseline with name `cdp-full-page-element-cut` using storage `filesystem` and ignoring:
+|ELEMENT         |
+|xpath((.//p)[1])|
+and screenshot configuration:
+|shootingStrategy|
+|CDP             |

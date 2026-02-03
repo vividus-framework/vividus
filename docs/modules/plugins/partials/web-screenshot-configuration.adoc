@@ -1,6 +1,6 @@
 Web screenshot configuration fields:
 
-* `shootingStrategy` - The shooting strategy to use.
+* `shootingStrategy` - The <<_shooting_strategies, shooting strategy>> to use.
 * `maxHeight` - The maximum screenshot height in pixels. The area outside this size won't be captured. May be useful when having memory issues on large pages.
 * `webHeaderToCut` - The header to cut on each screenshot segment during scroll e.g. sticky header.
 * `webFooterToCut` - The footer to cut on each screenshot segment during scroll e.g. sticky footer.
