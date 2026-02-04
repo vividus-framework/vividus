@@ -14,3 +14,4 @@
 ** `scrollableElement` - The element to scroll. *(Web only)*
 ** `scrollTimeout` - The scroll timeout. *(Web only)*
 ** `hideScrollbars` - Hide the scrollbar before capturing the screenshot, defaults to `true`. *(Web only)*
+** `textToMask` - The text to be masked with placeholder before capturing the page screenshot and reverted back after capturing is finished. *(Web only)*

@@ -16,6 +16,7 @@ Web screenshot configuration fields:
 * `scrollableElement` - The element to scroll.
 * `scrollTimeout` - The scroll timeout.
 * `hideScrollbars` - Hide the scrollbar before capturing the screenshot, defaults to `true`.
+* `textToMask` - The text to be masked with placeholder before capturing the page screenshot and reverted back after capturing is finished.
 
 Mobile app screenshot configuration fields:
 

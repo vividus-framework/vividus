@@ -168,5 +168,5 @@ When I <action> baseline with name `cdp-full-page-element-cut` using storage `fi
 |ELEMENT         |
 |xpath((.//p)[1])|
 and screenshot configuration:
-|shootingStrategy|
-|CDP             |
+|shootingStrategy|textToMask|
+|CDP             |urna      |
