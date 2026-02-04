@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ public class WebScreenshotConfiguration extends ScreenshotConfiguration
     @SuppressWarnings("MagicNumber")
     private Duration scrollTimeout = Duration.ofMillis(500);
     private boolean hideScrollbars = true;
+    private String textToMask;
 
     public int getMaxHeight()
     {
@@ -127,5 +128,15 @@ public class WebScreenshotConfiguration extends ScreenshotConfiguration
     public void setHideScrollbars(boolean hideScrollbars)
     {
         this.hideScrollbars = hideScrollbars;
+    }
+
+    public String getTextToMask()
+    {
+        return textToMask;
+    }
+
+    public void setTextToMask(String textToMask)
+    {
+        this.textToMask = textToMask;
     }
 }

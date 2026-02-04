@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ class ExamplesTableToWebScreenshotParametersConverterTests
     void shouldConvertExamplesTableToWebScreenshotConfiguration()
     {
         var table = new ExamplesTable("""
-                |nativeHeaderToCut|nativeFooterToCut|webHeaderToCut|webFooterToCut|hideScrollbars|
-                |1                |2                |3             |4             |false         |
+                |nativeHeaderToCut|nativeFooterToCut|webHeaderToCut|webFooterToCut|hideScrollbars|textToMask|
+                |1                |2                |3             |4             |false         |value     |
                 """);
         var configuration =
                 (WebScreenshotConfiguration) tableConverter.convertValue(table, null);
@@ -50,7 +50,8 @@ class ExamplesTableToWebScreenshotParametersConverterTests
                 () -> assertEquals(2, configuration.getNativeFooterToCut()),
                 () -> assertEquals(3, configuration.getWebHeaderToCut()),
                 () -> assertEquals(4, configuration.getWebFooterToCut()),
-                () -> assertFalse(configuration.isHideScrollbars())
+                () -> assertFalse(configuration.isHideScrollbars()),
+                () -> assertEquals("value", configuration.getTextToMask())
         );
     }
 }

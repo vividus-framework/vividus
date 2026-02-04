@@ -18,6 +18,7 @@ package org.vividus.selenium.screenshot;
 
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.vividus.selenium.screenshot.strategies.AdjustingScrollableElementAwareViewportPastingDecorator;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.screenshot.WebCutOptions;
@@ -155,6 +156,12 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
                 (float) javascriptActions.getDevicePixelRatio());
         if (screenshotParameters != null)
         {
+            if (StringUtils.isNotBlank(screenshotParameters.getTextToMask()))
+            {
+                shootingStrategy = new TextMaskingDecorator(shootingStrategy,
+                        screenshotParameters.getTextToMask(), javascriptActions);
+            }
+
             shootingStrategy = decorateWithFixedCutStrategy(shootingStrategy,
                     screenshotParameters.getNativeHeaderToCut(), screenshotParameters.getNativeFooterToCut());
         }

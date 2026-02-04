@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import pazone.ashot.ShootingDecorator;
 import pazone.ashot.ShootingStrategy;
 import pazone.ashot.coordinates.Coords;
 
-public class ScrollbarHidingDecorator extends ShootingDecorator
+public class ScrollbarHidingDecorator extends ScreenshotShootingDecorator
 {
     private static final long serialVersionUID = -6146195031592698438L;
 
@@ -44,24 +42,13 @@ public class ScrollbarHidingDecorator extends ShootingDecorator
     }
 
     @Override
-    public BufferedImage getScreenshot(WebDriver wd)
-    {
-        return perform(() -> getShootingStrategy().getScreenshot(wd));
-    }
-
-    @Override
-    public BufferedImage getScreenshot(WebDriver wd, Set<Coords> coords)
-    {
-        return perform(() -> getShootingStrategy().getScreenshot(wd, coords));
-    }
-
-    @Override
     public Set<Coords> prepareCoords(Set<Coords> coordsSet)
     {
         return getShootingStrategy().prepareCoords(coordsSet);
     }
 
-    private BufferedImage perform(Supplier<BufferedImage> bufferedImageSupplier)
+    @Override
+    public BufferedImage perform(Supplier<BufferedImage> bufferedImageSupplier)
     {
         return scrollableElement.map(e -> scrollbarHandler.performActionWithHiddenScrollbars(bufferedImageSupplier, e))
                 .orElseGet(() -> scrollbarHandler.performActionWithHiddenScrollbars(bufferedImageSupplier));

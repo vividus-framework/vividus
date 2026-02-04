@@ -168,11 +168,12 @@ class WebAshotFactoryTests
     }
 
     @Test
-    void shouldCreateAshotWithCdpShootingStrategy() throws IllegalAccessException
+    void shouldCreateAshotWithCdpShootingStrategyAndTextMasking() throws IllegalAccessException
     {
         var screenshotParameters = new WebScreenshotParameters();
         screenshotParameters.setNativeFooterToCut(TEN);
         screenshotParameters.setShootingStrategy(Optional.of("CDP"));
+        screenshotParameters.setTextToMask("text_to_mask");
 
         when(javascriptActions.getDevicePixelRatio()).thenReturn(2d);
 
@@ -184,7 +185,10 @@ class WebAshotFactoryTests
         var nativeCuttingDecorator = getShootingStrategy(baseStrategy);
         assertThat(nativeCuttingDecorator, is(instanceOf(CuttingDecorator.class)));
 
-        var scalingDecorator = getShootingStrategy(nativeCuttingDecorator);
+        var maskingDecorator = getShootingStrategy(nativeCuttingDecorator);
+        assertThat(maskingDecorator, is(instanceOf(TextMaskingDecorator.class)));
+
+        var scalingDecorator = getShootingStrategy(maskingDecorator);
         assertThat(scalingDecorator, is(instanceOf(ScalingDecorator.class)));
 
         var simple = getShootingStrategy(scalingDecorator);
