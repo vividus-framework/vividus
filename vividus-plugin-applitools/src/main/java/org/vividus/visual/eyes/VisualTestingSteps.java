@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,15 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import org.jbehave.core.annotations.When;
+import org.jbehave.core.model.ExamplesTable;
+import org.jspecify.annotations.Nullable;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;
-import org.vividus.ui.web.screenshot.WebScreenshotConfiguration;
 import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheckResult;
@@ -42,12 +42,11 @@ public class VisualTestingSteps extends AbstractApplitoolsSteps
 {
     private final VisualTestingService<ApplitoolsVisualCheckResult> visualTestingService;
     private final ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
-    private final ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
+    private final ScreenshotParametersFactory screenshotParametersFactory;
 
-    public VisualTestingSteps(
-            VisualTestingService<ApplitoolsVisualCheckResult> visualTestingService,
+    public VisualTestingSteps(VisualTestingService<ApplitoolsVisualCheckResult> visualTestingService,
             ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory,
-            ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory, IUiContext uiContext,
+            ScreenshotParametersFactory screenshotParametersFactory, IUiContext uiContext,
             IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
     {
         super(uiContext, attachmentPublisher, softAssert);
@@ -109,7 +108,7 @@ public class VisualTestingSteps extends AbstractApplitoolsSteps
     @When("I run visual test with Applitools using:$applitoolsConfigurations")
     public void performCheck(List<ApplitoolsVisualCheck> applitoolsConfigurations)
     {
-        applitoolsConfigurations.forEach(visualCheck -> runApplitoolsTest(visualCheck, Optional.empty()));
+        applitoolsConfigurations.forEach(visualCheck -> runApplitoolsTest(visualCheck, null));
     }
 
     /**
@@ -182,14 +181,12 @@ public class VisualTestingSteps extends AbstractApplitoolsSteps
     @When(value = "I run visual test with Applitools using:$applitoolsConfigurations and screenshot"
             + " config:$screenshotConfiguration", priority = 1)
     public void performCheck(List<ApplitoolsVisualCheck> applitoolsConfigurations,
-            WebScreenshotConfiguration screenshotConfiguration)
+            ExamplesTable screenshotConfiguration)
     {
-        applitoolsConfigurations
-                .forEach(visualCheck -> runApplitoolsTest(visualCheck, Optional.of(screenshotConfiguration)));
+        applitoolsConfigurations.forEach(visualCheck -> runApplitoolsTest(visualCheck, screenshotConfiguration));
     }
 
-    private void runApplitoolsTest(ApplitoolsVisualCheck visualCheck,
-            Optional<ScreenshotConfiguration> screenshotConfiguration)
+    private void runApplitoolsTest(ApplitoolsVisualCheck visualCheck, @Nullable ExamplesTable screenshotConfiguration)
     {
         runApplitoolsTest(() ->
         {

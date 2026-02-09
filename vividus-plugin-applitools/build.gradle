@@ -3,8 +3,8 @@ project.description = 'VIVIDUS plugin for Applitools'
 dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-extension-visual-testing')
+    implementation project(':vividus-extension-selenium')
     implementation project(':vividus-http-client')
-    implementation project(':vividus-plugin-web-app')
     implementation project(':vividus-reporter')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
@@ -20,4 +20,5 @@ dependencies {
     testImplementation platform(libs.mockito.bom)
     testImplementation(libs.mockito.junitJupiter)
     testImplementation(libs.slf4jTest)
+    testImplementation project(':vividus-plugin-web-app')
 }

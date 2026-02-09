@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,13 +37,13 @@ import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.ConvertedParameters;
 import org.jbehave.core.steps.Parameters;
+import org.jspecify.annotations.Nullable;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.resource.ResourceLoadException;
 import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.visual.engine.IVisualTestingEngine;
@@ -63,13 +63,12 @@ public class VisualSteps extends AbstractVisualSteps
     private static final ConvertedParameters EMPTY_CHECK_SETTINGS = new ConvertedParameters(Map.of(), null);
 
     private final IVisualTestingEngine visualTestingEngine;
-    private final ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
+    private final ScreenshotParametersFactory screenshotParametersFactory;
     private final BaselineIndexer baselineIndexer;
 
     public VisualSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher,
             IVisualTestingEngine visualTestingEngine, ISoftAssert softAssert,
-            ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory,
-            BaselineIndexer baselineIndexer)
+            ScreenshotParametersFactory screenshotParametersFactory, BaselineIndexer baselineIndexer)
     {
         super(uiContext, attachmentPublisher, softAssert);
         this.visualTestingEngine = visualTestingEngine;
@@ -86,7 +85,7 @@ public class VisualSteps extends AbstractVisualSteps
     @When("I $actionType baseline with name `$name`")
     public void runVisualTests(VisualActionType actionType, String name)
     {
-        performVisualAction(name, actionType, Optional.empty(), Optional.empty());
+        performVisualAction(name, actionType, Optional.empty(), null);
     }
 
     /**
@@ -99,7 +98,7 @@ public class VisualSteps extends AbstractVisualSteps
     @When(value = "I $actionType baseline with name `$name` using storage `$storage`", priority = 1)
     public void runVisualTests(VisualActionType actionType, String name, String storage)
     {
-        performVisualAction(name, actionType, Optional.of(storage), Optional.empty());
+        performVisualAction(name, actionType, Optional.of(storage), null);
     }
 
     /**
@@ -113,10 +112,9 @@ public class VisualSteps extends AbstractVisualSteps
      *                                |By.xpath(.//header)|100           |100           |CEILING       |
      */
     @When("I $actionType baseline with name `$name` using screenshot configuration:$screenshotConfiguration")
-    public void runVisualTests(VisualActionType actionType, String name,
-            ScreenshotConfiguration screenshotConfiguration)
+    public void runVisualTests(VisualActionType actionType, String name, ExamplesTable screenshotConfiguration)
     {
-        performVisualAction(name, actionType, Optional.empty(), Optional.of(screenshotConfiguration));
+        performVisualAction(name, actionType, Optional.empty(), screenshotConfiguration);
     }
 
     /**
@@ -133,9 +131,9 @@ public class VisualSteps extends AbstractVisualSteps
     @When(value = "I $actionType baseline with name `$name` using storage `$storage` and"
             + " screenshot configuration:$screenshotConfiguration", priority = 1)
     public void runVisualTests(VisualActionType actionType, String name, String storage,
-            ScreenshotConfiguration screenshotConfiguration)
+            ExamplesTable screenshotConfiguration)
     {
-        performVisualAction(name, actionType, Optional.of(storage), Optional.of(screenshotConfiguration));
+        performVisualAction(name, actionType, Optional.of(storage), screenshotConfiguration);
     }
 
     /**
@@ -149,9 +147,9 @@ public class VisualSteps extends AbstractVisualSteps
      * |By.xpath(.//header)|By.cssSelector(footer)|
      */
     @When("I $actionType baseline with name `$name` ignoring:$checkSettings")
-    public void runVisualTests(VisualActionType actionType, String name, ExamplesTable checkSettings)
+    public void runVisualTestsWithSettings(VisualActionType actionType, String name, ExamplesTable checkSettings)
     {
-        performVisualAction(checkSettings, name, actionType, Optional.empty(), Optional.empty());
+        performVisualAction(checkSettings, name, actionType, Optional.empty(), null);
     }
 
     /**
@@ -168,9 +166,10 @@ public class VisualSteps extends AbstractVisualSteps
      */
     @When(value = "I $actionType baseline with name `$name` using storage `$storage` and ignoring:$checkSettings",
         priority = 1)
-    public void runVisualTests(VisualActionType actionType, String name, String storage, ExamplesTable checkSettings)
+    public void runVisualTestsWithSettings(VisualActionType actionType, String name, String storage,
+            ExamplesTable checkSettings)
     {
-        performVisualAction(checkSettings, name, actionType, Optional.of(storage), Optional.empty());
+        performVisualAction(checkSettings, name, actionType, Optional.of(storage), null);
     }
 
     /**
@@ -191,9 +190,9 @@ public class VisualSteps extends AbstractVisualSteps
     @When(value = "I $actionType baseline with name `$name` ignoring:$checkSettings using"
             + " screenshot configuration:$screenshotConfiguration", priority = 1)
     public void runVisualTests(VisualActionType actionType, String name, ExamplesTable checkSettings,
-            ScreenshotConfiguration screenshotConfiguration)
+            ExamplesTable screenshotConfiguration)
     {
-        performVisualAction(checkSettings, name, actionType, Optional.empty(), Optional.of(screenshotConfiguration));
+        performVisualAction(checkSettings, name, actionType, Optional.empty(), screenshotConfiguration);
     }
 
     /**
@@ -215,10 +214,9 @@ public class VisualSteps extends AbstractVisualSteps
     @When(value = "I $actionType baseline with name `$name` using storage `$storage` and ignoring"
             + ":$checkSettings and screenshot configuration:$screenshotConfiguration", priority = 2)
     public void runVisualTests(VisualActionType actionType, String name, String storage, ExamplesTable checkSettings,
-            ScreenshotConfiguration screenshotConfiguration)
+            ExamplesTable screenshotConfiguration)
     {
-        performVisualAction(checkSettings, name, actionType, Optional.of(storage),
-                Optional.of(screenshotConfiguration));
+        performVisualAction(checkSettings, name, actionType, Optional.of(storage), screenshotConfiguration);
     }
 
     /**
@@ -260,7 +258,7 @@ public class VisualSteps extends AbstractVisualSteps
      *                      |1                          |99                      |
      */
     @When(value = "I $actionType baseline with name `$name` from image `$image` ignoring:$checkSettings", priority = 2)
-    public void runVisualTests(VisualActionType actionType, String baselineName, byte[] image,
+    public void runVisualTestsWithSettings(VisualActionType actionType, String baselineName, byte[] image,
             ExamplesTable checkSettings)
     {
         runVisualTests(actionType, baselineName, image, Optional.empty(), checkSettings);
@@ -313,7 +311,7 @@ public class VisualSteps extends AbstractVisualSteps
     }
 
     private void performVisualAction(ExamplesTable checkSettingsTable, String baselineName, VisualActionType actionType,
-            Optional<String> baselineStorage, Optional<ScreenshotConfiguration> screenshotConfiguration)
+            Optional<String> baselineStorage, @Nullable ExamplesTable screenshotConfiguration)
     {
         Parameters checkSettings = toParameters(checkSettingsTable);
 
@@ -328,13 +326,13 @@ public class VisualSteps extends AbstractVisualSteps
     }
 
     private void performVisualAction(String baselineName, VisualActionType actionType,
-            Optional<String> baselineStorage, Optional<ScreenshotConfiguration> screenshotConfiguration)
+            Optional<String> baselineStorage, @Nullable ExamplesTable screenshotConfiguration)
     {
         performVisualAction(baselineName, actionType, baselineStorage, screenshotConfiguration, EMPTY_CHECK_SETTINGS);
     }
 
     private void performVisualAction(String baselineName, VisualActionType actionType, Optional<String> baselineStorage,
-            Optional<ScreenshotConfiguration> screenshotConfiguration, Parameters checkSettings)
+            @Nullable ExamplesTable screenshotConfiguration, Parameters checkSettings)
     {
         performVisualAction(baselineName, actionType, baselineStorage, checkSettings, vc -> {
             Map<IgnoreStrategy, Set<Locator>> ignores = getIgnores(checkSettings);

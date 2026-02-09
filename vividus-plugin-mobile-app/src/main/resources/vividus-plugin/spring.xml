@@ -140,8 +140,6 @@
     <bean class="org.vividus.mobileapp.action.MobileAtomicActionFactories$Wait" />
     <bean class="org.vividus.mobileapp.action.MobileAtomicActionFactories$Release" />
 
-    <bean class="org.vividus.mobileapp.converter.ExamplesTableToScreenshotConfigurationConverter" />
-
     <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">
         <idref bean="actionsSequenceSteps" />
         <idref bean="applicationSteps" />
