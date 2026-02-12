@@ -191,7 +191,7 @@ Benefits of prompt file usage:
 ==== Setup prompt files for GitHub Copilot
 
 .   Create a `.github/prompts` folder (if it doesn't exist)
-.   Place the ready-made prompt files into the created folder. The sample prompt for generation of VIVIDUS stories testing web-applications is available in the https://github.com/vividus-framework/vividus-sample-tests/blob/main/.github/prompts/generate-vividus-story-web.prompt.md[sample project], the content should be copied to the local project and then can be modified depending on the needs and specifics of SUT.
+.   Place the ready-made prompt files into the created folder. The sample prompt for generating VIVIDUS stories that test web-applications is available in the https://github.com/vividus-framework/vividus-sample-tests/blob/main/.github/prompts/generate-vividus-story-web.prompt.md[sample project]; copy this content into your local project and then modify it based on your needs and the specifics of your SUT.
 +
 [IMPORTANT]
 The prompt file must have the `.prompt.md` extension (e.g., `generate-vividus-story-web.prompt.md`). This extension ensures proper
