@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,6 +101,7 @@ class BatchStorageTests
         batchConfigurations.put("batch-2.name", BATCH_2_NAME);
         batchConfigurations.put("batch-2.threads", Integer.toString(BATCH_2_THREADS));
         batchConfigurations.put("batch-2.story.execution-timeout", BATCH_2_TIMEOUT.toString());
+        batchConfigurations.put("batch-2.execution-timeout", BATCH_2_TIMEOUT.toString());
         batchConfigurations.put("batch-2.meta-filters", BATCH_2_META_FILTERS);
         batchConfigurations.put("batch-2.fail-fast", TRUE);
         batchConfigurations.put("batch-2.variables.key1", VALUE_1);
@@ -109,7 +110,7 @@ class BatchStorageTests
         when(propertyParser.getPropertiesByPrefix(BATCH)).thenReturn(batchConfigurations);
 
         var propertyMapper = new PropertyMapper(DOT, PropertyNamingStrategies.KEBAB_CASE, propertyParser, Set.of());
-        batchStorage = new BatchStorage(propertyMapper, EXPECTED_DURATION, null, DEFAULT_META_FILTERS, false);
+        batchStorage = new BatchStorage(propertyMapper, EXPECTED_DURATION, null, null, DEFAULT_META_FILTERS, false);
     }
 
     @Test
@@ -197,7 +198,7 @@ class BatchStorageTests
             DEFAULT_RESOURCE_LOCATION));
 
         var propertyMapper = new PropertyMapper(DOT, PropertyNamingStrategies.KEBAB_CASE, propertyParser, Set.of());
-        batchStorage = new BatchStorage(propertyMapper, null, "300", DEFAULT_META_FILTERS, false);
+        batchStorage = new BatchStorage(propertyMapper, null, null, "300", DEFAULT_META_FILTERS, false);
         assertEquals(List.of(warn("Property `bdd.story-execution-timeout` is deprecated and will be removed"
             + " in VIVIDUS 0.7.0. Please use `story.execution-timeout` instead.")), LOGGER.getLoggingEvents());
         var config = batchStorage.getBatchConfiguration("batch-999");
@@ -213,22 +214,23 @@ class BatchStorageTests
         var duration = Duration.ofHours(111);
         var propertyMapper = new PropertyMapper(DOT, PropertyNamingStrategies.KEBAB_CASE, propertyParser, Set.of());
         var iae = assertThrows(IllegalArgumentException.class,
-            () -> new BatchStorage(propertyMapper, duration, "202", DEFAULT_META_FILTERS, false));
+            () -> new BatchStorage(propertyMapper, duration, duration, "202", DEFAULT_META_FILTERS, false));
         assertEquals(iae.getMessage(), "Conflicting properties are found: `bdd.story-execution-timeout`"
             + " and `story.execution-timeout`. Property `bdd.story-execution-timeout` is deprecated and will be"
             + " removed in VIVIDUS 0.7.0. Please use `story.execution-timeout` instead.");
     }
 
     @Test
-    void shouldUseDefaultTimeout() throws IOException
+    void shouldUseDefaultTimeouts() throws IOException
     {
         var propertyParser = mock(PropertyParser.class);
         when(propertyParser.getPropertiesByPrefix(BATCH)).thenReturn(Map.of("batch-997.resource-location",
                 DEFAULT_RESOURCE_LOCATION));
 
         var propertyMapper = new PropertyMapper(DOT, PropertyNamingStrategies.KEBAB_CASE, propertyParser, Set.of());
-        batchStorage = new BatchStorage(propertyMapper, null, null, DEFAULT_META_FILTERS, false);
+        batchStorage = new BatchStorage(propertyMapper, null, null, null, DEFAULT_META_FILTERS, false);
         var config = batchStorage.getBatchConfiguration("batch-997");
         assertEquals(Duration.ofHours(2), config.getStoryExecutionTimeout());
+        assertEquals(Duration.ofHours(10), config.getExecutionTimeout());
     }
 }
