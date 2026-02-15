@@ -40,7 +40,7 @@ h2 = { module = "com.h2database:h2", version = "2.4.240" }
 csvjdbc = { module = "net.sourceforge.csvjdbc:csvjdbc", version = "1.0.46" }
 mysql-connector-j = { module = "com.mysql:mysql-connector-j", version = "9.6.0" }
 mssql-jdbc = { module = "com.microsoft.sqlserver:mssql-jdbc", version = "13.3.1.jre11-preview" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.7.9" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.7.10" }
 oracle-ojdbc10 = { module = "com.oracle.database.jdbc:ojdbc10", version = "19.29.0.0" }
 db2jcc = { module = "com.ibm.db2.jcc:db2jcc", version = "db2jcc4" }
 snowflake-jdbc = { module = "net.snowflake:snowflake-jdbc", version = "4.0.0" }
