@@ -144,6 +144,16 @@ When I type `${text}` in field located `accessibilityId(nameInput)`
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 
 
+Scenario: Verify step: 'When I change device screen orientation to $orientation'
+When I change context to element located by `accessibilityId(nameInput)`
+Given I initialize scenario variable `portraitWidth` with value `${context-width}`
+When I change device screen orientation to LANDSCAPE
+Given I initialize scenario variable `landscapeWidth` with value `${context-width}`
+Then `${portraitWidth}` is not equal to `${landscapeWidth}`
+When I change device screen orientation to PORTRAIT
+When I reset context
+
+
 Scenario: Verify dynamic variable: 'clipboard-text'
 When I tap on element located by `accessibilityId(CopyTextToClipboardButton)`
 Then `${clipboard-text}` is equal to `${text}`
@@ -538,11 +548,6 @@ When I wait until element located by `accessibilityId(menuToggler)` disappears
 When I activate application with bundle identifier `${main-app}`
 When I wait until element located by `accessibilityId(menuToggler)` appears
 
-Scenario: Verify step: 'When I change device screen orientation to $orientation'
-When I save `${size-attribute}` attribute value of element located by `accessibilityId(menuToggler)` to scenario variable `portraitSize`
-When I change device screen orientation to LANDSCAPE
-When I save `${size-attribute}` attribute value of element located by `accessibilityId(menuToggler)` to scenario variable `landscapeSize`
-Then `${portraitSize}` is not equal to `${landscapeSize}`
 
 Scenario: Verify step: 'When I close mobile application'
 When I close mobile application
