@@ -56,7 +56,7 @@ public class SslLabsClient
         this.jsonUtils = jsonUtils;
         this.sslLabHost = sslLabHost;
         this.email = Validate.notBlank(email,
-                "SSL Labs API v4 requires a registered email address. Please set the 'ssl-labs.email' property.");
+                "SSL Labs API v4 requires a registered email address");
     }
 
     public Optional<Grade> performSslScan(String host)

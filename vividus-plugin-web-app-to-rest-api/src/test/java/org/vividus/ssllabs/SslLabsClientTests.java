@@ -175,16 +175,11 @@ class SslLabsClientTests
     @Test
     void shouldThrowExceptionWhenEmailIsBlank()
     {
-        try (var duration = mockStatic(Duration.class))
-        {
-            duration.when(() -> Duration.ofMinutes(10)).thenReturn(Duration.ZERO);
-            duration.when(() -> Duration.ofSeconds(30)).thenReturn(Duration.ZERO);
-            var exception = assertThrows(IllegalArgumentException.class,
-                    () -> new SslLabsClient(httpClient, new JsonUtils(), SSL_LABS_HOST, ""));
-            assertEquals(
-                    "SSL Labs API v4 requires a registered email address. Please set the 'ssl-labs.email' property.",
-                    exception.getMessage());
-        }
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> new SslLabsClient(httpClient, new JsonUtils(), SSL_LABS_HOST, ""));
+        assertEquals(
+                "SSL Labs API v4 requires a registered email address",
+                exception.getMessage());
     }
 
     private void mockResponse(String response) throws IOException
