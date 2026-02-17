@@ -8,7 +8,7 @@
 
     <context:component-scan base-package="org.vividus.visual.storage" />
 
-    <bean id="visualSteps" class="org.vividus.visual.VisualSteps">
+    <bean id="visualSteps" class="org.vividus.visual.VisualSteps" parent="abstractVisualSteps">
         <constructor-arg ref="screenshotParametersFactory" />
     </bean>
 

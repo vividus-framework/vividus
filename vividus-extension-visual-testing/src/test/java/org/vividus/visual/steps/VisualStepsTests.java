@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ class VisualStepsTests
     private static final String VISUAL_CHECK_PASSED = "Visual check passed";
     private static final String COMPARE_AGAINST = "true, COMPARE_AGAINST";
     private static final String CHECK_INEQUALITY_AGAINST = "false, CHECK_INEQUALITY_AGAINST";
+    private static final String EXTENDED_MESSAGE_FORMAT = "Visual check for '%s' baseline is %s";
 
     @Mock private IUiContext uiContext;
     @Mock private IAttachmentPublisher attachmentPublisher;
@@ -148,6 +149,32 @@ class VisualStepsTests
                 VISUAL_COMPARISON_ATTACHMENT_TITLE);
         ordered.verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, true);
         assertNull(visualCheck.getSearchContext());
+    }
+
+    @Test
+    void shouldUseExtendedAssertionFormatPassed()
+    {
+        var visualCheck = new AbstractVisualCheck(BASELINE_NAME, VisualActionType.COMPARE_AGAINST) { };
+        var visualCheckResult = new VisualCheckResult(visualCheck);
+        visualCheckResult.setPassed(true);
+
+        visualSteps.setExtendedAssertionFormatEnabled(true);
+        visualSteps.verifyResult(visualCheckResult);
+
+        verify(softAssert).recordPassedAssertion(EXTENDED_MESSAGE_FORMAT.formatted(BASELINE_NAME, "passed"));
+    }
+
+    @Test
+    void shouldUseExtendedAssertionFormatFailed()
+    {
+        var visualCheck = new AbstractVisualCheck(BASELINE_NAME, VisualActionType.COMPARE_AGAINST) { };
+        var visualCheckResult = new VisualCheckResult(visualCheck);
+        visualCheckResult.setPassed(false);
+
+        visualSteps.setExtendedAssertionFormatEnabled(true);
+        visualSteps.verifyResult(visualCheckResult);
+
+        verify(softAssert).recordFailedAssertion(EXTENDED_MESSAGE_FORMAT.formatted(BASELINE_NAME, "failed"));
     }
 
     private static final class TestVisualSteps extends AbstractVisualSteps

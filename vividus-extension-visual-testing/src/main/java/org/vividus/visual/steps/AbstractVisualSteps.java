@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ public abstract class AbstractVisualSteps
     private final IUiContext uiContext;
     private final IAttachmentPublisher attachmentPublisher;
     private final ISoftAssert softAssert;
+
+    private boolean extendedAssertionFormatEnabled;
 
     protected AbstractVisualSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher,
             ISoftAssert softAssert)
@@ -90,7 +92,22 @@ public abstract class AbstractVisualSteps
     protected void verifyResult(VisualCheckResult result)
     {
         boolean passed = result.isPassed() ^ result.getActionType() == VisualActionType.CHECK_INEQUALITY_AGAINST;
-        softAssert.assertTrue("Visual check passed", passed);
+        if (extendedAssertionFormatEnabled)
+        {
+            String format = "Visual check for '%s' baseline is %s";
+            if (passed)
+            {
+                softAssert.recordPassedAssertion(format.formatted(result.getBaselineName(), "passed"));
+            }
+            else
+            {
+                softAssert.recordFailedAssertion(format.formatted(result.getBaselineName(), "failed"));
+            }
+        }
+        else
+        {
+            softAssert.assertTrue("Visual check passed", passed);
+        }
     }
 
     protected abstract String getTemplateName();
@@ -98,5 +115,10 @@ public abstract class AbstractVisualSteps
     protected ISoftAssert getSoftAssert()
     {
         return softAssert;
+    }
+
+    public void setExtendedAssertionFormatEnabled(boolean extendedAssertionFormatEnabled)
+    {
+        this.extendedAssertionFormatEnabled = extendedAssertionFormatEnabled;
     }
 }
