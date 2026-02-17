@@ -163,6 +163,47 @@ e.g., `0`, `#`, specify the way indices are displayed.
 |Paths to the composite steps e.g. `steps/*.steps`
 |===
 
+==== Parallel Story Execution
+
+Stories within a batch are executed in parallel using the number of threads specified by the `batch-<batch-number>.threads` property. By default, stories run sequentially (1 thread). Increasing the thread count can significantly reduce test execution time.
+
+.suite.properties: Running stories in 2 batches with different parallelism levels
+[source,properties]
+----
+batch-1.resource-location=story/api
+batch-1.threads=5
+batch-1.name=API Tests
+
+batch-2.resource-location=story/ui
+batch-2.threads=2
+batch-2.name=UI Tests
+----
+
+In this example:
+
+* `batch-1` runs API test stories from the `story/api` folder using `5` parallel threads. Since API tests are generally stateless, a higher level of parallelism can be used.
+* `batch-2` runs UI test stories from the `story/ui` folder using `2` parallel threads. UI tests may require more resources per thread, so a lower parallelism level is configured.
+* `batch-1` runs first, and only after it completes, `batch-2` starts (batches always run sequentially).
+
+[IMPORTANT]
+====
+When running stories in parallel, make sure:
+
+* Stories do not depend on each other's state or execution order.
+* Shared resources (e.g. database records, user sessions) are properly isolated across threads.
+* The `story` xref:commons:variables.adoc[variable scope] is thread-safe, but the `next_batches` and `global` scopes are shared.
+====
+
+.suite.properties: Running all stories from a single folder with 3 threads
+[source,properties]
+----
+batch-1.resource-location=story/regression
+batch-1.threads=3
+batch-1.story.execution-timeout=PT30M
+----
+
+The `story.execution-timeout` property limits how long each individual story can run. This is useful in parallel execution to prevent a single slow story from blocking a thread indefinitely.
+
 === Profiles
 
 A profile defines the subject of the test, i.e. it answers the question "What are specifics of the browser/device I want to run tests on?".
