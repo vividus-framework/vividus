@@ -145,14 +145,13 @@ Meta:
 When I create temporary excel file with content:
 {nullPlaceholder=NULL}
 |ColumnA|ColumnB|ColumnC|
-|NULL|value1|NULL|
-|value2|NULL|value3|
+|NULL   |value1 |NULL   |
+|value2 |NULL   |value3 |
 and put path to scenario variable `path`
-Then `${response-as-bytes}` is not equal to `null`
 When I initialize scenario variable `excel-data` with values:
 |ColumnA|ColumnB|ColumnC|
-||value1||
-|value2||value3|
+|       |value1 |       |
+|value2 |       |value3 |
 Then `${excel-data}` is equal to table:
 {transformer=FROM_EXCEL, path=$\{path\}, sheet=Sheet0, range=A1:C3}
 

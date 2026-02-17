@@ -150,8 +150,8 @@ class ExcelSheetWriterTests
     {
         var content = new ExamplesTable("{nullPlaceholder=NULL}\n"
                 + "|ColumnA|ColumnB|ColumnC|\n"
-                + "|NULL|value1|NULL|\n"
-                + "|value2|NULL|value3|");
+                + "|NULL   |value1 |NULL   |\n"
+                + "|value2 |NULL   |value3 |");
 
         var pathTemp = createExcelFile();
         EXCEL_SHEET_WRITER.createExcel(pathTemp, Optional.of(TEST_SHEET_NAME), content);
