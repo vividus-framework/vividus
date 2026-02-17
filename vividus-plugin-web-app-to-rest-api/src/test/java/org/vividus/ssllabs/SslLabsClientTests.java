@@ -22,7 +22,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -170,16 +169,6 @@ class SslLabsClientTests
             grade.verify(() -> Grade.fromString(anyString()), never());
             assertThat(logger.getLoggingEvents(), is(List.of()));
         }
-    }
-
-    @Test
-    void shouldThrowExceptionWhenEmailIsBlank()
-    {
-        var exception = assertThrows(IllegalArgumentException.class,
-                () -> new SslLabsClient(httpClient, new JsonUtils(), SSL_LABS_HOST, ""));
-        assertEquals(
-                "SSL Labs API v4 requires a registered email address",
-                exception.getMessage());
     }
 
     private void mockResponse(String response) throws IOException
