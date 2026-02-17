@@ -467,6 +467,11 @@ Then SSL rating for URL `$url` is $comparisonRule `$gradeName`
 |`https://api.ssllabs.com`
 |SSL Labs endpoint.
 
+|`ssl-labs.email`
+|`string`
+|`<empty>`
+|The registered email address to use for SSL Labs API v4 authentication. Must be registered via the https://github.com/ssllabs/ssllabs-scan/blob/master/ssllabs-api-docs-v4.md#register-for-scan-api-initiation-and-result-fetching-[SSL Labs registration API].
+
 |===
 
 .Validate SSL rating for `https://www.google.com`
