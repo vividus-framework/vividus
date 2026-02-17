@@ -17,6 +17,7 @@
 package org.vividus.excel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
@@ -141,6 +142,30 @@ class ExcelSheetWriterTests
             IExcelSheetParser sheetParser = new ExcelSheetParser(sheet, true);
             List<List<String>> actualData = sheetParser.getData();
             assertEquals(expectedData, actualData);
+        }
+    }
+
+    @Test
+    void shouldCreateExcelWithNullValues() throws IOException
+    {
+        ExamplesTable content = new ExamplesTable("{nullPlaceholder=NULL}\n"
+                + "|ColumnA|ColumnB|ColumnC|\n"
+                + "|NULL|value1|NULL|\n"
+                + "|value2|NULL|value3|");
+
+        Path pathTemp = createExcelFile();
+        EXCEL_SHEET_WRITER.createExcel(pathTemp, Optional.of(TEST_SHEET_NAME), content);
+
+        try (XSSFWorkbook workbook = new XSSFWorkbook(FileUtils.openInputStream(new File(pathTemp.toString()))))
+        {
+            XSSFSheet sheet = workbook.getSheetAt(0);
+            IExcelSheetParser sheetParser = new ExcelSheetParser(sheet, true);
+            assertNull(sheetParser.getDataFromCell("A2"));
+            assertEquals("value1", sheetParser.getDataFromCell("B2"));
+            assertNull(sheetParser.getDataFromCell("C2"));
+            assertEquals("value2", sheetParser.getDataFromCell("A3"));
+            assertNull(sheetParser.getDataFromCell("B3"));
+            assertEquals("value3", sheetParser.getDataFromCell("C3"));
         }
     }
 }

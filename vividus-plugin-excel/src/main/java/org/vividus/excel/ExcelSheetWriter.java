@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,9 +88,12 @@ public class ExcelSheetWriter
     private void fillData(ExamplesTable content, XSSFSheet sheet, XSSFWorkbook workbook)
     {
         ArrayList<CellType> columTypes = new ArrayList<>();
-        fillRow(sheet, workbook, 0, content.getHeaders(), columTypes);
-        IntStream.range(0, content.getRowCount()).forEach(rowIndex -> {
-            List<String> cells = content.getRowValues(rowIndex, true);
+        List<String> headers = content.getHeaders();
+        fillRow(sheet, workbook, 0, headers, columTypes);
+        List<Map<String, String>> rows = content.getRows();
+        IntStream.range(0, rows.size()).forEach(rowIndex -> {
+            Map<String, String> rowData = rows.get(rowIndex);
+            List<String> cells = headers.stream().map(rowData::get).toList();
             fillRow(sheet, workbook, rowIndex + 1, cells, columTypes);
         });
     }
@@ -120,6 +124,10 @@ public class ExcelSheetWriter
             else
             {
                 String cellContentFromExampleTable = cells.get(index);
+                if (cellContentFromExampleTable == null)
+                {
+                    return;
+                }
                 Cell cellExcel = row.createCell(index);
                 Matcher cellTypeMatcher = CELL_WITH_TYPE_PATTERN.matcher(cellContentFromExampleTable);
                 if (cellTypeMatcher.matches())
