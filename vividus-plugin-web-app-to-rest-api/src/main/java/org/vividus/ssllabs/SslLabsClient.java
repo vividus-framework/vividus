@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.core5.http.HttpStatus;
 import org.slf4j.Logger;
@@ -54,7 +55,8 @@ public class SslLabsClient
         this.httpClient = httpClient;
         this.jsonUtils = jsonUtils;
         this.sslLabHost = sslLabHost;
-        this.email = email;
+        this.email = Validate.notBlank(email,
+                "SSL Labs API v4 requires a registered email address. Please set the 'ssl-labs.email' property.");
     }
 
     public Optional<Grade> performSslScan(String host)
