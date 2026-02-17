@@ -1,6 +1,9 @@
 #Ignore Gradle cache
 .gradle
 
+#Ignore Gradle wrapper (downloaded from build system)
+/gradle/
+
 #Ignore IDE project files
 .settings
 .project
