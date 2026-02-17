@@ -23,8 +23,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
@@ -99,12 +101,17 @@ public class ExcelSheetWriter
 
     private static void validateColumnsUniqueness(List<String> headers)
     {
-        if (headers.size() != new HashSet<>(headers).size())
+        Set<String> seen = new HashSet<>();
+        Set<String> duplicates = new LinkedHashSet<>();
+        headers.forEach(h ->
         {
-            List<String> duplicates = headers.stream()
-                    .filter(h -> headers.indexOf(h) != headers.lastIndexOf(h))
-                    .distinct()
-                    .toList();
+            if (!seen.add(h))
+            {
+                duplicates.add(h);
+            }
+        });
+        if (!duplicates.isEmpty())
+        {
             throw new IllegalArgumentException(
                     "ExamplesTable contains duplicate column names: " + duplicates);
         }
