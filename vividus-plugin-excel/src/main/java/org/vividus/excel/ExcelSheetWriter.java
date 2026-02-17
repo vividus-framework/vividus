@@ -22,7 +22,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -91,23 +90,12 @@ public class ExcelSheetWriter
         ArrayList<CellType> columTypes = new ArrayList<>();
         List<String> headers = content.getHeaders();
         fillRow(sheet, workbook, 0, headers, columTypes);
-        boolean hasUniqueColumns = headers.size() == new HashSet<>(headers).size();
-        if (hasUniqueColumns)
-        {
-            List<Map<String, String>> rows = content.getRows();
-            IntStream.range(0, rows.size()).forEach(rowIndex -> {
-                Map<String, String> rowData = rows.get(rowIndex);
-                List<String> cells = headers.stream().map(rowData::get).toList();
-                fillRow(sheet, workbook, rowIndex + 1, cells, columTypes);
-            });
-        }
-        else
-        {
-            IntStream.range(0, content.getRowCount()).forEach(rowIndex -> {
-                List<String> cells = content.getRowValues(rowIndex, true);
-                fillRow(sheet, workbook, rowIndex + 1, cells, columTypes);
-            });
-        }
+        List<Map<String, String>> rows = content.getRows();
+        IntStream.range(0, rows.size()).forEach(rowIndex -> {
+            Map<String, String> rowData = rows.get(rowIndex);
+            List<String> cells = headers.stream().map(rowData::get).toList();
+            fillRow(sheet, workbook, rowIndex + 1, cells, columTypes);
+        });
     }
 
     private void fillRow(XSSFSheet sheet, XSSFWorkbook workbook, int rowIndex, List<String> cells,

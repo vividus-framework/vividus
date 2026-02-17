@@ -43,12 +43,12 @@ import org.vividus.util.ResourceUtils;
 class ExcelSheetWriterTests
 {
     private static final ExamplesTable CONTENT = new ExamplesTable("""
-            |name|status|name|
+            |name|status|surname|
             |First |OPEN   |MoreFirst|
             |Second|closed|MoreSecond|""");
     private static final String NAME = "name";
     private static final List<List<String>> EXPECTED_DATA = List.of(
-            List.of(NAME, "status", NAME),
+            List.of(NAME, "status", "surname"),
             List.of("First", "OPEN", "MoreFirst"),
             List.of("Second", "closed", "MoreSecond")
     );
@@ -148,18 +148,18 @@ class ExcelSheetWriterTests
     @Test
     void shouldCreateExcelWithNullValues() throws IOException
     {
-        ExamplesTable content = new ExamplesTable("{nullPlaceholder=NULL}\n"
+        var content = new ExamplesTable("{nullPlaceholder=NULL}\n"
                 + "|ColumnA|ColumnB|ColumnC|\n"
                 + "|NULL|value1|NULL|\n"
                 + "|value2|NULL|value3|");
 
-        Path pathTemp = createExcelFile();
+        var pathTemp = createExcelFile();
         EXCEL_SHEET_WRITER.createExcel(pathTemp, Optional.of(TEST_SHEET_NAME), content);
 
-        try (XSSFWorkbook workbook = new XSSFWorkbook(FileUtils.openInputStream(new File(pathTemp.toString()))))
+        try (var workbook = new XSSFWorkbook(FileUtils.openInputStream(new File(pathTemp.toString()))))
         {
-            XSSFSheet sheet = workbook.getSheetAt(0);
-            IExcelSheetParser sheetParser = new ExcelSheetParser(sheet, true);
+            var sheet = workbook.getSheetAt(0);
+            var sheetParser = new ExcelSheetParser(sheet, true);
             assertNull(sheetParser.getDataFromCell("A2"));
             assertEquals("value1", sheetParser.getDataFromCell("B2"));
             assertNull(sheetParser.getDataFromCell("C2"));

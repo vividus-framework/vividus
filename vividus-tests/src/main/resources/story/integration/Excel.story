@@ -139,6 +139,23 @@ When I initialize scenario variable `expectedTable` with values:
 Then `${expectedTable}` is equal to table:
 {transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=DifferentTypes, range=B1:D2;B3:D3}
 
+Scenario: Validate Excel file creation with null placeholder values
+Meta:
+    @requirementId 6446
+When I create temporary excel file with content:
+{nullPlaceholder=NULL}
+|ColumnA|ColumnB|ColumnC|
+|NULL|value1|NULL|
+|value2|NULL|value3|
+and put path to scenario variable `path`
+Then `${response-as-bytes}` is not equal to `null`
+When I initialize scenario variable `excel-data` with values:
+|ColumnA|ColumnB|ColumnC|
+||value1||
+|value2||value3|
+Then `${excel-data}` is equal to table:
+{transformer=FROM_EXCEL, path=$\{path\}, sheet=Sheet0, range=A1:C3}
+
 Scenario: Validate step 'Then `$excelDocument` contains exactly `$expectedRowCount` rows in sheet with index `$sheetIndex`'
 Meta:
     @requirementId 6017
