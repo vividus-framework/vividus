@@ -30,6 +30,12 @@ include::partial$plugin-installation.adoc[]
 |`<empty>`
 |Used to append scenario based index to a baseline name
 
+|`ui.visual.extended-assertion-format-enabled`
+a|`true`
+`false`
+|`false`
+|Extends assertion message for baseline validation by including baseline name
+
 |`ui.visual.override-baselines`
 a|`true`
 `false`
