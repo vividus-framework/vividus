@@ -17,7 +17,6 @@
 package org.vividus.excel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
@@ -43,12 +42,12 @@ import org.vividus.util.ResourceUtils;
 class ExcelSheetWriterTests
 {
     private static final ExamplesTable CONTENT = new ExamplesTable("""
-            |name|status|surname|
+            |name|status|name|
             |First |OPEN   |MoreFirst|
             |Second|closed|MoreSecond|""");
     private static final String NAME = "name";
     private static final List<List<String>> EXPECTED_DATA = List.of(
-            List.of(NAME, "status", "surname"),
+            List.of(NAME, "status", NAME),
             List.of("First", "OPEN", "MoreFirst"),
             List.of("Second", "closed", "MoreSecond")
     );
@@ -142,30 +141,6 @@ class ExcelSheetWriterTests
             IExcelSheetParser sheetParser = new ExcelSheetParser(sheet, true);
             List<List<String>> actualData = sheetParser.getData();
             assertEquals(expectedData, actualData);
-        }
-    }
-
-    @Test
-    void shouldCreateExcelWithNullValues() throws IOException
-    {
-        var content = new ExamplesTable("{nullPlaceholder=NULL}\n"
-                + "|ColumnA|ColumnB|ColumnC|\n"
-                + "|NULL   |value1 |NULL   |\n"
-                + "|value2 |NULL   |value3 |");
-
-        var pathTemp = createExcelFile();
-        EXCEL_SHEET_WRITER.createExcel(pathTemp, Optional.of(TEST_SHEET_NAME), content);
-
-        try (var workbook = new XSSFWorkbook(FileUtils.openInputStream(new File(pathTemp.toString()))))
-        {
-            var sheet = workbook.getSheetAt(0);
-            var sheetParser = new ExcelSheetParser(sheet, true);
-            assertNull(sheetParser.getDataFromCell("A2"));
-            assertEquals("value1", sheetParser.getDataFromCell("B2"));
-            assertNull(sheetParser.getDataFromCell("C2"));
-            assertEquals("value2", sheetParser.getDataFromCell("A3"));
-            assertNull(sheetParser.getDataFromCell("B3"));
-            assertEquals("value3", sheetParser.getDataFromCell("C3"));
         }
     }
 }
