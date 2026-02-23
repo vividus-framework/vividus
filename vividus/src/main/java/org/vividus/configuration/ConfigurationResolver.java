@@ -157,7 +157,7 @@ public final class ConfigurationResolver
     private static PropertyPlaceholderHelper createPropertyPlaceholderHelper(boolean ignoreUnresolvablePlaceholders)
     {
         return new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, PLACEHOLDER_VALUE_SEPARATOR,
-                ignoreUnresolvablePlaceholders);
+                null, ignoreUnresolvablePlaceholders);
     }
 
     private static Multimap<String, String> assembleConfiguration(Properties configurationProperties,
