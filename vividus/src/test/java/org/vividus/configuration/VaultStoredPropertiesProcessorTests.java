@@ -151,8 +151,8 @@ class VaultStoredPropertiesProcessorTests
                         try
                         {
                             interceptor.intercept(httpRequest, new byte[0], mock(ClientHttpRequestExecution.class));
-                            assertEquals(Set.of(Map.entry("X-Vault-Namespace", List.of(vaultNamespaceValue))),
-                                    httpHeaders.entrySet());
+                            assertEquals(Set.of("X-Vault-Namespace"), httpHeaders.headerSet());
+                            assertEquals(List.of(vaultNamespaceValue), httpHeaders.get("X-Vault-Namespace"));
                             return true;
                         }
                         catch (IOException e)
