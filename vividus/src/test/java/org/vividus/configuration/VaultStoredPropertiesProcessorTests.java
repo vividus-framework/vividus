@@ -65,7 +65,7 @@ import org.springframework.web.client.RestTemplate;
 @ExtendWith(TestLoggerFactoryExtension.class)
 class VaultStoredPropertiesProcessorTests
 {
-    private static final String X_VAULT_NAMESPACE = "X-Vault-Namespace";
+    private static final String HEADER_X_VAULT_NAMESPACE = "X-Vault-Namespace";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(VaultStoredPropertiesProcessor.class);
 
@@ -153,8 +153,8 @@ class VaultStoredPropertiesProcessorTests
                         try
                         {
                             interceptor.intercept(httpRequest, new byte[0], mock(ClientHttpRequestExecution.class));
-                            assertEquals(Set.of(X_VAULT_NAMESPACE), httpHeaders.headerNames());
-                            assertEquals(List.of(vaultNamespaceValue), httpHeaders.get(X_VAULT_NAMESPACE));
+                            assertEquals(Set.of(HEADER_X_VAULT_NAMESPACE), httpHeaders.headerNames());
+                            assertEquals(List.of(vaultNamespaceValue), httpHeaders.get(HEADER_X_VAULT_NAMESPACE));
                             return true;
                         }
                         catch (IOException e)
