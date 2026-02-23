@@ -14,8 +14,6 @@ dependencies {
     implementation platform('org.springframework.kafka:spring-kafka-bom:4.0.3')
     implementation('org.springframework.kafka:spring-kafka')
 
-    implementation('org.apache.kafka:kafka-clients:4.1.1')
-
     implementation platform(libs.slf4j.bom)
     implementation(libs.slf4j.api)
 
@@ -26,7 +24,4 @@ dependencies {
     testImplementation(libs.mockito.junitJupiter)
     testImplementation('org.springframework.kafka:spring-kafka-test')
     testImplementation(libs.slf4jTest)
-
-    // https://github.com/spring-projects/spring-kafka/issues/3955#issuecomment-2971304102
-    testImplementation('org.apache.kafka:kafka_2.13:4.1.1')
 }
