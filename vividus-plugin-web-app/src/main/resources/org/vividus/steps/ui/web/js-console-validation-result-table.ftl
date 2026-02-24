@@ -8,16 +8,6 @@
     <link rel="stylesheet" href="../../webjars/bootstrap/5.3.1/css/bootstrap.min.css"/>
 </head>
 <body>
-    <style>
-        .SEVERE {
-            background-color: #F2DEDE;
-            color: #A94442;
-        }
-        .WARNING {
-            background-color: #FCF8E3;
-            color: #8A6D3B;
-        }
-    </style>
     <table class="table table-hover table-bordered">
         <thead>
             <tr>
@@ -32,7 +22,14 @@
             [#list results?keys as pageResult]
                 [#list results[pageResult] as jsLogEntry]
                 [#assign counter = counter + 1]
-                <tr class="${jsLogEntry.level}">
+                <tr class="[#switch jsLogEntry.level]
+                    [#on "SEVERE"]
+                        table-danger
+                    [#on "WARNING"]
+                        table-warning
+                    [#default]
+                        table-light
+                    [/#switch]">
                     <td>
                         ${counter!}
                     </td>
