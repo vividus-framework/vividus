@@ -16,10 +16,6 @@ subprojects {
             module('commons-logging:commons-logging') {
                 replacedBy('org.slf4j:jcl-over-slf4j', 'Redirect commons-logging logs to SLF4J')
             }
-            module('org.springframework:spring-jcl') {
-                // https://github.com/spring-projects/spring-framework/issues/20611#issuecomment-453462024
-                replacedBy('org.slf4j:jcl-over-slf4j', 'Use SLF4J over JCL instead of Spring over JCL implementation')
-            }
             module('log4j:log4j') {
                 replacedBy('org.slf4j:log4j-over-slf4j', 'Redirect Log4J 1.x logs to SLF4J')
             }

@@ -11,13 +11,8 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation platform('org.springframework.kafka:spring-kafka-bom:3.3.10')
+    implementation platform('org.springframework.kafka:spring-kafka-bom:4.0.3')
     implementation('org.springframework.kafka:spring-kafka')
-
-    // 'spring-kafka' uses 'kafka-clients' 3.8.1, but it is needed to use 3.9.1
-    // as it includes fix for https://issues.apache.org/jira/browse/KAFKA-17078
-    // which allows to use Java 24
-    implementation('org.apache.kafka:kafka-clients:3.9.1')
 
     implementation platform(libs.slf4j.bom)
     implementation(libs.slf4j.api)
@@ -29,7 +24,4 @@ dependencies {
     testImplementation(libs.mockito.junitJupiter)
     testImplementation('org.springframework.kafka:spring-kafka-test')
     testImplementation(libs.slf4jTest)
-
-    // https://github.com/spring-projects/spring-kafka/issues/3955#issuecomment-2971304102
-    testImplementation('org.apache.kafka:kafka_2.13:3.9.1')
 }
