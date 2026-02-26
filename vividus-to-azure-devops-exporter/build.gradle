@@ -32,6 +32,7 @@ dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-exporter-commons')
 
+    implementation(libs.apache.commons.text)
     implementation platform(libs.jackson.bom)
     implementation(libs.jackson.dataformat.xml)
 

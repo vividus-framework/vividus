@@ -135,6 +135,47 @@ class AzureDevOpsFacadeTests
     }
 
     @Test
+    void shouldCreateTestCaseWithAutomatedStepsContainingLessThanSignInStepsSection()
+            throws IOException, SyntaxException
+    {
+        SectionMapping mapping = new SectionMapping();
+        mapping.setSteps(ScenarioPart.AUTOMATED);
+        options.setSectionMapping(mapping);
+        when(client.createTestCase(operationsCaptor.capture())).thenReturn(createWorkItem());
+        facade.createTestCase(SUITE_TITLE, createScenario(List.of(createStep("Then $var1 is <= $var2"))));
+        String data = "<steps id=\"0\" last=\"2\"><step id=\"2\" type=\"ActionStep\"><description/><parameterizedString"
+                + " isformatted=\"true\">Then $var1 is &amp;lt;= $var2</parameterizedString><parameterizedString"
+                + " isformatted=\"true\"/></step></steps>";
+        assertOperations(5, ops -> assertAll(
+            () -> assertAreaPath(ops.get(0)),
+            () -> assertTitle(ops.get(1)),
+            () -> assertSteps(ops.get(2), data),
+            () -> assertAutomatedTestName(ops.get(3)),
+            () -> assertAutomatedTestType(ops.get(4))
+        ));
+        verifyCreateTestCaseLog();
+    }
+
+    @Test
+    void shouldCreateTestCaseWithAutomatedStepsContainingLessThanSignInDescriptionSection()
+            throws IOException, SyntaxException
+    {
+        SectionMapping mapping = new SectionMapping();
+        mapping.setSteps(ScenarioPart.MANUAL);
+        options.setSectionMapping(mapping);
+        when(client.createTestCase(operationsCaptor.capture())).thenReturn(createWorkItem());
+        facade.createTestCase(SUITE_TITLE, createScenario(List.of(createStep("Then $var1 is <= $var2"))));
+        assertOperations(5, ops -> assertAll(
+            () -> assertAreaPath(ops.get(0)),
+            () -> assertTitle(ops.get(1)),
+            () -> assertDescription(ops.get(2), "<div>Then $var1 is &lt;= $var2</div>"),
+            () -> assertAutomatedTestName(ops.get(3)),
+            () -> assertAutomatedTestType(ops.get(4))
+        ));
+        verifyCreateTestCaseLog();
+    }
+
+    @Test
     void shouldCreateTestCaseWithAutomatedStepsStartingWithCommentInStepsSection() throws IOException, SyntaxException
     {
         SectionMapping mapping = new SectionMapping();
