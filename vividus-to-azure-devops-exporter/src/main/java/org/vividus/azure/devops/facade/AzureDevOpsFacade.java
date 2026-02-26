@@ -43,6 +43,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -263,7 +264,7 @@ public class AzureDevOpsFacade
 
     private String convertToDescriptionData(List<String> steps)
     {
-        return steps.stream().map(s -> format("<div>%s</div>", s)).collect(joining());
+        return steps.stream().map(s -> format("<div>%s</div>", StringEscapeUtils.escapeHtml4(s))).collect(joining());
     }
 
     private AddOperation createStepsOperation(String value)
