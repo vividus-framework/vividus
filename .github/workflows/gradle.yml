@@ -763,6 +763,9 @@ jobs:
           distribution: 'temurin'
           java-version: 25
 
+      - name: Warm up VIVIDUS test site
+        run: curl -v https://vividus-test-site-a92k.onrender.com/
+
       - name: BrowserStack - Mobile - Web - System tests
         env:
           BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
@@ -936,6 +939,9 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 25
+
+      - name: Warm up VIVIDUS test site
+        run: curl -v https://vividus-test-site-a92k.onrender.com/
 
       - name: Mobitru - Android - Mobile - Web - System tests
         env:
