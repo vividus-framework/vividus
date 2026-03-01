@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.vividus.selenium.locator.Locator;
@@ -64,7 +66,7 @@ class AbstractScreenshotParametersFactoryTests
         factory.setShootingStrategy(DEFAULT);
         factory.setIgnoreStrategies(createEmptyIgnores());
 
-        var parameters = factory.create(Optional.empty(), null, createEmptyIgnores());
+        var parameters = factory.create(null, null, createEmptyIgnores());
         assertEquals(cutBottom, parameters.getCutBottom());
         assertEquals(1, parameters.getCutTop());
         assertEquals(2, parameters.getCutLeft());
@@ -79,22 +81,30 @@ class AbstractScreenshotParametersFactoryTests
         factory.setShootingStrategy(DEFAULT);
         factory.setIgnoreStrategies(createEmptyIgnores());
 
-        var parameters = factory.create(Optional.of(createConfiguration(10)), null, createEmptyIgnores());
+        var screenshotConfiguration = new ExamplesTable("""
+                | cutTop | cutBottom | cutLeft | cutRight |
+                | 1      | 10        | 2       | 3        |
+                """);
+
+        var parameters = factory.create(screenshotConfiguration, null, createEmptyIgnores());
         assertEquals(15, parameters.getCutBottom());
     }
 
     @Test
     void shouldReturnCustomConfigurationWhenDefaultIsMissing()
     {
-        var cutBottom = 5;
+        var screenshotConfiguration = new ExamplesTable("""
+                | cutTop | cutBottom | cutLeft | cutRight |
+                | 1      | 5         | 2       | 3        |
+                """);
 
         factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of()));
         factory.setShootingStrategy(DEFAULT);
         factory.setIgnoreStrategies(createEmptyIgnores());
 
-        var parameters = factory.create(Optional.of(createConfiguration(cutBottom)), null,
+        var parameters = factory.create(screenshotConfiguration, null,
                 createEmptyIgnores());
-        assertEquals(cutBottom, parameters.getCutBottom());
+        assertEquals(5, parameters.getCutBottom());
         assertEquals(1, parameters.getCutTop());
     }
 
@@ -117,6 +127,9 @@ class AbstractScreenshotParametersFactoryTests
         configuration.setShootingStrategy(Optional.of(DEFAULT));
         configuration.setCutBottom(1);
 
+        ExamplesTable examplesTable = mock();
+        when(examplesTable.getRowsAs(ScreenshotConfiguration.class)).thenReturn(List.of(configuration));
+
         var globalElementLocator = mock(Locator.class);
         var globalAreaLocator = mock(Locator.class);
 
@@ -126,7 +139,7 @@ class AbstractScreenshotParametersFactoryTests
                 IgnoreStrategy.AREA, Set.of(globalAreaLocator)
         ));
 
-        ScreenshotParameters parameters = factory.create(Optional.of(configuration), null, createEmptyIgnores());
+        ScreenshotParameters parameters = factory.create(examplesTable, null, createEmptyIgnores());
 
         assertEquals(Optional.of(DEFAULT), parameters.getShootingStrategy());
         assertEquals(Map.of(
@@ -153,9 +166,10 @@ class AbstractScreenshotParametersFactoryTests
                 IgnoreStrategy.AREA, Set.of(locator),
                 IgnoreStrategy.ELEMENT, Set.of(locator)
         );
-        var configuration = Optional.of(screenshotConfiguration);
+        ExamplesTable examplesTable = mock();
+        when(examplesTable.getRowsAs(ScreenshotConfiguration.class)).thenReturn(List.of(screenshotConfiguration));
         var thrown = assertThrows(IllegalArgumentException.class,
-                () -> factory.create(configuration, IGNORES_TABLE, ignores));
+                () -> factory.create(examplesTable, IGNORES_TABLE, ignores));
         assertEquals("The elements and areas to ignore must be passed either through screenshot configuration"
                         + " or ignores table", thrown.getMessage());
     }
@@ -165,6 +179,8 @@ class AbstractScreenshotParametersFactoryTests
     {
         var locator = mock(Locator.class);
         var screenshotConfiguration = new ScreenshotConfiguration();
+        ExamplesTable examplesTable = mock();
+        when(examplesTable.getRowsAs(ScreenshotConfiguration.class)).thenReturn(List.of(screenshotConfiguration));
 
         factory.setScreenshotConfigurations(new PropertyMappedCollection<>(new HashMap<>()));
         factory.setIgnoreStrategies(createEmptyIgnores());
@@ -174,7 +190,7 @@ class AbstractScreenshotParametersFactoryTests
                 IgnoreStrategy.ELEMENT, Set.of(locator)
         );
 
-        ScreenshotParameters parameters = factory.create(Optional.of(screenshotConfiguration), IGNORES_TABLE, ignores);
+        ScreenshotParameters parameters = factory.create(examplesTable, IGNORES_TABLE, ignores);
 
         assertEquals(ignores, parameters.getIgnoreStrategies());
         assertThat(testLogger.getLoggingEvents(), equalTo(List.of(WARNING_MESSAGE, WARNING_MESSAGE)));
