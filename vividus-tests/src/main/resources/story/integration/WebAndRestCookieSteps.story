@@ -37,7 +37,7 @@ When I refresh page
 Then text `v2` exists
 When I remove all HTTP cookies
 When I execute HTTP GET request for resource with relative URL `/cookies`
-Then JSON element from `${json-context}` by JSON path `$` is equal to `{}`
+Then JSON element from `${json-context}` by JSON path `$` is equal to `{"cookies":{}}`
 When I set browser cookies to HTTP context
 When I execute HTTP GET request for resource with relative URL `/cookies`
-Then JSON element from `${json-context}` by JSON path `$` is equal to `{"c1":"v1","c2":"v2"}`
+Then JSON element from `${json-context}` by JSON path `$` is equal to `{"cookies":{"c1":"v1","c2":"v2"}}`

@@ -42,11 +42,11 @@ Then JSON element from `${json-context}` by JSON path `$.args.key` is equal to `
 Scenario: Set HTTP cookies
 When I execute HTTP GET request for resource with relative URL `/cookies/set?vividus-cookie=vividus`
 When I execute HTTP GET request for resource with relative URL `/cookies`
-Then JSON element from `${json-context}` by JSON path `$` is equal to `{"vividus-cookie": "vividus"}`
+Then JSON element from `${json-context}` by JSON path `$` is equal to `{"cookies":{"vividus-cookie": "vividus"}}`
 
 Scenario: Verify HTTP cookies are cleared
 When I execute HTTP GET request for resource with relative URL `/cookies`
-Then JSON element from `${json-context}` by JSON path `$` is equal to `{}`
+Then JSON element from `${json-context}` by JSON path `$` is equal to `{"cookies":{}}`
 
 Scenario: Verify step: "When I save value of HTTP cookie with name $cookieName to $scopes variable $variableName"
 When I execute HTTP GET request for resource with relative URL `/cookies/set?cookieName=cookieValue`
