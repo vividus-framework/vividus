@@ -6,7 +6,7 @@
     <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../../styles.css"/>
-    <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../../webjars/bootstrap/5.3.1/css/bootstrap.min.css"/>
 </head>
 <body>
     <style>
@@ -14,7 +14,7 @@
             white-space: pre-wrap;
             word-break: normal;
         }
-        a[data-toggle='collapse'] {
+        a[data-bs-toggle='collapse'] {
             display: inline-block;
             width: 100%;
             height: 100%;
@@ -22,13 +22,13 @@
         .toggleable:hover {
              cursor: pointer;
         }
-        .panel-heading a:after {
+        .card-header a:after {
             font-family:'FontAwesome';
             content:"\F103";
             float: right;
             color: grey;
         }
-        .panel-heading a.collapsed:after {
+        .card-header a.collapsed:after {
             content:"\F101";
         }
     </style>
@@ -36,35 +36,35 @@
     <#outputformat "HTML">
     <#assign left = statistics.left>
     <#assign right = statistics.right>
-    <div class="panel-group" id="accordion">
+    <div class="accordion" id="accordion">
         <#if left.query?has_content>
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h4 class="panel-title toggleable">
-                        <a data-toggle="collapse" data-target="#collapse-left-sql" href="#collapse-left-sql" class="collapsed">Left query</a>
+            <div class="card border-info">
+                <div class="card-header">
+                    <h4 class="card-title toggleable">
+                        <a data-bs-toggle="collapse" data-bs-target="#collapse-left-sql" href="#collapse-left-sql" class="collapsed">Left query</a>
                     </h4>
                 </div>
-                <div id="collapse-left-sql" class="panel-collapse collapse">
+                <div id="collapse-left-sql" class="collapse">
                     <pre><code class="sql">${left.query}</code></pre>
                 </div>
             </div>
         </#if>
 
         <#if right.query?has_content>
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h4 class="panel-title toggleable">
-                        <a data-toggle="collapse" data-target="#collapse-right-sql" href="#collapse-right-sql" class="collapsed">Right query</a>
+            <div class="card border-info">
+                <div class="card-header">
+                    <h4 class="card-title toggleable">
+                        <a data-bs-toggle="collapse" data-bs-target="#collapse-right-sql" href="#collapse-right-sql" class="collapsed">Right query</a>
                     </h4>
                 </div>
-                <div id="collapse-right-sql" class="panel-collapse collapse">
+                <div id="collapse-right-sql" class="collapse">
                     <pre><code class="sql">${right.query}</code></pre>
                 </div>
             </div>
         </#if>
 
-        <div class="panel panel-default">
-            <div class="panel-body">
+        <div class="card">
+            <div class="card-body">
                 <table class="table table-bordered table-stripped table-hover">
                     <thead>
                         <tr>
@@ -102,10 +102,10 @@
             </div>
             <div class="container-fluid">
                      <div class="row">
-                         <div class="col-xs-6">
+                         <div class="col-6">
                              <h4 style='text-align: center'>Total unique rows: ${statistics.totalRows}</h4>
                          </div>
-                         <div class="col-xs-6">
+                         <div class="col-6">
                             <h4 style='text-align: center'>Counts difference: ${(left.rowsQuantity - right.rowsQuantity)?abs}</h4>
                          </div>
                      </div>
@@ -118,7 +118,7 @@
     </#outputformat>
 
     <script src="../../webjars/jquery/3.6.4/jquery.min.js"></script>
-    <script src="../../webjars/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="../../webjars/bootstrap/5.3.1/js/bootstrap.min.js"></script>
     <script src="../../webjars/highlight.js/11.7.0/highlight.min.js"></script>
     <script src="../../webjars/chart.js/3.2.1/chart.min.js"></script>
     <script type="text/javascript">
