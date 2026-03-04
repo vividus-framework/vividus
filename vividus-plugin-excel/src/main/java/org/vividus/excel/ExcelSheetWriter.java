@@ -22,8 +22,11 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
@@ -87,11 +90,31 @@ public class ExcelSheetWriter
     private void fillData(ExamplesTable content, XSSFSheet sheet, XSSFWorkbook workbook)
     {
         ArrayList<CellType> columTypes = new ArrayList<>();
-        fillRow(sheet, workbook, 0, content.getHeaders(), columTypes);
+        List<String> headers = content.getHeaders();
+        validateColumnsUniqueness(headers);
+        fillRow(sheet, workbook, 0, headers, columTypes);
         IntStream.range(0, content.getRowCount()).forEach(rowIndex -> {
             List<String> cells = content.getRowValues(rowIndex, true);
             fillRow(sheet, workbook, rowIndex + 1, cells, columTypes);
         });
+    }
+
+    private static void validateColumnsUniqueness(List<String> headers)
+    {
+        Set<String> seen = new HashSet<>();
+        Set<String> duplicates = new LinkedHashSet<>();
+        headers.forEach(h ->
+        {
+            if (!seen.add(h))
+            {
+                duplicates.add(h);
+            }
+        });
+        if (!duplicates.isEmpty())
+        {
+            throw new IllegalArgumentException(
+                    "ExamplesTable contains duplicate column names: " + duplicates);
+        }
     }
 
     private void fillRow(XSSFSheet sheet, XSSFWorkbook workbook, int rowIndex, List<String> cells,
