@@ -6,7 +6,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-reporter')
     implementation project(':vividus-util')
-    implementation('com.azure.resourcemanager:azure-resourcemanager-resources:2.53.5')
+    implementation('com.azure.resourcemanager:azure-resourcemanager-resources:2.53.6')
 
     testImplementation platform(libs.junit.bom)
     testImplementation(libs.junit.jupiter)
