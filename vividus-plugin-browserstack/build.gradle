@@ -12,7 +12,7 @@ dependencies {
     implementation platform(libs.slf4j.bom)
     implementation(libs.slf4j.api)
     implementation('com.browserstack:automate-client-java:0.15')
-    implementation('com.browserstack:browserstack-local-java:1.1.7')
+    implementation('com.browserstack:browserstack-local-java:1.1.8')
 
     testImplementation platform(libs.junit.bom)
     testImplementation(libs.junit.jupiter)
