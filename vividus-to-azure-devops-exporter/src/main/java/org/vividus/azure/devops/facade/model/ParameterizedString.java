@@ -16,10 +16,10 @@
 
 package org.vividus.azure.devops.facade.model;
 
-import org.apache.commons.text.StringEscapeUtils;
-
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText;
+
+import org.apache.commons.text.StringEscapeUtils;
 
 public final class ParameterizedString
 {
