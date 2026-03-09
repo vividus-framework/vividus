@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
 import org.vividus.mcp.tool.VividusTool;
 
 import io.modelcontextprotocol.json.McpJsonMapper;
-import io.modelcontextprotocol.json.jackson.JacksonMcpJsonMapper;
+import io.modelcontextprotocol.json.jackson2.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
@@ -69,11 +69,17 @@ public class VividusMcpServer
                     try
                     {
                         String content = objectMapper.writeValueAsString(tool.getContent());
-                        return new McpSchema.CallToolResult(content, false);
+                        return McpSchema.CallToolResult.builder()
+                                .content(List.of(new McpSchema.TextContent(content)))
+                                .isError(false)
+                                .build();
                     }
                     catch (IOException e)
                     {
-                        return new McpSchema.CallToolResult(e.getMessage(), true);
+                        return McpSchema.CallToolResult.builder()
+                                .content(List.of(new McpSchema.TextContent(e.getMessage())))
+                                .isError(true)
+                                .build();
                     }
                 })
                 .build();
