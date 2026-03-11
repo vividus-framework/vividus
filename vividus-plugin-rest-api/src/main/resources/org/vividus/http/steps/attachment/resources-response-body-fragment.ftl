@@ -1,20 +1,20 @@
 <#if result.responseBody??>
 <#assign hash = result.hashCode()?c>
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_${hash}">
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal_${hash}">
 Show HTTP response
 </button>
-<div class="modal fade" id="modal_${hash}" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
-    <div class="modal-dialog modal-lg" role="document">
+<div class="modal fade" id="modal_${hash}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" id="modalLabel">Response body</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <pre><code id="pretty-code" class="html"><#outputformat "HTML">${result.responseBody}</#outputformat></code></pre>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
