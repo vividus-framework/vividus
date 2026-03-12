@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,12 +75,12 @@ public final class HashExpressionProcessors extends DelegatingExpressionProcesso
             this.fileHashFactory = fileHashFactory;
         }
 
-        public String getHash(String data)
+        private String getHash(String data)
         {
             return hashFactory.apply(data);
         }
 
-        public String getHash(byte[] data)
+        private String getHash(byte[] data)
         {
             return fileHashFactory.apply(data);
         }
