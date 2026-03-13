@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,22 +154,22 @@ public class UiContext implements IUiContext
         private SearchContext searchContext;
         private SearchContextSetter searchContextSetter;
 
-        public SearchContext getSearchContext()
+        protected SearchContext getSearchContext()
         {
             return searchContext;
         }
 
-        public void setSearchContext(SearchContext searchContext)
+        protected void setSearchContext(SearchContext searchContext)
         {
             this.searchContext = searchContext;
         }
 
-        public SearchContextSetter getSearchContextSetter()
+        protected SearchContextSetter getSearchContextSetter()
         {
             return searchContextSetter;
         }
 
-        public void setSearchContextSetter(SearchContextSetter searchContextSetter)
+        protected void setSearchContextSetter(SearchContextSetter searchContextSetter)
         {
             this.searchContextSetter = searchContextSetter;
         }

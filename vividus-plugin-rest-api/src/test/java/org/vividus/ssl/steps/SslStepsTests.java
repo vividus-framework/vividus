@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,9 +52,11 @@ class SslStepsTests
     @Test
     void testCheckSupportedSecureProtocols() throws IOException, GeneralSecurityException
     {
-        SSLContext sslContext = mock(SSLContext.class);
-        SSLSocketFactory sslSocketFactory = mock(SSLSocketFactory.class);
-        SSLSocket socket = mock(SSLSocket.class);
+        SSLContext sslContext = mock();
+        SSLSocketFactory sslSocketFactory = mock();
+
+        @SuppressWarnings("PMD.CloseResource")
+        SSLSocket socket = mock();
 
         when(sslContextFactory.getDefaultSslContext()).thenReturn(sslContext);
         when(sslContext.getSocketFactory()).thenReturn(sslSocketFactory);
