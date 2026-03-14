@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.vividus.azure.devops.facade.model;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 public final class ParameterizedString
 {
     @JacksonXmlProperty(isAttribute = true)
@@ -28,7 +30,7 @@ public final class ParameterizedString
 
     public ParameterizedString(String text)
     {
-        this.text = text;
+        this.text = StringEscapeUtils.escapeHtml4(text);
         this.isformatted = true;
     }
 

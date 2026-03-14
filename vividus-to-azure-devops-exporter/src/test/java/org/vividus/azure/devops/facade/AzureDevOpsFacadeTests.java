@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,7 @@ class AzureDevOpsFacadeTests
     private static final String AUTOMATED_STEPS_DESC = "<div>Step: When I perform action</div><div>Result: Then I perfo"
             + "rm verification</div><div>Step: When I perform action</div><div>Step: When I perform action</div><div>Re"
             + "sult: Then I perform verification</div>";
+    private static final String LESS_THAN_STEP = "Then $var1 is <= $var2";
     private static final Integer TEST_CASE_ID = 123;
     private static final String RUN_NAME = "run-name";
     private static final Integer TEST_PLAN_ID = 345;
@@ -128,6 +129,47 @@ class AzureDevOpsFacadeTests
             () -> assertAreaPath(ops.get(0)),
             () -> assertTitle(ops.get(1)),
             () -> assertSteps(ops.get(2), STEPS),
+            () -> assertAutomatedTestName(ops.get(3)),
+            () -> assertAutomatedTestType(ops.get(4))
+        ));
+        verifyCreateTestCaseLog();
+    }
+
+    @Test
+    void shouldCreateTestCaseWithAutomatedStepsContainingLessThanSignInStepsSection()
+            throws IOException, SyntaxException
+    {
+        SectionMapping mapping = new SectionMapping();
+        mapping.setSteps(ScenarioPart.AUTOMATED);
+        options.setSectionMapping(mapping);
+        when(client.createTestCase(operationsCaptor.capture())).thenReturn(createWorkItem());
+        facade.createTestCase(SUITE_TITLE, createScenario(List.of(createStep(LESS_THAN_STEP))));
+        String data = "<steps id=\"0\" last=\"2\"><step id=\"2\" type=\"ActionStep\"><description/><parameterizedString"
+                + " isformatted=\"true\">Then $var1 is &amp;lt;= $var2</parameterizedString><parameterizedString"
+                + " isformatted=\"true\"/></step></steps>";
+        assertOperations(5, ops -> assertAll(
+            () -> assertAreaPath(ops.get(0)),
+            () -> assertTitle(ops.get(1)),
+            () -> assertSteps(ops.get(2), data),
+            () -> assertAutomatedTestName(ops.get(3)),
+            () -> assertAutomatedTestType(ops.get(4))
+        ));
+        verifyCreateTestCaseLog();
+    }
+
+    @Test
+    void shouldCreateTestCaseWithAutomatedStepsContainingLessThanSignInDescriptionSection()
+            throws IOException, SyntaxException
+    {
+        SectionMapping mapping = new SectionMapping();
+        mapping.setSteps(ScenarioPart.MANUAL);
+        options.setSectionMapping(mapping);
+        when(client.createTestCase(operationsCaptor.capture())).thenReturn(createWorkItem());
+        facade.createTestCase(SUITE_TITLE, createScenario(List.of(createStep(LESS_THAN_STEP))));
+        assertOperations(5, ops -> assertAll(
+            () -> assertAreaPath(ops.get(0)),
+            () -> assertTitle(ops.get(1)),
+            () -> assertDescription(ops.get(2), "<div>Then $var1 is &lt;= $var2</div>"),
             () -> assertAutomatedTestName(ops.get(3)),
             () -> assertAutomatedTestType(ops.get(4))
         ));
