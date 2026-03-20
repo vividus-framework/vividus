@@ -87,6 +87,9 @@ The testing framework has been migrated from JUnit 5 to JUnit 6.
 ### #6383, #6384, #6385, #6228 [vividus-plugin-json] Migrate to Jackson 3 and json-schema-validator 2.0.0
 The JSON plugin has been migrated to Jackson 3 and `com.networknt:json-schema-validator` 2.0.0. This includes migration of JSON expression processor, matcher, schema validation steps, and steps for patching JSONs.
 
+### #6327, #6379, #6412, #6456 [vividus-plugin-web-app] Update Selenium DevTools to v143
+Selenium DevTools has been updated from v142 to v143, providing support for Chrome v143+ and bumped to 4.41.0.
+
 ### #6353 [vividus-plugin-visual] Avoid baseline overrides for passed comparisons
 When `ui.visual.override-baselines` is set to `true`, only **failed** comparisons will update baselines. Previously, baselines were overridden for both passed and failed comparisons.
 
@@ -107,8 +110,8 @@ Large numbers in JSON (e.g., IDs exceeding JavaScript's safe integer limit) are 
 ### #6395 [vividus-plugin-web-app] Always consider mobile native elements configuration during screenshot strategy preparation
 Mobile native elements configuration (header/footer cut settings) is now correctly applied for all screenshot strategies, not just the default one.
 
-### #6275, #6379 [vividus-plugin-web-app] Add support of DevTools protocol for Chrome v142+
-DevTools protocol support has been added for Chrome versions 142 and above, ensuring continued compatibility with the latest Chrome releases.
+### #6275 [vividus-plugin-web-app] Fix execution of DevTools-based tests on Chrome 142+
+DevTools-based tests are fixed to work correctly on Chrome version 142 and above.
 
 ### #6311 [vividus-engine] Fix reporting of nested ignorable steps
 Nested ignorable steps (steps marked as ignorable that call other steps) are now properly reported in test reports.
