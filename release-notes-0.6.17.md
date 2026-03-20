@@ -73,6 +73,11 @@ When I flush `$dbIndex` database on `$instanceKey` Redis instance
 ```
 Flushes (removes all keys from) the specified Redis database on a given Redis instance.
 
+### #6237 [vividus-plugin-json] Add `random()` JSON Path function
+New JSON Path function `random()` for selecting random elements from arrays:
+- `random()` - returns a single random element from the input array.
+- `random(n)` - returns an array of `n` random elements from the input array.
+
 ### #6236 [vividus-bom] Add popular JDBC drivers dependencies to BOM
 Popular JDBC drivers are now included in the VIVIDUS BOM, so users no longer need to specify exact versions for drivers like MySQL, PostgreSQL, SQL Server, Oracle, Snowflake, H2, DB2, and CSV JDBC.
 
