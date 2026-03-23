@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,28 @@ class JsonTableTransformerTests
     {
         var tableProperties = createProperties("path=org/vividus/json/transformer/data.json"
                 + EXAMPLE_TABLE_COLUMNS_CONFIG);
+        var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
+        assertEquals(EXPECTED_TABLE, table);
+    }
+
+    @Test
+    void shouldTransformWithNewLineSeparatorInColumns()
+    {
+        when(variableContext.getVariable("varName")).thenReturn(readJsonData());
+
+        var tableProperties = createProperties("variableName=varName,columns=column_code=$.superCodes..code\n"
+                + "column_codeSystem=$.superCodes..codeSystem\ncolumn_type=$.superCodes..type");
+        var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
+        assertEquals(EXPECTED_TABLE, table);
+    }
+
+    @Test
+    void shouldTransformWithMixedSeparatorsInColumns()
+    {
+        when(variableContext.getVariable("varName")).thenReturn(readJsonData());
+
+        var tableProperties = createProperties("variableName=varName,columns=column_code=$.superCodes..code\n"
+                + "column_codeSystem=$.superCodes..codeSystem;column_type=$.superCodes..type");
         var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
         assertEquals(EXPECTED_TABLE, table);
     }

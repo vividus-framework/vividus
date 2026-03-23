@@ -233,12 +233,21 @@ a|The xref:ROOT:glossary.adoc#_resource[JSON resource name] or the JSON file pat
 IMPORTANT: The `path` parameter can not be used together with the `variableName` parameter.
 
 |columns
-a|The semicolon-separated list of mappings between column names and {json-paths} used to get column values.
+a|The semicolon-separated or newline-separated list of mappings between column names and {json-paths} used to get column values.
 
-.Columns parameter format
+.Columns parameter format (semicolon separator)
 [source]
 ----
 columns=column_name_1=json_path_1;column_name_2=json_path_2;column_name_N=json_path_N
+----
+
+.Columns parameter format (newline separator)
+[source]
+----
+columns=
+column_name_1=json_path_1
+column_name_2=json_path_2
+column_name_N=json_path_N
 ----
 
 * `column_name` - The user-defined column name in the resulting table.
