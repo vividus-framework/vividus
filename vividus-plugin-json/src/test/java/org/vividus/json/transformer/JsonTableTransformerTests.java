@@ -90,8 +90,8 @@ class JsonTableTransformerTests
     {
         when(variableContext.getVariable("varName")).thenReturn(readJsonData());
 
-        var tableProperties = createProperties("variableName=varName,columns=column_code=$.superCodes..code\n"
-                + "column_codeSystem=$.superCodes..codeSystem\ncolumn_type=$.superCodes..type");
+        var tableProperties = createProperties("variableName=varName,columns=column_code=$.superCodes..code;\n"
+                + "column_codeSystem=$.superCodes..codeSystem;\ncolumn_type=$.superCodes..type");
         var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
         assertEquals(EXPECTED_TABLE, table);
     }
@@ -101,7 +101,7 @@ class JsonTableTransformerTests
     {
         when(variableContext.getVariable("varName")).thenReturn(readJsonData());
 
-        var tableProperties = createProperties("variableName=varName,columns=column_code=$.superCodes..code\n"
+        var tableProperties = createProperties("variableName=varName,columns=column_code=$.superCodes..code;\n"
                 + "column_codeSystem=$.superCodes..codeSystem;column_type=$.superCodes..type");
         var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
         assertEquals(EXPECTED_TABLE, table);

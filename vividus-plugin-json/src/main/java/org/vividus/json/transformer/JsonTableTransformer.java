@@ -62,7 +62,7 @@ public class JsonTableTransformer implements ExtendedTableTransformer
                 : paths -> JsonPathUtils.getData(ResourceUtils.loadResourceOrFileAsStream(sourceValue), paths);
 
         String columns = tableProperties.getMandatoryNonBlankProperty("columns", String.class);
-        Map<String, String> columnsPerJsonPaths = Splitter.onPattern("[;\r\n]").omitEmptyStrings().trimResults()
+        Map<String, String> columnsPerJsonPaths = Splitter.on(';').omitEmptyStrings().trimResults()
                 .withKeyValueSeparator(Splitter.on('=').limit(2))
                 .split(columns);
 

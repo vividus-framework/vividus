@@ -264,7 +264,7 @@ Then `${documentTable}` is equal to table:
 Scenario: Verify FROM_JSON transformer with new line separator in columns parameter
 When I initialize scenario variable `documentTable` with values:
 {transformer=FROM_JSON, variableName=json, columns=
-author=$..book..author
+author=$..book..author;
 title=$..book..title}
 Then `${documentTable}` is equal to table:
 |author           |title                 |
