@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.configuration.Keywords;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -42,6 +44,7 @@ import org.vividus.util.ResourceUtils;
 @ExtendWith(MockitoExtension.class)
 class JsonTableTransformerTests
 {
+    private static final String VAR_NAME = "varName";
     private static final String EXAMPLE_TABLE_COLUMNS_CONFIG = ",columns=column_code=$.superCodes..code;"
             + "column_codeSystem=$.superCodes..codeSystem;column_type=$.superCodes..type";
     private static final String EXPECTED_TABLE = """
@@ -59,7 +62,7 @@ class JsonTableTransformerTests
     @Test
     void shouldTransformFromVariableToComplexTable()
     {
-        when(variableContext.getVariable("varName")).thenReturn(readJsonData());
+        when(variableContext.getVariable(VAR_NAME)).thenReturn(readJsonData());
 
         var tableProperties = createProperties("variableName=varName" + EXAMPLE_TABLE_COLUMNS_CONFIG);
         var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
@@ -85,26 +88,23 @@ class JsonTableTransformerTests
         assertEquals(EXPECTED_TABLE, table);
     }
 
-    @Test
-    void shouldTransformWithNewLineSeparatorInColumns()
+    @ParameterizedTest
+    @MethodSource("multiLineColumnsData")
+    void shouldTransformWithMultiLineColumns(String columnsParam)
     {
-        when(variableContext.getVariable("varName")).thenReturn(readJsonData());
+        when(variableContext.getVariable(VAR_NAME)).thenReturn(readJsonData());
 
-        var tableProperties = createProperties("variableName=varName,columns=column_code=$.superCodes..code;\n"
-                + "column_codeSystem=$.superCodes..codeSystem;\ncolumn_type=$.superCodes..type");
+        var tableProperties = createProperties("variableName=" + VAR_NAME + columnsParam);
         var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
         assertEquals(EXPECTED_TABLE, table);
     }
 
-    @Test
-    void shouldTransformWithMixedSeparatorsInColumns()
+    static Stream<String> multiLineColumnsData()
     {
-        when(variableContext.getVariable("varName")).thenReturn(readJsonData());
-
-        var tableProperties = createProperties("variableName=varName,columns=column_code=$.superCodes..code;\n"
-                + "column_codeSystem=$.superCodes..codeSystem;column_type=$.superCodes..type");
-        var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
-        assertEquals(EXPECTED_TABLE, table);
+        return Stream.of(
+                ",columns=column_code=$.superCodes..code;\ncolumn_codeSystem=$.superCodes..codeSystem;\ncolumn_type=$.superCodes..type",
+                ",columns=column_code=$.superCodes..code;\ncolumn_codeSystem=$.superCodes..codeSystem;column_type=$.superCodes..type"
+        );
     }
 
     @Test
