@@ -101,9 +101,11 @@ class JsonTableTransformerTests
 
     static Stream<String> multiLineColumnsData()
     {
+        var columnsPrefix = ",columns=column_code=$.superCodes..code;\n"
+                + "column_codeSystem=$.superCodes..codeSystem;";
         return Stream.of(
-                ",columns=column_code=$.superCodes..code;\ncolumn_codeSystem=$.superCodes..codeSystem;\ncolumn_type=$.superCodes..type",
-                ",columns=column_code=$.superCodes..code;\ncolumn_codeSystem=$.superCodes..codeSystem;column_type=$.superCodes..type"
+                columnsPrefix + "\ncolumn_type=$.superCodes..type",
+                columnsPrefix + "column_type=$.superCodes..type"
         );
     }
 
