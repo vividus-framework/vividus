@@ -198,3 +198,9 @@ When I initialize SCENARIO variable `varsMap` with values:
 |#{null} |
 Then `${nullVar}` is equal to `#{null}`
 Then `${varsMap[0].key}` is equal to `#{null}`
+
+Scenario: Verify dynamic variable `running-story-name`
+Then `${running-story-name}` is equal to `VariableTests`
+
+Scenario: Verify running-scenario dynamic variable
+Then `${running-scenario}` is equal to `Verify running-scenario dynamic variable`
