@@ -552,10 +552,11 @@ The variable returns the name of the currently running story (the file name of t
 ${running-story-name}
 ----
 
-.Log the name of the currently running story
+.Save the name of the currently running story into a variable
 [source,gherkin]
 ----
-Then `${running-story-name}` is not equal to ``
+Given I initialize scenario variable `storyName` with value `${running-story-name}`
+Then `${storyName}` is equal to `MyStory`
 ----
 
 == Debug
