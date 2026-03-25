@@ -541,40 +541,6 @@ Then `${response-as-bytes}` archive contains entries with names:
 |responseTextFromZipArchive.txt |
 ----
 
-== xref:commons:variables.adoc[Dynamic variables]
-
-=== Running story name
-
-The variable returns the name of the currently running story (the file name of the story without the `.story` extension).
-
-[source,gherkin]
-----
-${running-story}
-----
-
-.Save the name of the currently running story into a variable
-[source,gherkin]
-----
-Given I initialize scenario variable `storyName` with value `${running-story}`
-Then `${storyName}` is equal to `MyStory`
-----
-
-=== Running scenario name
-
-The variable returns the title of the currently running scenario.
-
-[source,gherkin]
-----
-${running-scenario}
-----
-
-.Save the name of the currently running scenario into a variable
-[source,gherkin]
-----
-Given I initialize scenario variable `scenarioName` with value `${running-scenario}`
-Then `${scenarioName}` is equal to `Verify search functionality`
-----
-
 == Debug
 === Wait for period
 
