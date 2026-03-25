@@ -176,6 +176,7 @@ public final class TestInfoLogger
                                 .thenComparing(Failure::getStep)
                                 .thenComparing(Failure::getMessage));
         message.format("%n%n Failures & Errors:");
+        String errorIndent = " ".repeat("         └── Error: ".length());
         String currentStory = null;
         String currentScenario = null;
         for (Failure f : failures)
@@ -193,7 +194,8 @@ public final class TestInfoLogger
             }
             String step = f.getStep().replaceAll("[\\r\\n]+", " ");
             message.format("%n     └── Step: %s", step);
-            message.format("%n         └── Error: %s", f.getMessage());
+            String indentedError = f.getMessage().replaceAll("\\r?\\n", "\n" + errorIndent);
+            message.format("%n         └── Error: %s", indentedError);
         }
     }
 

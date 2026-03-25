@@ -103,6 +103,8 @@ class TestInfoLoggerTests
     @SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "LineLength"})
     private static Stream<Arguments> sourceOfFailures()
     {
+        String multilineError = "line1\nline2\nline3";
+        String errorIndent = " ".repeat("         └── Error: ".length());
         return Stream.of(
                 Arguments.of("", Optional.empty()),
                 Arguments.of(String.format("%n%n No Failures & Errors!"), Optional.of(List.of())),
@@ -115,8 +117,10 @@ class TestInfoLoggerTests
         + " Story: first\\s+"
         + " └── Scenario: verify\\s+"
         + "     └── Step: do\\s+"
-        + "         └── Error: failure",
-                        Optional.of(Arrays.asList(createFailure("first", "verify", "do", "failure"),
+        + "         └── Error: line1\\s+"
+        + errorIndent + "line2\\s+"
+        + errorIndent + "line3",
+                        Optional.of(Arrays.asList(createFailure("first", "verify", "do", multilineError),
                                       createFailure("aaaaa", MESSAGE, "When I do\n\r|k|\n|v|", MESSAGE)))));
     }
 
