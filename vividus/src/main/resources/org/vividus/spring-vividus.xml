@@ -71,7 +71,7 @@
 
 
     <bean id="running-scenario" class="org.vividus.variable.RunningScenarioNameDynamicVariable"/>
-    <bean id="running-story-name" class="org.vividus.variable.RunningStoryNameDynamicVariable"/>
+    <bean id="running-story" class="org.vividus.variable.RunningStoryNameDynamicVariable"/>
 
     <bean id="CARTESIAN_PRODUCT" class="org.vividus.transformer.CartesianProductTableTransformer" />
     <bean id="DISTINCTING" class="org.vividus.transformer.DistinctingTableTransformer" />

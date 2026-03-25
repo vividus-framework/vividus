@@ -549,13 +549,13 @@ The variable returns the name of the currently running story (the file name of t
 
 [source,gherkin]
 ----
-${running-story-name}
+${running-story}
 ----
 
 .Save the name of the currently running story into a variable
 [source,gherkin]
 ----
-Given I initialize scenario variable `storyName` with value `${running-story-name}`
+Given I initialize scenario variable `storyName` with value `${running-story}`
 Then `${storyName}` is equal to `MyStory`
 ----
 
