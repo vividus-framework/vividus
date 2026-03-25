@@ -42,6 +42,7 @@ import org.vividus.util.ResourceUtils;
 public final class TestInfoLogger
 {
     private static final String HYPHEN = "-";
+    private static final String SPACE = " ";
     private static final int HEADER_SIZE = 40;
     private static final String CATEGORY_FORMAT = "%s%n %s:%n";
     private static final String NEW_LINE = "%n";
@@ -176,7 +177,7 @@ public final class TestInfoLogger
                                 .thenComparing(Failure::getStep)
                                 .thenComparing(Failure::getMessage));
         message.format("%n%n Failures & Errors:");
-        String errorIndent = " ".repeat("         └── Error: ".length());
+        String errorIndent = SPACE.repeat("         └── Error: ".length());
         String currentStory = null;
         String currentScenario = null;
         for (Failure f : failures)
@@ -192,7 +193,7 @@ public final class TestInfoLogger
                 currentScenario = f.getScenario();
                 message.format("%n └── Scenario: %s", currentScenario);
             }
-            String step = f.getStep().replaceAll("[\\r\\n]+", " ");
+            String step = f.getStep().replaceAll("[\\r\\n]+", SPACE);
             message.format("%n     └── Step: %s", step);
             String indentedError = f.getMessage().replaceAll("\\r?\\n", "\n" + errorIndent);
             message.format("%n         └── Error: %s", indentedError);
