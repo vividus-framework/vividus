@@ -541,6 +541,23 @@ Then `${response-as-bytes}` archive contains entries with names:
 |responseTextFromZipArchive.txt |
 ----
 
+== xref:commons:variables.adoc[Dynamic variables]
+
+=== Running story name
+
+The variable returns the name of the currently running story (the file name of the story without the `.story` extension).
+
+[source,gherkin]
+----
+${running-story-name}
+----
+
+.Log the name of the currently running story
+[source,gherkin]
+----
+Then `${running-story-name}` is not equal to ``
+----
+
 == Debug
 === Wait for period
 
