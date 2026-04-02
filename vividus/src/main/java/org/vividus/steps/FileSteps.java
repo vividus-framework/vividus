@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,32 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.Validate;
+import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
 import org.vividus.variable.VariableScope;
 
-import jakarta.inject.Inject;
-
 public class FileSteps
 {
-    @Inject private VariableContext variableContext;
+    private static final String FILE = "File '";
+
+    private final VariableContext variableContext;
+    private final ISoftAssert softAssert;
+
+    public FileSteps(VariableContext variableContext, ISoftAssert softAssert)
+    {
+        this.variableContext = variableContext;
+        this.softAssert = softAssert;
+    }
 
     /**
      * Creates temporary file with specified content and puts path to that file to variable with specified name.
@@ -73,5 +84,35 @@ public class FileSteps
     public void createFile(String fileContent, String filePath) throws IOException
     {
         FileUtils.writeStringToFile(new File(filePath), fileContent, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Checks if a file exists at the given path
+     * @param filePath The full file path, including its name and extension (e.g. C:\Users\Public\Documents\example.txt)
+     */
+    @Then("file exists at path `$filePath`")
+    public void assertPathExists(String filePath)
+    {
+        Validate.isTrue(filePath != null && !filePath.isBlank(),
+                "File path must not be null, empty or blank");
+
+        final Path path;
+        try
+        {
+            path = Path.of(filePath);
+        }
+        catch (InvalidPathException ex)
+        {
+            softAssert.recordFailedAssertion("Invalid path '" + filePath + "': " + ex.getMessage());
+            return;
+        }
+
+        if (!Files.exists(path) || !Files.isRegularFile(path))
+        {
+            softAssert.recordFailedAssertion(FILE + path + "' does not exist");
+            return;
+        }
+
+        softAssert.recordPassedAssertion(FILE + path + "' exists");
     }
 }
