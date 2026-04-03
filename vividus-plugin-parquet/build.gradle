@@ -11,7 +11,7 @@ if (isFamily(FAMILY_WINDOWS)) {
     }
 }
 
-ext.hadoopVersion = '3.4.3'
+ext.hadoopVersion = '3.5.0'
 
 dependencies {
     api("org.vividus:jbehave-core:${versions.jbehave}")
