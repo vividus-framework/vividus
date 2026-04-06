@@ -757,7 +757,9 @@ jobs:
                                                 -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
                                                 -Pvividus.configuration.suites= \
                                                 -Pvividus.batch-1.resource-location=story/web/permissions \
-                                                -Pvividus.batch-1.meta-filters="groovy: !targetPlatform || targetPlatform == 'ios'"
+                                                -Pvividus.batch-1.meta-filters="groovy: !targetPlatform || targetPlatform == 'ios'" \
+                                                -Pvividus.allure.history-directory=output/history/bs-mobile-web-iphone-system-tests \
+                                                -Pvividus.allure.report-directory=output/reports/bs-mobile-web-iphone-allure
           ./gradlew :vividus-tests:debugStories -Pvividus.configuration.profiles=browserstack/web/phone,web/phone/android \
                                                 -Pvividus.selenium.grid.capabilities.bstack\:options.deviceName="Samsung Galaxy S23 Ultra" \
                                                 -Pvividus.selenium.grid.capabilities.bstack\:options.appiumVersion=2.4.1 \
@@ -765,7 +767,23 @@ jobs:
                                                 -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
                                                 -Pvividus.configuration.suites= \
                                                 -Pvividus.batch-1.resource-location=story/web/permissions \
-                                                -Pvividus.batch-1.meta-filters="groovy: !targetPlatform || targetPlatform == 'android'"
+                                                -Pvividus.batch-1.meta-filters="groovy: !targetPlatform || targetPlatform == 'android'" \
+                                                -Pvividus.allure.history-directory=output/history/bs-mobile-web-android-system-tests \
+                                                -Pvividus.allure.report-directory=output/reports/bs-mobile-web-android-allure
+
+      - name: BrowserStack - Mobile - Web - Publish system tests report - iPhone
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: BrowserStack - System Tests - Report - Mobile Web iPhone
+          path: vividus-tests/output/reports/bs-mobile-web-iphone-allure
+
+      - name: BrowserStack - Mobile - Web - Publish system tests report - Android
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: BrowserStack - System Tests - Report - Mobile Web Android
+          path: vividus-tests/output/reports/bs-mobile-web-android-allure
 
       - name: BrowserStack - Desktop - Web - System tests
         env:
@@ -779,7 +797,9 @@ jobs:
                                                   -Pvividus.configuration.suites=health_check \
                                                   -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
-                                                  -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="VIVIDUS BrowserStack Integration Tests"
+                                                  -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="VIVIDUS BrowserStack Integration Tests" \
+                                                  -Pvividus.allure.history-directory=output/history/bs-desktop-web-${profile}-system-tests \
+                                                  -Pvividus.allure.report-directory=output/reports/bs-desktop-web-allure/${profile}
           done
           declare -a geolocationProfiles=( chrome edge )
           for profile in "${geolocationProfiles[@]}"; do
@@ -791,8 +811,17 @@ jobs:
                                                   -Pvividus.batch-1.meta-filters="groovy: !targetPlatform" \
                                                   -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
-                                                  -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="VIVIDUS BrowserStack Integration Tests"
+                                                  -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="VIVIDUS BrowserStack Integration Tests" \
+                                                  -Pvividus.allure.history-directory=output/history/bs-desktop-web-${profile}-system-tests \
+                                                  -Pvividus.allure.report-directory=output/reports/bs-desktop-web-allure/${profile}
           done
+
+      - name: BrowserStack - Desktop - Web - Publish system tests report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: BrowserStack - System Tests - Report - Desktop Web
+          path: vividus-tests/output/reports/bs-desktop-web-allure
 
       - name: BrowserStack - iOS - Mobile App - Run system tests
         env:
