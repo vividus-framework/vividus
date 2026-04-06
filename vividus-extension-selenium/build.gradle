@@ -23,7 +23,7 @@ configurations {
      api('org.seleniumhq.selenium:selenium-api')
      api('org.seleniumhq.selenium:selenium-support')
      api('org.seleniumhq.selenium:selenium-remote-driver')
-     api('io.appium:java-client:9.2.2')
+     api('io.appium:java-client:10.1.0')
 
      api('com.github.pazone:ashot:4351741a39')
 
