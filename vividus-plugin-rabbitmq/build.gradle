@@ -1,0 +1,20 @@
+project.description = 'VIVIDUS plugin for RabbitMQ'
+
+configurations {
+    testImplementation.extendsFrom compileOnly
+}
+
+dependencies {
+    api project(':vividus-engine')
+    implementation project(':vividus-soft-assert')
+    implementation project(':vividus-util')
+
+    implementation('org.springframework.amqp:spring-rabbit:4.0.2')
+
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
+    testImplementation(libs.slf4jTest)
+}

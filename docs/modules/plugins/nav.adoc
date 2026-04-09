@@ -40,6 +40,7 @@
 * xref:plugin-email.adoc[Email]
 * xref:plugin-lighthouse.adoc[Lighthouse]
 * xref:plugin-kafka.adoc[Kafka]
+* xref:plugin-rabbitmq.adoc[RabbitMQ]
 * xref:plugin-mobile-app.adoc[Mobile Application]
 * xref:plugin-mongodb.adoc[MongoDB]
 * xref:plugin-db.adoc[Relational Database]

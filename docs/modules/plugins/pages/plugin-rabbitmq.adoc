@@ -1,0 +1,107 @@
+= RabbitMQ Plugin
+
+The plugin provides the ability to publish messages to https://www.rabbitmq.com/[RabbitMQ] and read them from a queue.
+
+:plugin-short-name: rabbitmq
+include::partial$plugin-installation.adoc[]
+
+== Properties
+
+Define one property group per connection. Pick a *broker key* (the first segment after `rabbitmq.`); use the same name as `$brokerKey` in the steps.
+
+NOTE: The broker key must not contain dots.
+
+[cols="4,2,1,3", options="header"]
+|===
+|Property name
+|Acceptable values
+|Default
+|Description
+
+|`rabbitmq.<broker-key>.host`
+|hostname or IP
+|`localhost`
+|The broker host.
+
+|`rabbitmq.<broker-key>.port`
+|port number
+|5671
+|The broker port.
+
+|`rabbitmq.<broker-key>.username`
+|string
+|
+|The username.
+
+|`rabbitmq.<broker-key>.password`
+|string
+|
+|The password.
+
+|`rabbitmq.<broker-key>.virtual-host`
+|string
+|
+|The logical broker namespace (https://www.rabbitmq.com/docs/vhosts[vhost]) for connections, exchanges, and queues.
+
+|===
+
+.Local connection
+[source,properties]
+----
+rabbitmq.local.host=localhost
+rabbitmq.local.port=5672
+rabbitmq.local.username=guest
+rabbitmq.local.password=guest
+rabbitmq.local.virtual-host=/
+----
+
+.Hosted broker
+[source,properties]
+----
+rabbitmq.cloudamqp.host=penguin.lmq.cloudamqp.com
+rabbitmq.cloudamqp.port=5672
+rabbitmq.cloudamqp.username=bob
+rabbitmq.cloudamqp.password=023fc15b9733b17df187
+rabbitmq.cloudamqp.virtual-host=bob
+----
+
+== Steps
+
+=== Publish message
+
+Sends the message text to the broker. The routing key is usually the queue name when you publish straight to a queue.
+
+[source,gherkin]
+----
+When I publish message `$message` with routing key `$routingKey` to RabbitMQ broker `$brokerKey`
+----
+
+* `$message` - The message body.
+* `$routingKey` - The routing key (often the queue name).
+* `$brokerKey` - The broker key from the <<_properties,properties>>.
+
+[source,gherkin]
+----
+When I publish message `hello` with routing key `my-queue` to RabbitMQ broker `cloudamqp`
+----
+
+=== Retrieve message
+
+Waits up to the timeout for one message on the given queue, stores the payload in a variable as text.
+
+[source,gherkin]
+----
+When I retrieve message from queue `$queue` of RabbitMQ broker `$brokerKey` with `$timeout` timeout and save it to $scopes variable `$variableName`
+----
+
+* `$queue` - The queue to read from.
+* `$brokerKey` - The broker key from the <<_properties,properties>>.
+* `$timeout` - The maximum wait time in {durations-format-link} format to wait for a message.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of variable scopes].
+* `$variableName` - Where to store the message body.
+
+[source,gherkin]
+----
+When I retrieve message from queue `orders.queue` of RabbitMQ broker `local` with `PT10S` timeout and save it to SCENARIO variable `last-order`
+Then `${last-order}` is equal to `order-123`
+----
