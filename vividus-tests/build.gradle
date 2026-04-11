@@ -14,6 +14,7 @@ ext.ignoreBeans='dynamoDbSteps,kinesisSteps,lambdaSteps,s3BucketSteps'
 dependencies {
     implementation project(':vividus')
     implementation project(':vividus-plugin-accessibility')
+    implementation project(':vividus-plugin-activemq')
     implementation project(':vividus-plugin-applitools')
     implementation project(':vividus-plugin-avro')
     implementation project(':vividus-plugin-aws-dynamodb')
