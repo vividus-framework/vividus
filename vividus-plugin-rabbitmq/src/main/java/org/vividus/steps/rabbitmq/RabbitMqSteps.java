@@ -23,12 +23,16 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.net.ssl.SSLContext;
+
+import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -72,9 +76,30 @@ public class RabbitMqSteps
         getOptional(connectionProperties, "username").ifPresent(connectionFactory::setUsername);
         getOptional(connectionProperties, "password").ifPresent(connectionFactory::setPassword);
         getOptional(connectionProperties, "virtual-host").ifPresent(connectionFactory::setVirtualHost);
+        getOptional(connectionProperties, "use-ssl").ifPresent(value ->
+        {
+            Validate.isTrue("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value),
+                    "Invalid value '%s' for rabbitmq.<broker-key>.use-ssl, expected true/false", value);
+            if (Boolean.parseBoolean(value))
+            {
+                enableSsl(connectionFactory);
+            }
+        });
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMandatory(false);
         return template;
+    }
+
+    private static void enableSsl(CachingConnectionFactory factory)
+    {
+        try
+        {
+            factory.getRabbitConnectionFactory().useSslProtocol(SSLContext.getDefault());
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static Optional<String> getOptional(Map<String, String> properties, String key)

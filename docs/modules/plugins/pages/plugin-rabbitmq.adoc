@@ -43,6 +43,11 @@ NOTE: The broker key must not contain dots.
 |
 |The logical broker namespace (https://www.rabbitmq.com/docs/vhosts[vhost]) for connections, exchanges, and queues.
 
+|`rabbitmq.<broker-key>.use-ssl`
+|`true` / `false`
+|`false`
+|Enables an encrypted (TLS) connection to the broker.
+
 |===
 
 .Local connection
