@@ -20,16 +20,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+
+import javax.net.ssl.SSLContext;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,6 +59,7 @@ class RabbitMqStepsTests
     private static final String SUFFIX_USERNAME = ".username";
     private static final String SUFFIX_PASSWORD = ".password";
     private static final String SUFFIX_VIRTUAL_HOST = ".virtual-host";
+    private static final String SUFFIX_USE_SSL = ".use-ssl";
 
     private static final String MESSAGE_BODY = "msg";
     private static final String ROUTING_KEY = "rk";
@@ -132,6 +138,59 @@ class RabbitMqStepsTests
             verify(variableContext).putVariable(Set.of(VariableScope.STEP), VARIABLE_N, "42");
             verify(softAssert).assertNotNull(description, 42);
             verify(factories.constructed().get(0), never()).setPort(anyInt());
+        });
+    }
+
+    @Test
+    void shouldEnableSslUsingDefaultJvmContext() throws NoSuchAlgorithmException
+    {
+        var rabbitConnFactory = mock(com.rabbitmq.client.ConnectionFactory.class);
+        try (var factories = mockConstruction(CachingConnectionFactory.class,
+                     (mock, ctx) -> when(mock.getRabbitConnectionFactory()).thenReturn(rabbitConnFactory));
+                var ignored = mockConstruction(RabbitTemplate.class))
+        {
+            createSteps(Map.of(BROKER + SUFFIX_HOST, HOST_LOCAL, BROKER + SUFFIX_USE_SSL, Boolean.TRUE.toString()));
+            verify(rabbitConnFactory).useSslProtocol(SSLContext.getDefault());
+        }
+    }
+
+    @Test
+    void shouldWrapNoSuchAlgorithmExceptionFromSslContext()
+    {
+        var cause = new NoSuchAlgorithmException("no-tls");
+        try (var sslContext = mockStatic(SSLContext.class);
+                var ignored1 = mockConstruction(CachingConnectionFactory.class,
+                        (mock, ctx) -> when(mock.getRabbitConnectionFactory())
+                                .thenReturn(mock(com.rabbitmq.client.ConnectionFactory.class)));
+                var ignored2 = mockConstruction(RabbitTemplate.class))
+        {
+            sslContext.when(SSLContext::getDefault).thenThrow(cause);
+            var props = Map.of(BROKER + SUFFIX_HOST, HOST_LOCAL, BROKER + SUFFIX_USE_SSL, Boolean.TRUE.toString());
+            var exception = assertThrows(IllegalStateException.class, () -> createSteps(props));
+            assertEquals(cause, exception.getCause());
+        }
+    }
+
+    @Test
+    void shouldNotEnableSslWhenFlagIsFalse()
+    {
+        withMockedRabbit((factories, templates) ->
+        {
+            createSteps(Map.of(BROKER + SUFFIX_HOST, HOST_LOCAL, BROKER + SUFFIX_USE_SSL, "false"));
+            verify(factories.constructed().get(0), never()).getRabbitConnectionFactory();
+        });
+    }
+
+    @Test
+    void shouldFailWhenUseSslValueIsNotBoolean()
+    {
+        withMockedRabbit((factories, templates) ->
+        {
+            var props = Map.of(BROKER + SUFFIX_HOST, HOST_LOCAL, BROKER + SUFFIX_USE_SSL, "yes");
+            var exception = assertThrows(IllegalArgumentException.class, () -> createSteps(props));
+            assertEquals(
+                    "Invalid value 'yes' for rabbitmq.<broker-key>.use-ssl, expected true/false",
+                    exception.getMessage());
         });
     }
 
