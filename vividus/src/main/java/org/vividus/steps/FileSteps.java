@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,32 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
+import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.variable.VariableScope;
-
-import jakarta.inject.Inject;
 
 public class FileSteps
 {
-    @Inject private VariableContext variableContext;
+    private final VariableContext variableContext;
+    private final ISoftAssert softAssert;
+
+    public FileSteps(VariableContext variableContext, ISoftAssert softAssert)
+    {
+        this.variableContext = variableContext;
+        this.softAssert = softAssert;
+    }
 
     /**
      * Creates temporary file with specified content and puts path to that file to variable with specified name.
@@ -73,5 +85,51 @@ public class FileSteps
     public void createFile(String fileContent, String filePath) throws IOException
     {
         FileUtils.writeStringToFile(new File(filePath), fileContent, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Polls the given directory until exactly one file whose name matches the regular expression appears or the timeout
+     * expires, then saves the absolute path of the matched file to a variable. Fails if more than one matching file
+     * is found.
+     * @param timeout        The maximum time to wait in {durations-format-link} format
+     * @param pollingTimeout The interval between polling attempts in {durations-format-link} format
+     * @param fileNameRegex  The regular expression to match against file names (e.g. {@code report-\d+\.csv})
+     * @param directoryPath  The path to the directory to watch
+     * @param scopes         The set of variable scopes
+     * @param variableName   The variable name to store the absolute file path
+     * @throws IOException If an I/O error has occurred while reading the directory
+     */
+    @When("I wait `$timeout` with `$pollingTimeout` polling until file matching `$fileNameRegex` appears in directory "
+            + "`$directoryPath` and save path to $scopes variable `$variableName`")
+    public void waitForFileAndSavePath(Duration timeout, Duration pollingTimeout, Pattern fileNameRegex,
+            Path directoryPath, Set<VariableScope> scopes, String variableName) throws IOException
+    {
+        Validate.isTrue(Files.isDirectory(directoryPath), "The directory '%s' does not exist", directoryPath);
+
+        List<Path> found = new DurationBasedWaiter(timeout, pollingTimeout).wait(() ->
+        {
+            try (Stream<Path> paths = Files.list(directoryPath))
+            {
+                return paths.filter(Files::isRegularFile)
+                        .filter(p -> fileNameRegex.matcher(p.getFileName().toString()).matches()).toList();
+            }
+        }, matches -> !matches.isEmpty());
+
+        if (found.size() > 1)
+        {
+            List<String> fileNames = found.stream().map(Path::getFileName).map(Path::toString).sorted().toList();
+            softAssert
+                    .recordFailedAssertion("Expected exactly 1 file matching `%s` in directory '%s', but found %d: %s."
+                            .formatted(fileNameRegex, directoryPath, found.size(), String.join(", ", fileNames)));
+        }
+        else if (found.isEmpty())
+        {
+            softAssert.recordFailedAssertion("No file matching `%s` appeared in directory '%s' within %s"
+                    .formatted(fileNameRegex, directoryPath, timeout));
+        }
+        else
+        {
+            variableContext.putVariable(scopes, variableName, found.get(0).toAbsolutePath().toString());
+        }
     }
 }

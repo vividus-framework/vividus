@@ -472,6 +472,28 @@ Examples:
 file:///${examples-table-temporary-file}
 ----
 
+=== Wait for a file to appear in a directory
+
+Polls the given directory until exactly one file whose name matches the regular expression appears or the timeout
+expires, then saves the absolute path of that file to a variable.
+
+[source,gherkin]
+----
+When I wait `$timeout` with `$pollingTimeout` polling until file matching `$fileNameRegex` appears in directory `$directoryPath` and save path to $scopes variable `$variableName`
+----
+
+* `$timeout` - The maximum time to wait in {durations-format-link} format.
+* `$pollingTimeout` - The interval between polling attempts in {durations-format-link} format.
+* `$fileNameRegex` - The regular expression matched against file names only (not the full path), e.g. `report-\d+\.csv`.
+* `$directoryPath` - The path to an existing directory to watch.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to store the absolute path of the matched file.
+
+.Wait up to 30 seconds for a CSV report to arrive and store its path
+[source,gherkin]
+----
+When I wait `PT30S` with `PT1S` polling until file matching `report-\d+\.csv` appears in directory `/tmp/reports` and save path to SCENARIO variable `report-path`
+----
 
 == ZIP archives
 === Save ZIP archive entries
