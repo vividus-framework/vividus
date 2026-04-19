@@ -51,6 +51,7 @@ import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
+import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.StepCollector.Stage;
 import org.jbehave.core.steps.StepCreator.PendingStep;
@@ -826,5 +827,130 @@ class CollectingStatisticsStoryReporterTests
             () -> assertEquals(step, failure.getStep()),
             () -> assertEquals(cause, failure.getMessage())
         );
+    }
+
+    @Test
+    void shouldCountStoryCancelledByTimeout(@TempDir Path tempDirectory) throws IOException
+    {
+        when(runContext.isRunInProgress()).thenReturn(true);
+        initReporter(false, tempDirectory.toFile());
+        reporter.beforeStoriesSteps(Stage.BEFORE);
+        reporter.afterStoriesSteps(Stage.BEFORE);
+
+        reporter.beforeStory(story, false);
+        Scenario scenarioWithSteps = mock(Scenario.class);
+        when(scenarioWithSteps.getSteps()).thenReturn(List.of("When I do something", "Then I verify"));
+        reporter.beforeScenario(scenarioWithSteps);
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        reporter.beforeStep(STEP);
+        reporter.storyCancelled(story, new StoryDuration(0));
+        reporter.afterStory(false);
+        reporter.beforeStoriesSteps(Stage.AFTER);
+        reporter.afterStoriesSteps(Stage.AFTER);
+
+        var statistic = readStatistics(tempDirectory);
+        var expected = """
+                {
+                  "STORY" : {
+                    "total" : 1,
+                    "passed" : 0,
+                    "failed" : 0,
+                    "broken" : 1,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "SCENARIO" : {
+                    "total" : 1,
+                    "passed" : 0,
+                    "failed" : 0,
+                    "broken" : 1,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "STEP" : {
+                    "total" : 2,
+                    "passed" : 1,
+                    "failed" : 0,
+                    "broken" : 1,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "GIVEN_STORY" : {
+                    "total" : 0,
+                    "passed" : 0,
+                    "failed" : 0,
+                    "broken" : 0,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  }
+                }""";
+        assertEquals(expected, statistic);
+        assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
+    }
+
+    @Test
+    void shouldCountStoryCancelledByTimeoutWithNoActiveStep(@TempDir Path tempDirectory) throws IOException
+    {
+        when(runContext.isRunInProgress()).thenReturn(true);
+        initReporter(false, tempDirectory.toFile());
+        reporter.beforeStoriesSteps(Stage.BEFORE);
+        reporter.afterStoriesSteps(Stage.BEFORE);
+
+        reporter.beforeStory(story, false);
+        Scenario scenarioWithSteps = mock(Scenario.class);
+        when(scenarioWithSteps.getSteps()).thenReturn(List.of("When I do something"));
+        reporter.beforeScenario(scenarioWithSteps);
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        reporter.storyCancelled(story, new StoryDuration(0));
+        reporter.afterStory(false);
+        reporter.beforeStoriesSteps(Stage.AFTER);
+        reporter.afterStoriesSteps(Stage.AFTER);
+
+        var statistic = readStatistics(tempDirectory);
+        var expected = """
+                {
+                  "STORY" : {
+                    "total" : 1,
+                    "passed" : 0,
+                    "failed" : 0,
+                    "broken" : 1,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "SCENARIO" : {
+                    "total" : 1,
+                    "passed" : 0,
+                    "failed" : 0,
+                    "broken" : 1,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "STEP" : {
+                    "total" : 1,
+                    "passed" : 1,
+                    "failed" : 0,
+                    "broken" : 0,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "GIVEN_STORY" : {
+                    "total" : 0,
+                    "passed" : 0,
+                    "failed" : 0,
+                    "broken" : 0,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  }
+                }""";
+        assertEquals(expected, statistic);
+        assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
     }
 }

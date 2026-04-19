@@ -40,6 +40,7 @@ import com.google.common.eventbus.Subscribe;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
+import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.steps.StepCollector.Stage;
 import org.jbehave.core.steps.StepCreator.PendingStep;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
@@ -201,6 +202,23 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
         {
             testContext.remove(NodeContext.class);
         }
+    }
+
+    @Override
+    public void storyCancelled(Story story, StoryDuration storyDuration)
+    {
+        NodeContext nodeContext = context();
+        Node currentNode = nodeContext.getTail();
+        while (currentNode.getType() != ExecutableEntity.STORY
+                && currentNode.getType() != ExecutableEntity.GIVEN_STORY)
+        {
+            updateNodeStatus(currentNode, Status.BROKEN);
+            endNode();
+            currentNode = nodeContext.getTail();
+        }
+        updateNodeStatus(currentNode, Status.BROKEN);
+        changeStatus(Status.BROKEN);
+        super.storyCancelled(story, storyDuration);
     }
 
     @Override
