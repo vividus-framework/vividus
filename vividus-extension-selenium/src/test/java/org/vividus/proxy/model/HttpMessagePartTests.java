@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ class HttpMessagePartTests
     private static final String TEXT = "text";
     private static final String REQUEST_BODY = "requestBody";
     private static final String REQUEST_BODY_PARAMS = "requestBodyParameters";
+    private static final String NOT_DEFINED = "not defined";
 
     @Test
     void shouldReturnRequestUrl()
@@ -130,6 +131,19 @@ class HttpMessagePartTests
         );
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    void shouldReturnResponseDataWithNullTextAndMimeType()
+    {
+        HarEntry harEntry = createHarEntryWithNullContent();
+        Map<String, Object> responseData = (Map<String, Object>) HttpMessagePart.RESPONSE_DATA.get(harEntry);
+        Map<String, String> responseBody = (Map<String, String>) responseData.get("responseBody");
+        assertAll(
+            () -> assertEquals(NOT_DEFINED, responseBody.get(MIME_TYPE)),
+            () -> assertEquals(NOT_DEFINED, responseBody.get(TEXT))
+        );
+    }
+
     private HarEntry createHarEntry(HttpMethod httpMethod, int statusCode, Consumer<HarPostData> harPostDataConfigurer)
     {
         HarPostData postData = new HarPostData();
@@ -152,6 +166,25 @@ class HttpMessagePartTests
 
         HarResponse response = new HarResponse();
         response.setStatus(statusCode);
+        response.setContent(harContent);
+
+        HarEntry harEntry = new HarEntry();
+        harEntry.setRequest(request);
+        harEntry.setResponse(response);
+        return harEntry;
+    }
+
+    private HarEntry createHarEntryWithNullContent()
+    {
+        HarRequest request = new HarRequest();
+        request.setMethod(HttpMethod.POST);
+        request.setUrl(URL);
+        request.setQueryString(List.of());
+
+        HarContent harContent = new HarContent();
+
+        HarResponse response = new HarResponse();
+        response.setStatus(HttpStatus.SC_OK);
         response.setContent(harContent);
 
         HarEntry harEntry = new HarEntry();
