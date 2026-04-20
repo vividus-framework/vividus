@@ -843,7 +843,8 @@ class CollectingStatisticsStoryReporterTests
         reporter.beforeScenario(scenarioWithSteps);
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reporter.beforeStep(STEP);
-        reporter.storyCancelled(story, new StoryDuration(0));
+        var storyDuration = new StoryDuration(0);
+        reporter.storyCancelled(story, storyDuration);
         reporter.afterStory(false);
         reporter.beforeStoriesSteps(Stage.AFTER);
         reporter.afterStoriesSteps(Stage.AFTER);
@@ -890,6 +891,7 @@ class CollectingStatisticsStoryReporterTests
                 }""";
         assertEquals(expected, statistic);
         assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
+        verify(nextStoryReporter).storyCancelled(story, storyDuration);
     }
 
     @Test
@@ -905,7 +907,8 @@ class CollectingStatisticsStoryReporterTests
         when(scenarioWithSteps.getSteps()).thenReturn(List.of("When I do something"));
         reporter.beforeScenario(scenarioWithSteps);
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
-        reporter.storyCancelled(story, new StoryDuration(0));
+        var storyDuration = new StoryDuration(0);
+        reporter.storyCancelled(story, storyDuration);
         reporter.afterStory(false);
         reporter.beforeStoriesSteps(Stage.AFTER);
         reporter.afterStoriesSteps(Stage.AFTER);
@@ -952,5 +955,73 @@ class CollectingStatisticsStoryReporterTests
                 }""";
         assertEquals(expected, statistic);
         assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
+        verify(nextStoryReporter).storyCancelled(story, storyDuration);
+    }
+
+    @Test
+    void shouldCountGivenStoryCancelledByTimeout(@TempDir Path tempDirectory) throws IOException
+    {
+        when(runContext.isRunInProgress()).thenReturn(true);
+        initReporter(false, tempDirectory.toFile());
+        reporter.beforeStoriesSteps(Stage.BEFORE);
+        reporter.afterStoriesSteps(Stage.BEFORE);
+
+        reporter.beforeStory(story, false);
+        reporter.beforeStory(givenStory, true);
+        Scenario scenarioWithSteps = mock(Scenario.class);
+        when(scenarioWithSteps.getSteps()).thenReturn(List.of("When I do something"));
+        reporter.beforeScenario(scenarioWithSteps);
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        reporter.beforeStep(STEP);
+        var storyDuration = new StoryDuration(0);
+        reporter.storyCancelled(givenStory, storyDuration);
+        reporter.afterStory(true);
+        reporter.afterStory(false);
+        reporter.beforeStoriesSteps(Stage.AFTER);
+        reporter.afterStoriesSteps(Stage.AFTER);
+
+        var statistic = readStatistics(tempDirectory);
+        var expected = """
+                {
+                  "STORY" : {
+                    "total" : 1,
+                    "passed" : 0,
+                    "failed" : 0,
+                    "broken" : 1,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "SCENARIO" : {
+                    "total" : 1,
+                    "passed" : 0,
+                    "failed" : 0,
+                    "broken" : 1,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "STEP" : {
+                    "total" : 2,
+                    "passed" : 1,
+                    "failed" : 0,
+                    "broken" : 1,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "GIVEN_STORY" : {
+                    "total" : 1,
+                    "passed" : 0,
+                    "failed" : 0,
+                    "broken" : 1,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  }
+                }""";
+        assertEquals(expected, statistic);
+        assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
+        verify(nextStoryReporter).storyCancelled(givenStory, storyDuration);
     }
 }
