@@ -36,6 +36,7 @@ import de.sstoehr.harreader.model.HarRequest;
 import de.sstoehr.harreader.model.HarResponse;
 import de.sstoehr.harreader.model.HttpMethod;
 
+@SuppressWarnings("unchecked")
 class HttpMessagePartTests
 {
     private static final String URL = "www.test.com";
@@ -67,7 +68,6 @@ class HttpMessagePartTests
         assertEquals(queryParameters, HttpMessagePart.URL_QUERY.get(harEntry));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void shouldReturnRequestDataWithText()
     {
@@ -87,7 +87,6 @@ class HttpMessagePartTests
         );
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void shouldReturnRequestDataWithParams()
     {
@@ -118,7 +117,6 @@ class HttpMessagePartTests
         );
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void shouldReturnResponseData()
     {
@@ -131,7 +129,6 @@ class HttpMessagePartTests
         );
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void shouldReturnResponseDataWithNullTextAndMimeType()
     {
