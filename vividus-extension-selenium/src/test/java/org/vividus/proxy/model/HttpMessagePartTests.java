@@ -47,6 +47,7 @@ class HttpMessagePartTests
     private static final String TEXT = "text";
     private static final String REQUEST_BODY = "requestBody";
     private static final String REQUEST_BODY_PARAMS = "requestBodyParameters";
+    private static final String RESPONSE_BODY = "responseBody";
 
     @Test
     void shouldReturnRequestUrl()
@@ -123,7 +124,7 @@ class HttpMessagePartTests
     {
         HarEntry harEntry = createHarEntry(HttpMethod.POST, HttpStatus.SC_OK, d -> { });
         Map<String, Object> responseData = (Map<String, Object>) HttpMessagePart.RESPONSE_DATA.get(harEntry);
-        Map<String, String> responseBody = (Map<String, String>) responseData.get("responseBody");
+        Map<String, String> responseBody = (Map<String, String>) responseData.get(RESPONSE_BODY);
         assertAll(
             () -> assertEquals(MIME_TYPE, responseBody.get(MIME_TYPE)),
             () -> assertEquals(TEXT, responseBody.get(TEXT))
@@ -136,7 +137,7 @@ class HttpMessagePartTests
     {
         HarEntry harEntry = createHarEntryWithNullContent();
         Map<String, Object> responseData = (Map<String, Object>) HttpMessagePart.RESPONSE_DATA.get(harEntry);
-        Map<String, String> responseBody = (Map<String, String>) responseData.get("responseBody");
+        Map<String, String> responseBody = (Map<String, String>) responseData.get(RESPONSE_BODY);
         assertAll(
             () -> assertNull(responseBody.get(MIME_TYPE)),
             () -> assertNull(responseBody.get(TEXT))
