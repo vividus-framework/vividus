@@ -454,7 +454,7 @@ Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` i
 When I execute sequence of touch actions:
 |type          |argument                                      |
 |TAP_AND_HOLD  |By.accessibilityId(<firstItemAccessibilityId>)|
-|MOVE_BY_OFFSET|(-150, 0)                                     |
+|MOVE_BY_OFFSET|(-200, 0)                                     |
 |RELEASE       |                                              |
 When I wait until element located by `accessibilityId(<firstItemAccessibilityId>)` disappears
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `1`
@@ -462,7 +462,7 @@ When I execute sequence of touch actions:
 |type          |argument                                       |
 |MOVE_TO       |By.accessibilityId(<secondItemAccessibilityId>)|
 |TAP_AND_HOLD  |                                               |
-|MOVE_BY_OFFSET|(150, 0)                                       |
+|MOVE_BY_OFFSET|(200, 0)                                       |
 |RELEASE       |                                               |
 When I wait until element located by `accessibilityId(<firstItemAccessibilityId>)` appears
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
@@ -474,7 +474,7 @@ When I execute sequence of touch actions:
 |type          |argument    |
 |MOVE_BY_OFFSET|(${x}, ${y})|
 |TAP_AND_HOLD  |            |
-|MOVE_BY_OFFSET|(-150, 0)   |
+|MOVE_BY_OFFSET|(-200, 0)   |
 |RELEASE       |            |
 When I wait until element located by `accessibilityId(<secondItemAccessibilityId>)` appears
 Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `0`
