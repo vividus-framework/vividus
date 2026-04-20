@@ -84,8 +84,6 @@ public enum HttpMessagePart
         }
     };
 
-    private static final String NOT_DEFINED = "not defined";
-
     public abstract Object get(HarEntry harEntry);
 
     private static Map<String, List<String>> getQueryParameters(HarRequest request)
@@ -96,10 +94,16 @@ public enum HttpMessagePart
 
     private static Map<String, String> createBodyData(String mimeType, String text)
     {
-        return Map.of(
-                "mimeType", mimeType != null ? mimeType : NOT_DEFINED,
-                "text", text != null ? text : NOT_DEFINED
-        );
+        Map<String, String> data = new HashMap<>();
+        if (mimeType != null)
+        {
+            data.put("mimeType", mimeType);
+        }
+        if (text != null)
+        {
+            data.put("text", text);
+        }
+        return data;
     }
 
     private static Map<String, List<String>> getRequestBodyParameters(HarPostData postData)

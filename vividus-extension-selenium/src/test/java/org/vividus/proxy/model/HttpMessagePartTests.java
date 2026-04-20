@@ -47,7 +47,6 @@ class HttpMessagePartTests
     private static final String TEXT = "text";
     private static final String REQUEST_BODY = "requestBody";
     private static final String REQUEST_BODY_PARAMS = "requestBodyParameters";
-    private static final String NOT_DEFINED = "not defined";
 
     @Test
     void shouldReturnRequestUrl()
@@ -139,8 +138,8 @@ class HttpMessagePartTests
         Map<String, Object> responseData = (Map<String, Object>) HttpMessagePart.RESPONSE_DATA.get(harEntry);
         Map<String, String> responseBody = (Map<String, String>) responseData.get("responseBody");
         assertAll(
-            () -> assertEquals(NOT_DEFINED, responseBody.get(MIME_TYPE)),
-            () -> assertEquals(NOT_DEFINED, responseBody.get(TEXT))
+            () -> assertNull(responseBody.get(MIME_TYPE)),
+            () -> assertNull(responseBody.get(TEXT))
         );
     }
 
