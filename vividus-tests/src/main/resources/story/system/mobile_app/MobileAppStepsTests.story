@@ -225,7 +225,6 @@ When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `xpath(//android.widget.TextView[@text='Image'])`
 When I upload file `/data/mobile-upload-image.png` to device
 When I tap on element located by `accessibilityId(selectImage)`
-When I wait until element located by `xpath(//android.widget.TextView[@text='Pictures'])` appears
 When I tap on element located by `xpath(//android.widget.TextView[@text='Pictures'])`
 When I tap on element located by `xpath((//android.view.ViewGroup[contains(@content-desc, "Photo taken")])[1])`
 Then number of elements found by `xpath(//android.widget.TextView[@text='228x228'])` is equal to `1`
@@ -238,7 +237,6 @@ When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `iosClassChain(**/XCUIElementTypeButton[$name == "Image"$])`
 When I upload file `/data/mobile-upload-image.png` to device
 When I tap on element located by `iosNsPredicate(name == 'selectImage')`
-When I wait until element located by `accessibilityId(Photos)` appears
 When I tap on element located by `xpath((//XCUIElementTypeImage[contains(@name, "Photo")])[1])`
 When I wait until element located by `xpath(//XCUIElementTypeStaticText[@value='228x228'])` appears
 
@@ -248,7 +246,6 @@ Meta:
     @targetPlatform android
 When I upload file with name `file_for_upload_step.png` and data `#{loadBinaryResource(/data/file_for_upload_step.png)}` to device
 When I tap on element located by `accessibilityId(selectImage)`
-When I wait until element located by `xpath(//android.widget.TextView[@text='Pictures'])` appears
 When I tap on element located by `xpath(//android.widget.TextView[@text='Pictures'])`
 When I tap on element located by `xpath((//android.view.ViewGroup[contains(@content-desc, "Photo taken")])[1])`
 Then number of elements found by `xpath(//android.widget.TextView[@text='569x407'])` is equal to `1`
@@ -259,7 +256,6 @@ Meta:
     @targetPlatform ios
 When I upload file with name `file_for_upload_step.png` and data `#{loadBinaryResource(/data/file_for_upload_step.png)}` to device
 When I tap on element located by `iosNsPredicate(name == 'selectImage')`
-When I wait until element located by `accessibilityId(Photos)` appears
 When I tap on element located by `xpath((//XCUIElementTypeImage[contains(@name, "Photo")])[1])`
 Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='569x407'])` is equal to `1`
 
