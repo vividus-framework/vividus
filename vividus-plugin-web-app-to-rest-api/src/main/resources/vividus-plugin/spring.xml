@@ -20,6 +20,7 @@
 
     <bean id="sslLabsClient" class="org.vividus.ssllabs.SslLabsClient">
         <constructor-arg index="2" value="${ssl-labs.api-endpoint}"/>
+        <constructor-arg index="3" value="${ssl-labs.email}"/>
     </bean>
 
     <bean id="sslLabsSteps" class="org.vividus.ssllabs.SslLabsSteps" />
