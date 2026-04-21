@@ -134,6 +134,7 @@ public class ApplicationSteps
     @When("I activate application with bundle identifier `$bundleId`")
     public void activateApp(String bundleId)
     {
+        LOGGER.info("Activating application with bundle identifier {}", bundleId);
         applicationActions.activateApp(bundleId);
     }
 
