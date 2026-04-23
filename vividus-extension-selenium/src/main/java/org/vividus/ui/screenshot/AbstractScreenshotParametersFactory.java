@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,13 @@
 
 package org.vividus.ui.screenshot;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+
+import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -26,7 +30,8 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.Validate;
+import org.jbehave.core.model.ExamplesTable;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.locator.Locator;
@@ -34,7 +39,7 @@ import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.util.property.PropertyMappedCollection;
 
 public abstract class AbstractScreenshotParametersFactory<C extends ScreenshotConfiguration,
-        P extends ScreenshotParameters> implements ScreenshotParametersFactory<C>
+        P extends ScreenshotParameters> implements ScreenshotParametersFactory
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScreenshotParametersFactory.class);
 
@@ -49,22 +54,36 @@ public abstract class AbstractScreenshotParametersFactory<C extends ScreenshotCo
     }
 
     @Override
-    public P create(Optional<C> screenshotConfiguration, String sourceKey, Map<IgnoreStrategy, Set<Locator>> ignores)
+    public P create(@Nullable ExamplesTable screenshotConfiguration, String sourceKey,
+            Map<IgnoreStrategy, Set<Locator>> ignores)
     {
         Optional<C> defaultConfiguration = getDefaultConfiguration();
 
-        return screenshotConfiguration.map(currentConfig ->
+        if (screenshotConfiguration == null)
         {
-            patchIgnores(sourceKey, currentConfig, ignores);
-
-            C configuration = defaultConfiguration
-                    .map(defaultConfig -> getConfigurationMerger().apply(currentConfig, defaultConfig))
-                    .orElse(currentConfig);
-            return createParameters(configuration);
-        }).orElseGet(() -> {
             C configuration = defaultConfiguration.orElseGet(this::createScreenshotConfiguration);
             return createParameters(configuration, ignores);
-        });
+        }
+        List<C> screenshotConfigurations = screenshotConfiguration.getRowsAs(getScreenshotConfigurationClass());
+        int rowNumber = screenshotConfigurations.size();
+        isTrue(rowNumber == 1,
+                "Exactly one row is expected in ExamplesTable in order to convert it to screenshot configuration, "
+                        + "but found %d row(s)",
+                rowNumber);
+        C currentConfig = screenshotConfigurations.get(0);
+        patchIgnores(sourceKey, currentConfig, ignores);
+
+        C configuration = defaultConfiguration
+                .map(defaultConfig -> getConfigurationMerger().apply(currentConfig, defaultConfig))
+                .orElse(currentConfig);
+        return createParameters(configuration);
+    }
+
+    public Class<C> getScreenshotConfigurationClass()
+    {
+        ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
+        //noinspection unchecked
+        return (Class<C>) parameterizedType.getActualTypeArguments()[0];
     }
 
     protected abstract C createScreenshotConfiguration();
@@ -91,7 +110,7 @@ public abstract class AbstractScreenshotParametersFactory<C extends ScreenshotCo
     {
         if (!source.isEmpty())
         {
-            Validate.isTrue(configIgnores.isEmpty(), "The elements and areas to ignore must be passed "
+            isTrue(configIgnores.isEmpty(), "The elements and areas to ignore must be passed "
                     + "either through screenshot configuration or %s", sourceKey);
             LOGGER.atWarn().addArgument(sourceKey).log("The passing of elements and areas to ignore through {}"
                     + " is deprecated, please use screenshot configuration instead");
@@ -143,7 +162,7 @@ public abstract class AbstractScreenshotParametersFactory<C extends ScreenshotCo
 
     protected int ensureValidCutSize(int value, String key)
     {
-        Validate.isTrue(value >= 0, "The %s to cut must be greater than or equal to zero", key);
+        isTrue(value >= 0, "The %s to cut must be greater than or equal to zero", key);
         return value;
     }
 

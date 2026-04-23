@@ -58,7 +58,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
 import org.vividus.converter.FluentTrimmedEnumConverter;
 import org.vividus.selenium.locator.Locator;
-import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.ui.web.converter.StringToDimensionParameterConverter;
@@ -75,7 +74,7 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
 
     @Mock private ScreenshotParameters screenshotParameters;
     @Mock private Locator locator;
-    @Mock private ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
+    @Mock private ScreenshotParametersFactory screenshotParametersFactory;
     @Mock private BaselineIndexer baselineIndexer;
     @InjectMocks private ExamplesTableToApplitoolsVisualChecksConverter converter;
 

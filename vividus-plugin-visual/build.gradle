@@ -8,10 +8,10 @@ java {
 
 dependencies {
     implementation project(':vividus-engine')
-    implementation project(':vividus-plugin-web-app')
     implementation project(':vividus-reporter')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
+    implementation project(':vividus-extension-selenium')
     implementation project(':vividus-extension-visual-testing')
 
     blobStorageImplementation project(':vividus-plugin-azure-storage-account')
