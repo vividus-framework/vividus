@@ -26,6 +26,7 @@ import static org.apache.commons.lang3.StringUtils.substringBefore;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -34,10 +35,14 @@ import javax.net.ssl.SSLContext;
 
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
+import org.jbehave.core.model.ExamplesTable;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.testcontext.TestContext;
 import org.vividus.util.property.IPropertyParser;
 import org.vividus.variable.VariableScope;
 
@@ -45,13 +50,18 @@ public class RabbitMqSteps
 {
     private static final String DOT = ".";
 
+    private static final Class<?> MESSAGE_PROPERTIES_KEY = MessageProperties.class;
+
     private final Map<String, RabbitTemplate> rabbitTemplates;
+    private final TestContext testContext;
     private final VariableContext variableContext;
     private final ISoftAssert softAssert;
 
-    public RabbitMqSteps(IPropertyParser propertyParser, VariableContext variableContext, ISoftAssert softAssert)
+    public RabbitMqSteps(IPropertyParser propertyParser, TestContext testContext, VariableContext variableContext,
+            ISoftAssert softAssert)
     {
         this.rabbitTemplates = buildTemplates(propertyParser);
+        this.testContext = testContext;
         this.variableContext = variableContext;
         this.softAssert = softAssert;
     }
@@ -108,6 +118,21 @@ public class RabbitMqSteps
     }
 
     /**
+     * Sets the AMQP message properties to be applied to the next published message. The properties are consumed after
+     * publishing and do not carry over to subsequent publish steps.
+     *
+     * @param properties The message properties table.
+     */
+    @When("I set RabbitMQ message properties:$properties")
+    public void setMessageProperties(ExamplesTable properties)
+    {
+        List<MessageProperties> rows = properties.getRowsAs(MessageProperties.class);
+        Validate.isTrue(rows.size() == 1, "Exactly one row is expected in the message properties table, but got %d",
+                rows.size());
+        testContext.put(MESSAGE_PROPERTIES_KEY, rows.get(0));
+    }
+
+    /**
      * Publishes a text message to the default exchange with the given routing key (typically the queue name).
      *
      * @param message    The message body
@@ -117,7 +142,12 @@ public class RabbitMqSteps
     @When("I publish message `$message` with routing key `$routingKey` to RabbitMQ broker `$brokerKey`")
     public void publishMessage(String message, String routingKey, String brokerKey)
     {
-        getTemplate(brokerKey).convertAndSend(routingKey, message);
+        RabbitTemplate template = getTemplate(brokerKey);
+        MessageProperties messageProperties = Optional
+                .ofNullable(testContext.<MessageProperties>remove(MESSAGE_PROPERTIES_KEY))
+                .orElseGet(MessageProperties::new);
+        Message amqpMessage = template.getMessageConverter().toMessage(message, messageProperties);
+        template.send(routingKey, amqpMessage);
     }
 
     /**

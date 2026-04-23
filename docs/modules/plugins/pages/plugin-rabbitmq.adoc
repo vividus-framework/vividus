@@ -72,6 +72,26 @@ rabbitmq.cloudamqp.virtual-host=bob
 
 == Steps
 
+=== Set message properties
+
+Sets the AMQP message properties to be applied to the next <<_publish_message,published message>>. The properties are consumed after publishing and do not carry over to subsequent publish steps.
+
+[source,gherkin]
+----
+When I set RabbitMQ message properties:$properties
+----
+
+* `$properties` - The message properties table. The table must contain exactly one row. Column names map directly to the writable properties of https://www.rabbitmq.com/docs/publishers#message-properties[MessageProperties], for example `contentType`, `contentEncoding`, `correlationId`, `replyTo`, `expiration`, `messageId`, `type`, `userId`, `appId`.
+
+.Publish a JSON message with a correlation ID
+[source,gherkin]
+----
+When I set RabbitMQ message properties:
+|contentType     |correlationId|
+|application/json|req-42       |
+When I publish message `{"key":"value"}` with routing key `my-queue` to RabbitMQ broker `local`
+----
+
 === Publish message
 
 Sends the message text to the broker. The routing key is usually the queue name when you publish straight to a queue.
