@@ -72,8 +72,6 @@ dependencies {
     annotationProcessor platform('org.apache.logging.log4j:log4j-bom:2.25.4')
     annotationProcessor('org.apache.logging.log4j:log4j-core')
 
-    implementation('de.vandermeer:asciitable:0.3.2')
-
     // Meta filters based on Groovy
     implementation('org.apache.groovy:groovy:5.0.5')
 
