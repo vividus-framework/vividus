@@ -5,8 +5,7 @@
     <meta charset="utf-8">
     <title>Visual tests result table</title>
     <link rel="stylesheet" href="../../styles.css"/>
-    <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="../../webjars/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css">
+    <link rel="stylesheet" href="../../webjars/bootstrap/5.3.1/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="../../webjars/vividus/style.css"/>
 </head>
 <body>
@@ -27,16 +26,17 @@
         <#if compare>
             <div class="col-md">
                 <#if hasBaseline>
-                    <label class="checkbox-inline">
-                        <input id="diffCheckBox" type="checkbox" data-toggle="toggle" data-on="Diff" data-off="Checkpoint" data-onstyle="danger" data-offstyle="success">
-                    </label>
+                    <div class="form-check form-switch form-check-inline">
+                        <input class="form-check-input" type="checkbox" role="switch" id="diffCheckBox">
+                        <label class="form-check-label" for="diffCheckBox" id="diffCheckBoxLabel">Checkpoint</label>
+                    </div>
                 </#if>
                 <@custom_controls />
             </div>
             <div class="col-md-6">
                 <p>Baseline</p>
                 <#if hasBaseline>
-                    <img class="img-responsive" src="data:image/png;base64,${freemarkerMethodCompressImage(result.baseline)}" />
+                    <img class="img-fluid" src="data:image/png;base64,${freemarkerMethodCompressImage(result.baseline)}" />
                 <#else>
                     <span>No baseline image</span>
                 </#if>
@@ -45,13 +45,13 @@
                 <p>Checkpoint</p>
                 <#if hasBaseline>
                     <#if result.diff?hasContent>
-                        <img id="diff" class="img-responsive" src="data:image/png;base64,${freemarkerMethodCompressImage(result.diff)}" />
+                        <img id="diff" class="img-fluid" src="data:image/png;base64,${freemarkerMethodCompressImage(result.diff)}" />
                     <#else>
                         <span>No diff image</span>
                     </#if>
                 </#if>
                 <#if result.checkpoint?hasContent>
-                    <img id="checkpoint" class="img-responsive" src="data:image/png;base64,${freemarkerMethodCompressImage(result.checkpoint)}" />
+                    <img id="checkpoint" class="img-fluid" src="data:image/png;base64,${freemarkerMethodCompressImage(result.checkpoint)}" />
                 <#else>
                     <span>No checkpoint image</span>
                 </#if>
@@ -61,7 +61,7 @@
                 <p>Baseline</p>
                 <@custom_controls />
                 <#if result.checkpoint?hasContent>
-                    <img id="checkpoint" class="img-responsive" src="data:image/png;base64,${freemarkerMethodCompressImage(result.checkpoint)}" />
+                    <img id="checkpoint" class="img-fluid" src="data:image/png;base64,${freemarkerMethodCompressImage(result.checkpoint)}" />
                 <#else>
                     <span>No checkpoint image</span>
                 </#if>
@@ -70,25 +70,27 @@
     </div>
 
     <script src="../../webjars/jquery/3.6.4/jquery.min.js"></script>
-    <script src="../../webjars/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <script src="../../webjars/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <script src="../../webjars/bootstrap/5.3.1/js/bootstrap.min.js"></script>
     <#if compare>
     <script type="text/javascript">
         $(document).ready(function(){
             var diffImage = $("#diff");
             var checkpointImage = $("#checkpoint");
+            var label = $("#diffCheckBoxLabel");
             checkpointImage.show();
             diffImage.hide();
             $("#diffCheckBox").change(function(){
                 if($(this).is(":checked"))
                 {
                     diffImage.show();
-                    checkpointImage.hide()
+                    checkpointImage.hide();
+                    label.text("Diff");
                 }
                 else
                 {
                     diffImage.hide();
-                    checkpointImage.show()
+                    checkpointImage.show();
+                    label.text("Checkpoint");
                 }
             });
         });
