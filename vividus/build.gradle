@@ -80,7 +80,7 @@ dependencies {
     // Spring
     implementation platform(libs.spring.bom)
     implementation(libs.spring.context)
-    implementation('org.springframework.vault:spring-vault-core:4.0.1')
+    implementation('org.springframework.vault:spring-vault-core:4.0.2')
 
     implementation(libs.jakarta.injectApi)
     implementation('commons-cli:commons-cli:1.11.0')
