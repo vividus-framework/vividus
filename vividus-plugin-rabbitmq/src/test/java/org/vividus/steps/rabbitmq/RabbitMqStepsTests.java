@@ -16,10 +16,13 @@
 
 package org.vividus.steps.rabbitmq;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
@@ -28,6 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.Map;
@@ -36,15 +40,22 @@ import java.util.function.BiConsumer;
 
 import javax.net.ssl.SSLContext;
 
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.util.property.IPropertyParser;
 import org.vividus.variable.VariableScope;
 
@@ -79,14 +90,49 @@ class RabbitMqStepsTests
     @Mock private ISoftAssert softAssert;
 
     @Test
+    void shouldFailWhenMessagePropertiesTableHasNotExactlyOneRow()
+    {
+        var steps = createSteps(Map.of());
+        var table = new ExamplesTable("|contentType|\n|application/json|\n|text/plain|");
+        var exception = assertThrows(IllegalArgumentException.class, () -> steps.setMessageProperties(table));
+        assertEquals("Exactly one row is expected in the message properties table, but got 2",
+                exception.getMessage());
+    }
+
+    @Test
     void shouldPublishMessage()
+    {
+        var converter = mock(MessageConverter.class);
+        var amqpMessage = mock(Message.class);
+        withMockedRabbit((factories, templates) ->
+        {
+            var steps = createSteps(Map.of(BROKER + SUFFIX_HOST, HOST_LOCAL));
+            var template = templates.constructed().get(0);
+            when(template.getMessageConverter()).thenReturn(converter);
+            when(converter.toMessage(eq(MESSAGE_BODY), any(MessageProperties.class))).thenReturn(amqpMessage);
+            steps.publishMessage(MESSAGE_BODY, ROUTING_KEY, BROKER);
+            verify(template).send(ROUTING_KEY, amqpMessage);
+            verify(factories.constructed().get(0), never()).setPort(anyInt());
+        });
+    }
+
+    @Test
+    void shouldPublishMessageWithProperties()
     {
         withMockedRabbit((factories, templates) ->
         {
             var steps = createSteps(Map.of(BROKER + SUFFIX_HOST, HOST_LOCAL));
+            var template = templates.constructed().get(0);
+            when(template.getMessageConverter()).thenReturn(new SimpleMessageConverter());
+            steps.setMessageProperties(new ExamplesTable("|messageId|appId|\n|12345|myApp|"));
             steps.publishMessage(MESSAGE_BODY, ROUTING_KEY, BROKER);
-            verify(templates.constructed().get(0)).convertAndSend(ROUTING_KEY, MESSAGE_BODY);
-            verify(factories.constructed().get(0), never()).setPort(anyInt());
+
+            var messageCaptor = ArgumentCaptor.forClass(Message.class);
+            verify(template).send(eq(ROUTING_KEY), messageCaptor.capture());
+            var message = messageCaptor.getValue();
+            assertArrayEquals(MESSAGE_BODY.getBytes(StandardCharsets.UTF_8), message.getBody());
+            assertEquals("12345", message.getMessageProperties().getMessageId());
+            assertEquals("myApp", message.getMessageProperties().getAppId());
         });
     }
 
@@ -253,7 +299,7 @@ class RabbitMqStepsTests
     private RabbitMqSteps createSteps(Map<String, String> templateConfig)
     {
         when(propertyParser.getPropertyValuesByPrefix(RABBITMQ_PREFIX)).thenReturn(templateConfig);
-        return new RabbitMqSteps(propertyParser, variableContext, softAssert);
+        return new RabbitMqSteps(propertyParser, new SimpleTestContext(), variableContext, softAssert);
     }
 
     private static String noConfigurationMessage(String brokerKey)
