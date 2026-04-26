@@ -9,7 +9,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation('org.springframework.amqp:spring-rabbit:4.0.2')
+    implementation('org.springframework.amqp:spring-rabbit:4.0.3')
 
     testImplementation platform(libs.junit.bom)
     testImplementation(libs.junit.jupiter)
