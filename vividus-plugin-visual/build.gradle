@@ -23,6 +23,11 @@ tasks.register('blobStorageTest', Test) {
 }
 check.dependsOn blobStorageTest
 
+pmdBlobStorage {
+    ruleSetFiles = pmdMain.ruleSetFiles
+    maxFailures = pmdMain.maxFailures
+}
+
 dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-plugin-web-app')
