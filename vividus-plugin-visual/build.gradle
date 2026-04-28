@@ -5,6 +5,10 @@ sourceSets {
         compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
         runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
     }
+    blobStorageTest {
+        compileClasspath += sourceSets.blobStorage.output + sourceSets.blobStorage.compileClasspath
+        runtimeClasspath += sourceSets.blobStorage.output + sourceSets.blobStorage.runtimeClasspath
+    }
 }
 
 java {
@@ -13,9 +17,11 @@ java {
     }
 }
 
-configurations {
-    testImplementation.extendsFrom(blobStorageImplementation)
+tasks.register('blobStorageTest', Test) {
+    testClassesDirs = sourceSets.blobStorageTest.output.classesDirs
+    classpath = sourceSets.blobStorageTest.runtimeClasspath
 }
+check.dependsOn blobStorageTest
 
 dependencies {
     implementation project(':vividus-engine')
@@ -37,11 +43,18 @@ dependencies {
     implementation platform(libs.slf4j.bom)
     implementation(libs.slf4j.api)
 
-    testImplementation sourceSets.blobStorage.output
     testImplementation platform(libs.junit.bom)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platformLauncher)
     testImplementation platform(libs.mockito.bom)
     testImplementation(libs.mockito.junitJupiter)
     testImplementation(libs.slf4jTest)
+
+    blobStorageTestImplementation sourceSets.blobStorage.output
+    blobStorageTestImplementation platform(libs.junit.bom)
+    blobStorageTestImplementation(libs.junit.jupiter)
+    blobStorageTestRuntimeOnly(libs.junit.platformLauncher)
+    blobStorageTestImplementation platform(libs.mockito.bom)
+    blobStorageTestImplementation(libs.mockito.junitJupiter)
+    blobStorageTestImplementation(libs.slf4jTest)
 }
