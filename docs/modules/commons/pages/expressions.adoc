@@ -1057,6 +1057,44 @@ Finds the resource by its name and replaces the expression with the content of t
 Given I initialize scenario variable `my-data` with value `#{resourceToBase64(/data/body.txt)}`
 ----
 
+=== `loadFile`
+
+Loads text file by its path.
+
+[source, subs="+quotes"]
+----
+#{loadFile(*$filePath*)}
+----
+
+* *`$filePath`* - the path to the file to load
+
+NOTE: The expression fails if the file does not exist or the path points to a directory.
+
+.Load data from a file on the file system
+[source,gherkin]
+----
+Given I initialize scenario variable `my-data` with value `#{loadFile(/home/user/data/body.txt)}`
+----
+
+=== `loadBinaryFile`
+
+Loads binary file by its path.
+
+[source, subs="+quotes"]
+----
+#{loadBinaryFile(*$filePath*)}
+----
+
+* *`$filePath`* - the path to the file to load
+
+NOTE: The expression fails if the file does not exist or the path points to a directory.
+
+.Load binary data from a file on the file system
+[source,gherkin]
+----
+Given I initialize scenario variable `my-data` with value `#{loadBinaryFile(/home/user/data/image.png)}`
+----
+
 == URL parsing
 :url-argument: pass:quotes[*`$url`* - the URL to extract the component from.]
 
