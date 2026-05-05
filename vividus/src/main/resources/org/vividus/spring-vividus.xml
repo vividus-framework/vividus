@@ -97,6 +97,7 @@
     <bean class="org.vividus.expression.GroovyExpressionProcessor" />
     <bean class="org.vividus.expression.HashExpressionProcessors" />
     <bean class="org.vividus.expression.LoadBinaryResourceExpressionProcessor" />
+    <bean class="org.vividus.expression.LoadFileExpressionProcessors" />
     <bean class="org.vividus.expression.RandomIntExpressionProcessor" />
     <bean class="org.vividus.expression.ReplaceByRegExpProcessors" />
     <bean class="org.vividus.expression.RoundExpressionProcessor" />
