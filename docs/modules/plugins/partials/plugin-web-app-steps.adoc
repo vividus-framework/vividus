@@ -358,7 +358,7 @@ When I execute sequence of actions:
 
 This set of steps allows to validate the https://developer.mozilla.org/en-US/docs/Web/API/console[browser console logging messages].
 
-:log-levels: List of the comma-separated messages levels. The supported levels are: ERRORS, WARNINGS, INFOS.
+:log-entries: List of the comma-separated messages levels. The supported levels are: ERRORS, WARNINGS, INFOS.
 
 [TIP]
 =====
@@ -383,9 +383,9 @@ Validates the absence of log entries of the desired level in the browser console
 
 [source,gherkin]
 ----
-Then there are no browser console $logLevels
+Then there are no browser console $logEntries
 ----
-* `$logLevels` - {log-levels}
+* `$logEntries` - {log-entries}
 
 .Validate absence of JS errors
 [source,gherkin]
@@ -406,10 +406,10 @@ Then there are no browser console $logLevels by regex `$regex`
 _Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
 [source,gherkin]
 ----
-Then there are no browser console $logLevels by regex '$regex'
+Then there are no browser console $logEntries by regex '$regex'
 ----
 
-* `$logLevels` - {log-levels}
+* `$logEntries` - {log-entries}
 * `$regex` - The regular expression to match log entry messages.
 
 .Validate absence of JS error referencing user
@@ -425,9 +425,9 @@ Validates the presence of specific log entries of the desired level in the brows
 
 [source,gherkin]
 ----
-Then there are browser console $logLevels by regex `$regex`
+Then there are browser console $logEntries by regex `$regex`
 ----
-* `$logLevels` - {log-levels}
+* `$logEntries` - {log-entries}
 * `$regex` - The regular expression to match log entry messages.
 
 .Validate presence of JS errors referencing user
@@ -447,7 +447,7 @@ NOTE: Wait uses generic UI timeouts specified by the properties `ui.wait.timeout
 ----
 When I wait until browser console $logEntries by regex `$regex` appear and save all entries into $scopes variable `$variableName`
 ----
-* `$logLevels` - {log-levels}
+* `$logEntries` - {log-entries}
 * `$regex` - The regular expression to match log entry messages.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The name of the variable to save the value of the barcode.
