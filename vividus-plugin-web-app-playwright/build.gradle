@@ -31,5 +31,4 @@ dependencies {
     testImplementation(libs.mockito.junitJupiter)
     testImplementation(libs.slf4jTest)
     testImplementation(libs.equalsverifier)
-    testImplementation(libs.junitPioneer)
 }

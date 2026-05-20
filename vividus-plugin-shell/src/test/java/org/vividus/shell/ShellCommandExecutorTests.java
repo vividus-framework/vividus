@@ -39,7 +39,7 @@ import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.tika.utils.FileProcessResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junitpioneer.jupiter.SetSystemProperty;
+import org.junit.jupiter.api.util.SetSystemProperty;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;

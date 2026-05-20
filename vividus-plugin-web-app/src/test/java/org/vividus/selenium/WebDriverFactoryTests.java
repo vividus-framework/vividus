@@ -56,7 +56,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junitpioneer.jupiter.ClearSystemProperty;
+import org.junit.jupiter.api.util.ClearSystemProperty;
 import org.mockito.Mock;
 import org.mockito.MockedStatic.Verification;
 import org.mockito.junit.jupiter.MockitoExtension;
