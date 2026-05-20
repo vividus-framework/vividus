@@ -23,10 +23,10 @@ import java.util.Properties;
 
 import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.util.SetSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
-import org.junit.jupiter.api.util.SetSystemProperty;
 
 class DecryptorTests
 {
