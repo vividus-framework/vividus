@@ -40,12 +40,12 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import org.jbehave.core.model.Meta;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.util.SetSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.jupiter.api.util.SetSystemProperty;
 
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.model.Link;
