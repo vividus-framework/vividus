@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junitpioneer.jupiter.SetSystemProperty;
+import org.junit.jupiter.api.util.SetSystemProperty;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;

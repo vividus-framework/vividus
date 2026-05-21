@@ -29,11 +29,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.util.SetSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
-import org.junitpioneer.jupiter.SetSystemProperty;
 import org.springframework.beans.factory.BeanIsAbstractException;
 import org.vividus.log.LoggerConfigurer;
 
