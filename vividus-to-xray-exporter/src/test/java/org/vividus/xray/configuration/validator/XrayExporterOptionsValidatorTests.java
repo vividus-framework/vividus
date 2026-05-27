@@ -45,6 +45,8 @@ class XrayExporterOptionsValidatorTests
     private static final String CLOUD_CLIENT_ID_FIELD = "cloud.client-id";
     private static final String CLOUD_CLIENT_SECRET_FIELD = "cloud.client-secret";
     private static final String DATA_TXT = "data.txt";
+    private static final String CLIENT_ID = "id";
+    private static final String CLIENT_SECRET = "secret";
 
     @Mock private Errors errors;
 
@@ -121,7 +123,7 @@ class XrayExporterOptionsValidatorTests
         XrayExporterOptions options = createOptions(List.of());
         CloudOptions cloud = new CloudOptions();
         cloud.setEnabled(true);
-        cloud.setClientSecret("secret");
+        cloud.setClientSecret(CLIENT_SECRET);
         options.setCloudOptions(cloud);
 
         validator.validate(options, errors);
@@ -137,7 +139,7 @@ class XrayExporterOptionsValidatorTests
         XrayExporterOptions options = createOptions(List.of());
         CloudOptions cloud = new CloudOptions();
         cloud.setEnabled(true);
-        cloud.setClientId("id");
+        cloud.setClientId(CLIENT_ID);
         options.setCloudOptions(cloud);
 
         validator.validate(options, errors);
@@ -152,7 +154,7 @@ class XrayExporterOptionsValidatorTests
     {
         XrayExporterOptions options = createOptions(List.of());
         CloudOptions cloud = new CloudOptions();
-        cloud.setClientId("id");
+        cloud.setClientId(CLIENT_ID);
         options.setCloudOptions(cloud);
 
         validator.validate(options, errors);
@@ -167,7 +169,7 @@ class XrayExporterOptionsValidatorTests
     {
         XrayExporterOptions options = createOptions(List.of());
         CloudOptions cloud = new CloudOptions();
-        cloud.setClientSecret("secret");
+        cloud.setClientSecret(CLIENT_SECRET);
         options.setCloudOptions(cloud);
 
         validator.validate(options, errors);
@@ -183,8 +185,8 @@ class XrayExporterOptionsValidatorTests
         XrayExporterOptions options = createOptions(List.of());
         CloudOptions cloud = new CloudOptions();
         cloud.setEnabled(true);
-        cloud.setClientId("id");
-        cloud.setClientSecret("secret");
+        cloud.setClientId(CLIENT_ID);
+        cloud.setClientSecret(CLIENT_SECRET);
         options.setCloudOptions(cloud);
 
         validator.validate(options, errors);

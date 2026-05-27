@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.apache.hc.core5.http.ClassicHttpRequest;
@@ -43,9 +44,16 @@ class XrayCloudClientTests
     private static final String CLIENT_ID = "client-id";
     private static final String CLIENT_SECRET = "client-secret";
     private static final String TOKEN = "******";
-    private static final String AUTH_URL = BASE_URL + "/authenticate";
-    private static final String IMPORT_URL = BASE_URL + "/import/execution";
-    private static final String GRAPHQL_URL = BASE_URL + "/graphql";
+    private static final String AUTH_PATH = "/authenticate";
+    private static final String IMPORT_PATH = "/import/execution";
+    private static final String GRAPHQL_PATH = "/graphql";
+    private static final String AUTH_URL = BASE_URL + AUTH_PATH;
+    private static final String IMPORT_URL = BASE_URL + IMPORT_PATH;
+    private static final String GRAPHQL_URL = BASE_URL + GRAPHQL_PATH;
+    private static final String DOUBLE_QUOTE = "\"";
+    private static final String TEST_KEY = "TEST-1";
+    private static final String IMPORT_RESPONSE_JSON = "{\"key\":\"" + TEST_KEY + "\"}";
+    private static final String EXECUTION_JSON = "{\"tests\":[]}";
 
     @Mock private IHttpClient httpClient;
 
@@ -64,22 +72,21 @@ class XrayCloudClientTests
 
     private HttpResponse authResponse()
     {
-        return response(HttpStatus.SC_OK, "\"" + TOKEN + "\"");
+        return response(HttpStatus.SC_OK, DOUBLE_QUOTE + TOKEN + DOUBLE_QUOTE);
     }
 
     @Test
     void shouldAuthenticateAndImportExecution() throws IOException
     {
-        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith("/authenticate"))))
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
                 .thenReturn(authResponse());
-        String importResponseBody = "{\"key\":\"TEST-1\"}";
-        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith("/import/execution"))))
-                .thenReturn(response(HttpStatus.SC_OK, importResponseBody));
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(IMPORT_PATH))))
+                .thenReturn(response(HttpStatus.SC_OK, IMPORT_RESPONSE_JSON));
 
         XrayCloudClient client = createClient();
-        String key = client.importExecution("{\"tests\":[]}");
+        String key = client.importExecution(EXECUTION_JSON);
 
-        assertEquals("TEST-1", key);
+        assertEquals(TEST_KEY, key);
         verify(httpClient).execute(argThat(req -> req != null && requestMatchesUrl(req, AUTH_URL)));
         verify(httpClient).execute(argThat(req -> req != null && requestMatchesUrl(req, IMPORT_URL)));
     }
@@ -87,14 +94,14 @@ class XrayCloudClientTests
     @Test
     void shouldReuseTokenOnSecondCall() throws IOException
     {
-        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith("/authenticate"))))
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
                 .thenReturn(authResponse());
-        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith("/import/execution"))))
-                .thenReturn(response(HttpStatus.SC_OK, "{\"key\":\"TEST-1\"}"));
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(IMPORT_PATH))))
+                .thenReturn(response(HttpStatus.SC_OK, IMPORT_RESPONSE_JSON));
 
         XrayCloudClient client = createClient();
-        client.importExecution("{\"tests\":[]}");
-        client.importExecution("{\"tests\":[]}");
+        client.importExecution(EXECUTION_JSON);
+        client.importExecution(EXECUTION_JSON);
 
         // authenticate should be called only once
         verify(httpClient, times(1)).execute(argThat(req -> req != null && requestMatchesUrl(req, AUTH_URL)));
@@ -105,17 +112,17 @@ class XrayCloudClientTests
     void shouldRetryOnUnauthorizedResponse() throws IOException
     {
         String newToken = "new-token";
-        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith("/authenticate"))))
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
                 .thenReturn(authResponse())
-                .thenReturn(response(HttpStatus.SC_OK, "\"" + newToken + "\""));
-        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith("/import/execution"))))
+                .thenReturn(response(HttpStatus.SC_OK, DOUBLE_QUOTE + newToken + DOUBLE_QUOTE));
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(IMPORT_PATH))))
                 .thenReturn(response(HttpStatus.SC_UNAUTHORIZED, ""))
-                .thenReturn(response(HttpStatus.SC_OK, "{\"key\":\"TEST-1\"}"));
+                .thenReturn(response(HttpStatus.SC_OK, IMPORT_RESPONSE_JSON));
 
         XrayCloudClient client = createClient();
-        String key = client.importExecution("{\"tests\":[]}");
+        String key = client.importExecution(EXECUTION_JSON);
 
-        assertEquals("TEST-1", key);
+        assertEquals(TEST_KEY, key);
         verify(httpClient, times(2)).execute(argThat(req -> req != null && requestMatchesUrl(req, AUTH_URL)));
         verify(httpClient, times(2)).execute(argThat(req -> req != null && requestMatchesUrl(req, IMPORT_URL)));
     }
@@ -123,11 +130,11 @@ class XrayCloudClientTests
     @Test
     void shouldThrowIoExceptionOnAuthenticationFailure() throws IOException
     {
-        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith("/authenticate"))))
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
                 .thenReturn(response(HttpStatus.SC_FORBIDDEN, "Forbidden"));
 
         XrayCloudClient client = createClient();
-        IOException thrown = assertThrows(IOException.class, () -> client.importExecution("{\"tests\":[]}"));
+        IOException thrown = assertThrows(IOException.class, () -> client.importExecution(EXECUTION_JSON));
 
         assertTrue(thrown.getMessage().contains("authentication failed"));
     }
@@ -135,13 +142,13 @@ class XrayCloudClientTests
     @Test
     void shouldThrowIoExceptionOnNon2xxResponse() throws IOException
     {
-        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith("/authenticate"))))
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
                 .thenReturn(authResponse());
-        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith("/import/execution"))))
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(IMPORT_PATH))))
                 .thenReturn(response(HttpStatus.SC_BAD_REQUEST, "bad request"));
 
         XrayCloudClient client = createClient();
-        IOException thrown = assertThrows(IOException.class, () -> client.importExecution("{\"tests\":[]}"));
+        IOException thrown = assertThrows(IOException.class, () -> client.importExecution(EXECUTION_JSON));
 
         assertTrue(thrown.getMessage().contains(String.valueOf(HttpStatus.SC_BAD_REQUEST)));
     }
@@ -149,7 +156,7 @@ class XrayCloudClientTests
     @Test
     void shouldAddTestsToTestSet() throws IOException
     {
-        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith("/authenticate"))))
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
                 .thenReturn(authResponse());
 
         String testSetIssueId = "uuid-set-1";
@@ -172,7 +179,7 @@ class XrayCloudClientTests
         String mutationResponse = "{\"data\":{\"addTestsToTestSet\":{\"addedTests\":[\"" + testIssueId1
                 + "\",\"" + testIssueId2 + "\"],\"warning\":null}}}";
 
-        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith("/graphql"))))
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(GRAPHQL_PATH))))
                 .thenReturn(response(HttpStatus.SC_OK, testSetResponse))
                 .thenReturn(response(HttpStatus.SC_OK, testsResponse))
                 .thenReturn(response(HttpStatus.SC_OK, mutationResponse));
@@ -189,7 +196,7 @@ class XrayCloudClientTests
         {
             return url.equals(request.getUri().toString());
         }
-        catch (Exception e)
+        catch (URISyntaxException e)
         {
             return false;
         }
