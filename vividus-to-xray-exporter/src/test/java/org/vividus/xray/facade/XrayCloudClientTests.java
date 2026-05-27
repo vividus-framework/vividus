@@ -16,6 +16,9 @@
 
 package org.vividus.xray.facade;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,6 +32,11 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import com.github.valfirst.slf4jtest.LoggingEvent;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
+
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -38,7 +46,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class XrayCloudClientTests
 {
     private static final String BASE_URL = "https://xray.cloud.getxray.app/api/v2";
@@ -57,6 +65,8 @@ class XrayCloudClientTests
     private static final String EXECUTION_JSON = "{\"tests\":[]}";
 
     @Mock private IHttpClient httpClient;
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(XrayCloudClient.class);
 
     private XrayCloudClient createClient()
     {
@@ -213,6 +223,10 @@ class XrayCloudClientTests
                 .thenReturn(response(HttpStatus.SC_OK, mutationResponse));
 
         createClient().addTestsToTestSet("TS-1", List.of(testKey));
+
+        assertThat(logger.getLoggingEvents(), hasItem(
+                LoggingEvent.warn("Xray Cloud addTestsToTestSet warning: {}",
+                        "Some tests already belong to the test set")));
     }
 
     @Test
