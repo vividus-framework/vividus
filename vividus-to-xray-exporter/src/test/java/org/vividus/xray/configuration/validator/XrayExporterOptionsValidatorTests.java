@@ -16,12 +16,15 @@
 
 package org.vividus.xray.configuration.validator;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -93,6 +96,22 @@ class XrayExporterOptionsValidatorTests
         verify(errors).rejectValue(TEST_EXECUTION_ATTACHMENTS_FIELD, StringUtils.EMPTY,
                 "The attachment folder at path " + directory + " is empty");
         verifyNoMoreInteractions(errors);
+    }
+
+    @Test
+    void shouldThrowUncheckedIoExceptionWhenDirectoryListingFails(@TempDir Path directory)
+    {
+        assumeTrue(directory.toFile().setReadable(false),
+                "Cannot remove directory read permissions (likely running as root)");
+        try
+        {
+            XrayExporterOptions options = createOptions(List.of(directory));
+            assertThrows(UncheckedIOException.class, () -> validator.validate(options, errors));
+        }
+        finally
+        {
+            directory.toFile().setReadable(true);
+        }
     }
 
     @Test

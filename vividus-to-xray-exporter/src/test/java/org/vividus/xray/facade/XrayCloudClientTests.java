@@ -191,6 +191,91 @@ class XrayCloudClientTests
         verify(httpClient, times(3)).execute(argThat(req -> req != null && requestMatchesUrl(req, GRAPHQL_URL)));
     }
 
+    @Test
+    void shouldLogWarningWhenAddTestsToTestSetReturnsWarning() throws IOException
+    {
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
+                .thenReturn(authResponse());
+
+        String testSetIssueId = "uuid-set-1";
+        String testIssueId = "uuid-test-1";
+        String testKey = "TC-1";
+        String testSetResponse = String.format(
+                "{\"data\":{\"getTestSets\":{\"results\":[{\"issueId\":\"%s\"}]}}}", testSetIssueId);
+        String testsResponse = String.format(
+                "{\"data\":{\"getTests\":{\"results\":[{\"issueId\":\"%s\",\"jira\":{\"key\":\"%s\"}}]}}}",
+                testIssueId, testKey);
+        String mutationResponse = "{\"data\":{\"addTestsToTestSet\":{\"addedTests\":[],\"warning\":\"Some tests already belong to the test set\"}}}";
+
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(GRAPHQL_PATH))))
+                .thenReturn(response(HttpStatus.SC_OK, testSetResponse))
+                .thenReturn(response(HttpStatus.SC_OK, testsResponse))
+                .thenReturn(response(HttpStatus.SC_OK, mutationResponse));
+
+        createClient().addTestsToTestSet("TS-1", List.of(testKey));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTestKeyNotFoundInGraphQLResponse() throws IOException
+    {
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
+                .thenReturn(authResponse());
+
+        String testSetIssueId = "uuid-set-1";
+        String testSetResponse = String.format(
+                "{\"data\":{\"getTestSets\":{\"results\":[{\"issueId\":\"%s\"}]}}}", testSetIssueId);
+        String testsResponse = "{\"data\":{\"getTests\":{\"results\":[{\"issueId\":\"uuid-test-2\","
+                + "\"jira\":{\"key\":\"TC-2\"}}]}}}";
+
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(GRAPHQL_PATH))))
+                .thenReturn(response(HttpStatus.SC_OK, testSetResponse))
+                .thenReturn(response(HttpStatus.SC_OK, testsResponse));
+
+        XrayCloudClient client = createClient();
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> client.addTestsToTestSet("TS-1", List.of("TC-1")));
+
+        assertTrue(thrown.getMessage().contains("TC-1"));
+    }
+
+    @Test
+    void shouldRetryExecuteGraphQLOnUnauthorizedResponse() throws IOException
+    {
+        String newToken = "new-token";
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
+                .thenReturn(authResponse())
+                .thenReturn(response(HttpStatus.SC_OK, DOUBLE_QUOTE + newToken + DOUBLE_QUOTE));
+
+        String testSetIssueId = "uuid-set-1";
+        String testIssueId = "uuid-test-1";
+        String testKey = "TC-1";
+        String testSetResponse = String.format(
+                "{\"data\":{\"getTestSets\":{\"results\":[{\"issueId\":\"%s\"}]}}}", testSetIssueId);
+        String testsResponse = String.format(
+                "{\"data\":{\"getTests\":{\"results\":[{\"issueId\":\"%s\",\"jira\":{\"key\":\"%s\"}}]}}}",
+                testIssueId, testKey);
+        String mutationResponse = "{\"data\":{\"addTestsToTestSet\":{\"addedTests\":[\""
+                + testIssueId + "\"],\"warning\":null}}}";
+
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(GRAPHQL_PATH))))
+                .thenReturn(response(HttpStatus.SC_UNAUTHORIZED, ""))
+                .thenReturn(response(HttpStatus.SC_OK, testSetResponse))
+                .thenReturn(response(HttpStatus.SC_OK, testsResponse))
+                .thenReturn(response(HttpStatus.SC_OK, mutationResponse));
+
+        createClient().addTestsToTestSet("TS-1", List.of(testKey));
+
+        verify(httpClient, times(2)).execute(argThat(req -> req != null && requestMatchesUrl(req, AUTH_URL)));
+        verify(httpClient, times(4)).execute(argThat(req -> req != null && requestMatchesUrl(req, GRAPHQL_URL)));
+    }
+
+    @Test
+    void shouldThrowIoExceptionWhenAuthRequestBuildFails()
+    {
+        XrayCloudClient client = new XrayCloudClient("http://host:invalid_port", CLIENT_ID, CLIENT_SECRET, httpClient);
+        assertThrows(IOException.class, () -> client.importExecution(EXECUTION_JSON));
+    }
+
     private static boolean requestMatchesUrl(ClassicHttpRequest request, String url)
     {
         try
