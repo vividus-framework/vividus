@@ -78,6 +78,49 @@ xray-exporter.project-key=ABBA
 xray-exporter.json-results-directory=/Users/happytester/Repositories/app-tests/output/results/jbehave
 ----
 
+=== Xray Cloud Configuration
+
+By default, VIVIDUS exports results to an on-premise Xray Server (Jira plugin). To export to https://www.getxray.app/[Xray Cloud], enable the cloud mode and provide API credentials.
+
+[cols="2,1,3", options="header"]
+|===
+
+|Property
+|Required
+|Description
+
+|`xray-exporter.cloud.enabled`
+|false
+|Set to `true` to enable Xray Cloud mode (default: `false`)
+
+|*`xray-exporter.cloud.client-id`*
+|true (when cloud is enabled)
+|Xray Cloud API client ID (obtained from the Xray app settings in Jira)
+
+|*`xray-exporter.cloud.client-secret`*
+|true (when cloud is enabled)
+|Xray Cloud API client secret (obtained from the Xray app settings in Jira)
+
+|`xray-exporter.cloud.api-base-url`
+|false
+a|Base URL for the Xray Cloud REST API. Default: `https://xray.cloud.getxray.app/api/v2`.
+
+Override this value when using a regional Xray Cloud deployment, for example:
+* `https://us.xray.cloud.getxray.app/api/v2`
+* `https://eu.xray.cloud.getxray.app/api/v2`
+
+|===
+
+NOTE: When `xray-exporter.cloud.enabled=true`, the `xray-exporter.jira-instance-key` property is not used.
+
+.application.properties (Xray Cloud example)
+[source,properties]
+----
+xray-exporter.cloud.enabled=true
+xray-exporter.cloud.client-id=<YOUR_CLIENT_ID>
+xray-exporter.cloud.client-secret=<YOUR_CLIENT_SECRET>
+----
+
 === Test Execution
 
 [cols="2,1,3", options="header"]
