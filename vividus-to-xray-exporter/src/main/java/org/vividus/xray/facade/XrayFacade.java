@@ -32,11 +32,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
-import org.apache.commons.lang3.function.FailableFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.jira.JiraClient;
-import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.mapper.JiraEntityMapper;
@@ -46,7 +43,6 @@ import org.vividus.util.json.JsonPathUtils;
 import org.vividus.xray.databind.CucumberTestCaseSerializer;
 import org.vividus.xray.databind.ManualTestCaseSerializer;
 import org.vividus.xray.model.AbstractTestCase;
-import org.vividus.xray.model.AddOperationRequest;
 import org.vividus.xray.model.CucumberTestCase;
 import org.vividus.xray.model.ManualTestCase;
 import org.vividus.xray.model.TestExecution;
@@ -63,17 +59,17 @@ public class XrayFacade
     private final List<String> editableStatuses;
     private final Optional<String> jiraInstanceKey;
     private final JiraFacade jiraFacade;
-    private final JiraClientProvider jiraClientProvider;
+    private final XrayClient xrayClient;
     private final ObjectMapper objectMapper;
 
     public XrayFacade(Optional<String> jiraInstanceKey, List<String> editableStatuses, JiraFacade jiraFacade,
-            JiraClientProvider jiraClientProvider, ManualTestCaseSerializer manualTestSerializer,
+            XrayClient xrayClient, ManualTestCaseSerializer manualTestSerializer,
             CucumberTestCaseSerializer cucumberTestSerializer)
     {
         this.jiraInstanceKey = jiraInstanceKey;
         this.editableStatuses = editableStatuses;
         this.jiraFacade = jiraFacade;
-        this.jiraClientProvider = jiraClientProvider;
+        this.xrayClient = xrayClient;
         this.objectMapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .setDefaultPropertyInclusion(Include.NON_NULL)
@@ -127,40 +123,25 @@ public class XrayFacade
     public void createTestExecution(TestExecution testExecution, List<Path> attachments)
             throws IOException, JiraConfigurationException
     {
-        importTestExecution(testExecution, (request, client) ->
-        {
-            LOGGER.atInfo().addArgument(request).log("Creating Test Execution: {}");
-            String response = client.apply(jiraClientProvider.getByJiraConfigurationKey(jiraInstanceKey));
-            String testExecutionKey = JsonPathUtils.getData(response, "$.testExecIssue.key");
-            addAttachments(testExecutionKey, attachments);
-            LOGGER.atInfo().addArgument(testExecutionKey).log("Test Execution with key {} has been created");
-        });
+        String testExecutionRequest = objectMapper.writeValueAsString(testExecution);
+        LOGGER.atInfo().addArgument(testExecutionRequest).log("Creating Test Execution: {}");
+        String testExecutionKey = xrayClient.importExecution(testExecutionRequest);
+        addAttachments(testExecutionKey, attachments);
+        LOGGER.atInfo().addArgument(testExecutionKey).log("Test Execution with key {} has been created");
     }
 
     public void updateTestExecution(TestExecution testExecution, List<Path> attachments)
             throws IOException, JiraConfigurationException
     {
-        importTestExecution(testExecution, (request, client) ->
-        {
-            String testExecutionKey = testExecution.getTestExecutionKey();
-            LOGGER.atInfo()
-                  .addArgument(testExecutionKey)
-                  .addArgument(request)
-                  .log("Updating Test Execution with ID {}: {}");
-            client.apply(jiraClientProvider.getByIssueKey(testExecutionKey));
-            addAttachments(testExecutionKey, attachments);
-            LOGGER.atInfo().addArgument(testExecutionKey).log("Test Execution with key {} has been updated");
-        });
-    }
-
-    private void importTestExecution(TestExecution testExecution, ExecutionImportConsumer importer)
-            throws IOException, JiraConfigurationException
-    {
+        String testExecutionKey = testExecution.getTestExecutionKey();
         String testExecutionRequest = objectMapper.writeValueAsString(testExecution);
-        FailableFunction<JiraClient, String, IOException> importFunction = client -> client
-                .executePost("/rest/raven/1.0/import/execution", testExecutionRequest);
-
-        importer.consume(testExecutionRequest, importFunction);
+        LOGGER.atInfo()
+              .addArgument(testExecutionKey)
+              .addArgument(testExecutionRequest)
+              .log("Updating Test Execution with ID {}: {}");
+        xrayClient.importExecution(testExecutionRequest);
+        addAttachments(testExecutionKey, attachments);
+        LOGGER.atInfo().addArgument(testExecutionKey).log("Test Execution with key {} has been updated");
     }
 
     public void addAttachments(String testExecutionKey, List<Path> attachmentPaths)
@@ -218,14 +199,11 @@ public class XrayFacade
     public void updateTestSet(String testSetKey, List<String> testCaseKeys)
             throws IOException, JiraConfigurationException
     {
-        AddOperationRequest request = new AddOperationRequest(testCaseKeys);
-        String requestBody = objectMapper.writeValueAsString(request);
         LOGGER.atInfo()
               .addArgument(() -> StringUtils.join(testCaseKeys, ", "))
               .addArgument(testSetKey)
               .log("Add {} test cases to Test Set with ID {}");
-        jiraClientProvider.getByIssueKey(testSetKey).executePost("/rest/raven/1.0/api/testset/" + testSetKey + "/test",
-                requestBody);
+        xrayClient.addTestsToTestSet(testSetKey, testCaseKeys);
     }
 
     private void checkIfIssueEditable(JiraEntity jiraEntity) throws NonEditableIssueStatusException
@@ -268,12 +246,5 @@ public class XrayFacade
         {
             super("Issue " + testCaseId + " is in non-editable '" + status + "' status");
         }
-    }
-
-    @FunctionalInterface
-    private interface ExecutionImportConsumer
-    {
-        void consume(String request, FailableFunction<JiraClient, String, IOException> client)
-                throws IOException, JiraConfigurationException;
     }
 }

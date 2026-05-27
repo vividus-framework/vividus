@@ -28,11 +28,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.vividus.xray.configuration.XrayExporterOptions;
+import org.vividus.xray.configuration.XrayExporterOptions.CloudOptions;
 
 @Component(EnableConfigurationProperties.VALIDATOR_BEAN_NAME)
 public class XrayExporterOptionsValidator implements Validator
 {
     private static final String TEST_EXECUTION_ATTACHMENTS_FIELD = "test-execution.attachments";
+    private static final String CLOUD_CLIENT_ID_FIELD = "cloud.client-id";
+    private static final String CLOUD_CLIENT_SECRET_FIELD = "cloud.client-secret";
 
     @Override
     public boolean supports(Class<?> clazz)
@@ -75,5 +78,33 @@ public class XrayExporterOptionsValidator implements Validator
                         "Please do not try to publish the file system root as the attachment");
             }
         });
+
+        CloudOptions cloud = options.getCloudOptions();
+        if (cloud.isEnabled())
+        {
+            if (StringUtils.isBlank(cloud.getClientId()))
+            {
+                errors.rejectValue(CLOUD_CLIENT_ID_FIELD, StringUtils.EMPTY,
+                        "Xray Cloud client ID must be set when cloud mode is enabled");
+            }
+            if (StringUtils.isBlank(cloud.getClientSecret()))
+            {
+                errors.rejectValue(CLOUD_CLIENT_SECRET_FIELD, StringUtils.EMPTY,
+                        "Xray Cloud client secret must be set when cloud mode is enabled");
+            }
+        }
+        else
+        {
+            if (StringUtils.isNotBlank(cloud.getClientId()))
+            {
+                errors.rejectValue(CLOUD_CLIENT_ID_FIELD, StringUtils.EMPTY,
+                        "Xray Cloud client ID must not be set when cloud mode is disabled");
+            }
+            if (StringUtils.isNotBlank(cloud.getClientSecret()))
+            {
+                errors.rejectValue(CLOUD_CLIENT_SECRET_FIELD, StringUtils.EMPTY,
+                        "Xray Cloud client secret must not be set when cloud mode is disabled");
+            }
+        }
     }
 }
