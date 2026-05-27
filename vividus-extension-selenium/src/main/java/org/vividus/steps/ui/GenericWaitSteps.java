@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.annotation.Replacement;
 import org.vividus.selenium.locator.Locator;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
@@ -47,6 +48,7 @@ import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 
+@SuppressWarnings("PMD.ExcessiveImports")
 @TakeScreenshotOnFailure
 public class GenericWaitSteps
 {
@@ -103,7 +105,12 @@ public class GenericWaitSteps
      * Step supports only <b>VISIBLE</b> elements waiting. If locator will be configured to <b>ALL</b>
      * or <b>INVISIBLE</b> exception will be thrown.
      * @param locator locator to locate element
+     * @deprecated Current step has invalid behavior when there is more than one element on a page, use step instead:
+     * When I wait until all elements located by `$locator` disappear
      */
+    @Deprecated(since = "0.6.17", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0",
+            replacementFormatPattern = "When I wait until all elements located by `%1$s` disappear")
     @When("I wait until element located by `$locator` disappears")
     public void waitForElementDisappearance(Locator locator)
     {

@@ -11,11 +11,13 @@ When I change context to element located by `cssSelector(.external)`
 When I COMPARE_AGAINST baseline with name `moving-element-after-stopping#{eval(isWindows ? '-windows' : '')}`
 When I reset context
 
-Scenario: Step verification "When I wait until element located by '$locator' disappears"
+Scenario: Step verification: "When I wait until all elements located by `$locator` disappear", "When I wait until element located by '$locator' disappears"
 Given I am on page with URL `${vividus-test-site-url}/elementState.html`
 Given I initialize scenario variable `disappearing-locator` with value `By.id(element-to-hide)`
 Then number of elements found by `${disappearing-locator}` is equal to `1`
 When I click on element located by `id(button-hide)`
+When I wait until all elements located by `${disappearing-locator}` disappear
+!-- Deprecated
 When I wait until element located by `${disappearing-locator}` disappears
 Then number of elements found by `${disappearing-locator}` is equal to `0`
 

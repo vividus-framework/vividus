@@ -1,0 +1,2 @@
+Composite: When I wait until all elements located by `$locator` disappear
+When I wait until number of elements located by `<locator>` is equal to 0
