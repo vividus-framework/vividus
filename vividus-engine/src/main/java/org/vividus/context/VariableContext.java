@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,13 @@ public interface VariableContext
 
     void putVariable(VariableScope variableScope, String variableKey, Object variableValue);
 
-    void putVariable(Set<VariableScope> variableScopes, String variableKey, Object variableValue);
+    default void putVariable(Set<VariableScope> variableScopes, String variableKey, Object variableValue)
+    {
+        putVariable(variableScopes, variableKey, variableValue, true);
+    }
+
+    void putVariable(Set<VariableScope> variableScopes, String variableKey, Object variableValue,
+            boolean verboseLogging);
 
     void initVariables();
 
