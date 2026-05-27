@@ -38,13 +38,15 @@ import org.vividus.jira.JiraConfigurationException;
 class XrayServerClientTests
 {
     private static final String EXECUTION_RESPONSE =
-            "{\"testExecIssue\":{\"id\":\"01101\",\"key\":\"TEST-1\",\"self\":\"https://jira.com/rest/api/2/issue/01101\"}}";
+            "{\"testExecIssue\":{\"id\":\"01101\",\"key\":\"TEST-1\","
+            + "\"self\":\"https://jira.com/rest/api/2/issue/01101\"}}";
     private static final String ISSUE_KEY = "TEST-1";
     private static final String TEST_SET_KEY = "TEST-2";
     private static final String TEST_CASE_KEY_1 = "TEST-3";
     private static final String TEST_CASE_KEY_2 = "TEST-4";
     private static final String IMPORT_ENDPOINT = "/rest/raven/1.0/import/execution";
     private static final String EXECUTION_JSON = "{\"tests\":[]}";
+    private static final String CONFIG_ERROR = "config error";
 
     @Mock private JiraClientProvider jiraClientProvider;
     @Mock private JiraClient jiraClient;
@@ -78,7 +80,7 @@ class XrayServerClientTests
     @Test
     void shouldWrapJiraConfigurationExceptionOnImportExecution() throws JiraConfigurationException
     {
-        JiraConfigurationException cause = new JiraConfigurationException("config error");
+        JiraConfigurationException cause = new JiraConfigurationException(CONFIG_ERROR);
         when(jiraClientProvider.getByJiraConfigurationKey(Optional.empty())).thenThrow(cause);
 
         XrayServerClient client = new XrayServerClient(jiraClientProvider, Optional.empty());
@@ -104,7 +106,7 @@ class XrayServerClientTests
     @Test
     void shouldWrapJiraConfigurationExceptionOnAddTestsToTestSet() throws JiraConfigurationException
     {
-        JiraConfigurationException cause = new JiraConfigurationException("config error");
+        JiraConfigurationException cause = new JiraConfigurationException(CONFIG_ERROR);
         when(jiraClientProvider.getByIssueKey(TEST_SET_KEY)).thenThrow(cause);
 
         XrayServerClient client = new XrayServerClient(jiraClientProvider, Optional.empty());

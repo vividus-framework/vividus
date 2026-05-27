@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -47,39 +46,43 @@ public class XrayExporterOptionsValidator implements Validator
     public void validate(Object target, Errors errors)
     {
         XrayExporterOptions options = (XrayExporterOptions) target;
-        List<Path> attachments = options.getTestExecutionOptions().getAttachments();
+        options.getTestExecutionOptions().getAttachments().forEach(
+                attachment -> validateAttachment(attachment, errors));
+        validateCloudOptions(options.getCloudOptions(), errors);
+    }
 
-        attachments.forEach(attachment ->
+    private void validateAttachment(Path attachment, Errors errors)
+    {
+        if (!Files.exists(attachment))
         {
-            if (!Files.exists(attachment))
+            errors.rejectValue(TEST_EXECUTION_ATTACHMENTS_FIELD, StringUtils.EMPTY,
+                    "The attachment file at path " + attachment + " does not exist");
+            return;
+        }
+
+        try
+        {
+            if (Files.isDirectory(attachment) && Files.list(attachment).findAny().isEmpty())
             {
                 errors.rejectValue(TEST_EXECUTION_ATTACHMENTS_FIELD, StringUtils.EMPTY,
-                        "The attachment file at path " + attachment + " does not exist");
+                        "The attachment folder at path " + attachment + " is empty");
                 return;
             }
+        }
+        catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
+        }
 
-            try
-            {
-                if (Files.isDirectory(attachment) && Files.list(attachment).findAny().isEmpty())
-                {
-                    errors.rejectValue(TEST_EXECUTION_ATTACHMENTS_FIELD, StringUtils.EMPTY,
-                            "The attachment folder at path " + attachment + " is empty");
-                    return;
-                }
-            }
-            catch (IOException e)
-            {
-                throw new UncheckedIOException(e);
-            }
+        if (attachment.getRoot().equals(attachment))
+        {
+            errors.rejectValue(TEST_EXECUTION_ATTACHMENTS_FIELD, StringUtils.EMPTY,
+                    "Please do not try to publish the file system root as the attachment");
+        }
+    }
 
-            if (attachment.getRoot().equals(attachment))
-            {
-                errors.rejectValue(TEST_EXECUTION_ATTACHMENTS_FIELD, StringUtils.EMPTY,
-                        "Please do not try to publish the file system root as the attachment");
-            }
-        });
-
-        CloudOptions cloud = options.getCloudOptions();
+    private void validateCloudOptions(CloudOptions cloud, Errors errors)
+    {
         if (cloud.isEnabled())
         {
             if (StringUtils.isBlank(cloud.getClientId()))

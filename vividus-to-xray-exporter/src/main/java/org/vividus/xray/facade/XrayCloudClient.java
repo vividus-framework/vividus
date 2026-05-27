@@ -43,6 +43,10 @@ public class XrayCloudClient implements XrayClient
     private static final String AUTHORIZATION = "Authorization";
     private static final String XRAY_CLOUD_API = "Xray Cloud API";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final String IMPORT_EXECUTION_PATH = "/import/execution";
+    private static final String GRAPHQL_PATH = "/graphql";
+    private static final String COMMA_SEPARATOR = ", ";
+    private static final String DOUBLE_QUOTE = "\"";
 
     private final String apiBaseUrl;
     private final String clientId;
@@ -62,11 +66,11 @@ public class XrayCloudClient implements XrayClient
     public String importExecution(String executionJson) throws IOException
     {
         String token = getToken();
-        HttpResponse response = post(apiBaseUrl + "/import/execution", executionJson, token);
+        HttpResponse response = post(apiBaseUrl + IMPORT_EXECUTION_PATH, executionJson, token);
         if (response.getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
         {
             invalidateToken(token);
-            response = post(apiBaseUrl + "/import/execution", executionJson, getToken());
+            response = post(apiBaseUrl + IMPORT_EXECUTION_PATH, executionJson, getToken());
         }
         ensureSuccessful(response);
         return JsonPathUtils.getData(response.getResponseBodyAsString(), "$.key");
@@ -92,7 +96,7 @@ public class XrayCloudClient implements XrayClient
 
     private List<String> resolveTestIssueIds(List<String> testCaseKeys) throws IOException
     {
-        String jql = String.join(", ", testCaseKeys);
+        String jql = String.join(COMMA_SEPARATOR, testCaseKeys);
         String query = String.format(
                 "{ getTests(jql: \"issueKey in (%s)\", limit: %d) { results { issueId jira(fields: [\"key\"]) } } }",
                 jql, testCaseKeys.size());
@@ -121,8 +125,8 @@ public class XrayCloudClient implements XrayClient
     private void addTestsToTestSetById(String testSetIssueId, List<String> testIssueIds) throws IOException
     {
         String testIdsParam = testIssueIds.stream()
-                .map(id -> "\"" + id + "\"")
-                .collect(Collectors.joining(", "));
+                .map(id -> DOUBLE_QUOTE + id + DOUBLE_QUOTE)
+                .collect(Collectors.joining(COMMA_SEPARATOR));
         String mutation = String.format(
                 "mutation { addTestsToTestSet(issueId: \"%s\", testIssueIds: [%s]) { addedTests warning } }",
                 testSetIssueId, testIdsParam);
@@ -138,11 +142,11 @@ public class XrayCloudClient implements XrayClient
     {
         String token = getToken();
         String bodyJson = OBJECT_MAPPER.createObjectNode().put("query", query).toString();
-        HttpResponse response = post(apiBaseUrl + "/graphql", bodyJson, token);
+        HttpResponse response = post(apiBaseUrl + GRAPHQL_PATH, bodyJson, token);
         if (response.getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
         {
             invalidateToken(token);
-            response = post(apiBaseUrl + "/graphql", bodyJson, getToken());
+            response = post(apiBaseUrl + GRAPHQL_PATH, bodyJson, getToken());
         }
         ensureSuccessful(response);
         return response.getResponseBodyAsString();
@@ -200,8 +204,8 @@ public class XrayCloudClient implements XrayClient
                     .build());
             if (response.getStatusCode() != HttpStatus.SC_OK)
             {
-                throw new IOException("Xray Cloud authentication failed with status " + response.getStatusCode()
-                        + ": " + response.getResponseBodyAsString());
+                throw new IOException(String.format("Xray Cloud authentication failed with status %d: %s",
+                        response.getStatusCode(), response.getResponseBodyAsString()));
             }
             String tokenJson = response.getResponseBodyAsString();
             // Response is a JSON string like "eyJ..." — strip surrounding quotes
@@ -219,8 +223,8 @@ public class XrayCloudClient implements XrayClient
         if (status < HttpStatus.SC_OK || status >= HttpStatus.SC_MULTIPLE_CHOICES)
         {
             LOGGER.atError().addArgument(XRAY_CLOUD_API).addArgument(response).log("{} response: {}");
-            throw new IOException("Xray Cloud API responded with unexpected status " + status + ": "
-                    + response.getResponseBodyAsString());
+            throw new IOException(String.format("Xray Cloud API responded with unexpected status %d: %s",
+                    status, response.getResponseBodyAsString()));
         }
     }
 }
