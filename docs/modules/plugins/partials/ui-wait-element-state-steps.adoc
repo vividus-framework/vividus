@@ -17,9 +17,9 @@ When I wait until element located by `$locator` appears
 When I wait until element located by `id(welcome-image)` appears
 ----
 
-=== Wait for element disappearance
+=== Wait for elements disappearance
 
-Waits for disappearance of the element by the locator.
+Waits for disappearance of all elements by the locator.
 
 NOTE: If the element doesn't exist on the page/context, the step will immediately complete successfully.
 Checking the element on the page (if needed) should be done in a separate step (e.g. <<_wait_for_element_appearance>> or xref:plugin-html.adoc#_validate_elements[Validate elements]).
@@ -28,15 +28,21 @@ WARNING: It's forbidden to use <<_visibility_types>> in the locator.
 
 [source,gherkin]
 ----
+When I wait until all elements located by `$locator` disappear
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 When I wait until element located by `$locator` disappears
 ----
 
 * `$locator` - <<_locator>>.
 
-.Wait for disappearance of the element with the specified name
+.Wait for disappearance of the elements with the specified name
 [source,gherkin]
 ----
-When I wait until element located by `id(welcome-image)` disappears
+When I wait until all elements located by `id(welcome-image)` disappear
 ----
 
 === Wait for element with specified state using polling interval
