@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.hc.core5.http.ClassicHttpRequest;
@@ -66,7 +67,7 @@ class XrayCloudClientTests
     {
         HttpResponse r = new HttpResponse();
         r.setStatusCode(status);
-        r.setResponseBody(body.getBytes());
+        r.setResponseBody(body.getBytes(StandardCharsets.UTF_8));
         return r;
     }
 
