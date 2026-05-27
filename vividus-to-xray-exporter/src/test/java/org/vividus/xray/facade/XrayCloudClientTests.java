@@ -18,6 +18,7 @@ package org.vividus.xray.facade;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -128,7 +129,7 @@ class XrayCloudClientTests
         XrayCloudClient client = createClient();
         IOException thrown = assertThrows(IOException.class, () -> client.importExecution("{\"tests\":[]}"));
 
-        assertEquals(true, thrown.getMessage().contains("authentication failed"));
+        assertTrue(thrown.getMessage().contains("authentication failed"));
     }
 
     @Test
@@ -142,7 +143,7 @@ class XrayCloudClientTests
         XrayCloudClient client = createClient();
         IOException thrown = assertThrows(IOException.class, () -> client.importExecution("{\"tests\":[]}"));
 
-        assertEquals(true, thrown.getMessage().contains(String.valueOf(HttpStatus.SC_BAD_REQUEST)));
+        assertTrue(thrown.getMessage().contains(String.valueOf(HttpStatus.SC_BAD_REQUEST)));
     }
 
     @Test
