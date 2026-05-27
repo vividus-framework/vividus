@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,6 +113,8 @@ class DatabaseStepsTests
     private static final String DATA_SET_COMPARISON_FTL = "/templates/maps-comparison-table.ftl";
     private static final String DATA_SETS_COMPARISON_TITLE = "Data sets comparison";
 
+    private static final String VARIABLE_NAME = "var";
+
     private static final String QUERY_RESULTS_ARE_EQUAL = "Query results are equal";
 
     private static final String COL1 = "col1";
@@ -163,10 +165,26 @@ class DatabaseStepsTests
         mockQueryForList(QUERY, DB_KEY, List.of(Map.of(COL1, VAL1)));
         Set<VariableScope> variableScope = Set.of(VariableScope.SCENARIO);
         List<Map<String, Object>> singletonList = List.of(Map.of(COL1, VAL1));
-        String variableName = "var";
-        databaseSteps.executeSql(QUERY, DB_KEY, variableScope, variableName);
-        verify(variableContext).putVariable(variableScope, variableName, singletonList);
-        assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info(LOG_EXECUTING_SQL_QUERY, QUERY))));
+        databaseSteps.executeSql(QUERY, DB_KEY, variableScope, VARIABLE_NAME);
+        verify(variableContext).putVariable(variableScope, VARIABLE_NAME, singletonList, false);
+        verify(attachmentPublisher).publishAttachment("data-set-table.ftl", Map.of("data", singletonList),
+                "Data saved into 'var' variable");
+        assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(
+                info(LOG_EXECUTING_SQL_QUERY, QUERY),
+                info("Saving a resulting data set into the {} variable '{}'", "scenario", VARIABLE_NAME))));
+    }
+
+    @Test
+    void shouldExecuteSqlAndNotPublishAttachmentWhenResultIsEmpty()
+    {
+        mockQueryForList(QUERY, DB_KEY, List.of());
+        Set<VariableScope> variableScope = Set.of(VariableScope.SCENARIO);
+        databaseSteps.executeSql(QUERY, DB_KEY, variableScope, VARIABLE_NAME);
+        verify(variableContext).putVariable(variableScope, VARIABLE_NAME, List.of(), false);
+        verifyNoInteractions(attachmentPublisher);
+        assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(
+                info(LOG_EXECUTING_SQL_QUERY, QUERY),
+                info("The resulting data set saved into the '{}' variable is empty", VARIABLE_NAME))));
     }
 
     static Stream<Arguments> matchingResultLists()

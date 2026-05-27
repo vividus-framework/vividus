@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,29 +51,39 @@ public class VariableTestContext implements VariableContext
     }
 
     @Override
-    public void putVariable(Set<VariableScope> variableScopes, String variableKey, Object variableValue)
+    public void putVariable(Set<VariableScope> variableScopes, String variableKey, Object variableValue,
+            boolean verboseLogging)
     {
-        variableScopes.forEach(s -> putVariable(s, variableKey, variableValue));
+        variableScopes.forEach(s -> putVariable(s, variableKey, variableValue, verboseLogging));
     }
 
     @Override
     public void putVariable(VariableScope variableScope, String variableKey, Object variableValue)
     {
-        if (variableValue instanceof byte[] bytes)
+        putVariable(variableScope, variableKey, variableValue, true);
+    }
+
+    private void putVariable(VariableScope variableScope, String variableKey, Object variableValue,
+            boolean verboseLogging)
+    {
+        if (verboseLogging)
         {
-            LOGGER.atInfo()
-                    .addArgument(() -> bytes.length / THOUSAND)
-                    .addArgument(() -> EnumUtils.toHumanReadableForm(variableScope))
-                    .addArgument(variableKey)
-                    .log("Saving {} kB of binary data into the {} variable '{}'");
-        }
-        else
-        {
-            LOGGER.atInfo()
-                  .addArgument(variableValue)
-                  .addArgument(() -> EnumUtils.toHumanReadableForm(variableScope))
-                  .addArgument(variableKey)
-                  .log("Saving a value '{}' into the {} variable '{}'");
+            if (variableValue instanceof byte[] bytes)
+            {
+                LOGGER.atInfo()
+                        .addArgument(() -> bytes.length / THOUSAND)
+                        .addArgument(() -> EnumUtils.toHumanReadableForm(variableScope))
+                        .addArgument(variableKey)
+                        .log("Saving {} kB of binary data into the {} variable '{}'");
+            }
+            else
+            {
+                LOGGER.atInfo()
+                      .addArgument(variableValue)
+                      .addArgument(() -> EnumUtils.toHumanReadableForm(variableScope))
+                      .addArgument(variableKey)
+                      .log("Saving a value '{}' into the {} variable '{}'");
+            }
         }
 
         BiConsumer<String, Object> variableSaver = switch (variableScope)
