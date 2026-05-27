@@ -74,7 +74,8 @@ public class XrayExporterOptionsValidator implements Validator
             throw new UncheckedIOException(e);
         }
 
-        if (attachment.getRoot().equals(attachment))
+        Path root = attachment.getRoot();
+        if (root != null && root.equals(attachment))
         {
             errors.rejectValue(TEST_EXECUTION_ATTACHMENTS_FIELD, StringUtils.EMPTY,
                     "Please do not try to publish the file system root as the attachment");
