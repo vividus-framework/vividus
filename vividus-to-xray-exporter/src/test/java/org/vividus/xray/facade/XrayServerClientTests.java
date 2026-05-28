@@ -57,7 +57,7 @@ class XrayServerClientTests
         when(jiraClientProvider.getByJiraConfigurationKey(Optional.empty())).thenReturn(jiraClient);
         when(jiraClient.executePost(IMPORT_ENDPOINT, EXECUTION_JSON)).thenReturn(EXECUTION_RESPONSE);
 
-        XrayServerClient client = new XrayServerClient(jiraClientProvider, Optional.empty());
+        XrayServerClient client = new XrayServerClient(jiraClientProvider, null);
         String key = client.importExecution(EXECUTION_JSON);
 
         assertEquals(ISSUE_KEY, key);
@@ -67,8 +67,8 @@ class XrayServerClientTests
     @Test
     void shouldImportExecutionWithJiraInstanceKey() throws IOException, JiraConfigurationException
     {
-        Optional<String> instanceKey = Optional.of("my-jira");
-        when(jiraClientProvider.getByJiraConfigurationKey(instanceKey)).thenReturn(jiraClient);
+        String instanceKey = "my-jira";
+        when(jiraClientProvider.getByJiraConfigurationKey(Optional.of(instanceKey))).thenReturn(jiraClient);
         when(jiraClient.executePost(IMPORT_ENDPOINT, EXECUTION_JSON)).thenReturn(EXECUTION_RESPONSE);
 
         XrayServerClient client = new XrayServerClient(jiraClientProvider, instanceKey);
@@ -83,7 +83,7 @@ class XrayServerClientTests
         JiraConfigurationException cause = new JiraConfigurationException(CONFIG_ERROR);
         when(jiraClientProvider.getByJiraConfigurationKey(Optional.empty())).thenThrow(cause);
 
-        XrayServerClient client = new XrayServerClient(jiraClientProvider, Optional.empty());
+        XrayServerClient client = new XrayServerClient(jiraClientProvider, null);
         IOException thrown = assertThrows(IOException.class, () -> client.importExecution(EXECUTION_JSON));
 
         assertInstanceOf(JiraConfigurationException.class, thrown.getCause());
@@ -95,7 +95,7 @@ class XrayServerClientTests
     {
         when(jiraClientProvider.getByIssueKey(TEST_SET_KEY)).thenReturn(jiraClient);
 
-        XrayServerClient client = new XrayServerClient(jiraClientProvider, Optional.empty());
+        XrayServerClient client = new XrayServerClient(jiraClientProvider, null);
         client.addTestsToTestSet(TEST_SET_KEY, List.of(TEST_CASE_KEY_1, TEST_CASE_KEY_2));
 
         verify(jiraClient).executePost(
@@ -109,7 +109,7 @@ class XrayServerClientTests
         JiraConfigurationException cause = new JiraConfigurationException(CONFIG_ERROR);
         when(jiraClientProvider.getByIssueKey(TEST_SET_KEY)).thenThrow(cause);
 
-        XrayServerClient client = new XrayServerClient(jiraClientProvider, Optional.empty());
+        XrayServerClient client = new XrayServerClient(jiraClientProvider, null);
         IOException thrown = assertThrows(IOException.class,
                 () -> client.addTestsToTestSet(TEST_SET_KEY, List.of(TEST_CASE_KEY_1)));
 

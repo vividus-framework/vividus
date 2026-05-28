@@ -17,7 +17,6 @@
 package org.vividus.xray.configuration;
 
 import java.security.GeneralSecurityException;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -38,8 +37,7 @@ public class XrayClientConfiguration
     public XrayClient xrayServerClient(JiraClientProvider jiraClientProvider,
             @Value("${xray-exporter.jira-instance-key:}") String jiraInstanceKey)
     {
-        return new XrayServerClient(jiraClientProvider, Optional.ofNullable(
-                jiraInstanceKey.isEmpty() ? null : jiraInstanceKey));
+        return new XrayServerClient(jiraClientProvider, jiraInstanceKey.isEmpty() ? null : jiraInstanceKey);
     }
 
     @Bean
