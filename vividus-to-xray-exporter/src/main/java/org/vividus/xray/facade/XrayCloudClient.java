@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,8 +42,9 @@ public class XrayCloudClient implements XrayClient
     private static final String AUTHORIZATION = "Authorization";
     private static final String XRAY_CLOUD_API = "Xray Cloud API";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final String IMPORT_EXECUTION_PATH = "/import/execution";
-    private static final String GRAPHQL_PATH = "/graphql";
+    private static final String AUTHENTICATE_PATH = "/api/v2/authenticate";
+    private static final String IMPORT_EXECUTION_PATH = "/api/v2/import/execution";
+    private static final String GRAPHQL_PATH = "/api/v2/graphql";
     private static final String COMMA_SEPARATOR = ", ";
     private static final String DOUBLE_QUOTE = "\"";
 
@@ -52,11 +52,11 @@ public class XrayCloudClient implements XrayClient
     private final String clientId;
     private final String clientSecret;
     private final IHttpClient httpClient;
-    private final AtomicReference<String> cachedToken = new AtomicReference<>();
+    private String cachedToken;
 
     public XrayCloudClient(String apiBaseUrl, String clientId, String clientSecret, IHttpClient httpClient)
     {
-        this.apiBaseUrl = apiBaseUrl;
+        this.apiBaseUrl = apiBaseUrl.endsWith("/") ? apiBaseUrl.substring(0, apiBaseUrl.length() - 1) : apiBaseUrl;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.httpClient = httpClient;
@@ -65,13 +65,7 @@ public class XrayCloudClient implements XrayClient
     @Override
     public String importExecution(String executionJson) throws IOException
     {
-        String token = getToken();
-        HttpResponse response = post(apiBaseUrl + IMPORT_EXECUTION_PATH, executionJson, token);
-        if (response.getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
-        {
-            invalidateToken(token);
-            response = post(apiBaseUrl + IMPORT_EXECUTION_PATH, executionJson, getToken());
-        }
+        HttpResponse response = postWithRetry(apiBaseUrl + IMPORT_EXECUTION_PATH, executionJson);
         ensureSuccessful(response);
         return JsonPathUtils.getData(response.getResponseBodyAsString(), "$.key");
     }
@@ -134,22 +128,29 @@ public class XrayCloudClient implements XrayClient
         String warning = JsonPathUtils.getData(response, "$.data.addTestsToTestSet.warning");
         if (warning != null)
         {
-            LOGGER.atWarn().addArgument(warning).log("Xray Cloud addTestsToTestSet warning: {}");
+            LOGGER.atWarn().addArgument(warning)
+                  .log("Warning received from Xray Cloud while adding tests to test set: {}");
         }
     }
 
     private String executeGraphQL(String query) throws IOException
     {
-        String token = getToken();
         String bodyJson = OBJECT_MAPPER.createObjectNode().put("query", query).toString();
-        HttpResponse response = post(apiBaseUrl + GRAPHQL_PATH, bodyJson, token);
-        if (response.getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
-        {
-            invalidateToken(token);
-            response = post(apiBaseUrl + GRAPHQL_PATH, bodyJson, getToken());
-        }
+        HttpResponse response = postWithRetry(apiBaseUrl + GRAPHQL_PATH, bodyJson);
         ensureSuccessful(response);
         return response.getResponseBodyAsString();
+    }
+
+    private HttpResponse postWithRetry(String url, String body) throws IOException
+    {
+        String token = getToken();
+        HttpResponse response = post(url, body, token);
+        if (response.getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
+        {
+            invalidateToken();
+            response = post(url, body, getToken());
+        }
+        return response;
     }
 
     private HttpResponse post(String url, String body, String token) throws IOException
@@ -171,22 +172,16 @@ public class XrayCloudClient implements XrayClient
 
     private String getToken() throws IOException
     {
-        String token = cachedToken.get();
-        if (token == null)
+        if (cachedToken == null)
         {
-            String newToken = authenticate();
-            if (!cachedToken.compareAndSet(null, newToken))
-            {
-                return cachedToken.get();
-            }
-            return newToken;
+            cachedToken = authenticate();
         }
-        return token;
+        return cachedToken;
     }
 
-    private void invalidateToken(String knownStaleToken)
+    private void invalidateToken()
     {
-        cachedToken.compareAndSet(knownStaleToken, null);
+        cachedToken = null;
     }
 
     private String authenticate() throws IOException
@@ -199,7 +194,7 @@ public class XrayCloudClient implements XrayClient
         {
             HttpResponse response = httpClient.execute(HttpRequestBuilder.create()
                     .withHttpMethod(HttpMethod.POST)
-                    .withEndpoint(apiBaseUrl + "/authenticate")
+                    .withEndpoint(apiBaseUrl + AUTHENTICATE_PATH)
                     .withContent(body, ContentType.APPLICATION_JSON)
                     .build());
             if (response.getStatusCode() != HttpStatus.SC_OK)
