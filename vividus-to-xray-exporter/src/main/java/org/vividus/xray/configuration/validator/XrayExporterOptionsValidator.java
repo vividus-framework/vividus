@@ -60,18 +60,21 @@ public class XrayExporterOptionsValidator implements Validator
             return;
         }
 
-        try
+        if (Files.isDirectory(attachment))
         {
-            if (Files.isDirectory(attachment) && Files.list(attachment).findAny().isEmpty())
+            try (var stream = Files.list(attachment))
             {
-                errors.rejectValue(TEST_EXECUTION_ATTACHMENTS_FIELD, StringUtils.EMPTY,
-                        "The attachment folder at path " + attachment + " is empty");
-                return;
+                if (stream.findAny().isEmpty())
+                {
+                    errors.rejectValue(TEST_EXECUTION_ATTACHMENTS_FIELD, StringUtils.EMPTY,
+                            "The attachment folder at path " + attachment + " is empty");
+                    return;
+                }
             }
-        }
-        catch (IOException e)
-        {
-            throw new UncheckedIOException(e);
+            catch (IOException e)
+            {
+                throw new UncheckedIOException(e);
+            }
         }
 
         Path root = attachment.getRoot();

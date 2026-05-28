@@ -244,8 +244,9 @@ class XrayCloudClientTests
                 .thenReturn(response(HttpStatus.SC_OK, testsResponse));
 
         XrayCloudClient client = createClient();
+        List<String> keys = List.of(TEST_CASE_KEY);
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-                () -> client.addTestsToTestSet(TEST_SET_KEY, List.of(TEST_CASE_KEY)));
+                () -> client.addTestsToTestSet(TEST_SET_KEY, keys));
 
         assertTrue(thrown.getMessage().contains(TEST_CASE_KEY));
     }
