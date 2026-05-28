@@ -196,8 +196,7 @@ public class XrayFacade
         return attachments;
     }
 
-    public void updateTestSet(String testSetKey, List<String> testCaseKeys)
-            throws IOException, JiraConfigurationException
+    public void updateTestSet(String testSetKey, List<String> testCaseKeys) throws IOException
     {
         LOGGER.atInfo()
               .addArgument(() -> StringUtils.join(testCaseKeys, ", "))

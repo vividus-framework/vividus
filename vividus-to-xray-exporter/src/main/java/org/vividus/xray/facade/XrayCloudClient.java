@@ -114,7 +114,7 @@ public class XrayCloudClient implements XrayClient
                 throw new IllegalArgumentException("Could not find Xray issue ID for test case key: " + key);
             }
             return issueId;
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     private void addTestsToTestSetById(String testSetIssueId, List<String> testIssueIds) throws IOException
