@@ -42,9 +42,9 @@ public class XrayCloudClient implements XrayClient
     private static final String AUTHORIZATION = "Authorization";
     private static final String XRAY_CLOUD_API = "Xray Cloud API";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final String AUTHENTICATE_PATH = "/api/v2/authenticate";
-    private static final String IMPORT_EXECUTION_PATH = "/api/v2/import/execution";
-    private static final String GRAPHQL_PATH = "/api/v2/graphql";
+    private static final String AUTHENTICATE_PATH = "/authenticate";
+    private static final String IMPORT_EXECUTION_PATH = "/import/execution";
+    private static final String GRAPHQL_PATH = "/graphql";
     private static final String COMMA_SEPARATOR = ", ";
     private static final String DOUBLE_QUOTE = "\"";
 
@@ -56,7 +56,8 @@ public class XrayCloudClient implements XrayClient
 
     public XrayCloudClient(String apiBaseUrl, String clientId, String clientSecret, IHttpClient httpClient)
     {
-        this.apiBaseUrl = apiBaseUrl.endsWith("/") ? apiBaseUrl.substring(0, apiBaseUrl.length() - 1) : apiBaseUrl;
+        this.apiBaseUrl = (apiBaseUrl.endsWith("/") ? apiBaseUrl.substring(0, apiBaseUrl.length() - 1) : apiBaseUrl)
+                + "/api/v2";
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.httpClient = httpClient;
@@ -143,8 +144,7 @@ public class XrayCloudClient implements XrayClient
 
     private HttpResponse postWithRetry(String url, String body) throws IOException
     {
-        String token = getToken();
-        HttpResponse response = post(url, body, token);
+        HttpResponse response = post(url, body, getToken());
         if (response.getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
         {
             invalidateToken();
