@@ -27,7 +27,9 @@ import org.junit.jupiter.api.Test;
 import org.vividus.http.client.HttpClientConfig;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.http.client.IHttpClientFactory;
+import org.vividus.jira.JiraClientProvider;
 import org.vividus.xray.facade.XrayCloudClient;
+import org.vividus.xray.facade.XrayServerClient;
 
 class XrayClientConfigurationTests
 {
@@ -46,5 +48,21 @@ class XrayClientConfigurationTests
 
         assertInstanceOf(XrayCloudClient.class,
                 new XrayClientConfiguration().xrayCloudClient(options, httpClientFactory));
+    }
+
+    @Test
+    void shouldCreateXrayServerClientWithoutJiraInstanceKey()
+    {
+        JiraClientProvider jiraClientProvider = mock(JiraClientProvider.class);
+        assertInstanceOf(XrayServerClient.class,
+                new XrayClientConfiguration().xrayServerClient(jiraClientProvider, ""));
+    }
+
+    @Test
+    void shouldCreateXrayServerClientWithJiraInstanceKey()
+    {
+        JiraClientProvider jiraClientProvider = mock(JiraClientProvider.class);
+        assertInstanceOf(XrayServerClient.class,
+                new XrayClientConfiguration().xrayServerClient(jiraClientProvider, "my-jira"));
     }
 }
