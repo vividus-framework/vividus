@@ -100,7 +100,7 @@ public class XrayExporterOptions
         private boolean enabled;
         private String clientId;
         private String clientSecret;
-        private String apiBaseUrl = "https://xray.cloud.getxray.app/api/v2";
+        private String apiBaseUrl = "https://xray.cloud.getxray.app/";
 
         public boolean isEnabled()
         {

@@ -103,11 +103,11 @@ By default, VIVIDUS exports results to an on-premise Xray Server (Jira plugin). 
 
 |`xray-exporter.cloud.api-base-url`
 |false
-a|Base URL for the Xray Cloud REST API. Default: `https://xray.cloud.getxray.app/api/v2`.
+a|Base URL for the Xray Cloud REST API (the `/api/v2` path is appended automatically). Default: `https://xray.cloud.getxray.app/`.
 
 Override this value when using a regional Xray Cloud deployment, for example:
-* `https://us.xray.cloud.getxray.app/api/v2`
-* `https://eu.xray.cloud.getxray.app/api/v2`
+* `https://us.xray.cloud.getxray.app/`
+* `https://eu.xray.cloud.getxray.app/`
 
 |===
 

@@ -18,7 +18,6 @@ package org.vividus.xray.facade;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -49,20 +48,32 @@ import org.vividus.http.client.IHttpClient;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class XrayCloudClientTests
 {
-    private static final String BASE_URL = "https://xray.cloud.getxray.app/api/v2";
+    private static final String BASE_URL = "https://xray.cloud.getxray.app/";
     private static final String CLIENT_ID = "client-id";
     private static final String CLIENT_SECRET = "client-secret";
     private static final String TOKEN = "******";
+    private static final String NEW_TOKEN = "new-token";
     private static final String AUTH_PATH = "/authenticate";
     private static final String IMPORT_PATH = "/import/execution";
     private static final String GRAPHQL_PATH = "/graphql";
-    private static final String AUTH_URL = BASE_URL + AUTH_PATH;
-    private static final String IMPORT_URL = BASE_URL + IMPORT_PATH;
-    private static final String GRAPHQL_URL = BASE_URL + GRAPHQL_PATH;
+    private static final String XRAY_API_BASE = "https://xray.cloud.getxray.app/api/v2";
+    private static final String AUTH_URL = XRAY_API_BASE + AUTH_PATH;
+    private static final String IMPORT_URL = XRAY_API_BASE + IMPORT_PATH;
+    private static final String GRAPHQL_URL = XRAY_API_BASE + GRAPHQL_PATH;
     private static final String DOUBLE_QUOTE = "\"";
-    private static final String TEST_KEY = "TEST-1";
-    private static final String IMPORT_RESPONSE_JSON = "{\"key\":\"" + TEST_KEY + "\"}";
+    private static final String IMPORT_KEY = "TEST-1";
+    private static final String IMPORT_RESPONSE_JSON = "{\"key\":\"" + IMPORT_KEY + "\"}";
     private static final String EXECUTION_JSON = "{\"tests\":[]}";
+    private static final String TEST_SET_KEY = "TS-1";
+    private static final String TEST_CASE_KEY = "TC-1";
+    private static final String TEST_SET_ISSUE_ID = "uuid-set-1";
+    private static final String TEST_ISSUE_ID = "uuid-test-1";
+    private static final String TEST_SET_RESPONSE_TEMPLATE =
+            "{\"data\":{\"getTestSets\":{\"results\":[{\"issueId\":\"%s\"}]}}}";
+    private static final String SINGLE_TEST_RESPONSE_TEMPLATE =
+            "{\"data\":{\"getTests\":{\"results\":[{\"issueId\":\"%s\",\"jira\":{\"key\":\"%s\"}}]}}}";
+    private static final String MUTATION_RESPONSE_PREFIX = "{\"data\":{\"addTestsToTestSet\":{\"addedTests\":[\"";
+    private static final String MUTATION_RESPONSE_SUFFIX = "\"],\"warning\":null}}}";
 
     @Mock private IHttpClient httpClient;
 
@@ -97,7 +108,7 @@ class XrayCloudClientTests
         XrayCloudClient client = createClient();
         String key = client.importExecution(EXECUTION_JSON);
 
-        assertEquals(TEST_KEY, key);
+        assertEquals(IMPORT_KEY, key);
         verify(httpClient).execute(argThat(req -> req != null && requestMatchesUrl(req, AUTH_URL)));
         verify(httpClient).execute(argThat(req -> req != null && requestMatchesUrl(req, IMPORT_URL)));
     }
@@ -122,10 +133,9 @@ class XrayCloudClientTests
     @Test
     void shouldRetryOnUnauthorizedResponse() throws IOException
     {
-        String newToken = "new-token";
         when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
                 .thenReturn(authResponse())
-                .thenReturn(response(HttpStatus.SC_OK, DOUBLE_QUOTE + newToken + DOUBLE_QUOTE));
+                .thenReturn(response(HttpStatus.SC_OK, DOUBLE_QUOTE + NEW_TOKEN + DOUBLE_QUOTE));
         when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(IMPORT_PATH))))
                 .thenReturn(response(HttpStatus.SC_UNAUTHORIZED, ""))
                 .thenReturn(response(HttpStatus.SC_OK, IMPORT_RESPONSE_JSON));
@@ -133,7 +143,7 @@ class XrayCloudClientTests
         XrayCloudClient client = createClient();
         String key = client.importExecution(EXECUTION_JSON);
 
-        assertEquals(TEST_KEY, key);
+        assertEquals(IMPORT_KEY, key);
         verify(httpClient, times(2)).execute(argThat(req -> req != null && requestMatchesUrl(req, AUTH_URL)));
         verify(httpClient, times(2)).execute(argThat(req -> req != null && requestMatchesUrl(req, IMPORT_URL)));
     }
@@ -170,25 +180,20 @@ class XrayCloudClientTests
         when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
                 .thenReturn(authResponse());
 
-        String testSetIssueId = "uuid-set-1";
-        String testIssueId1 = "uuid-test-1";
         String testIssueId2 = "uuid-test-2";
-        String testSetKey = "TS-1";
-        String testKey1 = "TC-1";
         String testKey2 = "TC-2";
 
         // First GraphQL: resolve test set issueId
-        String testSetResponse = String.format(
-                "{\"data\":{\"getTestSets\":{\"results\":[{\"issueId\":\"%s\"}]}}}", testSetIssueId);
+        String testSetResponse = String.format(TEST_SET_RESPONSE_TEMPLATE, TEST_SET_ISSUE_ID);
         // Second GraphQL: resolve test case issueIds
         String testsResponse = String.format(
                 "{\"data\":{\"getTests\":{\"results\":["
                 + "{\"issueId\":\"%s\",\"jira\":{\"key\":\"%s\"}},"
                 + "{\"issueId\":\"%s\",\"jira\":{\"key\":\"%s\"}}"
-                + "]}}}", testIssueId1, testKey1, testIssueId2, testKey2);
+                + "]}}}", TEST_ISSUE_ID, TEST_CASE_KEY, testIssueId2, testKey2);
         // Third GraphQL: mutation
-        String mutationResponse = "{\"data\":{\"addTestsToTestSet\":{\"addedTests\":[\"" + testIssueId1
-                + "\",\"" + testIssueId2 + "\"],\"warning\":null}}}";
+        String mutationResponse = MUTATION_RESPONSE_PREFIX + TEST_ISSUE_ID
+                + "\",\"" + testIssueId2 + MUTATION_RESPONSE_SUFFIX;
 
         when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(GRAPHQL_PATH))))
                 .thenReturn(response(HttpStatus.SC_OK, testSetResponse))
@@ -196,7 +201,7 @@ class XrayCloudClientTests
                 .thenReturn(response(HttpStatus.SC_OK, mutationResponse));
 
         XrayCloudClient client = createClient();
-        client.addTestsToTestSet(testSetKey, List.of(testKey1, testKey2));
+        client.addTestsToTestSet(TEST_SET_KEY, List.of(TEST_CASE_KEY, testKey2));
 
         verify(httpClient, times(3)).execute(argThat(req -> req != null && requestMatchesUrl(req, GRAPHQL_URL)));
     }
@@ -207,25 +212,20 @@ class XrayCloudClientTests
         when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
                 .thenReturn(authResponse());
 
-        String testSetIssueId = "uuid-set-1";
-        String testIssueId = "uuid-test-1";
-        String testKey = "TC-1";
-        String testSetResponse = String.format(
-                "{\"data\":{\"getTestSets\":{\"results\":[{\"issueId\":\"%s\"}]}}}", testSetIssueId);
-        String testsResponse = String.format(
-                "{\"data\":{\"getTests\":{\"results\":[{\"issueId\":\"%s\",\"jira\":{\"key\":\"%s\"}}]}}}",
-                testIssueId, testKey);
-        String mutationResponse = "{\"data\":{\"addTestsToTestSet\":{\"addedTests\":[],\"warning\":\"Some tests already belong to the test set\"}}}";
+        String testSetResponse = String.format(TEST_SET_RESPONSE_TEMPLATE, TEST_SET_ISSUE_ID);
+        String testsResponse = String.format(SINGLE_TEST_RESPONSE_TEMPLATE, TEST_ISSUE_ID, TEST_CASE_KEY);
+        String mutationResponse = "{\"data\":{\"addTestsToTestSet\":{\"addedTests\":[],"
+                + "\"warning\":\"Some tests already belong to the test set\"}}}";
 
         when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(GRAPHQL_PATH))))
                 .thenReturn(response(HttpStatus.SC_OK, testSetResponse))
                 .thenReturn(response(HttpStatus.SC_OK, testsResponse))
                 .thenReturn(response(HttpStatus.SC_OK, mutationResponse));
 
-        createClient().addTestsToTestSet("TS-1", List.of(testKey));
+        createClient().addTestsToTestSet(TEST_SET_KEY, List.of(TEST_CASE_KEY));
 
         assertThat(logger.getLoggingEvents(), hasItem(
-                LoggingEvent.warn("Xray Cloud addTestsToTestSet warning: {}",
+                LoggingEvent.warn("Warning received from Xray Cloud while adding tests to test set: {}",
                         "Some tests already belong to the test set")));
     }
 
@@ -235,9 +235,7 @@ class XrayCloudClientTests
         when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
                 .thenReturn(authResponse());
 
-        String testSetIssueId = "uuid-set-1";
-        String testSetResponse = String.format(
-                "{\"data\":{\"getTestSets\":{\"results\":[{\"issueId\":\"%s\"}]}}}", testSetIssueId);
+        String testSetResponse = String.format(TEST_SET_RESPONSE_TEMPLATE, TEST_SET_ISSUE_ID);
         String testsResponse = "{\"data\":{\"getTests\":{\"results\":[{\"issueId\":\"uuid-test-2\","
                 + "\"jira\":{\"key\":\"TC-2\"}}]}}}";
 
@@ -247,29 +245,21 @@ class XrayCloudClientTests
 
         XrayCloudClient client = createClient();
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-                () -> client.addTestsToTestSet("TS-1", List.of("TC-1")));
+                () -> client.addTestsToTestSet(TEST_SET_KEY, List.of(TEST_CASE_KEY)));
 
-        assertTrue(thrown.getMessage().contains("TC-1"));
+        assertTrue(thrown.getMessage().contains(TEST_CASE_KEY));
     }
 
     @Test
     void shouldRetryExecuteGraphQLOnUnauthorizedResponse() throws IOException
     {
-        String newToken = "new-token";
         when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
                 .thenReturn(authResponse())
-                .thenReturn(response(HttpStatus.SC_OK, DOUBLE_QUOTE + newToken + DOUBLE_QUOTE));
+                .thenReturn(response(HttpStatus.SC_OK, DOUBLE_QUOTE + NEW_TOKEN + DOUBLE_QUOTE));
 
-        String testSetIssueId = "uuid-set-1";
-        String testIssueId = "uuid-test-1";
-        String testKey = "TC-1";
-        String testSetResponse = String.format(
-                "{\"data\":{\"getTestSets\":{\"results\":[{\"issueId\":\"%s\"}]}}}", testSetIssueId);
-        String testsResponse = String.format(
-                "{\"data\":{\"getTests\":{\"results\":[{\"issueId\":\"%s\",\"jira\":{\"key\":\"%s\"}}]}}}",
-                testIssueId, testKey);
-        String mutationResponse = "{\"data\":{\"addTestsToTestSet\":{\"addedTests\":[\""
-                + testIssueId + "\"],\"warning\":null}}}";
+        String testSetResponse = String.format(TEST_SET_RESPONSE_TEMPLATE, TEST_SET_ISSUE_ID);
+        String testsResponse = String.format(SINGLE_TEST_RESPONSE_TEMPLATE, TEST_ISSUE_ID, TEST_CASE_KEY);
+        String mutationResponse = MUTATION_RESPONSE_PREFIX + TEST_ISSUE_ID + MUTATION_RESPONSE_SUFFIX;
 
         when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(GRAPHQL_PATH))))
                 .thenReturn(response(HttpStatus.SC_UNAUTHORIZED, ""))
@@ -277,7 +267,7 @@ class XrayCloudClientTests
                 .thenReturn(response(HttpStatus.SC_OK, testsResponse))
                 .thenReturn(response(HttpStatus.SC_OK, mutationResponse));
 
-        createClient().addTestsToTestSet("TS-1", List.of(testKey));
+        createClient().addTestsToTestSet(TEST_SET_KEY, List.of(TEST_CASE_KEY));
 
         verify(httpClient, times(2)).execute(argThat(req -> req != null && requestMatchesUrl(req, AUTH_URL)));
         verify(httpClient, times(4)).execute(argThat(req -> req != null && requestMatchesUrl(req, GRAPHQL_URL)));
