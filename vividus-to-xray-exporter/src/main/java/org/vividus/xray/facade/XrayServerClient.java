@@ -23,6 +23,7 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.jspecify.annotations.Nullable;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.util.json.JsonPathUtils;
@@ -34,9 +35,9 @@ public class XrayServerClient implements XrayClient
             .setDefaultPropertyInclusion(Include.NON_NULL);
 
     private final JiraClientProvider jiraClientProvider;
-    private final Optional<String> jiraInstanceKey;
+    @Nullable private final String jiraInstanceKey;
 
-    public XrayServerClient(JiraClientProvider jiraClientProvider, Optional<String> jiraInstanceKey)
+    public XrayServerClient(JiraClientProvider jiraClientProvider, @Nullable String jiraInstanceKey)
     {
         this.jiraClientProvider = jiraClientProvider;
         this.jiraInstanceKey = jiraInstanceKey;
@@ -47,7 +48,7 @@ public class XrayServerClient implements XrayClient
     {
         try
         {
-            String response = jiraClientProvider.getByJiraConfigurationKey(jiraInstanceKey)
+            String response = jiraClientProvider.getByJiraConfigurationKey(Optional.ofNullable(jiraInstanceKey))
                     .executePost("/rest/raven/1.0/import/execution", executionJson);
             return JsonPathUtils.getData(response, "$.testExecIssue.key");
         }
