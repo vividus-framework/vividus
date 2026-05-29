@@ -2,7 +2,8 @@
 
 ## Build & quality validation
 
-Before committing any Java changes, run the full quality suite for every affected module:
+Before committing any Java changes, run the full quality suite for every affected module
+(replace `<module>` with the actual Gradle project name, e.g. `vividus-plugin-rest-api`):
 
 ```bash
 JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64 ./gradlew \
@@ -52,7 +53,9 @@ When a bean is conditionally present (`@ConditionalOnProperty`, `@ConditionalOnM
 
 ```java
 @Bean
-public XrayServerClient xrayServerClient(@Lazy JiraClientProvider jiraClientProvider) { ... }
+public XrayServerClient xrayServerClient(@Lazy JiraClientProvider jiraClientProvider) {
+    // method body — jiraClientProvider is injected lazily to avoid Qodana false positive
+}
 ```
 
 ### Spring Boot configuration metadata
