@@ -248,6 +248,21 @@ class XrayFacadeTests
         verifyCreateLogs(MANUAL_TYPE);
     }
 
+    @Test
+    void shouldCreateManualTestCaseWithJiraInstanceKey() throws IOException, JiraConfigurationException
+    {
+        String jiraInstanceKey = "my-jira";
+        xrayFacade = new XrayFacade(jiraInstanceKey, List.of(), jiraFacade, xrayClient,
+                manualTestSerializer, cucumberTestSerializer);
+        ManualTestCase testCase = createManualTestCase();
+        mockSerialization(manualTestSerializer, testCase);
+        when(jiraFacade.createIssue(BODY, Optional.of(jiraInstanceKey))).thenReturn(CREATE_RESPONSE);
+
+        xrayFacade.createTestCase(testCase);
+
+        verifyCreateLogs(MANUAL_TYPE);
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     void shouldUpdateTestExecution(@TempDir Path directory) throws IOException, JiraConfigurationException
@@ -443,7 +458,7 @@ class XrayFacadeTests
 
     private void initializeFacade(List<String> editableStatuses)
     {
-        xrayFacade = new XrayFacade(Optional.empty(), editableStatuses, jiraFacade, xrayClient,
+        xrayFacade = new XrayFacade(null, editableStatuses, jiraFacade, xrayClient,
                 manualTestSerializer, cucumberTestSerializer);
     }
 

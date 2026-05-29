@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.vividus.http.client.HttpClientConfig;
 import org.vividus.http.client.IHttpClientFactory;
 import org.vividus.jira.JiraClientProvider;
@@ -34,7 +35,7 @@ public class XrayClientConfiguration
 {
     @Bean
     @ConditionalOnProperty(name = "xray-exporter.cloud.enabled", havingValue = "false", matchIfMissing = true)
-    public XrayClient xrayServerClient(JiraClientProvider jiraClientProvider,
+    public XrayClient xrayServerClient(@Lazy JiraClientProvider jiraClientProvider,
             @Value("${xray-exporter.jira-instance-key:}") String jiraInstanceKey)
     {
         return new XrayServerClient(jiraClientProvider, jiraInstanceKey.isEmpty() ? null : jiraInstanceKey);
