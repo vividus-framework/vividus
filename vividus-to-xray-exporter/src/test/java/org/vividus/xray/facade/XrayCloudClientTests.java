@@ -175,6 +175,20 @@ class XrayCloudClientTests
     }
 
     @Test
+    void shouldThrowIoExceptionOnInformationalResponse() throws IOException
+    {
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
+                .thenReturn(authResponse());
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(IMPORT_PATH))))
+                .thenReturn(response(HttpStatus.SC_CONTINUE, "continue"));
+
+        XrayCloudClient client = createClient();
+        IOException thrown = assertThrows(IOException.class, () -> client.importExecution(EXECUTION_JSON));
+
+        assertTrue(thrown.getMessage().contains(String.valueOf(HttpStatus.SC_CONTINUE)));
+    }
+
+    @Test
     void shouldAddTestsToTestSet() throws IOException
     {
         when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))

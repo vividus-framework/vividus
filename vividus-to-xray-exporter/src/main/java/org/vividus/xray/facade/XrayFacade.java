@@ -34,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.Nullable;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.mapper.JiraEntityMapper;
@@ -57,16 +58,16 @@ public class XrayFacade
     private static final Logger LOGGER = LoggerFactory.getLogger(XrayFacade.class);
 
     private final List<String> editableStatuses;
-    private final Optional<String> jiraInstanceKey;
+    @Nullable private final String jiraInstanceKey;
     private final JiraFacade jiraFacade;
     private final XrayClient xrayClient;
     private final ObjectMapper objectMapper;
 
-    public XrayFacade(Optional<String> jiraInstanceKey, List<String> editableStatuses, JiraFacade jiraFacade,
+    public XrayFacade(@Nullable String jiraInstanceKey, List<String> editableStatuses, JiraFacade jiraFacade,
             XrayClient xrayClient, ManualTestCaseSerializer manualTestSerializer,
             CucumberTestCaseSerializer cucumberTestSerializer)
     {
-        this.jiraInstanceKey = jiraInstanceKey;
+        this.jiraInstanceKey = jiraInstanceKey == null || jiraInstanceKey.isEmpty() ? null : jiraInstanceKey;
         this.editableStatuses = editableStatuses;
         this.jiraFacade = jiraFacade;
         this.xrayClient = xrayClient;
@@ -81,7 +82,7 @@ public class XrayFacade
     {
         String createTestRequest = objectMapper.writeValueAsString(testCase);
         LOGGER.atInfo().addArgument(testCase::getType).addArgument(createTestRequest).log("Creating {} Test Case: {}");
-        String response = jiraFacade.createIssue(createTestRequest, jiraInstanceKey);
+        String response = jiraFacade.createIssue(createTestRequest, Optional.ofNullable(jiraInstanceKey));
         String issueKey = JsonPathUtils.getData(response, "$.key");
         LOGGER.atInfo().addArgument(testCase::getType)
                        .addArgument(issueKey)
