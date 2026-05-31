@@ -511,9 +511,9 @@ and it will install a hook such that
 
 . When you perform Git push, it runs `spotlessCheck`
 . If formatting issues are found:
-    - It automatically runs `spotlessApply` to fix them
-    - Aborts the push with a message
-    - You can then commit the changes and push again
+    ** It automatically runs `spotlessApply` to fix them
+    ** Aborts the push with a message
+    ** You can then commit the changes and push again
 
 This ensures your code is always clean before it leaves your machine.
 

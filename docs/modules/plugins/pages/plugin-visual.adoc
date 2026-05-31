@@ -115,9 +115,9 @@ In order to support screenshot taking configuration per-project/per-step basis f
 Properties-based screenshot configuration can be specified using `web.screenshot.strategy.<YOUR_STRATEGY_NAME>.<PROPERTY_NAME>=<PROPERTY_VALUE>` pattern,
 where:
 
- - `YOUR_STRATEGY_NAME` - name of the custom strategy;
- - `PROPERTY_NAME` - name of the property you want to specify;
- - `PROPERTY_VALUE` - value of the property in the required format.
+* `YOUR_STRATEGY_NAME` - name of the custom strategy;
+* `PROPERTY_NAME` - name of the property you want to specify;
+* `PROPERTY_VALUE` - value of the property in the required format.
 
 ==== Properties-based configuration:
 

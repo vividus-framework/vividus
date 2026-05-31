@@ -192,9 +192,9 @@ The profile can be enabled by adding `{android-profile}` to `configuration.profi
 
 The local profiles can be used in conjunction with:
 
- - `{android-profile}`,
- - `{ios-profile}`,
- - `{tvos-profile}`.
+* `{android-profile}`,
+* `{ios-profile}`,
+* `{tvos-profile}`.
 
 ==== `mobile_app/local`
 

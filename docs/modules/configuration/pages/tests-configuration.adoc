@@ -32,7 +32,7 @@ NOTE: The properties marked with *bold* are mandatory.
 
 [cols="2,1,2", options="header"]
 |===
-|Property
+|Property Name
 |Default value
 |Description
 
@@ -333,7 +333,7 @@ JSON file should contain a valid JSON. If JSON is not valid known issues will be
 
 [cols="2,1,2", options="header"]
 |===
-|Property
+|Property Name
 |Default value
 |Description
 

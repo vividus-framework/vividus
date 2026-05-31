@@ -583,8 +583,8 @@ som/d477590f9ce03896
 |¡Aguaaa, aguaaa!
 
 |Chiquito.jokes
-a|- Cómo viene de borracho, ¡va usté muy cargado! +
-- ¿Qué quiere que dé dos viajes?
+a|* Cómo viene de borracho, ¡va usté muy cargado! +
+* ¿Qué quiere que dé dos viajes?
 
 |Chiquito.sentences
 |¡Se ha pasao usted con mi bambina! ¡Es usted un torpedo del año cuatro!

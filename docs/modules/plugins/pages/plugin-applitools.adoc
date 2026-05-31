@@ -123,9 +123,9 @@ See https://applitools.com/docs/topics/general-concepts/working-withcross-enviro
 Properties-based screenshot configuration can be specified using `web.screenshot.strategy.<YOUR_STRATEGY_NAME>.<PROPERTY_NAME>=<PROPERTY_VALUE>` pattern,
 where:
 
- - `YOUR_STRATEGY_NAME` - name of the custom strategy;
- - `PROPERTY_NAME` - name of the property you want to specify;
- - `PROPERTY_VALUE` - value of the property in the required format.
+* `YOUR_STRATEGY_NAME` - name of the custom strategy;
+* `PROPERTY_NAME` - name of the property you want to specify;
+* `PROPERTY_VALUE` - value of the property in the required format.
 
 Keep in mind that properties-based configuration can be overridden by <<_visual_check_with_custom_applitools_and_screenshot_configuration, the step>> with custom step configuration.
 
