@@ -26,7 +26,7 @@ https://h2database.com/html/features.html#execute_sql_on_connection[could be fou
 +
 2.1 Configure using `INIT` property
 +
- - using `INIT` property data loaded into the database once and can no longer be change.
+* using `INIT` property data loaded into the database once and can no longer be changed.
 +
 .Configure connection and initialization of the database
 [source,properties]
@@ -54,7 +54,7 @@ db.connection.testh2db.password=
 ----
 2.2 Configure using test step
 +
- - if you use database initialization in the step, you only need to specify the connection parameters in the properties file and execute DDL script in the test.
+* if you use database initialization in the step, you only need to specify the connection parameters in the properties file and execute DDL script in the test.
 +
 .Configure connection to database
 [source,properties]

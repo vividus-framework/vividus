@@ -55,9 +55,9 @@ Let's see the structure of the expression for the following example:
 +
 There are three of them:
 
- - int minimumLength - minimum number of symbols;
- - int maximumLength - maximum number of symbols;
- - boolean includeUppercase - `true` or `false` for Uppercase usage;
+* int minimumLength - minimum number of symbols;
+* int maximumLength - maximum number of symbols;
+* boolean includeUppercase - `true` or `false` for Uppercase usage;
 
 In this way we created an *expression* that *generates* a *password* from *5* to *10* characters length *including* uppercase letters. +
 Possible output is `51gVj5aLZY`

@@ -22,11 +22,11 @@ implementation('org.vividus:vividus-plugin-db')
 
 . Define your JDBC driver and add appropriate dependency. Let's take PostgreSQL as an example:
 +
-- Open JDBC page on https://mvnrepository.com/open-source/jdbc-drivers[maven repository];
-- Find driver for your database and open details (https://mvnrepository.com/artifact/org.postgresql/postgresql[PostgreSQL JDBC Driver]);
-- Choose and open version (https://mvnrepository.com/artifact/org.postgresql/postgresql/42.5.4[42.5.4]);
-- Go to the Gradle tab and copy implementation string;
-- Paste chosen dependency into your build.gradle file:
+* Open JDBC page on https://mvnrepository.com/open-source/jdbc-drivers[maven repository];
+* Find driver for your database and open details (https://mvnrepository.com/artifact/org.postgresql/postgresql[PostgreSQL JDBC Driver]);
+* Choose and open version (https://mvnrepository.com/artifact/org.postgresql/postgresql/42.5.4[42.5.4]);
+* Go to the Gradle tab and copy implementation string;
+* Paste chosen dependency into your build.gradle file:
 +
 .build.gradle
 [source,gradle,subs="attributes+"]
@@ -308,7 +308,7 @@ jdbc:snowflake://account_identifier.snowflakecomputing.com/?connection_parameter
 
 [cols="4,2,1,4", options="header"]
 |===
-|Property name
+|Property Name
 |Acceptable values
 |Default
 |Description

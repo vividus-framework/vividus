@@ -20,7 +20,7 @@ include::partial$jira-configuration.adoc[]
 [cols="1,2,3", options="header"]
 |===
 
-|Property
+|Property Name
 |Required
 |Description
 

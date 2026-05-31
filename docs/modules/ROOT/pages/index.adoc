@@ -27,8 +27,8 @@ See the https://github.com/vividus-framework/vividus/releases[release history] t
 
 It's possible to receive ongoing updates about releases on GitHub through a subscription:
 
-- open https://github.com/vividus-framework/vividus/[main VIVIDUS repository]
-- subscribe to release notifications
+* open https://github.com/vividus-framework/vividus/[main VIVIDUS repository]
+* subscribe to release notifications
 +
 image::subscribe-to-releases.gif[Subscribe to releases,width=70%]
 
@@ -36,7 +36,7 @@ image::subscribe-to-releases.gif[Subscribe to releases,width=70%]
 
 There are various channels which you can ask questions on.
 
-- Use #support channel in https://vividus-support.vercel.app/[Slack].
-- Create an issue for your question at https://github.com/vividus-framework/vividus/issues/new/choose[GitHub].
-- Email us using team@vividus.dev.
-- Follow and tag us on https://x.com/vividus_tool[X].
+* Use #support channel in https://vividus-support.vercel.app/[Slack].
+* Create an issue for your question at https://github.com/vividus-framework/vividus/issues/new/choose[GitHub].
+* Email us using team@vividus.dev.
+* Follow and tag us on https://x.com/vividus_tool[X].

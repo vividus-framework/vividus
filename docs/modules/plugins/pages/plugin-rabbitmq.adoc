@@ -13,7 +13,7 @@ NOTE: The broker key must not contain dots.
 
 [cols="4,2,1,3", options="header"]
 |===
-|Property name
+|Property Name
 |Acceptable values
 |Default
 |Description

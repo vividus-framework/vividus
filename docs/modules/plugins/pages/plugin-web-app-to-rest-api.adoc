@@ -391,7 +391,7 @@ Then all resources by selector `$cssSelector` are valid on:$pages
 ----
 
 include::partial$html-locator.adoc[]
-. `$pages` - The pages to validate resources on.
+* `$pages` - The pages to validate resources on.
 
 .Validate resources located by XPath
 [source,gherkin]
@@ -424,7 +424,7 @@ Then all resources by selector `$cssSelector` from $html are valid
 ----
 
 include::partial$html-locator.adoc[]
-. `$html` - HTML document to validate.
+* `$html` - HTML document to validate.
 
 .Validate resources from the current page
 [source,gherkin]

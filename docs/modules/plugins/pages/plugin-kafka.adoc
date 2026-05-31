@@ -29,7 +29,7 @@ Where `<producer-key>` is the key of the producer configuration which should be 
 
 === Steps
 
-==== *Set headers to Kafka event*
+==== Set headers to Kafka event
 
 Sets headers to the event, which will be sent to Kafka topic.
 
@@ -51,7 +51,7 @@ When I set Kafka event headers:
 When I send event with value `test-data` to `dev` Kafka topic `test-topic`
 ----
 
-==== *Send event with value*
+==== Send event with value
 
 Sends the event with the value to the provided topic with no key or partition.
 
@@ -72,7 +72,7 @@ When I send event with value `$value` to `$producerKey` Kafka topic `$topic`
 When I send event with value `my-data` to `dev` Kafka topic `my-topic`
 ----
 
-==== *Send event with key and value*
+==== Send event with key and value
 
 Sends the event with the key and the value to the provided topic. Events with the same event key are written to the [same partition](https://kafka.apache.org/documentation/#intro_concepts_and_terms), and Kafka guarantees that any consumer of a given topic-partition will always read that partition's events in exactly the same order as they were written.
 
@@ -123,7 +123,7 @@ Where `<consumer-key>` is the key of the consumer configuration which should be 
 
 === Steps
 
-==== *Start the consumer*
+==== Start the consumer
 
 Starts the Kafka consumer with the provided configuration to listen the specified topics. The consumer must be stopped when it's not needed.
 
@@ -135,7 +135,7 @@ When I start consuming events from `$consumerKey` Kafka topics `$topics`
 * `$consumerKey` - The key of the Kafka consumer configuration.
 * `$topics` - The comma-separated set of topics to listen.
 
-==== *Drain/Peek the consumed events*
+==== Drain/Peek the consumed events
 
 Drains/Peeks the consumed events to the specified variable. If the consumer is not stopped, the new events might arrive after the draining. If the consumer is stopped, all the events received from the consumer start or after the last draining operation are stored to the variable.
 
@@ -149,7 +149,7 @@ When I $queueOperation consumed `$consumerKey` Kafka events to $scopes variable 
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store the events. The events are accessible via zero-based index, e.g. `${my-var[0]}` will return the first received event.
 
-==== *Wait for the events*
+==== Wait for the events
 
 Waits until the count of the consumed events (from the consumer start or after the last draining operation) matches to the rule or until the timeout is exceeded.
 
@@ -163,7 +163,7 @@ When I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
 * `$expectedCount` - The expected count of the events to be matched by the rule.
 
-==== *Stop the consumer*
+==== Stop the consumer
 
 Stops the Kafka consumer started by the corresponding step before. All recorded events are kept and can be drained into the variable using the step described above.
 

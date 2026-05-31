@@ -32,7 +32,7 @@ NOTE: The properties marked with *bold* are mandatory.
 
 [cols="2,1,2", options="header"]
 |===
-|Property
+|Property Name
 |Default value
 |Description
 
@@ -62,7 +62,7 @@ NOTE: The properties marked with *bold* are mandatory.
 
 |`batch-<batch-number>.fail-fast`
 |`false`
-|If `true` and any failure is occurred during the batch execution, the subsequent batches will not be executed.
+|If `true` and any failure occurs during the batch execution, the subsequent batches will not be executed.
 
 |`batch-<batch-number>.story.fail-fast`
 |`<empty>`
@@ -333,7 +333,7 @@ JSON file should contain a valid JSON. If JSON is not valid known issues will be
 
 [cols="2,1,2", options="header"]
 |===
-|Property
+|Property Name
 |Default value
 |Description
 

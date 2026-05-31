@@ -249,7 +249,7 @@ Extension of prompt `test-template.prompt.md` file to include auto-run of test c
 ```
 After generating the test script:
 1. Confirm test execution in agent chat by `"Yes, execute the tests"`.
-2. Execute test using сommand: ./gradlew runStories
+2. Execute test using command: ./gradlew runStories
 3. Automatically execute test with:
    - Chrome desktop profile.
    - Newly created story files.

@@ -13,8 +13,8 @@
 |xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]-s to join
 |===
 
-- `left` table is the first xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] declared in `tables` parameter,
-- `right` table is the second xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] declared in `tables` parameter or table body put under the transformer definition.
+* `left` table is the first xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] declared in `tables` parameter,
+* `right` table is the second xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] declared in `tables` parameter or table body put under the transformer definition.
 
 [IMPORTANT]
 ====

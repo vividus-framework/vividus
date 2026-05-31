@@ -20,10 +20,10 @@ could be optionally specified using global property `azure.environment`
 
 The supported environments are only:
 
-- `AZURE`
-- `AZURE_CHINA`
-- `AZURE_GERMANY`
-- `AZURE_US_GOVERNMENT`
+* `AZURE`
+* `AZURE_CHINA`
+* `AZURE_GERMANY`
+* `AZURE_US_GOVERNMENT`
 
 ==== Azure subscription selection
 
@@ -40,7 +40,7 @@ NOTE: The properties marked with *bold* are mandatory.
 
 [cols="1,1,3", options="header"]
 |===
-|Property name
+|Property Name
 |Default
 |Description
 

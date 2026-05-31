@@ -40,14 +40,14 @@ appium
 
 Make sure you have installed:
 
-- https://www.java.com/en/download/manual.jsp[Java]
-- http://developer.android.com/sdk/index.html[Android SDK]
-- https://developer.apple.com/xcode/[Xcode (iOS)]
+* https://www.java.com/en/download/manual.jsp[Java]
+* http://developer.android.com/sdk/index.html[Android SDK]
+* https://developer.apple.com/xcode/[Xcode (iOS)]
 
 And the following environment variables are set:
 
-- JAVA_HOME
-- ANDROID_HOME
+* JAVA_HOME
+* ANDROID_HOME
 
 TIP: You can open "Edit configuration" to set the variables in Appium Desktop.
 
@@ -73,11 +73,11 @@ Appium-doctor checks for:
 
 Desired Capabilities are just a set of keys and values that get sent to the Appium server during session initialization, that tell Appium what kind of thing we want to automate. The minimum set of required capabilities for any Appium driver should include:
 
-- *platformName*: the name of the platform to automate
-- *platformVersion*: the version of the platform to automate
-- *deviceName*: the kind of device to automate
-- *app*: the path to the app you want to automate (but use the browserName capability instead in the case of automating a web browser)
-- *automationName*: the name of the driver you wish to use
+* *platformName*: the name of the platform to automate
+* *platformVersion*: the version of the platform to automate
+* *deviceName*: the kind of device to automate
+* *app*: the path to the app you want to automate (but use the browserName capability instead in the case of automating a web browser)
+* *automationName*: the name of the driver you wish to use
 
 There are lots of other capabilities. To find out more please see https://appium.io/docs/en/2.1/guides/caps/[Appium Capabilities Documentation].
 

@@ -91,12 +91,12 @@ web.driver.<browser>.driver-executable-path=/path/to/driver/executable
 
 where `<browser>` is one of the following values:
 
-- `chrome`
-- `firefox`
-- `safari`
-- `iexplore`
-- `edge`
-- `opera`
+* `chrome`
+* `firefox`
+* `safari`
+* `iexplore`
+* `edge`
+* `opera`
 
 === Configure browser path
 
@@ -113,10 +113,10 @@ web.driver.<browser>.binary-path=/path/to/custom/browser/executable
 
 where `<browser>` is one of the following values:
 
-- `chrome`
-- `firefox`
-- `edge`
-- `opera`
+* `chrome`
+* `firefox`
+* `edge`
+* `opera`
 
 === Configure Basic authentication for Chromium browsers
 It is allowed to add predefined configurations for

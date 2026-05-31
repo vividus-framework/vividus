@@ -115,9 +115,9 @@ In order to support screenshot taking configuration per-project/per-step basis f
 Properties-based screenshot configuration can be specified using `web.screenshot.strategy.<YOUR_STRATEGY_NAME>.<PROPERTY_NAME>=<PROPERTY_VALUE>` pattern,
 where:
 
- - `YOUR_STRATEGY_NAME` - name of the custom strategy;
- - `PROPERTY_NAME` - name of the property you want to specify;
- - `PROPERTY_VALUE` - value of the property in the required format.
+* `YOUR_STRATEGY_NAME` - name of the custom strategy;
+* `PROPERTY_NAME` - name of the property you want to specify;
+* `PROPERTY_VALUE` - value of the property in the required format.
 
 ==== Properties-based configuration:
 
@@ -139,7 +139,7 @@ When I $visualAction baseline with name `$baselineName` using screenshot configu
 When I $visualAction baseline with name `$baselineName` ignoring:$ignoringElement using screenshot configuration:$screenshotConfiguration
 ----
 
-==== *Examples of usage property based web configuration:*
+==== Examples of usage property based web configuration:
 
 [source,gherkin]
 ----
@@ -152,7 +152,7 @@ web.screenshot.strategy.custom.shooting-strategy=SIMPLE
 web.screenshot.strategy=custom
 ----
 
-==== *Examples of usage step based configuration:*
+==== Examples of usage step based configuration:
 
 [source,gherkin]
 ----
@@ -229,7 +229,7 @@ where:
 
 |===
 
-==== *Examples of usage property based configuration:*
+==== Examples of usage property based configuration:
 
 [source,gherkin]
 ----
@@ -241,7 +241,7 @@ mobile.screenshot.strategy.custom.shooting-strategy=VIEWPORT
 mobile.screenshot.strategy=custom
 ----
 
-==== *Examples of usage step based configuration:*
+==== Examples of usage step based configuration:
 
 [source,gherkin]
 ----
