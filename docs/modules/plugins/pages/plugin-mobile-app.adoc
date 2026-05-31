@@ -1049,8 +1049,8 @@ When I start recording `$instrument` metrics
 When I stop recording `$instrument` metrics and save results to file `$path`
 ----
 
-. `$instrument` - The instrument of Xcode Instruments utility. Some useful instruments: Time Profiler, Leaks, File Activity, etc.
-. `$path` - The path to the file to save an archive with collected data.
+* `$instrument` - The instrument of Xcode Instruments utility. Some useful instruments: Time Profiler, Leaks, File Activity, etc.
+* `$path` - The path to the file to save an archive with collected data.
 
 .Perform profiling during application usage
 [source,gherkin]

@@ -24,8 +24,8 @@ Removes all keys from the specified Redis database.
 When I flush `$dbIndex` database on `$instanceKey` Redis instance
 ----
 
-- `dbIndex` — the non-negative index of the Redis database to flush
-- `instanceKey` — the key identifying the Redis instance in the <<_properties,connections config>>
+* `dbIndex` — the non-negative index of the Redis database to flush
+* `instanceKey` — the key identifying the Redis instance in the <<_properties,connections config>>
 
 .Flush database keys
 [source,gherkin]

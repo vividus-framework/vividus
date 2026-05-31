@@ -139,7 +139,7 @@ When I $visualAction baseline with name `$baselineName` using screenshot configu
 When I $visualAction baseline with name `$baselineName` ignoring:$ignoringElement using screenshot configuration:$screenshotConfiguration
 ----
 
-==== *Examples of usage property based web configuration:*
+==== Examples of usage property based web configuration:
 
 [source,gherkin]
 ----
@@ -152,7 +152,7 @@ web.screenshot.strategy.custom.shooting-strategy=SIMPLE
 web.screenshot.strategy=custom
 ----
 
-==== *Examples of usage step based configuration:*
+==== Examples of usage step based configuration:
 
 [source,gherkin]
 ----
@@ -229,7 +229,7 @@ where:
 
 |===
 
-==== *Examples of usage property based configuration:*
+==== Examples of usage property based configuration:
 
 [source,gherkin]
 ----
@@ -241,7 +241,7 @@ mobile.screenshot.strategy.custom.shooting-strategy=VIEWPORT
 mobile.screenshot.strategy=custom
 ----
 
-==== *Examples of usage step based configuration:*
+==== Examples of usage step based configuration:
 
 [source,gherkin]
 ----

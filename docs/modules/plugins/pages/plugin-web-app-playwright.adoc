@@ -13,9 +13,9 @@ The xref:configuration:tests-configuration.adoc#_profiles[profiles] allow to cho
 
 The following profiles running desktop browsers are available out of the box:
 
-- `web_pw/desktop/chromium` - for Google Chrome, Microsoft Edge and other Chromium-based browsers, by default, Playwright uses open source https://playwright.dev/java/docs/browsers#chromium[Chromium] builds.
-- `web_pw/desktop/firefox` - https://playwright.dev/java/docs/browsers#firefox[Playwright's Firefox] version matches the recent Firefox Stable build.
-- `web_pw/desktop/webkit` - https://playwright.dev/java/docs/browsers#webkit[Playwright's WebKit] version matches the recent WebKit trunk build, before it is used in Apple Safari and other WebKit-based browsers.
+* `web_pw/desktop/chromium` - for Google Chrome, Microsoft Edge and other Chromium-based browsers, by default, Playwright uses open source https://playwright.dev/java/docs/browsers#chromium[Chromium] builds.
+* `web_pw/desktop/firefox` - https://playwright.dev/java/docs/browsers#firefox[Playwright's Firefox] version matches the recent Firefox Stable build.
+* `web_pw/desktop/webkit` - https://playwright.dev/java/docs/browsers#webkit[Playwright's WebKit] version matches the recent WebKit trunk build, before it is used in Apple Safari and other WebKit-based browsers.
 
 === Headless
 
@@ -24,9 +24,9 @@ version of the browser while controlling it programmatically. It can be used wit
 meaning that it runs without its “head”, the Graphical User Interface (GUI). The following profiles running browsers in
 headless mode are available:
 
-- `web_pw/headless/chromium` - for Google Chrome, Microsoft Edge and other Chromium-based browsers, by default, Playwright uses open source https://playwright.dev/java/docs/browsers#chromium[Chromium] builds.
-- `web_pw/headless/firefox` - https://playwright.dev/java/docs/browsers#firefox[Playwright's Firefox] version matches the recent Firefox Stable build.
-- `web_pw/headless/webkit` - https://playwright.dev/java/docs/browsers#webkit[Playwright's WebKit] version matches the recent WebKit trunk build, before it is used in Apple Safari and other WebKit-based browsers.
+* `web_pw/headless/chromium` - for Google Chrome, Microsoft Edge and other Chromium-based browsers, by default, Playwright uses open source https://playwright.dev/java/docs/browsers#chromium[Chromium] builds.
+* `web_pw/headless/firefox` - https://playwright.dev/java/docs/browsers#firefox[Playwright's Firefox] version matches the recent Firefox Stable build.
+* `web_pw/headless/webkit` - https://playwright.dev/java/docs/browsers#webkit[Playwright's WebKit] version matches the recent WebKit trunk build, before it is used in Apple Safari and other WebKit-based browsers.
 
 == Properties
 

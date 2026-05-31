@@ -918,7 +918,7 @@ NOTE: The step throws the error in case if https://developer.mozilla.org/en-US/d
 Then I validate HTTP redirects:$expectedRedirects
 ----
 
-. `$expectedRedirects` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with redirect parameters containing the following columns:
+* `$expectedRedirects` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with redirect parameters containing the following columns:
 ** [subs=+quotes]`*startUrl*` - The URL from which redirection starts.
 ** [subs=+quotes]`*endUrl*` - The expected final URL to redirect to.
 ** [subs=+quotes]`*redirectsNumber*` - The expected number of redirects between `startUrl` and `endUrl` (optional).

@@ -92,9 +92,9 @@ Saves CSV string to indexed zero-based variable with column name mappings, e.g. 
 When I save CSV `$csv` to $scopes variable `$variableName`
 ----
 
-. `$csv` - CSV string.
-. `$scopes` - The comma-separated set of the xref:commons:variables.adoc#_scopes[variables scopes].
-. `$variableName` - The name of the variable to save CSV string.
+* `$csv` - CSV string.
+* `$scopes` - The comma-separated set of the xref:commons:variables.adoc#_scopes[variables scopes].
+* `$variableName` - The name of the variable to save CSV string.
 
 .Validate CSV data
 [source,gherkin]

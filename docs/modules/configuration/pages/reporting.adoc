@@ -316,7 +316,7 @@ image::linked.png[Link in allure report]
 
 [cols="3,1,2,1", options="header"]
 |===
-|Property name
+|Property Name
 |Meta tag
 |Description
 |Example
@@ -437,7 +437,7 @@ All properties are optional, in case if property is not set, no corresponding da
 
 [cols="1,2,2", options="header"]
 |===
-|Property name
+|Property Name
 |Description
 |Example
 
@@ -467,7 +467,7 @@ NOTE: The properties marked with *bold* are mandatory.
 
 [cols="4,3,3", options="header"]
 |===
-|Property name
+|Property Name
 |Description
 |Example
 

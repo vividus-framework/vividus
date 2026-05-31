@@ -38,7 +38,7 @@ Generates the date using current date as a baseline.
 
 [cols="4,3,1,4", options="header"]
 |===
-|Property name
+|Property Name
 |Acceptable values
 |Default
 |Description
@@ -127,7 +127,7 @@ Formats the input date to another format. Additionally, time zone can be changed
 
 [cols="4,3,1,4", options="header"]
 |===
-|Property name
+|Property Name
 |Acceptable values
 |Default
 |Description

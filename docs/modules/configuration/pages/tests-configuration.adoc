@@ -62,7 +62,7 @@ NOTE: The properties marked with *bold* are mandatory.
 
 |`batch-<batch-number>.fail-fast`
 |`false`
-|If `true` and any failure is occurred during the batch execution, the subsequent batches will not be executed.
+|If `true` and any failure occurs during the batch execution, the subsequent batches will not be executed.
 
 |`batch-<batch-number>.story.fail-fast`
 |`<empty>`

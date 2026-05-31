@@ -18,10 +18,10 @@ Upload the specified data to Amazon S3 under the specified bucket and key name.
 When I upload data `$data` with key `$objectKey` and content type `$contentType` to S3 bucket `$bucketName`
 ----
 
-- `$data` - the data to be uploaded
-- `$objectKey` - the key under which to store the specified data
-- `$contentType` - the MIME type of data
-- `$bucketName` - the name of an existing bucket
+* `$data` - The data to be uploaded.
+* `$objectKey` - The key under which to store the specified data.
+* `$contentType` - The MIME type of data.
+* `$bucketName` - The name of an existing bucket.
 
 .Upload data to Amazon S3
 [source,gherkin]
@@ -39,10 +39,10 @@ Retrieve the object by key from the provided S3 bucket and save its content to a
 When I fetch object with key `$objectKey` from S3 bucket `$bucketName` and save result to $scopes variable `$variableName`
 ----
 
-- `$objectKey` - the key under which the desired object is stored
-- `$bucketName` - the name of the bucket containing the desired object
-- `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-- `$variableName` - the variable name
+* `$objectKey` - The key under which the desired object is stored.
+* `$bucketName` - The name of the bucket containing the desired object.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name.
 
 .Download S3 object
 [source,gherkin]
@@ -59,9 +59,9 @@ Set https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl
 When I set ACL `$cannedAcl` for object with key `$objectKey` from S3 bucket `$bucketName`
 ----
 
-- `$cannedAcl` - The new pre-configured canned ACL for the specified object. (See https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl[the official documentation] for a complete list of the available ACLs)
-- `$objectKey` - The key of the object within the specified bucket whose ACL is being set.
-- `$bucketName` - The name of the bucket containing the object whose ACL is being set
+* `$cannedAcl` - The new pre-configured canned ACL for the specified object. (See https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl[the official documentation] for a complete list of the available ACLs)
+* `$objectKey` - The key of the object within the specified bucket whose ACL is being set.
+* `$bucketName` - The name of the bucket containing the object whose ACL is being set
 
 .Set public READ permission
 [source,gherkin]
@@ -77,7 +77,7 @@ Collects a list of the S3 objects keys in the specified bucket. Because buckets 
 When I collect objects keys filtered by:$filters in S3 bucket `$bucketName` and save result to $scopes variable `$variableName`
 ----
 
-- `$filters` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with filters to be applied to the objects to limit the resulting set.
+* `$filters` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with filters to be applied to the objects to limit the resulting set.
 +
 .The supported filter types
 [cols="1,1,2", options="header"]
@@ -110,9 +110,9 @@ The filters can be combined in any order and in any composition.
 |object modified not earlier than|2021-01-15T19:00:00+00:00 |
 ----
 
-- `$bucketName` - The name of the S3 bucket which objects keys are to be collected
-- `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-- `$variableName` - The variable name to store the S3 objects keys. The keys are accessible via zero-based index, `${my-keys[0]}` will return the first found key.
+* `$bucketName` - The name of the S3 bucket which objects keys are to be collected
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the S3 objects keys. The keys are accessible via zero-based index, `${my-keys[0]}` will return the first found key.
 
 .Download the first found S3 object with the specified prefix
 [source,gherkin]
@@ -133,8 +133,8 @@ Delete the specified object in the specified bucket. Once deleted, the object ca
 When I delete object with key `$objectKey` from S3 bucket `$bucketName`
 ----
 
-- `$objectKey` - The key of the object to delete.
-- `$bucketName` - The name of the Amazon S3 bucket containing the object to delete.
+* `$objectKey` - The key of the object to delete.
+* `$bucketName` - The name of the Amazon S3 bucket containing the object to delete.
 
 .Delete S3 object
 [source,gherkin]

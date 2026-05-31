@@ -12,9 +12,9 @@ any AWS service will use the provided credentials.
 Given I configure $awsCredentialsScope-scoped AWS credentials with access key `$accessKey` and secret key `$secretKey`
 ----
 
-- `$awsCredentialsScope` - The AWS credentials scope: `scenario` or `story`.
-- `$accessKey` - The AWS access key.
-- `$secretKey` - The AWS secret access key.
+* `$awsCredentialsScope` - The AWS credentials scope: `scenario` or `story`.
+* `$accessKey` - The AWS access key.
+* `$secretKey` - The AWS secret access key.
 
 .Upload data to Amazon S3 with locally configured credentials (`vividus-plugin-aws-s3` is required for data upload)
 [source,gherkin]

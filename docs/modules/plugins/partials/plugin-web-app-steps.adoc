@@ -16,7 +16,7 @@ The atomic actions performed are:
 * click on the element if it is found, otherwise the whole step is failed and its execution stops;
 * the first two actions are retried once if the field becomes stale during actions execution in other
 words if https://www.selenium.dev/exceptions/#stale_element_reference[StaleElementReferenceException]
-is occurred at any atomic action.
+occurs at any atomic action.
 
 [NOTE]
 ====
