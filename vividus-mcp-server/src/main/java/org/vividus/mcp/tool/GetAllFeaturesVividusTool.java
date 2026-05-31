@@ -104,8 +104,8 @@ public class GetAllFeaturesVividusTool implements VividusTool
 
         List<String> expressions = expressionProcessors.stream()
                 .flatMap(p -> extractExpressionNames(p).stream())
-                .sorted()
                 .distinct()
+                .sorted()
                 .toList();
 
         List<String> dynamicVariableNames = dynamicVariables.keySet().stream()
@@ -132,7 +132,7 @@ public class GetAllFeaturesVividusTool implements VividusTool
             }
             catch (IllegalAccessException e)
             {
-                return List.of();
+                throw new IllegalStateException("Failed to access delegates field of DelegatingExpressionProcessor", e);
             }
         }
         if (processor instanceof MultiArgExpressionProcessor<?> multiArg)
@@ -143,7 +143,8 @@ public class GetAllFeaturesVividusTool implements VividusTool
             }
             catch (IllegalAccessException e)
             {
-                return List.of();
+                throw new IllegalStateException(
+                        "Failed to access expressionName field of MultiArgExpressionProcessor", e);
             }
         }
         return List.of();
