@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -92,6 +93,11 @@ class VividusMcpServerTests
 
     private static final class TestVividusTool extends GetAllFeaturesVividusTool
     {
+        TestVividusTool()
+        {
+            super(List.of(), Map.of());
+        }
+
         @Override
         public Object getContent()
         {

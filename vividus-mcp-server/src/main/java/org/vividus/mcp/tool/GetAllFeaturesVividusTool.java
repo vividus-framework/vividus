@@ -16,22 +16,55 @@
 
 package org.vividus.mcp.tool;
 
+import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import org.jbehave.core.expressions.DelegatingExpressionProcessor;
+import org.jbehave.core.expressions.ExpressionProcessor;
+import org.jbehave.core.expressions.MultiArgExpressionProcessor;
 import org.vividus.mcp.VividusMcpServer.StepInfo;
 import org.vividus.runner.StepsCollector;
 import org.vividus.runner.StepsCollector.Step;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonUtils;
+import org.vividus.variable.DynamicVariable;
 
 import io.modelcontextprotocol.spec.McpSchema;
 
 public class GetAllFeaturesVividusTool implements VividusTool
 {
+    private static final Field EXPRESSION_NAME_FIELD;
+    private static final Field DELEGATES_FIELD;
+
+    static
+    {
+        try
+        {
+            EXPRESSION_NAME_FIELD = MultiArgExpressionProcessor.class.getDeclaredField("expressionName");
+            EXPRESSION_NAME_FIELD.setAccessible(true);
+            DELEGATES_FIELD = DelegatingExpressionProcessor.class.getDeclaredField("delegates");
+            DELEGATES_FIELD.setAccessible(true);
+        }
+        catch (NoSuchFieldException e)
+        {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
     private final JsonUtils jsonUtils = new JsonUtils();
+    private final List<ExpressionProcessor<?>> expressionProcessors;
+    private final Map<String, DynamicVariable> dynamicVariables;
+
+    public GetAllFeaturesVividusTool(List<ExpressionProcessor<?>> expressionProcessors,
+            Map<String, DynamicVariable> dynamicVariables)
+    {
+        this.expressionProcessors = expressionProcessors;
+        this.dynamicVariables = dynamicVariables;
+    }
 
     @SuppressWarnings("LineLength")
     @Override
@@ -69,8 +102,51 @@ public class GetAllFeaturesVividusTool implements VividusTool
                 .map(s -> new StepInfo(s.getStartingWord() + " " + s.getPattern(), s.getLocation()))
                 .toList();
 
+        List<String> expressions = expressionProcessors.stream()
+                .flatMap(p -> extractExpressionNames(p).stream())
+                .sorted()
+                .distinct()
+                .toList();
+
+        List<String> dynamicVariableNames = dynamicVariables.keySet().stream()
+                .sorted()
+                .map(name -> "${" + name + "}")
+                .toList();
+
         return new GetAllFeaturesResponse(steps, readJsonResourceAsMap("parameters.json"),
-                readJsonResourceAsMap("expressions.json"));
+                expressions, dynamicVariableNames);
+    }
+
+    private static List<String> extractExpressionNames(ExpressionProcessor<?> processor)
+    {
+        if (processor instanceof DelegatingExpressionProcessor delegating)
+        {
+            try
+            {
+                @SuppressWarnings("unchecked")
+                Collection<ExpressionProcessor<?>> delegates =
+                        (Collection<ExpressionProcessor<?>>) DELEGATES_FIELD.get(delegating);
+                return delegates.stream()
+                        .flatMap(d -> extractExpressionNames(d).stream())
+                        .toList();
+            }
+            catch (IllegalAccessException e)
+            {
+                return List.of();
+            }
+        }
+        if (processor instanceof MultiArgExpressionProcessor<?> multiArg)
+        {
+            try
+            {
+                return List.of("#{" + EXPRESSION_NAME_FIELD.get(multiArg) + "(...)}");
+            }
+            catch (IllegalAccessException e)
+            {
+                return List.of();
+            }
+        }
+        return List.of();
     }
 
     @SuppressWarnings("unchecked")
@@ -83,7 +159,8 @@ public class GetAllFeaturesVividusTool implements VividusTool
     public record GetAllFeaturesResponse(
         List<StepInfo> steps,
         Map<String, String> stepParameters,
-        Map<String, String> expressions)
+        List<String> expressions,
+        List<String> dynamicVariables)
     {
     }
 }
