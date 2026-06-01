@@ -5,13 +5,12 @@
 Before committing any Java changes, run the full quality suite for every affected module
 (replace `<module>` with the actual Gradle project name, e.g. `vividus-plugin-rest-api`):
 
-```bash
-JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64 ./gradlew \
-  :<module>:checkstyleMain :<module>:checkstyleTest \
-  :<module>:spotbugsMain :<module>:spotbugsTest \
-  :<module>:pmdMain :<module>:pmdTest \
-  :<module>:test
-```
+    # Ensure JAVA_HOME points to Java 21 (see README.md)
+    ./gradlew \
+      :<module>:checkstyleMain :<module>:checkstyleTest \
+      :<module>:spotbugsMain :<module>:spotbugsTest \
+      :<module>:pmdMain :<module>:pmdTest \
+      :<module>:test
 
 Fix **all** violations before pushing.
 
@@ -23,7 +22,7 @@ The following files **must not** be staged or committed:
 - `gradle/wrapper/gradle-wrapper.properties`
 - Any `.gradle/` build output directory
 
-These are either managed by the `vividus-build-system` submodule or are build artefacts. If accidentally staged, remove them with `git rm --cached`.
+These are either managed by the `vividus-build-system` submodule or are build artefacts. If accidentally staged, remove them with `git rm -r --cached <path>`.
 
 ## Qodana patterns
 
