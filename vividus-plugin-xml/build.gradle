@@ -4,7 +4,7 @@ dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
-    implementation('org.xmlunit:xmlunit-core:2.11.0')
+    implementation('org.xmlunit:xmlunit-core:2.12.0')
 
     testImplementation platform(libs.junit.bom)
     testImplementation(libs.junit.jupiter)
