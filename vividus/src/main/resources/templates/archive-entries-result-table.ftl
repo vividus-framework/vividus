@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
     <title>Archive entries</title>
-    <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../../webjars/bootstrap/5.3.1/css/bootstrap.min.css"/>
 </head>
 <body>
     <style>
@@ -28,7 +28,7 @@
     </style>
 
     <#if entryNames?has_content>
-      <table class="table table-hover table-bordered table-condensed fixedHeader">
+      <table class="table table-hover table-bordered table-sm fixedHeader">
          <thead>
             <tr>
                 <th>
