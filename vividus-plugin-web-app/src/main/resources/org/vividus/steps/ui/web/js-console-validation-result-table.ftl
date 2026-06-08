@@ -5,19 +5,10 @@
     <meta charset="utf-8">
     <title>JS error result table</title>
     <link rel="stylesheet" href="../../styles.css"/>
-    <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../../webjars/bootstrap/5.3.1/css/bootstrap.min.css"/>
 </head>
 <body>
-    <style>
-        .SEVERE {
-            background-color: #F2DEDE;
-            color: #A94442;
-        }
-        .WARNING {
-            background-color: #FCF8E3;
-            color: #8A6D3B;
-        }
-    </style>
+    [#assign levelClass = {"SEVERE": "table-danger", "WARNING": "table-warning", "INFO": "table-info"}]
     <table class="table table-hover table-bordered">
         <thead>
             <tr>
@@ -32,7 +23,7 @@
             [#list results?keys as pageResult]
                 [#list results[pageResult] as jsLogEntry]
                 [#assign counter = counter + 1]
-                <tr class="${jsLogEntry.level}">
+                <tr class="${levelClass[jsLogEntry.level]!}">
                     <td>
                         ${counter!}
                     </td>
