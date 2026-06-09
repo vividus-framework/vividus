@@ -34,7 +34,6 @@ import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestBuilder;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
-import org.vividus.http.exception.HttpRequestBuildException;
 import org.vividus.util.json.JsonPathUtils;
 
 public class XrayCloudClient implements XrayClient
@@ -155,19 +154,12 @@ public class XrayCloudClient implements XrayClient
 
     private HttpResponse post(String url, String body, String token) throws IOException
     {
-        try
-        {
-            return httpClient.execute(HttpRequestBuilder.create()
-                    .withHttpMethod(HttpMethod.POST)
-                    .withEndpoint(url)
-                    .withContent(body, ContentType.APPLICATION_JSON)
-                    .withHeaders(List.of(new BasicHeader(AUTHORIZATION, "Bearer " + token)))
-                    .build());
-        }
-        catch (HttpRequestBuildException e)
-        {
-            throw new IOException(e);
-        }
+        return httpClient.execute(HttpRequestBuilder.create()
+                .withHttpMethod(HttpMethod.POST)
+                .withEndpoint(url)
+                .withContent(body, ContentType.APPLICATION_JSON)
+                .withHeaders(List.of(new BasicHeader(AUTHORIZATION, "Bearer " + token)))
+                .build());
     }
 
     private String getToken() throws IOException
@@ -190,26 +182,20 @@ public class XrayCloudClient implements XrayClient
                 .put("client_id", clientId)
                 .put("client_secret", clientSecret)
                 .toString();
-        try
+
+        HttpResponse response = httpClient.execute(HttpRequestBuilder.create()
+                .withHttpMethod(HttpMethod.POST)
+                .withEndpoint(apiBaseUrl + AUTHENTICATE_PATH)
+                .withContent(body, ContentType.APPLICATION_JSON)
+                .build());
+        if (response.getStatusCode() != HttpStatus.SC_OK)
         {
-            HttpResponse response = httpClient.execute(HttpRequestBuilder.create()
-                    .withHttpMethod(HttpMethod.POST)
-                    .withEndpoint(apiBaseUrl + AUTHENTICATE_PATH)
-                    .withContent(body, ContentType.APPLICATION_JSON)
-                    .build());
-            if (response.getStatusCode() != HttpStatus.SC_OK)
-            {
-                throw new IOException(String.format("Xray Cloud authentication failed with status %d: %s",
-                        response.getStatusCode(), response.getResponseBodyAsString()));
-            }
-            String tokenJson = response.getResponseBodyAsString();
-            // Response is a JSON string like "eyJ..." — strip surrounding quotes
-            return tokenJson.substring(1, tokenJson.length() - 1);
+            throw new IOException(String.format("Xray Cloud authentication failed with status %d: %s",
+                    response.getStatusCode(), response.getResponseBodyAsString()));
         }
-        catch (HttpRequestBuildException e)
-        {
-            throw new IOException(e);
-        }
+        String tokenJson = response.getResponseBodyAsString();
+        // Response is a JSON string like "eyJ..." — strip surrounding quotes
+        return tokenJson.substring(1, tokenJson.length() - 1);
     }
 
     private void ensureSuccessful(HttpResponse response) throws IOException
