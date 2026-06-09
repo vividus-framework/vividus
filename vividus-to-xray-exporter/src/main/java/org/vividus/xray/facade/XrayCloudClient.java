@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.message.BasicHeader;
@@ -56,8 +58,7 @@ public class XrayCloudClient implements XrayClient
 
     public XrayCloudClient(String apiBaseUrl, String clientId, String clientSecret, IHttpClient httpClient)
     {
-        this.apiBaseUrl = (apiBaseUrl.endsWith("/") ? apiBaseUrl.substring(0, apiBaseUrl.length() - 1) : apiBaseUrl)
-                + "/api/v2";
+        this.apiBaseUrl = Strings.CS.appendIfMissing(apiBaseUrl, "/") + "api/v2";
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.httpClient = httpClient;
