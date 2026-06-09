@@ -98,9 +98,9 @@ public class XrayExporterOptions
     public static final class CloudOptions
     {
         private boolean enabled;
+        private String apiBaseUrl;
         private String clientId;
         private String clientSecret;
-        private String apiBaseUrl = "https://xray.cloud.getxray.app/";
 
         public boolean isEnabled()
         {
@@ -110,6 +110,16 @@ public class XrayExporterOptions
         public void setEnabled(boolean enabled)
         {
             this.enabled = enabled;
+        }
+
+        public String getApiBaseUrl()
+        {
+            return apiBaseUrl;
+        }
+
+        public void setApiBaseUrl(String apiBaseUrl)
+        {
+            this.apiBaseUrl = apiBaseUrl;
         }
 
         public String getClientId()
@@ -130,16 +140,6 @@ public class XrayExporterOptions
         public void setClientSecret(String clientSecret)
         {
             this.clientSecret = clientSecret;
-        }
-
-        public String getApiBaseUrl()
-        {
-            return apiBaseUrl;
-        }
-
-        public void setApiBaseUrl(String apiBaseUrl)
-        {
-            this.apiBaseUrl = apiBaseUrl;
         }
     }
 

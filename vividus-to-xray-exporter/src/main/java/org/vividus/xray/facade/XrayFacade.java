@@ -34,7 +34,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.lang.Nullable;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.mapper.JiraEntityMapper;
@@ -50,6 +49,7 @@ import org.vividus.xray.model.TestExecution;
 import org.zeroturnaround.zip.ZipException;
 import org.zeroturnaround.zip.ZipUtil;
 
+import jakarta.annotation.Nullable;
 import net.javacrumbs.jsonunit.JsonMatchers;
 import net.javacrumbs.jsonunit.core.Option;
 
@@ -67,7 +67,7 @@ public class XrayFacade
             XrayClient xrayClient, ManualTestCaseSerializer manualTestSerializer,
             CucumberTestCaseSerializer cucumberTestSerializer)
     {
-        this.jiraInstanceKey = jiraInstanceKey == null || jiraInstanceKey.isEmpty() ? null : jiraInstanceKey;
+        this.jiraInstanceKey = jiraInstanceKey;
         this.editableStatuses = editableStatuses;
         this.jiraFacade = jiraFacade;
         this.xrayClient = xrayClient;
@@ -122,7 +122,7 @@ public class XrayFacade
     }
 
     public void createTestExecution(TestExecution testExecution, List<Path> attachments)
-            throws IOException, JiraConfigurationException
+            throws IOException
     {
         String testExecutionRequest = objectMapper.writeValueAsString(testExecution);
         LOGGER.atInfo().addArgument(testExecutionRequest).log("Creating Test Execution: {}");
@@ -132,7 +132,7 @@ public class XrayFacade
     }
 
     public void updateTestExecution(TestExecution testExecution, List<Path> attachments)
-            throws IOException, JiraConfigurationException
+            throws IOException
     {
         String testExecutionKey = testExecution.getTestExecutionKey();
         String testExecutionRequest = objectMapper.writeValueAsString(testExecution);
@@ -146,7 +146,6 @@ public class XrayFacade
     }
 
     public void addAttachments(String testExecutionKey, List<Path> attachmentPaths)
-            throws IOException, JiraConfigurationException
     {
         if (attachmentPaths.isEmpty())
         {

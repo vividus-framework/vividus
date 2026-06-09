@@ -399,7 +399,7 @@ class XrayFacadeTests
     }
 
     @Test
-    void shouldAddTestCasesToTestSet() throws IOException, JiraConfigurationException
+    void shouldAddTestCasesToTestSet() throws IOException
     {
         initializeFacade(List.of());
         xrayFacade.updateTestSet(ISSUE_KEY, List.of(ISSUE_ID, ISSUE_ID));

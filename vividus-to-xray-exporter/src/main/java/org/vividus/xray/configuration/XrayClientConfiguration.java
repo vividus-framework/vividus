@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.vividus.http.client.HttpClientConfig;
 import org.vividus.http.client.IHttpClientFactory;
 import org.vividus.jira.JiraClientProvider;
@@ -35,7 +34,7 @@ public class XrayClientConfiguration
 {
     @Bean
     @ConditionalOnProperty(name = "xray-exporter.cloud.enabled", havingValue = "false", matchIfMissing = true)
-    public XrayClient xrayServerClient(@Lazy JiraClientProvider jiraClientProvider,
+    public XrayClient xrayServerClient(JiraClientProvider jiraClientProvider,
             @Value("${xray-exporter.jira-instance-key:}") String jiraInstanceKey)
     {
         return new XrayServerClient(jiraClientProvider, jiraInstanceKey.isEmpty() ? null : jiraInstanceKey);
@@ -46,11 +45,11 @@ public class XrayClientConfiguration
     public XrayClient xrayCloudClient(XrayExporterOptions options, IHttpClientFactory httpClientFactory)
             throws GeneralSecurityException
     {
-        XrayExporterOptions.CloudOptions cloud = options.getCloudOptions();
+        XrayExporterOptions.CloudOptions cloudOptions = options.getCloudOptions();
         return new XrayCloudClient(
-                cloud.getApiBaseUrl(),
-                cloud.getClientId(),
-                cloud.getClientSecret(),
+                cloudOptions.getApiBaseUrl(),
+                cloudOptions.getClientId(),
+                cloudOptions.getClientSecret(),
                 httpClientFactory.buildHttpClient(new HttpClientConfig()));
     }
 }
