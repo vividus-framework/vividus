@@ -16,7 +16,10 @@
 
 package org.vividus.xray.configuration;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,6 +27,9 @@ import static org.mockito.Mockito.when;
 import java.security.GeneralSecurityException;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.vividus.http.client.HttpClientConfig;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.http.client.IHttpClientFactory;
@@ -36,33 +42,44 @@ class XrayClientConfigurationTests
     @Test
     void shouldCreateXrayCloudClient() throws GeneralSecurityException
     {
-        IHttpClientFactory httpClientFactory = mock(IHttpClientFactory.class);
-        IHttpClient httpClient = mock(IHttpClient.class);
+        IHttpClientFactory httpClientFactory = mock();
+        IHttpClient httpClient = mock();
         when(httpClientFactory.buildHttpClient(any(HttpClientConfig.class))).thenReturn(httpClient);
 
-        XrayExporterOptions options = new XrayExporterOptions();
-        XrayExporterOptions.CloudOptions cloud = new XrayExporterOptions.CloudOptions();
-        cloud.setClientId("client-id");
-        cloud.setClientSecret("client-secret");
+        var apiBaseUrl = "https://xray.cloud.example.com";
+        var clientId = "client-id";
+        var clientSecret = "client-secret";
+
+        var options = new XrayExporterOptions();
+        var cloud = new XrayExporterOptions.CloudOptions();
+        cloud.setApiBaseUrl(apiBaseUrl);
+        cloud.setClientId(clientId);
+        cloud.setClientSecret(clientSecret);
         options.setCloudOptions(cloud);
 
-        assertInstanceOf(XrayCloudClient.class,
+        XrayCloudClient client = assertInstanceOf(XrayCloudClient.class,
                 new XrayClientConfiguration().xrayCloudClient(options, httpClientFactory));
+        assertAll(
+            () -> assertEquals(apiBaseUrl + "/api/v2", ReflectionTestUtils.getField(client, "apiBaseUrl")),
+            () -> assertEquals(clientId, ReflectionTestUtils.getField(client, "clientId")),
+            () -> assertEquals(clientSecret, ReflectionTestUtils.getField(client, "clientSecret")),
+            () -> assertSame(httpClient, ReflectionTestUtils.getField(client, "httpClient"))
+        );
     }
 
-    @Test
-    void shouldCreateXrayServerClientWithoutJiraInstanceKey()
+    @ParameterizedTest
+    @CsvSource({
+        "'',",
+        "my-jira, my-jira"
+    })
+    void shouldCreateXrayServerClient(String inputKey, String expectedKey)
     {
-        JiraClientProvider jiraClientProvider = mock(JiraClientProvider.class);
-        assertInstanceOf(XrayServerClient.class,
-                new XrayClientConfiguration().xrayServerClient(jiraClientProvider, ""));
-    }
-
-    @Test
-    void shouldCreateXrayServerClientWithJiraInstanceKey()
-    {
-        JiraClientProvider jiraClientProvider = mock(JiraClientProvider.class);
-        assertInstanceOf(XrayServerClient.class,
-                new XrayClientConfiguration().xrayServerClient(jiraClientProvider, "my-jira"));
+        JiraClientProvider jiraClientProvider = mock();
+        XrayServerClient client = assertInstanceOf(XrayServerClient.class,
+                new XrayClientConfiguration().xrayServerClient(jiraClientProvider, inputKey));
+        assertAll(
+            () -> assertSame(jiraClientProvider, ReflectionTestUtils.getField(client, "jiraClientProvider")),
+            () -> assertEquals(expectedKey, ReflectionTestUtils.getField(client, "jiraInstanceKey"))
+        );
     }
 }

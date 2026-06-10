@@ -193,9 +193,8 @@ public class XrayCloudClient implements XrayClient
             throw new IOException(String.format("Xray Cloud authentication failed with status %d: %s",
                     response.getStatusCode(), response.getResponseBodyAsString()));
         }
-        String tokenJson = response.getResponseBodyAsString();
-        // Response is a JSON string like "eyJ..." — strip surrounding quotes
-        return tokenJson.substring(1, tokenJson.length() - 1);
+        // Response is a JSON string like "eyJ..."
+        return OBJECT_MAPPER.readValue(response.getResponseBodyAsString(), String.class);
     }
 
     private void ensureSuccessful(HttpResponse response) throws IOException

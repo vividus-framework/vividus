@@ -110,7 +110,9 @@ class XrayCloudClientTests
 
         assertEquals(IMPORT_KEY, key);
         verify(httpClient).execute(argThat(req -> req != null && requestMatchesUrl(req, AUTH_URL)));
-        verify(httpClient).execute(argThat(req -> req != null && requestMatchesUrl(req, IMPORT_URL)));
+        verify(httpClient).execute(argThat(req -> req != null
+                && requestMatchesUrl(req, IMPORT_URL)
+                && requestHasBearerToken(req, TOKEN)));
     }
 
     @Test
@@ -127,7 +129,9 @@ class XrayCloudClientTests
 
         // authenticate should be called only once
         verify(httpClient, times(1)).execute(argThat(req -> req != null && requestMatchesUrl(req, AUTH_URL)));
-        verify(httpClient, times(2)).execute(argThat(req -> req != null && requestMatchesUrl(req, IMPORT_URL)));
+        verify(httpClient, times(2)).execute(argThat(req -> req != null
+                && requestMatchesUrl(req, IMPORT_URL)
+                && requestHasBearerToken(req, TOKEN)));
     }
 
     @Test
@@ -146,6 +150,12 @@ class XrayCloudClientTests
         assertEquals(IMPORT_KEY, key);
         verify(httpClient, times(2)).execute(argThat(req -> req != null && requestMatchesUrl(req, AUTH_URL)));
         verify(httpClient, times(2)).execute(argThat(req -> req != null && requestMatchesUrl(req, IMPORT_URL)));
+        verify(httpClient, times(1)).execute(argThat(req -> req != null
+                && requestMatchesUrl(req, IMPORT_URL)
+                && requestHasBearerToken(req, TOKEN)));
+        verify(httpClient, times(1)).execute(argThat(req -> req != null
+                && requestMatchesUrl(req, IMPORT_URL)
+                && requestHasBearerToken(req, NEW_TOKEN)));
     }
 
     @Test
@@ -218,6 +228,9 @@ class XrayCloudClientTests
         client.addTestsToTestSet(TEST_SET_KEY, List.of(TEST_CASE_KEY, testKey2));
 
         verify(httpClient, times(3)).execute(argThat(req -> req != null && requestMatchesUrl(req, GRAPHQL_URL)));
+        verify(httpClient, times(3)).execute(argThat(req -> req != null
+                && requestMatchesUrl(req, GRAPHQL_URL)
+                && requestHasBearerToken(req, TOKEN)));
     }
 
     @Test
@@ -286,6 +299,12 @@ class XrayCloudClientTests
 
         verify(httpClient, times(2)).execute(argThat(req -> req != null && requestMatchesUrl(req, AUTH_URL)));
         verify(httpClient, times(4)).execute(argThat(req -> req != null && requestMatchesUrl(req, GRAPHQL_URL)));
+        verify(httpClient, times(1)).execute(argThat(req -> req != null
+                && requestMatchesUrl(req, GRAPHQL_URL)
+                && requestHasBearerToken(req, TOKEN)));
+        verify(httpClient, times(3)).execute(argThat(req -> req != null
+                && requestMatchesUrl(req, GRAPHQL_URL)
+                && requestHasBearerToken(req, NEW_TOKEN)));
     }
 
     @Test
@@ -305,5 +324,11 @@ class XrayCloudClientTests
         {
             return false;
         }
+    }
+
+    private static boolean requestHasBearerToken(ClassicHttpRequest request, String token)
+    {
+        var header = request.getFirstHeader("Authorization");
+        return header != null && ("Bearer " + token).equals(header.getValue());
     }
 }
