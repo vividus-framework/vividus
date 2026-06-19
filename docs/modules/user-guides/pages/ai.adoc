@@ -62,6 +62,10 @@ macOS / Linux::
       "args": [
         "@playwright/mcp@latest"
       ]
+    },
+    "atlassian": { <4>
+      "url": "https://mcp.atlassian.com/v1/mcp",
+      "type": "http"
     }
   }
 }
@@ -87,6 +91,10 @@ Windows::
       "args": [
         "@playwright/mcp@latest"
       ]
+    },
+    "atlassian": { <4>
+      "url": "https://mcp.atlassian.com/v1/mcp",
+      "type": "http"
     }
   }
 }
@@ -96,6 +104,7 @@ Windows::
 <1> The absolute path to the `gradlew` or `gradlew.bat` executable contained in the tests project
 <2> The absolute path to the tests project
 <3> The Playwright MCP server is optional and can be used to control browser and generate tests for web-applications
+<4> The https://github.com/atlassian/atlassian-mcp-server[Atlassian MCP server] is optional and can be used to interact with Jira, Confluence, and Compass data (e.g., to generate tests from Jira requirements)
 . Start the MCP servers by clicking on the `▷ Start` buttons on the top of the servers names
 . Use Copilot in https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode#_use-agent-mode[agent mode] to generate automated scenarios
 ====
@@ -132,6 +141,14 @@ macOS / Linux::
       "args": [
           "@playwright/mcp"
       ]
+    },
+    "atlassian": { <4>
+      "command": "npx",
+      "args": [
+          "-y",
+          "mcp-remote@latest",
+          "https://mcp.atlassian.com/v1/mcp"
+      ]
     }
   }
 }
@@ -157,6 +174,14 @@ Windows::
       "args": [
           "@playwright/mcp"
       ]
+    },
+    "atlassian": { <4>
+      "command": "npx",
+      "args": [
+          "-y",
+          "mcp-remote@latest",
+          "https://mcp.atlassian.com/v1/mcp"
+      ]
     }
   }
 }
@@ -166,6 +191,7 @@ Windows::
 <1> The absolute path to the `gradlew` or `gradlew.bat` executable contained in the tests project
 <2> The absolute path to the tests project
 <3> The Playwright MCP server is optional and can be used to control browser and generate tests for web-applications
+<4> The https://github.com/atlassian/atlassian-mcp-server[Atlassian MCP server] is optional and can be used to interact with Jira, Confluence, and Compass data (e.g., to generate tests from Jira requirements). https://nodejs.org/en/download[Node.js] v18+ is required.
 . Restart `Claude Desktop` application
 ====
 
@@ -235,6 +261,51 @@ This will generate multiple scenarios covering:
 .  **Indicate Patterns or Approaches**.
 .  **Store Common Prompt Logic**: Save common prompt logic in a separate prompt file to avoid copy-pasting across
 different chats and minimize session context expiration effects.
+
+== Generating tests from Jira requirements using Atlassian MCP server
+
+The https://github.com/atlassian/atlassian-mcp-server[Atlassian MCP server] enables your AI assistant to interact with Jira, Confluence, and Compass directly. Combining it with the VIVIDUS MCP server allows
+you to generate automated test scenarios based on requirements and documentation stored in Atlassian Cloud.
+
+=== Prerequisites
+
+* An https://www.atlassian.com/software/jira[Atlassian Cloud] site with Jira and/or Confluence
+* The Atlassian MCP server configured as described in <<configure-mcp-servers>>
+* On first connection, a browser-based https://oauth.net/2.1/[OAuth 2.1] authorization flow will be triggered to grant access to your Atlassian data
+
+=== Ways to use
+
+==== Generate tests from a Jira ticket
+
+Provide a Jira issue key in your prompt, and the AI assistant will fetch the issue details and generate VIVIDUS test scenarios based on the acceptance criteria:
+
+```
+Read Jira ticket PROJ-123 and generate VIVIDUS test scenarios covering all acceptance criteria.
+```
+
+==== Generate tests from multiple Jira tickets
+
+Use JQL queries to find relevant Jira issues and generate tests in bulk:
+
+```
+Find all Jira stories in project PROJ with label "sprint-42" and generate VIVIDUS test scenarios for each.
+```
+
+==== Use Confluence pages as context
+
+Reference Confluence documentation to provide additional context for test generation:
+
+```
+Read the Confluence page "Login Flow Specification" in space DOCS and generate VIVIDUS test scenarios for the described login functionality.
+```
+
+==== Create Jira tickets from test results
+
+After test execution, use the Atlassian MCP server to create bug tickets:
+
+```
+Create a Jira bug in project PROJ with the summary "Login button is not clickable on mobile" and include the test failure details.
+```
 
 == FAQ
 
