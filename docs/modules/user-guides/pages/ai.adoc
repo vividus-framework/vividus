@@ -30,6 +30,8 @@ the configuration files for the used IDE and then refresh the project in the use
 
 == Configure AI Assistant
 
+NOTE: The examples below cover GitHub Copilot in VS Code and Claude Desktop, but any https://modelcontextprotocol.io/clients[MCP-compatible client] (such as Cursor, Windsurf, or Continue) can be configured in the same way using the VIVIDUS MCP server command shown here.
+
 [#configure-mcp-servers]
 .GitHub Copilot in VS Code
 [%collapsible]
@@ -103,7 +105,7 @@ Windows::
 .Claude Desktop
 [%collapsible]
 ====
-Claude is a next generation AI assistant built by Anthropic and trained to be safe, accurate, and secure to help you do your best work.
+Claude Desktop is a desktop client for Anthropic's Claude models.
 
 . Install https://claude.ai/download[Claude Desktop]
 . Open `Claude Desktop` and navigate to `Developer` tab in application `Settings`
@@ -121,16 +123,16 @@ macOS / Linux::
     "vividus": {
       "command": "/Users/Bob/Workspace/vividus-sample-tests/gradlew", <1>
       "args": [
-          "startMcpServer",
-          "-q",
-          "-p",
-          "/Users/Bob/Workspace/vividus-sample-tests" <2>
+        "startMcpServer",
+        "-q",
+        "-p",
+        "/Users/Bob/Workspace/vividus-sample-tests" <2>
       ]
     },
     "playwright": { <3>
       "command": "npx",
       "args": [
-          "@playwright/mcp"
+        "@playwright/mcp@latest"
       ]
     }
   }
@@ -146,16 +148,16 @@ Windows::
     "vividus": {
       "command": "c:\\Users\\Bob\\Workspace\\vividus-sample-tests\\gradlew.bat", <1>
       "args": [
-          "startMcpServer",
-          "-q",
-          "-p",
-          "c:\\Users\\Bob\\Workspace\\vividus-sample-tests" <2>
+        "startMcpServer",
+        "-q",
+        "-p",
+        "c:\\Users\\Bob\\Workspace\\vividus-sample-tests" <2>
       ]
     },
     "playwright": { <3>
       "command": "npx",
       "args": [
-          "@playwright/mcp"
+        "@playwright/mcp@latest"
       ]
     }
   }
@@ -186,11 +188,13 @@ running tests, and general conventions. This context is automatically picked up 
 The sample project already contains a https://github.com/vividus-framework/vividus-sample-tests/blob/main/.github/copilot-instructions.md[ready-made instructions file].
 Copy it into your local project and adjust it to reflect the specifics of your project.
 
-=== Copilot Skills
+== Copilot Skills
 
 A Copilot skill defines instructions, constraints, and step-by-step workflows for the
 https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent/about-copilot-coding-agent[GitHub Copilot coding agent].
 Use it to enforce style, allowed steps, locator conventions, and validation rules so every generated test follows team standards.
+
+NOTE: Copilot skills are picked up by the https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent/about-copilot-coding-agent[GitHub Copilot coding agent] (the cloud-based agent that is assigned to GitHub Issues). They are not used by the Copilot in VS Code agent mode chat.
 
 Benefits of using Copilot skills:
 
@@ -198,7 +202,7 @@ Benefits of using Copilot skills:
 * Reusable across test creation sessions.
 * Easier auditing and refactoring when the rules change.
 
-==== Setup Copilot Skills for GitHub Copilot
+=== Setup Copilot Skills for GitHub Copilot
 
 .   Create a `.github/skills` folder (if it doesn't exist)
 .   Create a subfolder for each skill and place a `SKILL.md` file inside it. Ready-made skills for generating VIVIDUS stories are available in the https://github.com/vividus-framework/vividus-sample-tests/tree/main/.github/skills[sample project]:
@@ -244,9 +248,13 @@ This will generate multiple scenarios covering:
 
 .  **Be Specific**: Include exact URLs and scope details.
 .  **State Requirements**: Mention specific validations needed.
-.  **Indicate Patterns or Approaches**.
+.  **Indicate Patterns or Approaches**: Mention whether to follow BDD naming conventions, use composite steps, or apply data tables.
+.  **Review Generated Tests**: Always inspect AI-generated `.story` files before committing. LLMs can produce syntactically valid but logically incorrect tests. Verify step names, locators, and assertions against actual application behaviour.
 .  **Store Common Skill Logic**: Save common instructions in a separate skill file to avoid copy-pasting across
 different chats and minimize session context expiration effects.
+
+[IMPORTANT]
+Never include sensitive data — credentials, API keys, PII, or confidential application details — in AI prompts. Treat every prompt as potentially logged or retained by the AI provider.
 
 == FAQ
 
@@ -299,8 +307,8 @@ Update test scenarios to include enhanced logging and error handling, focusing o
 Combining Strategies:
 
 *  Extract common steps to separate scenario.
-*  Create composite steps.
-*  Use story includes.
+*  Create https://jbehave.org/reference/stable/composite-steps.html[composite steps].
+*  Use https://jbehave.org/reference/stable/given-stories.html[story includes] (GivenStories).
 
 .Prompt for file combination:
 ```
@@ -328,11 +336,11 @@ BDD::
 Refactor these test scenarios to follow BDD approach and extract common steps into composite steps.
 ----
 
-DDD::
+DDD (Data-Driven)::
 +
 [source]
 ----
-Refactor these test scenarios to follow DDD approach and add examples tables to add variety of test data.
+Refactor these test scenarios to follow data-driven approach and add examples tables to add variety of test data.
 ----
 ======
 
@@ -349,5 +357,6 @@ Refactor these test scenarios to follow DDD approach and add examples tables to 
 Immediate Actions:
 
 .  Stop current generation.
+.  Restart the MCP server (in VS Code click `⟳ Restart` next to the server name; in Claude Desktop restart the application).
 .  Clear the conversation.
-.  Start fresh with URL and requirements (use the Copilot skill or provide details in chat).
+.  Start fresh with the target application URL and requirements (use the Copilot skill or provide details in chat).
