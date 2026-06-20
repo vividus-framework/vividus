@@ -11,7 +11,7 @@ IMPORTANT: LLM will access only those steps that are available from plugins incl
 . Copy the below line to `dependencies` section of the project `build.gradle` file in your test project
 +
 [IMPORTANT]
-VIVIDUS MCP server is available starting from version `0.6.16-SNAPSHOT` and higher.
+VIVIDUS MCP server is available starting from version `0.6.16` and higher.
 +
 .build.gradle
 [source,gradle,subs="attributes+"]
@@ -177,33 +177,45 @@ Windows::
 . Choose the preferred Language Model (the list of the available models can differ depending on your license)
 . Configure and start the <<configure-mcp-servers, MCP servers>>
 
-=== Common Prompt Files
+=== Copilot Instructions File
 
-A prompt file stores stable instructions and constraints for the AI agent. Use it to fix style, allowed steps,
-locator conventions, and validation rules so every generated test follows team standards.
+A https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot[Copilot instructions file]
+(`.github/copilot-instructions.md`) provides global context about the project to GitHub Copilot — such as the project layout, build commands,
+running tests, and general conventions. This context is automatically picked up by Copilot in VS Code and on GitHub.
 
-Benefits of prompt file usage:
+The sample project already contains a https://github.com/vividus-framework/vividus-sample-tests/blob/main/.github/copilot-instructions.md[ready-made instructions file].
+Copy it into your local project and adjust it to reflect the specifics of your project.
+
+=== Copilot Skills
+
+A Copilot skill defines instructions, constraints, and step-by-step workflows for the
+https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent/about-copilot-coding-agent[GitHub Copilot coding agent].
+Use it to enforce style, allowed steps, locator conventions, and validation rules so every generated test follows team standards.
+
+Benefits of using Copilot skills:
 
 * Centralized rules for test generation.
 * Reusable across test creation sessions.
 * Easier auditing and refactoring when the rules change.
 
-==== Setup prompt files for GitHub Copilot
+==== Setup Copilot Skills for GitHub Copilot
 
-.   Create a `.github/prompts` folder (if it doesn't exist)
-.   Place the ready-made prompt files into the created folder. The sample prompt for generating VIVIDUS stories that test web-applications is available in the https://github.com/vividus-framework/vividus-sample-tests/blob/main/.github/prompts/generate-vividus-story-web.prompt.md[sample project]; copy this content into your local project and then modify it based on your needs and the specifics of your SUT.
+.   Create a `.github/skills` folder (if it doesn't exist)
+.   Create a subfolder for each skill and place a `SKILL.md` file inside it. Ready-made skills for generating VIVIDUS stories are available in the https://github.com/vividus-framework/vividus-sample-tests/tree/main/.github/skills[sample project]:
+    * https://github.com/vividus-framework/vividus-sample-tests/blob/main/.github/skills/generate-vividus-web-tests/SKILL.md[Web application test generation skill] — generates `.story` files for web UI tests using the VIVIDUS web plugin; requires both the VIVIDUS MCP and Playwright MCP servers to be connected
+    * https://github.com/vividus-framework/vividus-sample-tests/blob/main/.github/skills/generate-vividus-api-tests/SKILL.md[API test generation skill] — generates `.story` files for REST API tests from an OpenAPI/Swagger specification; requires the VIVIDUS MCP server to be connected
+    Copy the content of the skill files into your local project and modify them based on your needs and the specifics of your SUT.
 +
 [IMPORTANT]
-The prompt file must have the `.prompt.md` extension (e.g., `generate-vividus-story-web.prompt.md`). This extension ensures proper
-recognition by VS Code and GitHub Copilot
+Each skill must be placed in a dedicated subfolder inside `.github/skills/` as a `SKILL.md` file (e.g., `.github/skills/generate-vividus-web-tests/SKILL.md`). This structure ensures proper recognition by GitHub Copilot.
 +
-.   Specify the path to your tests folder in the prompt.
-.   https://code.visualstudio.com/docs/copilot/customization/prompt-files#_use-a-prompt-file-in-chat[Use a prompt file in chat].
+.   Specify the path to your tests folder in the skill file.
+.   https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent/about-copilot-coding-agent[Use the skill with the GitHub Copilot coding agent].
 
 
 == Writing Tests with AI Assistance
 
-.Combine the prompt configured earlier with a detailed test case:
+.Combine the skill configured earlier with a detailed test case:
 ```
 Open `https://example.com/` page.
 Close any opened pop-ups.
@@ -217,7 +229,7 @@ This will generate a test with:
 *  Pop-up handling.
 *  Search functionality verification.
 
-.Or combine the prompt configured earlier with general web testing scenarios (scenarios list generated by AI):
+.Or combine the skill configured earlier with general web testing scenarios (scenarios list generated by AI):
 ```
 Open `https://example.com/` page and write test automation scenarios demonstrating Vividus tool capabilities for web application testing.
 ```
@@ -233,7 +245,7 @@ This will generate multiple scenarios covering:
 .  **Be Specific**: Include exact URLs and scope details.
 .  **State Requirements**: Mention specific validations needed.
 .  **Indicate Patterns or Approaches**.
-.  **Store Common Prompt Logic**: Save common prompt logic in a separate prompt file to avoid copy-pasting across
+.  **Store Common Skill Logic**: Save common instructions in a separate skill file to avoid copy-pasting across
 different chats and minimize session context expiration effects.
 
 == FAQ
@@ -244,7 +256,7 @@ different chats and minimize session context expiration effects.
 
 Please be aware of token limits. Set up auto-execution only if you are confident and polish your prompt file.
 
-Extension of prompt `test-template.prompt.md` file to include auto-run of test cases after confirmation in chat:
+Extension of the skill file to include auto-run of test cases after confirmation in chat:
 
 ```
 After generating the test script:
@@ -338,4 +350,4 @@ Immediate Actions:
 
 .  Stop current generation.
 .  Clear the conversation.
-.  Start fresh with URL and requirements (use `test-template.prompt.md` or provide details in chat).
+.  Start fresh with URL and requirements (use the Copilot skill or provide details in chat).
