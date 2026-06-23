@@ -30,7 +30,7 @@ the configuration files for the used IDE and then refresh the project in the use
 
 == Configure AI Assistant
 
-NOTE: The examples below cover GitHub Copilot in VS Code and Claude Desktop, but any https://modelcontextprotocol.io/clients[MCP-compatible client] (such as Cursor, Windsurf, or Continue) can be configured in the same way using the VIVIDUS MCP server command shown here.
+NOTE: The examples below cover GitHub Copilot in VS Code and Claude Code, but any https://modelcontextprotocol.io/clients[MCP-compatible client] (such as Cursor, Windsurf, or Continue) can be configured in the same way using the VIVIDUS MCP server command shown here.
 
 [#configure-mcp-servers]
 .GitHub Copilot in VS Code
@@ -102,73 +102,41 @@ Windows::
 . Use Copilot in https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode#_use-agent-mode[agent mode] to generate automated scenarios
 ====
 
-.Claude Desktop
+.Claude Code
 [%collapsible]
 ====
-Claude Desktop is a desktop client for Anthropic's Claude models.
+https://claude.ai/code[Claude Code] is an agentic coding tool by Anthropic.
 
-. Install https://claude.ai/download[Claude Desktop]
-. Open `Claude Desktop` and navigate to `Developer` tab in application `Settings`
-. Click `Edit Config` which opens `claude_desktop_config.json` file that contains MCP server configs
-. Add the following configuration into `claude_desktop_config.json` file and save it
+. Install https://claude.ai/code[Claude Code]
+. Add the VIVIDUS MCP server using the `claude mcp add` command:
 +
 [tabs]
 ======
 macOS / Linux::
 +
-[source,json]
+[source,bash]
 ----
-{
-  "mcpServers": {
-    "vividus": {
-      "command": "/Users/Bob/Workspace/vividus-sample-tests/gradlew", <1>
-      "args": [
-        "startMcpServer",
-        "-q",
-        "-p",
-        "/Users/Bob/Workspace/vividus-sample-tests" <2>
-      ]
-    },
-    "playwright": { <3>
-      "command": "npx",
-      "args": [
-        "@playwright/mcp@latest"
-      ]
-    }
-  }
-}
+claude mcp add vividus -s user -- /Users/Bob/Workspace/vividus-sample-tests/gradlew startMcpServer -q -p /Users/Bob/Workspace/vividus-sample-tests <1>
 ----
 
 Windows::
 +
-[source,json]
+[source,bash]
 ----
-{
-  "mcpServers": {
-    "vividus": {
-      "command": "c:\\Users\\Bob\\Workspace\\vividus-sample-tests\\gradlew.bat", <1>
-      "args": [
-        "startMcpServer",
-        "-q",
-        "-p",
-        "c:\\Users\\Bob\\Workspace\\vividus-sample-tests" <2>
-      ]
-    },
-    "playwright": { <3>
-      "command": "npx",
-      "args": [
-        "@playwright/mcp@latest"
-      ]
-    }
-  }
-}
+claude mcp add vividus -s user -- c:\Users\Bob\Workspace\vividus-sample-tests\gradlew.bat startMcpServer -q -p c:\Users\Bob\Workspace\vividus-sample-tests <1>
 ----
 ======
 +
-<1> The absolute path to the `gradlew` or `gradlew.bat` executable contained in the tests project
-<2> The absolute path to the tests project
-<3> The Playwright MCP server is optional and can be used to control browser and generate tests for web-applications
-. Restart `Claude Desktop` application
+<1> Replace with the absolute path to the `gradlew` or `gradlew.bat` executable and the absolute path to the tests project
+. Optionally, add the Playwright MCP server to enable browser control and web-application test generation: <2>
++
+[source,bash]
+----
+claude mcp add playwright -s user -- npx @playwright/mcp@latest
+----
++
+<2> The Playwright MCP server is optional and can be used to control browser and generate tests for web-applications
+. Start Claude Code and the configured MCP servers are loaded automatically
 ====
 
 == Web-application test automation with GitHub Copilot in VS Code
@@ -193,8 +161,6 @@ Copy it into your local project and adjust it to reflect the specifics of your p
 A Copilot skill defines instructions, constraints, and step-by-step workflows for the
 https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent/about-copilot-coding-agent[GitHub Copilot coding agent].
 Use it to enforce style, allowed steps, locator conventions, and validation rules so every generated test follows team standards.
-
-NOTE: Copilot skills are picked up by the https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent/about-copilot-coding-agent[GitHub Copilot coding agent] (the cloud-based agent that is assigned to GitHub Issues). They are not used by the Copilot in VS Code agent mode chat.
 
 Benefits of using Copilot skills:
 
@@ -336,7 +302,7 @@ BDD::
 Refactor these test scenarios to follow BDD approach and extract common steps into composite steps.
 ----
 
-DDD (Data-Driven)::
+Data-Driven::
 +
 [source]
 ----
@@ -357,6 +323,6 @@ Refactor these test scenarios to follow data-driven approach and add examples ta
 Immediate Actions:
 
 .  Stop current generation.
-.  Restart the MCP server (in VS Code click `⟳ Restart` next to the server name; in Claude Desktop restart the application).
+.  Restart the MCP server (in VS Code click `⟳ Restart` next to the server name; in Claude Code run `/mcp` to check server status or restart the session).
 .  Clear the conversation.
 .  Start fresh with the target application URL and requirements (use the Copilot skill or provide details in chat).
