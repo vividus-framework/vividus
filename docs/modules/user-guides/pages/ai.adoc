@@ -128,11 +128,11 @@ claude mcp add vividus -s user -- c:\Users\Bob\Workspace\vividus-sample-tests\gr
 ======
 +
 <1> Replace with the absolute path to the `gradlew` or `gradlew.bat` executable and the absolute path to the tests project
-. Optionally, add the Playwright MCP server to enable browser control and web-application test generation: <2>
+. Optionally, add the Playwright MCP server to enable browser control and web-application test generation:
 +
 [source,bash]
 ----
-claude mcp add playwright -s user -- npx @playwright/mcp@latest
+claude mcp add playwright -s user -- npx @playwright/mcp@latest <2>
 ----
 +
 <2> The Playwright MCP server is optional and can be used to control browser and generate tests for web-applications
@@ -306,8 +306,7 @@ Data-Driven::
 +
 [source]
 ----
-Refactor these test scenarios to follow data-driven approach and add examples tables to add variety of test data.
-----
+Refactor these test scenarios to follow a data-driven approach and add an Examples table to provide a variety of test data.
 ======
 
 === Q: What to do when AI starts hallucinating after previously working well?
