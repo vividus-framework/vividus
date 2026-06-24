@@ -1,18 +1,8 @@
-project.description = 'VIVIDUS to Azure DevOps exporter'
-
-buildscript {
-    ext {
-        springBootVersion = '4.0.3'
-    }
-
-    repositories {
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-    }
+plugins {
+    alias(libs.plugins.spring.boot)
 }
-apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+project.description = 'VIVIDUS to Azure DevOps exporter'
 
 tasks {
     javadocJar.enabled = false
@@ -21,7 +11,7 @@ tasks {
 
 dependencies {
     // https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/257
-    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    implementation platform(libs.spring.boot.bom)
 
     implementation('org.springframework.boot:spring-boot-starter')
     implementation('org.springframework.boot:spring-boot-starter-validation')

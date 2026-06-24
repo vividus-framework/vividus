@@ -1,3 +1,6 @@
+[versions]
+spring-boot = "4.0.3"
+
 [libraries]
 
 apache-commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.20.0" }
@@ -14,6 +17,7 @@ slf4j-julToSlf4j = { module = "org.slf4j:jul-to-slf4j" }
 slf4j-log4jOverSlf4j = { module = "org.slf4j:log4j-over-slf4j" }
 
 spring-bom = { module = "org.springframework:spring-framework-bom", version = "7.0.8" }
+spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 spring-beans = { module = "org.springframework:spring-beans" }
 spring-context = { module = "org.springframework:spring-context" }
 spring-core = { module = "org.springframework:spring-core" }
@@ -59,3 +63,6 @@ mockito-core = { module = "org.mockito:mockito-core" }
 junitPioneer = { module = "org.junit-pioneer:junit-pioneer", version = "2.3.0" }
 slf4jTest = { module = "com.github.valfirst:slf4j-test", version = "3.0.3" }
 equalsverifier = { module = "nl.jqno.equalsverifier:equalsverifier", version = "4.5" }
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
