@@ -121,7 +121,7 @@ claude mcp add vividus -s user -- /Users/Bob/Workspace/vividus-sample-tests/grad
 
 Windows::
 +
-[source,bash]
+[source,cmd]
 ----
 claude mcp add vividus -s user -- c:\Users\Bob\Workspace\vividus-sample-tests\gradlew.bat startMcpServer -q -p c:\Users\Bob\Workspace\vividus-sample-tests <1>
 ----
