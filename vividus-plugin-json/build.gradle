@@ -12,7 +12,7 @@ dependencies {
     implementation('io.qameta.allure:allure-jsonunit') {
         exclude (group: 'io.qameta.allure')
     }
-    implementation('com.networknt:json-schema-validator:3.0.3')
+    implementation('com.networknt:json-schema-validator:3.0.5')
     implementation(libs.guava)
 
     testImplementation platform(libs.junit.bom)
