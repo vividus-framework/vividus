@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
@@ -41,6 +40,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,6 +57,7 @@ import org.vividus.util.json.JsonUtils;
 class SslLabsClientTests
 {
     private static final String SSL_LABS_HOST = "https://api.ssllabs.com";
+    private static final String SSL_LABS_EMAIL = "test@example.com";
     private static final String ANALYZED_HOST = "www.example.com";
     private static final int SERVICE_IS_OVERLOADED = 529;
 
@@ -75,7 +76,7 @@ class SslLabsClientTests
         {
             duration.when(() -> Duration.ofMinutes(10)).thenReturn(Duration.ZERO);
             duration.when(() -> Duration.ofSeconds(30)).thenReturn(Duration.ZERO);
-            client = new SslLabsClient(httpClient, new JsonUtils(), SSL_LABS_HOST);
+            client = new SslLabsClient(httpClient, new JsonUtils(), SSL_LABS_HOST, SSL_LABS_EMAIL);
         }
     }
 
@@ -95,7 +96,7 @@ class SslLabsClientTests
         try (var grade = mockStatic(Grade.class))
         {
             var ioException = mock(IOException.class);
-            when(httpClient.doHttpGet(any(URI.class))).thenThrow(ioException);
+            when(httpClient.execute(any(ClassicHttpRequest.class))).thenThrow(ioException);
             assertEquals(Optional.empty(), client.performSslScan(ANALYZED_HOST));
             grade.verify(() -> Grade.fromString(anyString()), never());
             assertThat(logger.getLoggingEvents(),
@@ -119,7 +120,7 @@ class SslLabsClientTests
             HttpResponse httpResponse = new HttpResponse();
             httpResponse.setStatusCode(statusCode);
             httpResponse.setResponseBody(response.getBytes(StandardCharsets.UTF_8));
-            when(httpClient.doHttpGet(any(URI.class))).thenReturn(httpResponse);
+            when(httpClient.execute(any(ClassicHttpRequest.class))).thenReturn(httpResponse);
             assertEquals(Optional.empty(), client.performSslScan(ANALYZED_HOST));
             grade.verify(() -> Grade.fromString(anyString()), never());
             assertThat(logger.getLoggingEvents(), hasItems(
@@ -175,6 +176,6 @@ class SslLabsClientTests
         HttpResponse httpResponse = new HttpResponse();
         httpResponse.setStatusCode(HttpStatus.SC_OK);
         httpResponse.setResponseBody(response.getBytes(StandardCharsets.UTF_8));
-        when(httpClient.doHttpGet(any(URI.class))).thenReturn(httpResponse);
+        when(httpClient.execute(any(ClassicHttpRequest.class))).thenReturn(httpResponse);
     }
 }
