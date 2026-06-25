@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.StringComparisonRule;
+import org.vividus.ui.web.action.NavigateActions;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.ui.web.playwright.BrowserContextProvider;
 import org.vividus.ui.web.playwright.UiContext;
@@ -55,6 +56,7 @@ class PageStepsTests
 
     @Mock private BrowserContextProvider browserContextProvider;
     @Mock private UiContext uiContext;
+    @Mock private NavigateActions navigateActions;
     @Mock private WebApplicationConfiguration webApplicationConfiguration;
     @Mock private ISoftAssert softAssert;
     @InjectMocks private PageSteps pageSteps;
@@ -148,13 +150,8 @@ class PageStepsTests
     @Test
     void shouldRefreshPage()
     {
-        Page page = mock();
-        when(uiContext.getCurrentPage()).thenReturn(page);
-
         pageSteps.refreshPage();
-
-        verify(page).reload();
-        verifyNoMoreInteractions(page);
+        verify(navigateActions).refresh();
     }
 
     @Test
