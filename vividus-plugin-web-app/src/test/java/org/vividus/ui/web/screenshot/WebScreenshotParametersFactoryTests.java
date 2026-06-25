@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -60,13 +61,18 @@ class WebScreenshotParametersFactoryTests
         );
     }
 
+    private void initFactory(Map<String, WebScreenshotConfiguration> screenshotConfigurations,
+            Map<IgnoreStrategy, Set<Locator>> ignoreStrategies)
+    {
+        factory.setShootingStrategy(SIMPLE);
+        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(screenshotConfigurations));
+        factory.setIgnoreStrategies(ignoreStrategies);
+    }
+
     @Test
     void shouldCreateScreenshotConfiguration()
     {
-        factory.setShootingStrategy(SIMPLE);
-        factory.setScreenshotConfigurations(
-                new PropertyMappedCollection<>(Map.of(SIMPLE, new WebScreenshotConfiguration())));
-        factory.setIgnoreStrategies(Map.of());
+        initFactory(Map.of(SIMPLE, new WebScreenshotConfiguration()), Map.of());
 
         var userConfiguration = new WebScreenshotConfiguration();
         userConfiguration.setShootingStrategy(Optional.of(SIMPLE));
@@ -78,8 +84,10 @@ class WebScreenshotParametersFactoryTests
         when(searchActions.findElement(locator)).thenReturn(Optional.of(scrollableElement));
         userConfiguration.setCoordsProvider("WEB_DRIVER");
         userConfiguration.setScrollTimeout("PT1S");
+        ExamplesTable examplesTable = mock();
+        when(examplesTable.getRowsAs(WebScreenshotConfiguration.class)).thenReturn(List.of(userConfiguration));
 
-        var parameters = factory.create(Optional.of(userConfiguration), IGNORES_TABLE, createEmptyIgnores());
+        var parameters = factory.create(examplesTable, IGNORES_TABLE, createEmptyIgnores());
 
         assertEquals(Optional.of(SIMPLE), parameters.getShootingStrategy());
         assertEquals(11, parameters.getNativeHeaderToCut());
@@ -94,34 +102,31 @@ class WebScreenshotParametersFactoryTests
     @Test
     void shouldCreateScreenshotConfigurationWithIgnores()
     {
-        factory.setShootingStrategy(SIMPLE);
-        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(new HashMap<>()));
-        factory.setIgnoreStrategies(Map.of(IgnoreStrategy.ELEMENT, Set.of(), IgnoreStrategy.AREA, Set.of()));
+        initFactory(Map.of(), Map.of(IgnoreStrategy.ELEMENT, Set.of(), IgnoreStrategy.AREA, Set.of()));
 
         var locator = mock(Locator.class);
         var ignores = Map.of(
                 IgnoreStrategy.ELEMENT, Set.of(locator),
                 IgnoreStrategy.AREA, Set.of(locator)
         );
-        var parameters = factory.create(Optional.empty(), IGNORES_TABLE, ignores);
+        var parameters = factory.create(null, IGNORES_TABLE, ignores);
         assertEquals(ignores, parameters.getIgnoreStrategies());
     }
 
     @Test
     void shouldFailIfElementByLocatorDoesNotExist()
     {
-        factory.setShootingStrategy(SIMPLE);
-        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of()));
-        factory.setIgnoreStrategies(Map.of());
+        initFactory(Map.of(), Map.of());
 
         var webScreenshotConfiguration = new WebScreenshotConfiguration();
         webScreenshotConfiguration.setScrollableElement(Optional.of(locator));
         when(searchActions.findElement(locator)).thenReturn(Optional.empty());
-        var configuration = Optional.of(webScreenshotConfiguration);
+        ExamplesTable examplesTable = mock();
+        when(examplesTable.getRowsAs(WebScreenshotConfiguration.class)).thenReturn(List.of(webScreenshotConfiguration));
         Map<IgnoreStrategy, Set<Locator>> ignores = createEmptyIgnores();
 
         var thrown = assertThrows(ScreenshotPrecondtionMismatchException.class,
-                () -> factory.create(configuration, IGNORES_TABLE, ignores));
+                () -> factory.create(examplesTable, IGNORES_TABLE, ignores));
         assertEquals("Scrollable element does not exist", thrown.getMessage());
     }
 

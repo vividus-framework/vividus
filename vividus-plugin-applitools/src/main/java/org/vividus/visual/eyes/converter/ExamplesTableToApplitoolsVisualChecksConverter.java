@@ -38,7 +38,6 @@ import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.openqa.selenium.Dimension;
 import org.vividus.selenium.locator.Locator;
-import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
@@ -107,11 +106,10 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
 
     private final Map<String, BatchInfo> batchStorage = new ConcurrentHashMap<>();
 
-    private final ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
+    private final ScreenshotParametersFactory screenshotParametersFactory;
     private final BaselineIndexer baselineIndexer;
 
-    public ExamplesTableToApplitoolsVisualChecksConverter(
-            ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory,
+    public ExamplesTableToApplitoolsVisualChecksConverter(ScreenshotParametersFactory screenshotParametersFactory,
             BaselineIndexer baselineIndexer)
     {
         this.screenshotParametersFactory = screenshotParametersFactory;

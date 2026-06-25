@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,15 @@ package org.vividus.ui.mobileapp.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -57,7 +60,9 @@ class MobileAppScreenshotParametersFactoryTests
                 IgnoreStrategy.ELEMENT, Set.of(),
                 IgnoreStrategy.AREA, Set.of()
         );
-        var parameters = factory.create(Optional.of(configuration), null, ignores);
+        ExamplesTable examplesTable = mock();
+        when(examplesTable.getRowsAs(ScreenshotConfiguration.class)).thenReturn(List.of(configuration));
+        var parameters = factory.create(examplesTable, null, ignores);
         assertEquals(Optional.of(VIEWPORT), parameters.getShootingStrategy());
     }
 
@@ -72,7 +77,7 @@ class MobileAppScreenshotParametersFactoryTests
             IgnoreStrategy.ELEMENT, Set.of(locator),
             IgnoreStrategy.AREA, Set.of(locator)
         );
-        var parameters = factory.create(Optional.empty(), null, ignores);
+        var parameters = factory.create(null, null, ignores);
         assertEquals(ignores, parameters.getIgnoreStrategies());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import com.applitools.eyes.AccessibilityLevel;
 import com.applitools.eyes.AccessibilityStatus;
 import com.applitools.eyes.SessionAccessibilityStatus;
 
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,9 +45,7 @@ import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;
-import org.vividus.ui.web.screenshot.WebScreenshotConfiguration;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
 import org.vividus.visual.eyes.model.AccessibilityCheckResult;
@@ -69,9 +68,7 @@ class VisualTestingStepsTests
     private final ISoftAssert softAssert = mock(ISoftAssert.class);
     private final IUiContext uiContext = mock(IUiContext.class);
     private final IAttachmentPublisher attachmentPublisher = mock(IAttachmentPublisher.class);
-    @SuppressWarnings("unchecked")
-    private final ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory = mock(
-            ScreenshotParametersFactory.class);
+    @Mock private ScreenshotParametersFactory screenshotParametersFactory;
 
     private VisualTestingSteps visualTestingSteps;
 
@@ -108,14 +105,14 @@ class VisualTestingStepsTests
         var check = mock(ApplitoolsVisualCheck.class);
         var result = mockApplitoolsVisualCheckResult();
         when(visualTestingService.run(check)).thenReturn(result);
-        var screenshotConfiguration = mock(WebScreenshotConfiguration.class);
+        ExamplesTable screenshotConfiguration = mock();
         var screenshotParameters = mock(WebScreenshotParameters.class);
         Map<IgnoreStrategy, Set<Locator>> ignores = Map.of(
                 IgnoreStrategy.AREA, Set.of(),
                 IgnoreStrategy.ELEMENT, Set.of()
         );
-        when(screenshotParametersFactory.create(Optional.of(screenshotConfiguration), APPLITOOLS_CONFIGURATION,
-                ignores)).thenReturn(screenshotParameters);
+        when(screenshotParametersFactory.create(screenshotConfiguration, APPLITOOLS_CONFIGURATION, ignores)).thenReturn(
+                screenshotParameters);
         ApplitoolsTestResults applitoolsTestResults = mock(ApplitoolsTestResults.class);
         when(result.getApplitoolsTestResults()).thenReturn(applitoolsTestResults);
 
@@ -141,7 +138,7 @@ class VisualTestingStepsTests
                 IgnoreStrategy.AREA, Set.of(locator),
                 IgnoreStrategy.ELEMENT, Set.of(locator)
         );
-        when(screenshotParametersFactory.create(Optional.empty(), APPLITOOLS_CONFIGURATION, ignores)).thenReturn(
+        when(screenshotParametersFactory.create(null, APPLITOOLS_CONFIGURATION, ignores)).thenReturn(
                 screenshotParameters);
         SessionAccessibilityStatus status = mock(SessionAccessibilityStatus.class);
         when(status.getStatus()).thenReturn(AccessibilityStatus.Passed);
