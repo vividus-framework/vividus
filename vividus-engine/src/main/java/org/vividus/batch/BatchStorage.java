@@ -38,14 +38,17 @@ public final class BatchStorage
             "Property `bdd.story-execution-timeout` is deprecated and will be removed in"
                     + " VIVIDUS 0.7.0. Please use `story.execution-timeout` instead.";
     private static final Duration DEFAULT_STORY_TIMEOUT = Duration.ofHours(2);
+    private static final Duration DEFAULT_BATCH_TIMEOUT = Duration.ofHours(10);
 
     private final Map<String, BatchConfiguration> batchConfigurations;
     private final Duration defaultStoryExecutionTimeout;
+    private final Duration defaultBatchExecutionTimeout;
     private final List<String> defaultMetaFilters;
     private final boolean failFast;
 
     public BatchStorage(IPropertyMapper propertyMapper, Duration defaultStoryExecutionTimeout,
-        String deprecatedDefaultStoryExecutionTimeout, List<String> defaultMetaFilters,
+                        Duration defaultBatchExecutionTimeout, String deprecatedDefaultStoryExecutionTimeout,
+                        List<String> defaultMetaFilters,
             boolean failFast) throws IOException
     {
         this.defaultMetaFilters = defaultMetaFilters;
@@ -63,6 +66,8 @@ public final class BatchStorage
             this.defaultStoryExecutionTimeout = Optional.ofNullable(defaultStoryExecutionTimeout)
                                                         .orElse(DEFAULT_STORY_TIMEOUT);
         }
+        this.defaultBatchExecutionTimeout = Optional.ofNullable(defaultBatchExecutionTimeout)
+                                                    .orElse(DEFAULT_BATCH_TIMEOUT);
         this.failFast = failFast;
 
         batchConfigurations = readFromProperties(propertyMapper, BATCH, BatchConfiguration.class);
@@ -81,6 +86,10 @@ public final class BatchStorage
             if (batchConfiguration.getStoryExecutionTimeout() == null)
             {
                 batchConfiguration.overrideStoryExecutionTimeout(this.defaultStoryExecutionTimeout);
+            }
+            if (batchConfiguration.getExecutionTimeout() == null)
+            {
+                batchConfiguration.setExecutionTimeout(this.defaultBatchExecutionTimeout);
             }
             if (batchConfiguration.isFailFast() == null)
             {
@@ -111,6 +120,7 @@ public final class BatchStorage
             BatchConfiguration config = new BatchConfiguration();
             config.setName(batchKey);
             config.overrideStoryExecutionTimeout(defaultStoryExecutionTimeout);
+            config.setExecutionTimeout(defaultBatchExecutionTimeout);
             config.setMetaFilters(defaultMetaFilters);
             config.setFailFast(failFast);
             return config;
