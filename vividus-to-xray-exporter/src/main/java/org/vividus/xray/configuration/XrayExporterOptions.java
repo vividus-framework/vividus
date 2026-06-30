@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ public class XrayExporterOptions
     private TestCaseOptions testCaseOptions;
     @Name("test-execution")
     private TestExecutionOptions testExecutionOptions;
+    @Name("cloud")
+    private CloudOptions cloudOptions = new CloudOptions();
 
     public Path getJsonResultsDirectory()
     {
@@ -81,6 +83,64 @@ public class XrayExporterOptions
     public void setTestExecutionOptions(TestExecutionOptions testExecutionOptions)
     {
         this.testExecutionOptions = testExecutionOptions;
+    }
+
+    public CloudOptions getCloudOptions()
+    {
+        return cloudOptions;
+    }
+
+    public void setCloudOptions(CloudOptions cloudOptions)
+    {
+        this.cloudOptions = cloudOptions;
+    }
+
+    public static final class CloudOptions
+    {
+        private boolean enabled;
+        private String apiBaseUrl;
+        private String clientId;
+        private String clientSecret;
+
+        public boolean isEnabled()
+        {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled)
+        {
+            this.enabled = enabled;
+        }
+
+        public String getApiBaseUrl()
+        {
+            return apiBaseUrl;
+        }
+
+        public void setApiBaseUrl(String apiBaseUrl)
+        {
+            this.apiBaseUrl = apiBaseUrl;
+        }
+
+        public String getClientId()
+        {
+            return clientId;
+        }
+
+        public void setClientId(String clientId)
+        {
+            this.clientId = clientId;
+        }
+
+        public String getClientSecret()
+        {
+            return clientSecret;
+        }
+
+        public void setClientSecret(String clientSecret)
+        {
+            this.clientSecret = clientSecret;
+        }
     }
 
     public static final class TestCaseOptions

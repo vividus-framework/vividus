@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.xray.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -33,7 +34,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.vividus.xray.VividusToXrayExporterApplication;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.exporter.XrayExporter;
+import org.vividus.xray.facade.XrayClient;
 import org.vividus.xray.facade.XrayFacade;
+import org.vividus.xray.facade.XrayServerClient;
 import org.vividus.xray.factory.TestCaseFactory;
 
 @SpringBootTest(classes = VividusToXrayExporterApplication.class, properties = {
@@ -45,7 +48,14 @@ class VividusToXrayExporterIntegrationTests
     @MockitoBean private XrayExporterOptions xrayExporterOptions;
     @MockitoSpyBean private XrayFacade xrayFacade;
     @MockitoSpyBean private TestCaseFactory testCaseFactory;
+    @Autowired private XrayClient xrayClient;
     @Autowired private XrayExporter xrayExporter;
+
+    @Test
+    void shouldUseXrayServerClientByDefault()
+    {
+        assertInstanceOf(XrayServerClient.class, xrayClient);
+    }
 
     @Test
     void shouldStartContext(@TempDir Path tempDirectory) throws IOException

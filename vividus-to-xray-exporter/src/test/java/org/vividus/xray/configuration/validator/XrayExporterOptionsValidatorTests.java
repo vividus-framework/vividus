@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package org.vividus.xray.configuration.validator;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,13 +38,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.validation.Errors;
 import org.vividus.xray.configuration.XrayExporterOptions;
+import org.vividus.xray.configuration.XrayExporterOptions.CloudOptions;
 import org.vividus.xray.configuration.XrayExporterOptions.TestExecutionOptions;
 
 @ExtendWith(MockitoExtension.class)
 class XrayExporterOptionsValidatorTests
 {
     private static final String TEST_EXECUTION_ATTACHMENTS_FIELD = "test-execution.attachments";
+    private static final String CLOUD_CLIENT_ID_FIELD = "cloud.client-id";
+    private static final String CLOUD_CLIENT_SECRET_FIELD = "cloud.client-secret";
     private static final String DATA_TXT = "data.txt";
+    private static final String CLIENT_ID = "id";
+    private static final String CLIENT_SECRET = "secret";
 
     @Mock private Errors errors;
 
@@ -91,6 +99,22 @@ class XrayExporterOptionsValidatorTests
     }
 
     @Test
+    void shouldThrowUncheckedIoExceptionWhenDirectoryListingFails(@TempDir Path directory)
+    {
+        assumeTrue(directory.toFile().setReadable(false),
+                "Cannot remove directory read permissions (likely running as root)");
+        try
+        {
+            XrayExporterOptions options = createOptions(List.of(directory));
+            assertThrows(UncheckedIOException.class, () -> validator.validate(options, errors));
+        }
+        finally
+        {
+            directory.toFile().setReadable(true);
+        }
+    }
+
+    @Test
     void shouldPassValidationIfFolderExists(@TempDir Path directory) throws IOException
     {
         Files.createFile(directory.resolve(DATA_TXT));
@@ -106,6 +130,83 @@ class XrayExporterOptionsValidatorTests
     {
         Path filePath = Files.createFile(directory.resolve(DATA_TXT));
         XrayExporterOptions options = createOptions(List.of(filePath));
+
+        validator.validate(options, errors);
+
+        verifyNoInteractions(errors);
+    }
+
+    @Test
+    void shouldRejectCloudClientIdIfCloudEnabledButClientIdIsBlank()
+    {
+        XrayExporterOptions options = createOptions(List.of());
+        CloudOptions cloud = new CloudOptions();
+        cloud.setEnabled(true);
+        cloud.setClientSecret(CLIENT_SECRET);
+        options.setCloudOptions(cloud);
+
+        validator.validate(options, errors);
+
+        verify(errors).rejectValue(CLOUD_CLIENT_ID_FIELD, StringUtils.EMPTY,
+                "Xray Cloud client ID must be set when cloud mode is enabled");
+        verifyNoMoreInteractions(errors);
+    }
+
+    @Test
+    void shouldRejectCloudClientSecretIfCloudEnabledButClientSecretIsBlank()
+    {
+        XrayExporterOptions options = createOptions(List.of());
+        CloudOptions cloud = new CloudOptions();
+        cloud.setEnabled(true);
+        cloud.setClientId(CLIENT_ID);
+        options.setCloudOptions(cloud);
+
+        validator.validate(options, errors);
+
+        verify(errors).rejectValue(CLOUD_CLIENT_SECRET_FIELD, StringUtils.EMPTY,
+                "Xray Cloud client secret must be set when cloud mode is enabled");
+        verifyNoMoreInteractions(errors);
+    }
+
+    @Test
+    void shouldRejectCloudClientIdIfCloudDisabledButClientIdIsSet()
+    {
+        XrayExporterOptions options = createOptions(List.of());
+        CloudOptions cloud = new CloudOptions();
+        cloud.setClientId(CLIENT_ID);
+        options.setCloudOptions(cloud);
+
+        validator.validate(options, errors);
+
+        verify(errors).rejectValue(CLOUD_CLIENT_ID_FIELD, StringUtils.EMPTY,
+                "Xray Cloud client ID must not be set when cloud mode is disabled");
+        verifyNoMoreInteractions(errors);
+    }
+
+    @Test
+    void shouldRejectCloudClientSecretIfCloudDisabledButClientSecretIsSet()
+    {
+        XrayExporterOptions options = createOptions(List.of());
+        CloudOptions cloud = new CloudOptions();
+        cloud.setClientSecret(CLIENT_SECRET);
+        options.setCloudOptions(cloud);
+
+        validator.validate(options, errors);
+
+        verify(errors).rejectValue(CLOUD_CLIENT_SECRET_FIELD, StringUtils.EMPTY,
+                "Xray Cloud client secret must not be set when cloud mode is disabled");
+        verifyNoMoreInteractions(errors);
+    }
+
+    @Test
+    void shouldPassValidationWhenCloudEnabledWithCredentials()
+    {
+        XrayExporterOptions options = createOptions(List.of());
+        CloudOptions cloud = new CloudOptions();
+        cloud.setEnabled(true);
+        cloud.setClientId(CLIENT_ID);
+        cloud.setClientSecret(CLIENT_SECRET);
+        options.setCloudOptions(cloud);
 
         validator.validate(options, errors);
 

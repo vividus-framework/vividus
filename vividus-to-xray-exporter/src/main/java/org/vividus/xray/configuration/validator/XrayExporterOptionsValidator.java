@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -28,11 +27,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.vividus.xray.configuration.XrayExporterOptions;
+import org.vividus.xray.configuration.XrayExporterOptions.CloudOptions;
 
 @Component(EnableConfigurationProperties.VALIDATOR_BEAN_NAME)
 public class XrayExporterOptionsValidator implements Validator
 {
     private static final String TEST_EXECUTION_ATTACHMENTS_FIELD = "test-execution.attachments";
+    private static final String CLOUD_CLIENT_ID_FIELD = "cloud.client-id";
+    private static final String CLOUD_CLIENT_SECRET_FIELD = "cloud.client-secret";
 
     @Override
     public boolean supports(Class<?> clazz)
@@ -44,20 +46,25 @@ public class XrayExporterOptionsValidator implements Validator
     public void validate(Object target, Errors errors)
     {
         XrayExporterOptions options = (XrayExporterOptions) target;
-        List<Path> attachments = options.getTestExecutionOptions().getAttachments();
+        options.getTestExecutionOptions().getAttachments().forEach(
+                attachment -> validateAttachment(attachment, errors));
+        validateCloudOptions(options.getCloudOptions(), errors);
+    }
 
-        attachments.forEach(attachment ->
+    private void validateAttachment(Path attachment, Errors errors)
+    {
+        if (!Files.exists(attachment))
         {
-            if (!Files.exists(attachment))
-            {
-                errors.rejectValue(TEST_EXECUTION_ATTACHMENTS_FIELD, StringUtils.EMPTY,
-                        "The attachment file at path " + attachment + " does not exist");
-                return;
-            }
+            errors.rejectValue(TEST_EXECUTION_ATTACHMENTS_FIELD, StringUtils.EMPTY,
+                    "The attachment file at path " + attachment + " does not exist");
+            return;
+        }
 
-            try
+        if (Files.isDirectory(attachment))
+        {
+            try (var stream = Files.list(attachment))
             {
-                if (Files.isDirectory(attachment) && Files.list(attachment).findAny().isEmpty())
+                if (stream.findAny().isEmpty())
                 {
                     errors.rejectValue(TEST_EXECUTION_ATTACHMENTS_FIELD, StringUtils.EMPTY,
                             "The attachment folder at path " + attachment + " is empty");
@@ -68,12 +75,43 @@ public class XrayExporterOptionsValidator implements Validator
             {
                 throw new UncheckedIOException(e);
             }
+        }
 
-            if (attachment.getRoot().equals(attachment))
+        Path root = attachment.getRoot();
+        if (root != null && root.equals(attachment))
+        {
+            errors.rejectValue(TEST_EXECUTION_ATTACHMENTS_FIELD, StringUtils.EMPTY,
+                    "Please do not try to publish the file system root as the attachment");
+        }
+    }
+
+    private void validateCloudOptions(CloudOptions cloud, Errors errors)
+    {
+        if (cloud.isEnabled())
+        {
+            if (StringUtils.isBlank(cloud.getClientId()))
             {
-                errors.rejectValue(TEST_EXECUTION_ATTACHMENTS_FIELD, StringUtils.EMPTY,
-                        "Please do not try to publish the file system root as the attachment");
+                errors.rejectValue(CLOUD_CLIENT_ID_FIELD, StringUtils.EMPTY,
+                        "Xray Cloud client ID must be set when cloud mode is enabled");
             }
-        });
+            if (StringUtils.isBlank(cloud.getClientSecret()))
+            {
+                errors.rejectValue(CLOUD_CLIENT_SECRET_FIELD, StringUtils.EMPTY,
+                        "Xray Cloud client secret must be set when cloud mode is enabled");
+            }
+        }
+        else
+        {
+            if (StringUtils.isNotBlank(cloud.getClientId()))
+            {
+                errors.rejectValue(CLOUD_CLIENT_ID_FIELD, StringUtils.EMPTY,
+                        "Xray Cloud client ID must not be set when cloud mode is disabled");
+            }
+            if (StringUtils.isNotBlank(cloud.getClientSecret()))
+            {
+                errors.rejectValue(CLOUD_CLIENT_SECRET_FIELD, StringUtils.EMPTY,
+                        "Xray Cloud client secret must not be set when cloud mode is disabled");
+            }
+        }
     }
 }
