@@ -24,7 +24,7 @@ dependencies {
 
     implementation('javax.xml.ws:jaxws-api:2.3.1')
     implementation('javax.jws:javax.jws-api:1.1')
-    implementation('com.sun.xml.messaging.saaj:saaj-impl:1.5.3')
+    implementation('com.sun.xml.messaging.saaj:saaj-impl:3.0.6')
 
     testImplementation platform(libs.junit.bom)
     testImplementation(libs.junit.jupiter)
