@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,13 +86,14 @@ class BrowserStackLocalManagerTests
             Local local = localMocks.constructed().get(0);
             verify(local).start(optionsCaptor.capture());
             Map<String, String> parameters = optionsCaptor.getValue();
-            assertThat(parameters, aMapWithSize(4));
+            assertThat(parameters, aMapWithSize(5));
             verifyParameters(parameters, mainIdentifier);
             String pacPath = parameters.get("-pac-file");
             String pac = Files.readString(Paths.get(pacPath), StandardCharsets.UTF_8);
             assertEquals("function FindProxyForURL(url, host) "
                     + "{ if (shExpMatch(host, \"*.browserstack.com\")) { return \"DIRECT\"; }"
                     + "return \"PROXY localhost:52377\"; }", pac);
+            assertEquals("", parameters.get("-disable-ssl-validation"));
             assertTrue(manager.isStarted());
 
             String reusedIdentifier = CompletableFuture.supplyAsync(() ->
