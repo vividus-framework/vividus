@@ -75,7 +75,7 @@ dependencies {
     implementation('de.vandermeer:asciitable:0.3.2')
 
     // Meta filters based on Groovy
-    implementation('org.apache.groovy:groovy:5.0.6')
+    implementation('org.apache.groovy:groovy:5.0.7')
 
     // Spring
     implementation platform(libs.spring.bom)
