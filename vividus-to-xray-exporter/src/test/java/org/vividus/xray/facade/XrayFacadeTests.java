@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.jira.JiraClient;
-import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.model.Attachment;
@@ -95,7 +93,6 @@ class XrayFacadeTests
     private static final String MANUAL_TYPE = "Manual";
     private static final String CUCUMBER_TYPE = "Cucumber";
     private static final String CREATE_RESPONSE = "{\"key\" : \"" + ISSUE_ID + "\"}";
-    private static final String EXECUTION_IMPORT_ENDPOINT = "/rest/raven/1.0/import/execution";
     private static final String FILES_ATTACH_MESSAGE = "Successfully attached files and folders at {} to test "
             + "execution with key {}";
     private static final String TEST_EXECUTION_REQUEST = "{\"testExecutionKey\":\"TEST-0\",\"tests\":[]}";
@@ -114,8 +111,7 @@ class XrayFacadeTests
     @Mock private ManualTestCaseSerializer manualTestSerializer;
     @Mock private CucumberTestCaseSerializer cucumberTestSerializer;
     @Mock private JiraFacade jiraFacade;
-    @Mock private JiraClient jiraClient;
-    @Mock private JiraClientProvider jiraClientProvider;
+    @Mock private XrayClient xrayClient;
     private XrayFacade xrayFacade;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(XrayFacade.class);
@@ -123,7 +119,7 @@ class XrayFacadeTests
     @AfterEach
     void afterEach()
     {
-        verifyNoMoreInteractions(jiraFacade, jiraClient);
+        verifyNoMoreInteractions(jiraFacade, xrayClient);
     }
 
     @Test
@@ -252,6 +248,21 @@ class XrayFacadeTests
         verifyCreateLogs(MANUAL_TYPE);
     }
 
+    @Test
+    void shouldCreateManualTestCaseWithJiraInstanceKey() throws IOException, JiraConfigurationException
+    {
+        String jiraInstanceKey = "my-jira";
+        xrayFacade = new XrayFacade(jiraInstanceKey, List.of(), jiraFacade, xrayClient,
+                manualTestSerializer, cucumberTestSerializer);
+        ManualTestCase testCase = createManualTestCase();
+        mockSerialization(manualTestSerializer, testCase);
+        when(jiraFacade.createIssue(BODY, Optional.of(jiraInstanceKey))).thenReturn(CREATE_RESPONSE);
+
+        xrayFacade.createTestCase(testCase);
+
+        verifyCreateLogs(MANUAL_TYPE);
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     void shouldUpdateTestExecution(@TempDir Path directory) throws IOException, JiraConfigurationException
@@ -264,14 +275,13 @@ class XrayFacadeTests
             createTestExecutionItem("test-2", TestExecutionItemStatus.FAIL, List.of(TestExecutionItemStatus.PASS,
                     TestExecutionItemStatus.FAIL))
         ));
-        when(jiraClientProvider.getByIssueKey(ISSUE_KEY)).thenReturn(jiraClient);
 
         Path regularFile = createRegularFile(directory);
         xrayFacade.updateTestExecution(testExecution, List.of(regularFile, directory));
 
         String body = "{\"testExecutionKey\":\"TEST-0\",\"tests\":[{\"testKey\":\"test-1\",\"status\":\"PASS\"},"
                 + "{\"testKey\":\"test-2\",\"status\":\"FAIL\",\"examples\":[\"PASS\",\"FAIL\"]}]}";
-        verify(jiraClient).executePost(EXECUTION_IMPORT_ENDPOINT, body);
+        verify(xrayClient).importExecution(body);
         assertThat(logger.getLoggingEvents(), is(List.of(
             info(UPDATE_TEST_EXECUTION_LOG, ISSUE_KEY, body),
             info(FILES_ATTACH_MESSAGE, List.of(regularFile, directory), ISSUE_KEY),
@@ -315,16 +325,14 @@ class XrayFacadeTests
         testExecution.setTests(List.of(
             createTestExecutionItem("test-one", TestExecutionItemStatus.PASS, null)
         ));
-        when(jiraClientProvider.getByJiraConfigurationKey(Optional.empty())).thenReturn(jiraClient);
         String body = "{\"info\":{\"summary\":\"test execution summary\"},\"tests\":[{\"testKey\":\"test-one\","
                 + "\"status\":\"PASS\"}]}";
-        when(jiraClient.executePost(EXECUTION_IMPORT_ENDPOINT, body)).thenReturn("{\"testExecIssue\":{\"id\":\"01101\""
-                + ",\"key\":\"TEST-0\",\"self\":\"https://jira.com/rest/api/2/issue/01101\"}}");
+        when(xrayClient.importExecution(body)).thenReturn(ISSUE_KEY);
 
         Path regularFile = createRegularFile(directory);
         xrayFacade.createTestExecution(testExecution, List.of(regularFile));
 
-        verify(jiraClient).executePost(EXECUTION_IMPORT_ENDPOINT, body);
+        verify(xrayClient).importExecution(body);
         assertThat(logger.getLoggingEvents(), is(List.of(
             info("Creating Test Execution: {}", body),
             info(FILES_ATTACH_MESSAGE, List.of(regularFile), ISSUE_KEY),
@@ -347,14 +355,13 @@ class XrayFacadeTests
         TestExecution testExecution = new TestExecution();
         testExecution.setTestExecutionKey(ISSUE_KEY);
         testExecution.setTests(List.of());
-        when(jiraClientProvider.getByIssueKey(ISSUE_KEY)).thenReturn(jiraClient);
 
         IOException thrown = mock(IOException.class);
         doThrow(thrown).when(jiraFacade).addAttachments(eq(ISSUE_KEY), any());
 
         xrayFacade.updateTestExecution(testExecution, List.of(directory));
 
-        verify(jiraClient).executePost(EXECUTION_IMPORT_ENDPOINT, TEST_EXECUTION_REQUEST);
+        verify(xrayClient).importExecution(TEST_EXECUTION_REQUEST);
         assertThat(logger.getLoggingEvents(), is(List.of(
             info(UPDATE_TEST_EXECUTION_LOG, ISSUE_KEY, TEST_EXECUTION_REQUEST),
             error(thrown, "Failed to attach files and folders at {} to test execution with key {}", List.of(directory),
@@ -370,11 +377,10 @@ class XrayFacadeTests
         TestExecution testExecution = new TestExecution();
         testExecution.setTestExecutionKey(ISSUE_KEY);
         testExecution.setTests(List.of());
-        when(jiraClientProvider.getByIssueKey(ISSUE_KEY)).thenReturn(jiraClient);
 
         xrayFacade.updateTestExecution(testExecution, List.of());
 
-        verify(jiraClient).executePost(EXECUTION_IMPORT_ENDPOINT, TEST_EXECUTION_REQUEST);
+        verify(xrayClient).importExecution(TEST_EXECUTION_REQUEST);
         assertThat(logger.getLoggingEvents(), is(List.of(
             info(UPDATE_TEST_EXECUTION_LOG, ISSUE_KEY, TEST_EXECUTION_REQUEST),
             info(TEST_EXECUTION_UPDATED_LOG, ISSUE_KEY)
@@ -393,13 +399,11 @@ class XrayFacadeTests
     }
 
     @Test
-    void shouldAddTestCasesToTestSet() throws IOException, JiraConfigurationException
+    void shouldAddTestCasesToTestSet() throws IOException
     {
         initializeFacade(List.of());
-        when(jiraClientProvider.getByIssueKey(ISSUE_KEY)).thenReturn(jiraClient);
         xrayFacade.updateTestSet(ISSUE_KEY, List.of(ISSUE_ID, ISSUE_ID));
-        verify(jiraClient).executePost("/rest/raven/1.0/api/testset/" + ISSUE_KEY + "/test",
-            "{\"add\":[\"VVDS-1\",\"VVDS-1\"]}");
+        verify(xrayClient).addTestsToTestSet(ISSUE_KEY, List.of(ISSUE_ID, ISSUE_ID));
         assertThat(logger.getLoggingEvents(), is(List.of(
             info("Add {} test cases to Test Set with ID {}", ISSUE_ID + ", " + ISSUE_ID, ISSUE_KEY)
         )));
@@ -454,7 +458,7 @@ class XrayFacadeTests
 
     private void initializeFacade(List<String> editableStatuses)
     {
-        xrayFacade = new XrayFacade(Optional.empty(), editableStatuses, jiraFacade, jiraClientProvider,
+        xrayFacade = new XrayFacade(null, editableStatuses, jiraFacade, xrayClient,
                 manualTestSerializer, cucumberTestSerializer);
     }
 
