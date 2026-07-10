@@ -495,6 +495,80 @@ When I wait `$timeout` with `$pollingTimeout` polling until file matching `$file
 When I wait `PT30S` with `PT1S` polling until file matching `report-\d+\.csv` appears in directory `/tmp/reports` and save path to SCENARIO variable `report-path`
 ----
 
+== Object pool
+
+Think of an object pool as a shared basket of items that your tests can borrow from. You fill the basket once with a
+list of items (for example, a set of test user accounts), and then, whenever a test needs one, it picks an item out of
+the basket at random. Each item can be held by only one test at a time, so tests running side by side never accidentally
+grab the same account and interfere with each other.
+
+This is handy whenever you have a limited number of shared resources - such as logins, licenses, or reservations - that
+must be shared fairly across many tests.
+
+=== Deciding whether items go back into the basket
+
+By default, once a test takes an item out of the basket, that item stays out and is considered used up. If you would
+rather put every borrowed item back into the basket at the end of each story - so that later stories can reuse the same
+items - turn on the setting below.
+
+[cols="3,1,1,3", options="header"]
+|===
+|Setting |Possible values |Default |What it does
+
+|`object-pool.return-objects-after-story-completion`
+|`true` / `false`
+|`false`
+|When `true`, every item a story borrowed is returned to its basket once the story finishes, making it available again
+for the next stories. When `false`, borrowed items are not returned and are treated as used up.
+|===
+
+=== Fill the basket (initialize an object pool)
+
+Fills a named basket with a list of items. Each basket can be filled only once - trying to fill a basket that already
+exists will stop the test with an error. Every row of the table becomes one item in the basket, and the column headers
+become the details of that item.
+
+[source,gherkin]
+----
+Given I initialize object pool `$poolName` with data:$data
+----
+* `$poolName` - The name you give to the basket so you can refer to it later.
+* `$data` - The xref:ROOT:glossary.adoc#_examplestable[table] of items to put into the basket. Each row is one item.
+
+.Fill a basket named "credentials" with three user accounts
+[source,gherkin]
+----
+Given I initialize object pool `credentials` with data:
+|login |password|
+|user-1|pass-1  |
+|user-2|pass-2  |
+|user-3|pass-3  |
+----
+
+=== Take an item from the basket
+
+Picks a random item out of the basket and stores it, so you can use its details later in the test. The item is removed
+from the basket, so no other test can pick the same one until it is returned (see the setting above).
+
+[source,gherkin]
+----
+When I take object from pool `$poolName` and save it to $scopes variable `$variableName`
+----
+* `$poolName` - The name of the basket to pick an item from.
+* `$scopes` - xref:commons:variables.adoc#_scopes[How long the stored item should stay available] (for example, for the
+current scenario or the whole story).
+* `$variableName` - The name you give to the item so you can use its details later.
+
+Once stored, you can read the details of the picked item by its column names, for example `${credential.login}` and
+`${credential.password}`.
+
+.Take one user account from the "credentials" basket and use it
+[source,gherkin]
+----
+When I take object from pool `credentials` and save it to scenario variable `credential`
+Then `${credential.login}` matches `user-[1-3]`
+----
+
 == ZIP archives
 === Save ZIP archive entries
 
