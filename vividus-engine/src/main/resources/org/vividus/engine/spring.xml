@@ -14,6 +14,7 @@
         <constructor-arg ref="propertyMapper" />
         <constructor-arg type="java.time.Duration" value="${story.execution-timeout:#{null}}" />
         <constructor-arg type="java.lang.String" value="${bdd.story.execution-timeout:#{null}}" />
+        <constructor-arg type="java.time.Duration" value="${batch.execution-timeout:#{null}}" />
         <constructor-arg value="${bdd.all-meta-filters}" />
         <constructor-arg value="${batch.fail-fast}" />
     </bean>
