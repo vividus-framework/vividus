@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,9 @@ import org.vividus.softassert.issue.IKnownIssueProvider;
 import org.vividus.softassert.issue.KnownIssueChecker;
 import org.vividus.softassert.model.KnownIssue;
 
+@SuppressWarnings("PMD.SystemPrintln")
 public final class KnownIssueValidator
 {
-    private static final String FORMATTER = "%-12s| %s";
-
     private KnownIssueValidator()
     {
     }
@@ -91,6 +90,6 @@ public final class KnownIssueValidator
 
     private static void print(String knownIssueId, String assertionError)
     {
-        System.out.println(String.format(FORMATTER, knownIssueId, assertionError));
+        System.out.printf("%-12s| %s%n", knownIssueId, assertionError);
     }
 }

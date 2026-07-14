@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,10 @@ import org.junit.runners.model.InitializationError;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
+@SuppressWarnings("PMD.SystemPrintln")
 public final class ScenariosCounter
 {
     private static final String DEFAULT_STORY_LOCATION = "story";
-    private static final String FORMATTER = "%5d | %s";
 
     private ScenariosCounter()
     {
@@ -89,8 +89,7 @@ public final class ScenariosCounter
 
     private static void print(int number, String message)
     {
-        System.out.printf(FORMATTER, number, message);
-        System.out.println();
+        System.out.printf("%5d | %s%n", number, message);
     }
 
     private static void configureStoryLocation(String storyLocation)

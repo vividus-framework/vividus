@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,6 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
 import org.vividus.variable.VariableScope;
 
-@SuppressWarnings("PMD.UnnecessaryBooleanAssertion")
 @ExtendWith(MockitoExtension.class)
 class VariablesStepsTests
 {
@@ -133,7 +132,6 @@ class VariablesStepsTests
         verify(variableContext).putVariable(scopes, VALUE_1, value);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void shouldCompareEqualToListsOfMapsAndPublishResultTable()
     {
@@ -346,7 +344,7 @@ class VariablesStepsTests
         verify(variableContext).putVariable(scopes, VALUE_1, listOfMaps);
     }
 
-    private Answer getAssertionAnswer(boolean assertionPassed)
+    private Answer<Boolean> getAssertionAnswer(boolean assertionPassed)
     {
         return a ->
         {
