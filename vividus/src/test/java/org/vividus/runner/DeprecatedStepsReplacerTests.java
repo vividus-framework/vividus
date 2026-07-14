@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,8 +81,6 @@ class DeprecatedStepsReplacerTests
     private static final String RESOURCE_LOCATION = "root/vividus/vividus-tests/src/main/resources";
 
     private static final String SCENARIO_HEADER = "Scenario: scenario name\n";
-    private static final String STORY_LOCATION = "/story/TheHero.story";
-    private static final String STORY_FULL_PATH_URI = Path.of(RESOURCE_LOCATION + STORY_LOCATION).toUri().toString();
     private static final String CODE_STEP_PATTERN = "deprecated step with parameters $p1-`$p2` and SubSteps:$p3";
     private static final String CODE_STEP_ALIAS_PATTERN = "deprecated step with parameters $p1-'$p2' and SubSteps:$p3";
 
@@ -111,7 +109,7 @@ class DeprecatedStepsReplacerTests
     @SuppressWarnings({ "MultipleStringLiteralsExtended", "MultipleStringLiterals" })
     void shouldReplaceDeprecatedJavaSteps(StdErr stdErr) throws IOException, ParseException, NoSuchMethodException
     {
-        String lifecycleBlock = """
+        var lifecycleBlock = """
                 Lifecycle:
                 Before:
                 Scope: STORY
@@ -121,28 +119,28 @@ class DeprecatedStepsReplacerTests
                 Given deprecated step without automatic replacement (alias)
 
                 """;
-        Lifecycle lifecycle = new Lifecycle(List.of(new Lifecycle.Steps(Scope.STORY, List.of(CODE_STEP_UNRESOLVED))),
-                List.of(new Lifecycle.Steps(Scope.SCENARIO, List.of(CODE_STEP_UNRESOLVED_ALIAS))));
-        String codeStepPrioritized = "codeStepPrioritized";
-        String codeStep = """
+        var lifecycle = new Lifecycle(
+                List.of(new Lifecycle.Steps(Scope.STORY, List.of(CODE_STEP_UNRESOLVED))),
+                List.of(new Lifecycle.Steps(Scope.SCENARIO, List.of(CODE_STEP_UNRESOLVED_ALIAS)))
+        );
+
+        var codeStepPrioritized = "codeStepPrioritized";
+        var codeStep = """
                 Given deprecated step with parameters ${p1}-`<p2>` and SubSteps:
                 {headerSeparator=!, valueSeparator=!}
                 !step!
                 !Given deprecated step with parameters ${p1}-'<p2>' and SubSteps:!
                 !|step|!""";
-        String codeStepNested =
+        var codeStepNested =
                             "Given deprecated step with parameters ${p1}-'<p2>' and SubSteps:" + System.lineSeparator()
                           + "|step|";
-        String codeStepActual = """
+        var codeStepActual = """
                 Given actual step with parameters ${p1}-`<p2>` and SubSteps:
                 {headerSeparator=!, valueSeparator=!}
                 !step!
                 !Given actual step with parameters ${p1}-`<p2>` and SubSteps:!
                 !|step|!""";
-        String storyContentDeprecated = lifecycleBlock + SCENARIO_HEADER + codeStep + NEW_LINE + CODE_STEP_UNRESOLVED
-                + NEW_LINE + CODE_STEP_CONDITIONAL;
-        String storyContentActual = lifecycleBlock + SCENARIO_HEADER + codeStepActual + NEW_LINE + CODE_STEP_UNRESOLVED
-                + NEW_LINE + CODE_STEP_CONDITIONAL;
+
         var stepCandidate = mockCodeStepCandidate(CODE_STEP_PATTERN, codeStep, codeStepPrioritized);
         var stepAliasCandidate = mockCodeStepCandidate(CODE_STEP_ALIAS_PATTERN, codeStepNested, codeStepPrioritized);
         var ignoredCandidate = mock(StepCandidate.class);
@@ -151,23 +149,18 @@ class DeprecatedStepsReplacerTests
                 CODE_STEP_UNRESOLVED, "codeStepWithoutReplacement");
         var deprecatedStepCandidateAlias = mockCodeStepCandidate(CODE_STEP_UNRESOLVED_ALIAS_PATTERN,
                 CODE_STEP_UNRESOLVED_ALIAS, "codeStepWithoutReplacement");
-        var conditionalStepCandidate = mock(ConditionalStepCandidate.class);
-        lenient().when(conditionalStepCandidate.matches(CODE_STEP_CONDITIONAL)).thenReturn(true);
-        when(conditionalStepCandidate.getPatternAsString()).thenReturn(CODE_STEP_CONDITIONAL_PATTERN);
+        ConditionalStepCandidate conditionalStepCandidate = mockConditionalStepCandidate(CODE_STEP_CONDITIONAL_PATTERN,
+                CODE_STEP_CONDITIONAL);
+        List<StepCandidate> stepCandidates = List.of(deprecatedStepCandidate, deprecatedStepCandidateAlias,
+                stepCandidate, stepAliasCandidate, ignoredCandidate, conditionalStepCandidate);
+        var scenario = new Scenario("scenario name", List.of(codeStep, CODE_STEP_UNRESOLVED, CODE_STEP_CONDITIONAL));
+        var storyContentDeprecated = lifecycleBlock + SCENARIO_HEADER + codeStep + NEW_LINE + CODE_STEP_UNRESOLVED
+                + NEW_LINE + CODE_STEP_CONDITIONAL;
+        var storyContentActual = lifecycleBlock + SCENARIO_HEADER + codeStepActual + NEW_LINE + CODE_STEP_UNRESOLVED
+                + NEW_LINE + CODE_STEP_CONDITIONAL;
 
-        try (var ignored = mockConstruction(RegexStoryParser.class, (mock, context) ->
-        {
-            var scenario = new Scenario("scenario name",
-                    List.of(codeStep, CODE_STEP_UNRESOLVED, CODE_STEP_CONDITIONAL));
-            var story = new Story(STORY_FULL_PATH_URI, null, null, null, null, lifecycle, List.of(scenario));
-            assertRegexStoryParserConstruction(context);
-            when(mock.parseStory(any(String.class))).thenReturn(story);
-        }))
-        {
-            mockAndTestStepsReplacer(STORY_FULL_PATH_URI, storyContentDeprecated, storyContentActual,
-                    List.of(deprecatedStepCandidate, deprecatedStepCandidateAlias, stepCandidate, stepAliasCandidate,
-                            ignoredCandidate, conditionalStepCandidate));
-        }
+        testStepsReplacementInStory(lifecycle, scenario, storyContentDeprecated, storyContentActual, stepCandidates);
+
         verify(ignoredCandidate, never()).matches(codeStep);
         verify(conditionalStepCandidate).getMethod();
         assertThat(stdErr.capturedLines(), arrayContaining(
@@ -187,14 +180,24 @@ class DeprecatedStepsReplacerTests
     void shouldNotReplaceNotImplementedSteps() throws IOException, ParseException
     {
         String storyNoForReplace = SCENARIO_HEADER + CODE_STEP_UNPRIORITIZED;
+        var scenario = new Scenario(List.of(CODE_STEP_UNPRIORITIZED));
+
+        testStepsReplacementInStory(null, scenario, storyNoForReplace, storyNoForReplace, List.of());
+    }
+
+    private void testStepsReplacementInStory(Lifecycle lifecycle, Scenario scenario, String inputStory,
+            String outputStory, List<StepCandidate> stepCandidates) throws IOException, ParseException
+    {
+        var storyLocation = "/story/TheHero.story";
+        var storyFullPathUri = Path.of(RESOURCE_LOCATION + storyLocation).toUri().toString();
+        var story = new Story(storyFullPathUri, null, null, null, null, lifecycle, List.of(scenario));
         try (var ignored = mockConstruction(RegexStoryParser.class, (mock, context) ->
         {
-            var scenario = new Scenario(List.of(CODE_STEP_UNPRIORITIZED));
-            var story = new Story(STORY_FULL_PATH_URI, List.of(scenario));
+            assertRegexStoryParserConstruction(context);
             when(mock.parseStory(any(String.class))).thenReturn(story);
         }))
         {
-            mockAndTestStepsReplacer(STORY_FULL_PATH_URI, storyNoForReplace, storyNoForReplace, List.of());
+            mockAndTestStepsReplacer(storyFullPathUri, inputStory, outputStory, stepCandidates);
         }
     }
 
@@ -289,24 +292,31 @@ class DeprecatedStepsReplacerTests
     private StepCandidate mockCodeStepCandidate(String pattern, String matchedStep, String method)
             throws NoSuchMethodException
     {
-        var candidate = mock(StepCandidate.class);
+        StepCandidate candidate = mock();
         when(candidate.getPatternAsString()).thenReturn(pattern);
         lenient().when(candidate.matches(matchedStep)).thenReturn(true);
         when(candidate.getStartingWord()).thenReturn(GIVEN);
         when(candidate.composedSteps()).thenReturn(new String[0]);
-        when(candidate.getMethod())
-                .thenReturn(DeprecatedStepsReplacerTests.class.getDeclaredMethod(method));
+        when(candidate.getMethod()).thenReturn(DeprecatedStepsReplacerTests.class.getDeclaredMethod(method));
         return candidate;
     }
 
     private StepCandidate mockCompositeStepCandidate(String pattern, String matchedStep, String... compositesSteps)
     {
-        var candidate = mock(StepCandidate.class);
+        StepCandidate candidate = mock();
         when(candidate.getPatternAsString()).thenReturn(pattern);
         lenient().when(candidate.matches(matchedStep)).thenReturn(true);
         when(candidate.getStartingWord()).thenReturn(GIVEN);
         when(candidate.composedSteps()).thenReturn(compositesSteps);
         return candidate;
+    }
+
+    private static ConditionalStepCandidate mockConditionalStepCandidate(String pattern, String matchedStep)
+    {
+        ConditionalStepCandidate conditionalStepCandidate = mock();
+        when(conditionalStepCandidate.getPatternAsString()).thenReturn(pattern);
+        lenient().when(conditionalStepCandidate.matches(matchedStep)).thenReturn(true);
+        return conditionalStepCandidate;
     }
 
     @Replacement(versionToRemoveStep = "3.3.5",

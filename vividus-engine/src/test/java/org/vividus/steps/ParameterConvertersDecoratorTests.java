@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,6 @@ class ParameterConvertersDecoratorTests
     void shouldReplaceNestedVariablesAndExpressions()
     {
         String value = "${var#{eval(${nestedVar} + 1)}}";
-        Type type = String.class;
         String valueWithNestedVarReplaced = "${var#{eval(2 + 1)}}";
         when(variableResolver.resolve(value)).thenReturn(valueWithNestedVarReplaced);
         String valueWithExpressionProcessed = "${var3}";
@@ -130,6 +129,7 @@ class ParameterConvertersDecoratorTests
         when(expressionResolver.resolveExpressions(false, valueWithExternalVarReplaced))
                 .thenReturn(valueWithExternalVarReplaced);
         when(variableResolver.resolve(valueWithExternalVarReplaced)).thenReturn(valueWithExternalVarReplaced);
+        Type type = String.class;
         String actual = (String) parameterConverters.convert(value, type);
         assertEquals(valueWithExternalVarReplaced, actual);
         verify(stepMonitor).convertedValueOfType(valueWithExternalVarReplaced, type, actual,
@@ -273,20 +273,23 @@ class ParameterConvertersDecoratorTests
     @Test
     void shouldConvertToExamplesTableWithResolvedPlaceholders()
     {
-        String expressionKey = "expression";
-        String expression = "#{expression}";
-        String expressionValue = "expressionValue";
-        String variableKey = "variable";
-        String variable = "${variable}";
-        String variableValue = "variableValue";
-        String pathToTable = "/table-with-expression-and-variable.table";
-        String tableAsString = String.format("|%s|%s|%n|%s|%s|", expressionKey, variableKey, expression, variable);
+        var pathToTable = "/table-with-expression-and-variable.table";
         when(expressionResolver.resolveExpressions(false, pathToTable)).thenReturn(pathToTable);
         when(variableResolver.resolve(pathToTable)).thenReturn(pathToTable);
+
+        var expression = "#{expression}";
         when(variableResolver.resolve(expression)).thenReturn(expression);
+
+        var expressionValue = "expressionValue";
         when(expressionResolver.resolveExpressions(false, expression)).thenReturn(expressionValue);
         when(variableResolver.resolve(expressionValue)).thenReturn(expressionValue);
         when(expressionResolver.resolveExpressions(false, expressionValue)).thenReturn(expressionValue);
+
+        var expressionKey = "expression";
+        var variableKey = "variable";
+        var variable = "${variable}";
+        var variableValue = "variableValue";
+        var tableAsString = String.format("|%s|%s|%n|%s|%s|", expressionKey, variableKey, expression, variable);
         when(variableResolver.resolve(variable)).thenReturn(variableValue);
         when(expressionResolver.resolveExpressions(false, variableValue)).thenReturn(variableValue);
         when(variableResolver.resolve(variableValue)).thenReturn(variableValue);
@@ -317,7 +320,7 @@ class ParameterConvertersDecoratorTests
     {
         when(variableResolver.resolve(VALUE)).thenReturn(VALUE);
         Type type = Object.class;
-        Integer expected = Integer.valueOf(42);
+        Integer expected = 42;
         when(expressionResolver.resolveExpressions(false, VALUE)).thenReturn(expected);
         assertEquals(expected, parameterConverters.convert(VALUE, type));
     }
