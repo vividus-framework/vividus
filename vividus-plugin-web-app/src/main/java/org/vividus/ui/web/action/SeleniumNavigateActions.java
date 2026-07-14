@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,23 @@ import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
 
-import jakarta.inject.Inject;
-
-public class NavigateActions implements INavigateActions
+public class SeleniumNavigateActions implements INavigateActions
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NavigateActions.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SeleniumNavigateActions.class);
 
-    @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private ISoftAssert softAssert;
-    @Inject private WebJavascriptActions javascriptActions;
-    @Inject private IWebWaitActions waitActions;
+    private final IWebDriverProvider webDriverProvider;
+    private final WebJavascriptActions javascriptActions;
+    private final IWebWaitActions waitActions;
+    private final ISoftAssert softAssert;
+
+    public SeleniumNavigateActions(IWebDriverProvider webDriverProvider, WebJavascriptActions javascriptActions,
+            IWebWaitActions waitActions, ISoftAssert softAssert)
+    {
+        this.webDriverProvider = webDriverProvider;
+        this.javascriptActions = javascriptActions;
+        this.waitActions = waitActions;
+        this.softAssert = softAssert;
+    }
 
     @Override
     public void navigateTo(String url)
@@ -46,6 +53,12 @@ public class NavigateActions implements INavigateActions
         {
             handleTimeoutException(ex);
         }
+    }
+
+    @Override
+    public String getCurrentUrl()
+    {
+        return webDriverProvider.get().getCurrentUrl();
     }
 
     @Override

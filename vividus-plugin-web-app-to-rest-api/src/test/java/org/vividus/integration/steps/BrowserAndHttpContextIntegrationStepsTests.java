@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,14 +36,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.HttpTestContext;
+import org.vividus.http.client.CookieStoreProvider;
 import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.ui.web.action.CookieManager;
+import org.vividus.ui.web.action.NavigateActions;
 
 @ExtendWith(MockitoExtension.class)
 class BrowserAndHttpContextIntegrationStepsTests
 {
-    @Mock private HttpTestContext httpTestContext;
     @Mock private CookieManager<?> cookieManager;
+    @Mock private CookieStoreProvider cookieStoreProvider;
+    @Mock private HttpTestContext httpTestContext;
+    @Mock private NavigateActions navigateActions;
     @Mock private AttachmentPublisher attachmentPublisher;
     @InjectMocks private BrowserAndHttpContextIntegrationSteps steps;
 
@@ -52,14 +56,52 @@ class BrowserAndHttpContextIntegrationStepsTests
     {
         CookieStore cookieStore = mock();
         when(cookieManager.getCookiesAsHttpCookieStore()).thenReturn(cookieStore);
-        var cookie1 = new BasicClientCookie("key", "value");
-        var cookie2 = new BasicClientCookie("key1", "value1");
-        when(cookieStore.getCookies()).thenReturn(List.of(cookie1, cookie2));
+        List<Cookie> cookies = createHttpCookies();
+        when(cookieStore.getCookies()).thenReturn(cookies);
         steps.executeRequestUsingBrowserCookies();
         verify(httpTestContext).putCookieStore(cookieStore);
+        assertPublishAttachment("Browser cookies");
+    }
+
+    @Test
+    void shouldSetHttpCookiesToBrowser()
+    {
+        shouldSetHttpCookiesToBrowser(steps::setHttpCookiesToBrowser);
+        verify(navigateActions).refresh();
+    }
+
+    @Test
+    void shouldSetHttpCookiesToBrowserWithoutApply()
+    {
+        shouldSetHttpCookiesToBrowser(steps::setHttpCookiesToBrowserWithoutApply);
+    }
+
+    private void shouldSetHttpCookiesToBrowser(Runnable test)
+    {
+        CookieStore cookieStore = mock();
+        when(cookieStoreProvider.getCookieStore()).thenReturn(cookieStore);
+        List<Cookie> cookies = createHttpCookies();
+        when(cookieStore.getCookies()).thenReturn(cookies);
+
+        test.run();
+
+        verify(cookieManager).addHttpClientCookies(cookies);
+        assertPublishAttachment("All HTTP cookies");
+    }
+
+    private static List<Cookie> createHttpCookies()
+    {
+        var cookie1 = new BasicClientCookie("key", "value");
+        var cookie2 = new BasicClientCookie("key1", "value1");
+        return List.of(cookie1, cookie2);
+    }
+
+    private void assertPublishAttachment(String attachmentTitle)
+    {
         var cookiesCaptor = ArgumentCaptor.forClass(Map.class);
         verify(attachmentPublisher).publishAttachment(eq("org/vividus/integration/steps/cookies.ftl"),
-                cookiesCaptor.capture(), eq("Browser cookies"));
+                cookiesCaptor.capture(), eq(attachmentTitle));
+
         @SuppressWarnings("unchecked")
         Map<String, List<Cookie>> model = cookiesCaptor.getValue();
 
