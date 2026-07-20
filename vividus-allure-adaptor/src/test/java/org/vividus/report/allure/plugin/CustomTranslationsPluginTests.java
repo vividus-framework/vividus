@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,22 @@ class CustomTranslationsPluginTests
     {
         assertEquals("""
                 'use strict';
-                allure.api.addTranslation('en', {"tab":{"suites":{"name":"Batches Tab"}}});
+                (function() {
+                  var translations = {};
+                  translations['en'] = {"tab":{"suites":{"name":"Batches Tab"}}};
+                  var lang = document.documentElement.lang || 'en';
+                  var t = translations[lang] || translations['en'] || {};
+                  function applyTranslations(obj, prefix) {
+                    Object.keys(obj).forEach(function(key) {
+                      var fullKey = prefix ? prefix + '.' + key : key;
+                      if (typeof obj[key] === 'object' && obj[key] !== null) {
+                        applyTranslations(obj[key], fullKey);
+                      }
+                    });
+                  }
+                  if (t) { applyTranslations(t, ''); }
+                  window.__vividusCustomTranslations = translations;
+                })();
                 """, Files.readString(generatePluginJsFile()).replace("\r", ""));
     }
 
