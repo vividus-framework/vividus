@@ -12,18 +12,26 @@
     <style>
         .passed {
             --bs-table-bg: #DFF0D8;
+            --bs-table-color: #3C763D;
+            --bs-table-hover-color: #3C763D;
             color: #3C763D;
         }
         .blocked {
             --bs-table-bg: #F2DEDE;
+            --bs-table-color: #A94442;
+            --bs-table-hover-color: #A94442;
             color: #A94442;
         }
         .failed {
             --bs-table-bg: #F2DEDE;
+            --bs-table-color: #A94442;
+            --bs-table-hover-color: #A94442;
             color: #A94442;
         }
         .broken {
             --bs-table-bg: #CCB3FF;
+            --bs-table-color: #661AFF;
+            --bs-table-hover-color: #661AFF;
             color: #661AFF;
         }
         .skipped {
@@ -31,6 +39,8 @@
         }
         .value-failed:nth-child(even) {
             --bs-table-bg: #F2DEDE;
+            --bs-table-color: #A94442;
+            --bs-table-hover-color: #A94442;
             color: #A94442;
         }
         table {
