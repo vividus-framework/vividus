@@ -306,7 +306,6 @@
         </entry>
     </util:map>
 
-    <bean class="org.vividus.ui.web.converter.ExamplesTableToDefaultHttpHeadersConverter" />
     <bean class="org.vividus.ui.web.converter.ExamplesTableToWebScreenshotConfigurationConverter" />
     <bean class="org.vividus.ui.web.converter.StringToDimensionParameterConverter" />
 
