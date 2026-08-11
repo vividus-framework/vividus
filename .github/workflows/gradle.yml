@@ -497,7 +497,7 @@ jobs:
   system-mobile-tests-on-saucelabs:
     if: github.event.pull_request.head.repo.fork == false && github.actor != 'dependabot[bot]'
     env:
-      TEST_APP_VERSION: 0.7.0
+      TEST_APP_VERSION: 0.8.1
     runs-on: ubuntu-latest
 
     steps:
