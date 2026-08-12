@@ -142,7 +142,7 @@ class WinRmStepsTests
     }
 
     @SuppressWarnings("PMD.CloseResource")
-    void shouldExecuteCommandUsingWinRm(WinRmConnectionParameters connectionParameters,
+    private void shouldExecuteCommandUsingWinRm(WinRmConnectionParameters connectionParameters,
             Function<WinRMClient, String> test, BiConsumer<InOrder, WinRMClient.Builder> verifier)
     {
         when(winRmConnectionParameters.getConfiguration(SERVER)).thenReturn(connectionParameters);
