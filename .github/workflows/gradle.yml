@@ -552,10 +552,10 @@ jobs:
                                               -Pvividus.winrm.server.winrm-server.password=${WINRM_PASS} \
                                               -Pvividus.winrm.server.winrm-server.authentication-scheme=Basic \
                                               -Pvividus.winrm.server.winrm-server.disable-certificate-checks=true \
-                                              -Pvividus.variables.winrm-server-address=${winrm.server.winrm-server.address} \
-                                              -Pvividus.variables.winrm-server-username=${winrm.server.winrm-server.username} \
-                                              -Pvividus.variables.winrm-server-password=${winrm.server.winrm-server.password} \
-                                              -Pvividus.variables.winrm-server-authentication-scheme=${winrm.server.winrm-server.authentication-scheme} \
+                                              -Pvividus.variables.winrm-server-address=\${winrm.server.winrm-server.address} \
+                                              -Pvividus.variables.winrm-server-username=\${winrm.server.winrm-server.username} \
+                                              -Pvividus.variables.winrm-server-password=\${winrm.server.winrm-server.password} \
+                                              -Pvividus.variables.winrm-server-authentication-scheme=\${winrm.server.winrm-server.authentication-scheme} \
                                               -Pvividus.allure.executor.name="Github Actions (Vividus)" \
                                               -Pvividus.allure.executor.type=github \
                                               -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
