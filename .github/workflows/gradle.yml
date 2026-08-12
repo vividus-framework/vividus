@@ -497,6 +497,8 @@ jobs:
 
   system-winrm-tests:
     runs-on: windows-latest
+    permissions:
+      contents: read
 
     steps:
     - name: Checkout (including submodules and tags)
