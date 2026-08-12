@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,20 +121,19 @@ public class WinRmSteps
         WinRmConnectionParameters connectionParameters = winRmConnectionParameters.getConfiguration(connectionKey);
 
         String address = connectionParameters.getAddress();
-        String hostname;
-        boolean https = false;
-        int port = -1;
+        URI uri;
         try
         {
-            URI uri = address.contains("://") ? new URI(address) : new URI("http://" + address);
-            hostname = uri.getHost();
-            https = "https".equalsIgnoreCase(uri.getScheme());
-            port = uri.getPort();
+            uri = address.contains("://") ? new URI(address) : new URI("http://" + address);
         }
         catch (URISyntaxException e)
         {
-            hostname = address;
+            throw new IllegalArgumentException("Invalid WinRM address: " + address, e);
         }
+        String hostname = uri.getHost();
+        Validate.notNull(hostname, "Unable to extract hostname from WinRM address: %s", address);
+        boolean https = "https".equalsIgnoreCase(uri.getScheme());
+        int port = uri.getPort();
 
         WinRMClient.Builder builder = WinRMClient.builder(hostname)
                 .credentials(connectionParameters.getUsername(),
