@@ -17,12 +17,19 @@
 package org.vividus.ui.web.playwright.action;
 
 import java.util.List;
+import java.util.regex.Pattern;
+
+import com.microsoft.playwright.Page;
 
 import org.vividus.ui.web.action.JavascriptActions;
 import org.vividus.ui.web.playwright.UiContext;
 
 public class PlaywrightJavascriptActions implements JavascriptActions
 {
+    private static final Pattern PLAYWRIGHT_DECORATED_PATTERN = Pattern.compile("^(?:async\\s*)?"
+            + "(?:\\(\\s*(?:\\{[^}]*\\}|\\[[^\\]]*\\]|[^,()]+(?:,\\s*[^,()]+)?)?\\s*\\)|[^()\\s]+)\\s*"
+            + "=>\\s*(?:.|\\{|\\n)");
+
     private final UiContext uiContext;
 
     public PlaywrightJavascriptActions(UiContext uiContext)
@@ -34,10 +41,21 @@ public class PlaywrightJavascriptActions implements JavascriptActions
     @Override
     public <T> T executeScript(String script, Object... args)
     {
-        if (args.length == 0)
-        {
-            return (T) uiContext.getCurrentPage().evaluate("async () => {%n%s%n}".formatted(script));
-        }
-        return (T) uiContext.getCurrentPage().evaluate(script, List.of(args));
+        boolean hasArgs = args.length > 0;
+        String playwrightScript = isPlaywrightDecorated(script) ? script : decorateScript(script, hasArgs);
+        Page currentPage = uiContext.getCurrentPage();
+        return (T) (hasArgs ? currentPage.evaluate(playwrightScript, List.of(args))
+                : currentPage.evaluate(playwrightScript));
+    }
+
+    private boolean isPlaywrightDecorated(String script)
+    {
+        return PLAYWRIGHT_DECORATED_PATTERN.matcher(script).find();
+    }
+
+    private String decorateScript(String script, boolean hasArgs)
+    {
+        String playwrightFormat = hasArgs ? "arguments => {%n%s%n}" : "async () => {%n%s%n}";
+        return playwrightFormat.formatted(script);
     }
 }
