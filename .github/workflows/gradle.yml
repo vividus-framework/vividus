@@ -494,6 +494,84 @@ jobs:
         restore-keys: |
           kafka-tests-history-cache-
 
+
+  system-winrm-tests:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout (including submodules and tags)
+      uses: actions/checkout@v7
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Restore cached ~/.gradle/caches
+      uses: actions/cache/restore@v6
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-caches-
+
+    - name: Restore cached ~/.gradle/wrapper
+      uses: actions/cache/restore@v6
+      with:
+        path: ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('vividus-build-system/**/wrapper/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-wrapper-
+
+    - name: Configure WinRM and create test user
+      shell: powershell
+      run: |
+        winrm quickconfig -q -force
+        Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
+        Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $true
+        net user WinRMTest "WinRM_TstP@ss1" /add /passwordchg:no /expires:never
+        net localgroup Administrators WinRMTest /add
+
+    - name: Set up JDK 25
+      uses: actions/setup-java@v5
+      with:
+        distribution: 'temurin'
+        java-version: 25
+
+    - name: System WinRM tests
+      shell: bash
+      env:
+        WINRM_PASS: WinRM_TstP@ss1
+      run: |
+        ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments= \
+                                              -Pvividus.configuration.suites= \
+                                              -Pvividus.configuration.profiles= \
+                                              -Pvividus.batch-1.resource-location=story/system/winrm \
+                                              -Pvividus.winrm.server.winrm-server.address=localhost:5985 \
+                                              -Pvividus.winrm.server.winrm-server.username=WinRMTest \
+                                              -Pvividus.winrm.server.winrm-server.password=${WINRM_PASS} \
+                                              -Pvividus.winrm.server.winrm-server.authentication-scheme=Basic \
+                                              -Pvividus.winrm.server.winrm-server.disable-certificate-checks=true \
+                                              -Pvividus.variables.winrm-server-address=\${winrm.server.winrm-server.address} \
+                                              -Pvividus.variables.winrm-server-username=\${winrm.server.winrm-server.username} \
+                                              -Pvividus.variables.winrm-server-password=\${winrm.server.winrm-server.password} \
+                                              -Pvividus.variables.winrm-server-authentication-scheme=\${winrm.server.winrm-server.authentication-scheme} \
+                                              -Pvividus.allure.executor.name="Github Actions (Vividus)" \
+                                              -Pvividus.allure.executor.type=github \
+                                              -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
+                                              -Pvividus.allure.executor.build-order=${GITHUB_RUN_ID} \
+                                              -Pvividus.allure.executor.build-name="System WinRM Tests ${GITHUB_RUN_ID}" \
+                                              -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                              -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                              -Pvividus.allure.executor.report-name="System WinRM tests report"
+
+    - name: Publish system WinRM tests report
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: System WinRM Tests - Report
+        path: vividus-tests/output/reports/allure
+
   system-mobile-tests-on-saucelabs:
     if: github.event.pull_request.head.repo.fork == false && github.actor != 'dependabot[bot]'
     env:
