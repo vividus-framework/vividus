@@ -199,6 +199,9 @@ jobs:
         LIGHTHOUSE_API_KEY: ${{ secrets.LIGHTHOUSE_API_KEY }}
         CLOUDAMQP_USERNAME: ${{ secrets.CLOUDAMQP_USERNAME }}
         CLOUDAMQP_PASSWORD: ${{ secrets.CLOUDAMQP_PASSWORD }}
+        WINRM_ADDRESS: ${{ secrets.WINRM_ADDRESS }}
+        WINRM_USERNAME: ${{ secrets.WINRM_USERNAME }}
+        WINRM_PASSWORD: ${{ secrets.WINRM_PASSWORD }}
       shell: bash
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY && -n $MONGODB_USERNAME && -n $MONGODB_PASSWORD && -n $AWS_ACCESS_KEY_ID && -n $AWS_SECRET_ACCESS_KEY && -n $AWS_REGION && -n $AZURE_CLIENT_ID && -n $AZURE_CLIENT_SECRET && -n $AZURE_TENANT_ID && -n $AZURE_SUBSCRIPTION_ID && -n $AZURE_COSMOS_DB_KEY && -n $GMAIL_PASSWORD ]]; then
@@ -228,7 +231,13 @@ jobs:
                                                   -Pvividus.notifications.mail.recipient="vividus.team@gmail.com, ivan@vividus.dev" \
                                                   -Pvividus.notifications.mail.security-protocol=SSL \
                                                   -Pvividus.rabbitmq.cloudamqp.username=${CLOUDAMQP_USERNAME} \
-                                                  -Pvividus.rabbitmq.cloudamqp.password=${CLOUDAMQP_PASSWORD}
+                                                  -Pvividus.rabbitmq.cloudamqp.password=${CLOUDAMQP_PASSWORD} \
+                                                  -Pvividus.winrm.server.winrm-server.address=${WINRM_ADDRESS} \
+                                                  -Pvividus.winrm.server.winrm-server.username=${WINRM_USERNAME} \
+                                                  -Pvividus.winrm.server.winrm-server.****** \
+                                                  -Pvividus.variables.winrm-server-address=${WINRM_ADDRESS} \
+                                                  -Pvividus.variables.winrm-server-username=${WINRM_USERNAME} \
+                                                  -Pvividus.variables.winrm-server-******
         else
             echo No passwords/access keys are available, skipping system tests
         fi
