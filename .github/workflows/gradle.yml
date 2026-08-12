@@ -527,7 +527,7 @@ jobs:
         winrm quickconfig -q -force
         Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
         Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $true
-        net user WinRMTest "WinRM_Test_P@ss1" /add /passwordchg:no /expires:never
+        net user WinRMTest "WinRM_TstP@ss1" /add /passwordchg:no /expires:never
         net localgroup Administrators WinRMTest /add
 
     - name: Set up JDK 25
@@ -539,7 +539,7 @@ jobs:
     - name: System WinRM tests
       shell: bash
       env:
-        WINRM_PASS: WinRM_Test_P@ss1
+        WINRM_PASS: WinRM_TstP@ss1
       run: |
         ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments= \
                                               -Pvividus.configuration.suites= \
