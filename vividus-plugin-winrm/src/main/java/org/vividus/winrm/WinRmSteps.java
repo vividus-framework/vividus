@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.vividus.winrm;
 
 import static java.util.Optional.ofNullable;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -25,13 +27,11 @@ import java.util.function.Function;
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
+import org.metricshub.winrm.CommandResult;
+import org.metricshub.winrm.WinRMClient;
 import org.vividus.context.DynamicConfigurationManager;
 import org.vividus.context.VariableContext;
 import org.vividus.variable.VariableScope;
-
-import io.cloudsoft.winrm4j.client.WinRmClientContext;
-import io.cloudsoft.winrm4j.winrm.WinRmTool;
-import io.cloudsoft.winrm4j.winrm.WinRmToolResponse;
 
 public class WinRmSteps
 {
@@ -88,7 +88,7 @@ public class WinRmSteps
     public void executeBatchCommand(String command, String connectionKey, Set<VariableScope> scopes,
             String variableName)
     {
-        executeCommand(connectionKey, winRmTool -> winRmTool.executeCommand(command), scopes, variableName);
+        executeCommand(connectionKey, client -> client.command(command).execute(), scopes, variableName);
     }
 
     /**
@@ -112,33 +112,55 @@ public class WinRmSteps
     public void executePowerShellCommand(String command, String connectionKey, Set<VariableScope> scopes,
             String variableName)
     {
-        executeCommand(connectionKey, winRmTool -> winRmTool.executePs(command), scopes, variableName);
+        executeCommand(connectionKey, client -> client.powerShell(command).execute(), scopes, variableName);
     }
 
-    private void executeCommand(String connectionKey, Function<WinRmTool, WinRmToolResponse> executor,
+    private void executeCommand(String connectionKey, Function<WinRMClient, CommandResult> executor,
             Set<VariableScope> scopes, String variableName)
     {
         WinRmConnectionParameters connectionParameters = winRmConnectionParameters.getConfiguration(connectionKey);
 
-        WinRmTool.Builder winRmToolBuilder = WinRmTool.Builder.builder(connectionParameters.getAddress(),
-                connectionParameters.getUsername(), connectionParameters.getPassword());
-        winRmToolBuilder.disableCertificateChecks(connectionParameters.isDisableCertificateChecks());
-        ofNullable(connectionParameters.getAuthenticationScheme()).ifPresent(winRmToolBuilder::authenticationScheme);
-
-        WinRmClientContext context = WinRmClientContext.newInstance();
+        String address = connectionParameters.getAddress();
+        String hostname;
+        boolean https = false;
+        int port = -1;
         try
         {
-            WinRmTool winRmTool = winRmToolBuilder.context(context).build();
-            WinRmToolResponse response = executor.apply(winRmTool);
-            variableContext.putVariable(scopes, variableName, Map.of(
-                    "stdout", response.getStdOut(),
-                    "stderr", response.getStdErr(),
-                    "exit-status", response.getStatusCode()
-            ));
+            URI uri = address.contains("://") ? new URI(address) : new URI("http://" + address);
+            hostname = uri.getHost();
+            https = "https".equalsIgnoreCase(uri.getScheme());
+            port = uri.getPort();
         }
-        finally
+        catch (URISyntaxException e)
         {
-            context.shutdown();
+            hostname = address;
+        }
+
+        WinRMClient.Builder builder = WinRMClient.builder(hostname)
+                .credentials(connectionParameters.getUsername(),
+                        connectionParameters.getPassword().toCharArray());
+        if (https)
+        {
+            builder.https();
+        }
+        if (port > 0)
+        {
+            builder.port(port);
+        }
+        if (connectionParameters.isDisableCertificateChecks())
+        {
+            builder.trustAllCertificates();
+        }
+        ofNullable(connectionParameters.getAuthenticationScheme()).ifPresent(builder::authentication);
+
+        try (WinRMClient client = builder.build())
+        {
+            CommandResult result = executor.apply(client);
+            variableContext.putVariable(scopes, variableName, Map.of(
+                    "stdout", result.stdout(),
+                    "stderr", result.stderr(),
+                    "exit-status", result.exitCode()
+            ));
         }
     }
 }
