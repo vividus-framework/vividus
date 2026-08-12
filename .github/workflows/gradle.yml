@@ -547,12 +547,12 @@ jobs:
                                               -Pvividus.configuration.suites= \
                                               -Pvividus.configuration.profiles= \
                                               -Pvividus.batch-1.resource-location=story/system/winrm \
-                                              -Pvividus.winrm.server.winrm-server.address=localhost \
+                                              -Pvividus.winrm.server.winrm-server.address=localhost:5985 \
                                               -Pvividus.winrm.server.winrm-server.username=WinRMTest \
                                               -Pvividus.winrm.server.winrm-server.password=${WINRM_PASS} \
                                               -Pvividus.winrm.server.winrm-server.authentication-scheme=Basic \
                                               -Pvividus.winrm.server.winrm-server.disable-certificate-checks=true \
-                                              -Pvividus.variables.winrm-server-address=localhost \
+                                              -Pvividus.variables.winrm-server-address=localhost:5985 \
                                               -Pvividus.variables.winrm-server-username=WinRMTest \
                                               -Pvividus.variables.winrm-server-password=${WINRM_PASS} \
                                               -Pvividus.variables.winrm-server-authentication-scheme=Basic \
