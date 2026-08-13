@@ -1,6 +1,7 @@
 .Plugins
 * Clouds
 ** xref:aws.adoc[AWS]
+*** xref:plugin-aws-cloudwatch.adoc[CloudWatch]
 *** xref:plugin-aws-dynamodb.adoc[DynamoDB]
 *** xref:plugin-aws-kinesis.adoc[Kinesis]
 *** xref:plugin-aws-lambda.adoc[Lambda]
