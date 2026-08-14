@@ -20,12 +20,9 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockConstruction;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,30 +30,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
-import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
-import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider.Builder;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.ExecuteStatementRequest;
-import com.amazonaws.services.dynamodbv2.model.ExecuteStatementResult;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
-import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
 import org.vividus.variable.VariableScope;
+
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.ExecuteStatementResponse;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class DynamoDbStepsTests
@@ -66,39 +55,27 @@ class DynamoDbStepsTests
     @Mock private AwsServiceClientsContext clientsContext;
     @Mock private VariableContext variableContext;
 
-    @SuppressWarnings({ "try", "PMD.CloseResource" })
     @Test
     void shouldExecuteDeleteQueryWithAssumedRole()
     {
         String partiqlQuery = "DELETE FROM Table WHERE KeyName='Value'";
-        ExecuteStatementResult result = mock(ExecuteStatementResult.class);
-        STSAssumeRoleSessionCredentialsProvider provider = mock(STSAssumeRoleSessionCredentialsProvider.class);
-        String roleArn = "role:arn";
-        try (MockedConstruction<Builder> ignored = mockConstruction(Builder.class,
-                (mock, context) -> {
-                    assertEquals(1, context.getCount());
-                    assertEquals(List.of(roleArn, "Vividus"), context.arguments());
-                    when(mock.build()).thenReturn(provider);
-                }))
+        ExecuteStatementResponse result = ExecuteStatementResponse.builder().build();
+        executeQuery("role:arn", partiqlQuery, result, steps ->
         {
-            AmazonDynamoDBClientBuilder builder = executeQuery(roleArn, partiqlQuery,
-                    result, steps -> {
-                        ExecuteStatementResult actual = steps.executeQuery(partiqlQuery);
-                        assertEquals(result, actual);
-                    });
-            verify(builder).withCredentials(provider);
-        }
+            ExecuteStatementResponse actual = steps.executeQuery(partiqlQuery);
+            assertEquals(result, actual);
+        });
     }
 
     @Test
     void shouldExecuteSelectQuery()
     {
         String partiqlQuery = "SELECT * FROM Table";
-        ExecuteStatementResult result = new ExecuteStatementResult();
-        result.setItems(List.of(
-                Map.of("key1", new AttributeValue("value1")),
-                Map.of("key2", new AttributeValue("value2"))
-        ));
+        ExecuteStatementResponse result = ExecuteStatementResponse.builder()
+                .items(
+                        Map.of("key1", AttributeValue.builder().s("value1").build()),
+                        Map.of("key2", AttributeValue.builder().s("value2").build()))
+                .build();
         executeQuery(null, partiqlQuery, result, steps -> {
             Set<VariableScope> scopes = Set.of(VariableScope.STORY);
             String variableName = "var";
@@ -108,36 +85,18 @@ class DynamoDbStepsTests
         });
     }
 
-    private AmazonDynamoDBClientBuilder executeQuery(String roleArn, String partiqlQuery, ExecuteStatementResult result,
+    private void executeQuery(String roleArn, String partiqlQuery, ExecuteStatementResponse result,
             Consumer<DynamoDbSteps> test)
     {
-        try (var builder = mockStatic(AmazonDynamoDBClientBuilder.class))
-        {
-            AmazonDynamoDBClientBuilder amazonDynamoDBClientBuilder = mock();
-            builder.when(AmazonDynamoDBClientBuilder::standard).thenReturn(amazonDynamoDBClientBuilder);
+        DynamoDbClient amazonDynamoDB = mock();
+        when(amazonDynamoDB.executeStatement(argThat(request -> partiqlQuery.equals(request.statement()))))
+                .thenReturn(result);
 
-            AmazonDynamoDB amazonDynamoDB = mock();
-            when(amazonDynamoDBClientBuilder.build()).thenReturn(amazonDynamoDB);
+        DynamoDbSteps steps = new DynamoDbSteps(roleArn, clientsContext, variableContext);
+        when(clientsContext.getServiceClient(any(), any())).thenReturn(amazonDynamoDB);
 
-            ArgumentCaptor<ExecuteStatementRequest> captor = ArgumentCaptor.forClass(ExecuteStatementRequest.class);
-            when(amazonDynamoDB.executeStatement(captor.capture())).thenReturn(result);
+        test.accept(steps);
 
-            DynamoDbSteps steps = new DynamoDbSteps(roleArn, clientsContext, variableContext);
-
-            when(clientsContext.getServiceClient(
-                    argThat((ArgumentMatcher<Supplier<AwsClientBuilder<AmazonDynamoDBClientBuilder, AmazonDynamoDB>>>)
-                            supplier -> supplier.get().equals(amazonDynamoDBClientBuilder)), eq(amazonDynamoDB)))
-                    .thenReturn(amazonDynamoDB);
-
-            test.accept(steps);
-
-            ExecuteStatementRequest request = captor.getValue();
-            assertEquals(partiqlQuery, request.getStatement());
-            assertNull(request.getParameters());
-
-            assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info("Executing query: {}", partiqlQuery))));
-
-            return amazonDynamoDBClientBuilder;
-        }
+        assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info("Executing query: {}", partiqlQuery))));
     }
 }

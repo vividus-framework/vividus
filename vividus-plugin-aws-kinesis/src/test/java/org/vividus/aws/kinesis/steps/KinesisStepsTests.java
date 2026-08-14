@@ -19,45 +19,38 @@ package org.vividus.aws.kinesis.steps;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.kinesis.AmazonKinesis;
-import com.amazonaws.services.kinesis.AmazonKinesisClientBuilder;
-import com.amazonaws.services.kinesis.model.GetRecordsResult;
-import com.amazonaws.services.kinesis.model.GetShardIteratorResult;
-import com.amazonaws.services.kinesis.model.ListShardsResult;
-import com.amazonaws.services.kinesis.model.PutRecordResult;
-import com.amazonaws.services.kinesis.model.Record;
-import com.amazonaws.services.kinesis.model.Shard;
-import com.amazonaws.services.kinesis.model.ShardIteratorType;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
 import org.vividus.testcontext.TestContext;
 import org.vividus.variable.VariableScope;
+
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.kinesis.KinesisClient;
+import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
+import software.amazon.awssdk.services.kinesis.model.GetShardIteratorResponse;
+import software.amazon.awssdk.services.kinesis.model.ListShardsResponse;
+import software.amazon.awssdk.services.kinesis.model.PutRecordResponse;
+import software.amazon.awssdk.services.kinesis.model.Record;
+import software.amazon.awssdk.services.kinesis.model.Shard;
+import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
 
 @ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class })
 class KinesisStepsTests
@@ -68,7 +61,7 @@ class KinesisStepsTests
     private static final String SHARD_ID = "shard-id";
     private static final String SHARD_ITERATOR = "shard-iterator";
     private static final String DATA = "data";
-    private static final Object KEY = GetShardIteratorResult.class;
+    private static final Object KEY = GetShardIteratorResponse.class;
 
     @Mock private AwsServiceClientsContext clientsContext;
     @Mock private TestContext testContext;
@@ -80,14 +73,17 @@ class KinesisStepsTests
         runWithKinesisClient((kinesis, steps) ->
         {
             String partitionKey = "partition-key-1";
-            ArgumentCaptor<ByteBuffer> dataCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
             String sequenceNumber = "sequence-number";
-            PutRecordResult result = new PutRecordResult().withShardId(SHARD_ID).withSequenceNumber(sequenceNumber);
-            when(kinesis.putRecord(eq(STREAM_NAME), dataCaptor.capture(), eq(partitionKey))).thenReturn(result);
+            PutRecordResponse result = PutRecordResponse.builder()
+                    .shardId(SHARD_ID)
+                    .sequenceNumber(sequenceNumber)
+                    .build();
+            when(kinesis.putRecord(argThat(request -> STREAM_NAME.equals(request.streamName())
+                    && partitionKey.equals(request.partitionKey())
+                    && DATA.equals(request.data().asUtf8String())))).thenReturn(result);
 
             steps.putRecord(DATA, partitionKey, STREAM_NAME);
 
-            assertEquals(DATA, new String(dataCaptor.getValue().array(), StandardCharsets.UTF_8));
             assertThat(LOGGER.getLoggingEvents(), equalTo(List
                     .of(info("The data was placed to the shard with ID '{}' under the sequence number '{}'", SHARD_ID,
                             sequenceNumber))));
@@ -99,13 +95,17 @@ class KinesisStepsTests
     {
         runWithKinesisClient((kinesis, steps) ->
         {
-            ListShardsResult shards = new ListShardsResult().withShards(new Shard().withShardId(SHARD_ID));
-            when(kinesis.listShards(argThat(rq -> STREAM_NAME.equals(rq.getStreamName())))).thenReturn(shards);
+            ListShardsResponse shards = ListShardsResponse.builder()
+                    .shards(Shard.builder().shardId(SHARD_ID).build())
+                    .build();
+            when(kinesis.listShards(argThat(rq -> STREAM_NAME.equals(rq.streamName())))).thenReturn(shards);
 
-            GetShardIteratorResult shardIteratorResult = new GetShardIteratorResult().withShardIterator(SHARD_ITERATOR);
+            GetShardIteratorResponse shardIteratorResult = GetShardIteratorResponse.builder()
+                    .shardIterator(SHARD_ITERATOR)
+                    .build();
             when(kinesis.getShardIterator(
-                    argThat(rq -> STREAM_NAME.equals(rq.getStreamName()) && SHARD_ID.equals(rq.getShardId())
-                            && ShardIteratorType.LATEST.toString().equals(rq.getShardIteratorType()))))
+                    argThat(rq -> STREAM_NAME.equals(rq.streamName()) && SHARD_ID.equals(rq.shardId())
+                            && ShardIteratorType.LATEST.equals(rq.shardIteratorType()))))
                     .thenReturn(shardIteratorResult);
             steps.createShardIterators(STREAM_NAME);
 
@@ -124,13 +124,14 @@ class KinesisStepsTests
     {
         runWithKinesisClient((kinesis, steps) ->
         {
-            when(testContext.get(GetShardIteratorResult.class)).thenReturn(List.of(SHARD_ITERATOR));
+            when(testContext.get(GetShardIteratorResponse.class)).thenReturn(List.of(SHARD_ITERATOR));
             String nextShardIterator = "next-" + SHARD_ITERATOR;
-            Record record = new Record().withData(ByteBuffer.wrap(DATA.getBytes(StandardCharsets.UTF_8)));
-            GetRecordsResult result = new GetRecordsResult()
-                    .withNextShardIterator(nextShardIterator)
-                    .withRecords(record);
-            when(kinesis.getRecords(argThat(rq -> SHARD_ITERATOR.equals(rq.getShardIterator())))).thenReturn(result);
+            Record record = Record.builder().data(SdkBytes.fromUtf8String(DATA)).build();
+            GetRecordsResponse result = GetRecordsResponse.builder()
+                    .nextShardIterator(nextShardIterator)
+                    .records(record)
+                    .build();
+            when(kinesis.getRecords(argThat(rq -> SHARD_ITERATOR.equals(rq.shardIterator())))).thenReturn(result);
 
             Set<VariableScope> scopes = Set.of(VariableScope.STEP);
             String variableName = "var-name";
@@ -146,24 +147,11 @@ class KinesisStepsTests
         });
     }
 
-    void runWithKinesisClient(BiConsumer<AmazonKinesis, KinesisSteps> kinesisConsumer)
+    void runWithKinesisClient(BiConsumer<KinesisClient, KinesisSteps> kinesisConsumer)
     {
-        try (var builder = mockStatic(AmazonKinesisClientBuilder.class))
-        {
-            AmazonKinesis kinesis = mock();
-            builder.when(AmazonKinesisClientBuilder::defaultClient).thenReturn(kinesis);
-
-            AmazonKinesisClientBuilder customClientBuilder = mock();
-            builder.when(AmazonKinesisClientBuilder::standard).thenReturn(customClientBuilder);
-
-            KinesisSteps steps = new KinesisSteps(clientsContext, testContext, variableContext);
-
-            when(clientsContext.getServiceClient(
-                    argThat((ArgumentMatcher<Supplier<AwsClientBuilder<AmazonKinesisClientBuilder, AmazonKinesis>>>)
-                            supplier -> supplier.get().equals(customClientBuilder)), eq(kinesis)))
-                    .thenReturn(kinesis);
-
-            kinesisConsumer.accept(kinesis, steps);
-        }
+        KinesisClient kinesis = mock();
+        KinesisSteps steps = new KinesisSteps(clientsContext, testContext, variableContext);
+        when(clientsContext.getServiceClient(any(), any())).thenReturn(kinesis);
+        kinesisConsumer.accept(kinesis, steps);
     }
 }

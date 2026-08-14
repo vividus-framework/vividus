@@ -38,19 +38,16 @@ public class LambdaSteps
     private final VariableContext variableContext;
     private final AwsServiceClientsContext clientsContext;
 
-    private final LambdaClient awsLambdaClient;
-
     public LambdaSteps(AwsServiceClientsContext clientsContext, VariableContext variableContext)
     {
         this.clientsContext = clientsContext;
         this.variableContext = variableContext;
-
-        this.awsLambdaClient = LambdaClient.builder().build();
     }
 
     private LambdaClient getLambdaClient()
     {
-        return clientsContext.getServiceClient(LambdaClient::builder, awsLambdaClient);
+        return clientsContext.getServiceClient(LambdaClient.class, LambdaClient::builder,
+                () -> LambdaClient.builder().build());
     }
 
     /**

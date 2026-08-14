@@ -21,7 +21,6 @@ import static java.util.stream.Collectors.toMap;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -65,20 +64,16 @@ public class S3BucketSteps
     private final VariableContext variableContext;
     private final DateUtils dateUtils;
 
-    private final S3Client amazonS3Client;
-
     public S3BucketSteps(AwsServiceClientsContext clientsContext, VariableContext variableContext, DateUtils dateUtils)
     {
         this.clientsContext = clientsContext;
         this.variableContext = variableContext;
         this.dateUtils = dateUtils;
-
-        this.amazonS3Client = S3Client.builder().build();
     }
 
     private S3Client getS3Client()
     {
-        return clientsContext.getServiceClient(S3Client::builder, amazonS3Client);
+        return clientsContext.getServiceClient(S3Client.class, S3Client::builder, () -> S3Client.builder().build());
     }
 
     /**

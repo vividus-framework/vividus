@@ -36,6 +36,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ExecuteStatementRequest;
 import software.amazon.awssdk.services.dynamodb.model.ExecuteStatementResponse;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
 
 public class DynamoDbSteps
@@ -46,27 +47,19 @@ public class DynamoDbSteps
     private final VariableContext variableContext;
     private final JsonUtils jsonUtils = new JsonUtils();
 
-    private final DynamoDbClient amazonDynamoDB;
+    private final String roleArn;
 
     public DynamoDbSteps(String roleArn, AwsServiceClientsContext clientsContext, VariableContext variableContext)
     {
+        this.roleArn = roleArn;
         this.clientsContext = clientsContext;
         this.variableContext = variableContext;
-
-        var amazonDynamoDBClientBuilder = DynamoDbClient.builder();
-        if (roleArn != null)
-        {
-            AwsCredentialsProvider credentialsProvider = StsAssumeRoleCredentialsProvider.builder()
-                    .refreshRequest(request -> request.roleArn(roleArn).roleSessionName("Vividus"))
-                    .build();
-            amazonDynamoDBClientBuilder.credentialsProvider(credentialsProvider);
-        }
-        this.amazonDynamoDB = amazonDynamoDBClientBuilder.build();
     }
 
     private DynamoDbClient getDynamoDbClient()
     {
-        return clientsContext.getServiceClient(DynamoDbClient::builder, amazonDynamoDB);
+        return clientsContext.getServiceClient(DynamoDbClient.class, DynamoDbClient::builder,
+                this::createDefaultDynamoDbClient);
     }
 
     /**
@@ -115,7 +108,6 @@ public class DynamoDbSteps
     public void executeQuery(String partiqlQuery, Set<VariableScope> scopes, String variableName)
     {
         String jsonResult = jsonUtils.toJson(executeQuery(partiqlQuery).items().stream()
-                .stream()
                 .map(DynamoDbSteps::toMap)
                 .toList());
         variableContext.putVariable(scopes, variableName, jsonResult);
@@ -175,5 +167,21 @@ public class DynamoDbSteps
             return Base64.getEncoder().encodeToString(attributeValue.b().asByteArray());
         }
         return attributeValue.toString();
+    }
+
+    private DynamoDbClient createDefaultDynamoDbClient()
+    {
+        var amazonDynamoDBClientBuilder = DynamoDbClient.builder();
+        if (roleArn != null)
+        {
+            AwsCredentialsProvider credentialsProvider = StsAssumeRoleCredentialsProvider.builder()
+                    .refreshRequest(AssumeRoleRequest.builder()
+                            .roleArn(roleArn)
+                            .roleSessionName("Vividus")
+                            .build())
+                    .build();
+            amazonDynamoDBClientBuilder.credentialsProvider(credentialsProvider);
+        }
+        return amazonDynamoDBClientBuilder.build();
     }
 }

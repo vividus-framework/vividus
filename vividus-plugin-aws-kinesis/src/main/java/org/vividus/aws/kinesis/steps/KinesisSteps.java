@@ -16,7 +16,6 @@
 
 package org.vividus.aws.kinesis.steps;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,21 +52,18 @@ public class KinesisSteps
     private final VariableContext variableContext;
     private final AwsServiceClientsContext clientsContext;
 
-    private final KinesisClient amazonKinesis;
-
     public KinesisSteps(AwsServiceClientsContext clientsContext, TestContext testContext,
             VariableContext variableContext)
     {
         this.clientsContext = clientsContext;
         this.testContext = testContext;
         this.variableContext = variableContext;
-
-        this.amazonKinesis = KinesisClient.builder().build();
     }
 
     private KinesisClient getKinesisClient()
     {
-        return clientsContext.getServiceClient(KinesisClient::builder, amazonKinesis);
+        return clientsContext.getServiceClient(KinesisClient.class, KinesisClient::builder,
+                () -> KinesisClient.builder().build());
     }
 
     /**
@@ -94,7 +90,7 @@ public class KinesisSteps
     {
         PutRecordResponse result = getKinesisClient().putRecord(PutRecordRequest.builder()
                 .streamName(streamName)
-                .data(SdkBytes.fromByteBuffer(ByteBuffer.wrap(data.getBytes(StandardCharsets.UTF_8))))
+                .data(SdkBytes.fromString(data, StandardCharsets.UTF_8))
                 .partitionKey(partitionKey)
                 .build());
         LOGGER.atInfo()

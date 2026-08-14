@@ -40,17 +40,14 @@ public class AwsServiceClientsTestContext implements AwsServiceClientsContext
     }
 
     @Override
-    public <B extends AwsClientBuilder<B, T>, T> T getServiceClient(
-            Supplier<AwsClientBuilder<B, T>> clientBuilderSupplier, T defaultClient)
+    public <B extends AwsClientBuilder<B, T>, T> T getServiceClient(Class<T> clientClass,
+            Supplier<AwsClientBuilder<B, T>> clientBuilderSupplier, Supplier<T> defaultClientSupplier)
     {
         ScopedAwsServiceClients clients = getAwsServiceClients();
 
-        @SuppressWarnings("unchecked")
-        Class<T> clientClass = (Class<T>) defaultClient.getClass();
-
         return getClient(clients, AwsServiceClientScope.SCENARIO, clientClass, clientBuilderSupplier)
                 .or(() -> getClient(clients, AwsServiceClientScope.STORY, clientClass, clientBuilderSupplier))
-                .orElse(defaultClient);
+                .orElseGet(defaultClientSupplier);
     }
 
     @SuppressWarnings("unchecked")
