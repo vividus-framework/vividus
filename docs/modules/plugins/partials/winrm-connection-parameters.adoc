@@ -24,12 +24,8 @@ NOTE: The {parameters-name} marked with *bold* are mandatory.
 
 
 |`{connection-parameters-prefix}authentication-scheme`
-a|`Basic` +
-`Digest` +
-`NTLM` +
-`Negotiate` +
-`Kerberos` +
-`CredSSP`
+a|`NTLM` +
+`KERBEROS`
 |`NTLM`
 |Authentication scheme
 
