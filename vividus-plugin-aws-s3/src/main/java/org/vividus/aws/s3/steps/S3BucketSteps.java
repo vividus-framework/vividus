@@ -73,7 +73,7 @@ public class S3BucketSteps
 
     private S3Client getS3Client()
     {
-        return clientsContext.getServiceClient(S3Client.class, S3Client::builder, () -> S3Client.builder().build());
+        return clientsContext.getServiceClient(S3Client::builder, () -> S3Client.builder().build());
     }
 
     /**

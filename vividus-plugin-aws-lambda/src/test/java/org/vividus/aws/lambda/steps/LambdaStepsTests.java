@@ -74,7 +74,7 @@ class LambdaStepsTests
                 && payload.equals(request.payload().asUtf8String())
                 && LogType.TAIL == request.logType()))).thenReturn(invokeResult);
         LambdaSteps steps = new LambdaSteps(clientsContext, variableContext);
-        when(clientsContext.getServiceClient(any(), any(), any())).thenReturn(awsLambda);
+        when(clientsContext.getServiceClient(any(), any())).thenReturn(awsLambda);
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
         String variableName = "var";
         steps.invokeLambda(functionName, payload, scopes, variableName);

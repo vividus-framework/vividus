@@ -57,8 +57,7 @@ public class DynamoDbSteps
 
     private DynamoDbClient getDynamoDbClient()
     {
-        return clientsContext.getServiceClient(DynamoDbClient.class, DynamoDbClient::builder,
-                this::createDefaultDynamoDbClient);
+        return clientsContext.getServiceClient(DynamoDbClient::builder, this::createDefaultDynamoDbClient);
     }
 
     /**
@@ -123,54 +122,22 @@ public class DynamoDbSteps
 
     private static Object toObject(AttributeValue attributeValue)
     {
-        if (attributeValue.s() != null)
+        return switch (attributeValue.type())
         {
-            return attributeValue.s();
-        }
-        if (attributeValue.n() != null)
-        {
-            return new BigDecimal(attributeValue.n());
-        }
-        if (attributeValue.bool() != null)
-        {
-            return attributeValue.bool();
-        }
-        if (Boolean.TRUE.equals(attributeValue.nul()))
-        {
-            return null;
-        }
-        if (attributeValue.b() != null)
-        {
-            return Base64.getEncoder().encodeToString(attributeValue.b().asByteArray());
-        }
-        return toCollectionObject(attributeValue);
-    }
-
-    private static Object toCollectionObject(AttributeValue attributeValue)
-    {
-        if (attributeValue.hasL())
-        {
-            return attributeValue.l().stream().map(DynamoDbSteps::toObject).toList();
-        }
-        if (attributeValue.hasM())
-        {
-            return toMap(attributeValue.m());
-        }
-        if (attributeValue.hasSs())
-        {
-            return attributeValue.ss();
-        }
-        if (attributeValue.hasNs())
-        {
-            return attributeValue.ns().stream().map(BigDecimal::new).toList();
-        }
-        if (attributeValue.hasBs())
-        {
-            return attributeValue.bs().stream()
+            case S -> attributeValue.s();
+            case N -> new BigDecimal(attributeValue.n());
+            case BOOL -> attributeValue.bool();
+            case NUL -> null;
+            case B -> Base64.getEncoder().encodeToString(attributeValue.b().asByteArray());
+            case L -> attributeValue.l().stream().map(DynamoDbSteps::toObject).toList();
+            case M -> toMap(attributeValue.m());
+            case SS -> attributeValue.ss();
+            case NS -> attributeValue.ns().stream().map(BigDecimal::new).toList();
+            case BS -> attributeValue.bs().stream()
                     .map(bytes -> Base64.getEncoder().encodeToString(bytes.asByteArray()))
                     .toList();
-        }
-        return attributeValue.toString();
+            default -> attributeValue.toString();
+        };
     }
 
     private DynamoDbClient createDefaultDynamoDbClient()

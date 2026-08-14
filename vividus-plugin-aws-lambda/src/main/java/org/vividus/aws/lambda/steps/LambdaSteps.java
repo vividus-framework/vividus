@@ -46,8 +46,7 @@ public class LambdaSteps
 
     private LambdaClient getLambdaClient()
     {
-        return clientsContext.getServiceClient(LambdaClient.class, LambdaClient::builder,
-                () -> LambdaClient.builder().build());
+        return clientsContext.getServiceClient(LambdaClient::builder, () -> LambdaClient.builder().build());
     }
 
     /**

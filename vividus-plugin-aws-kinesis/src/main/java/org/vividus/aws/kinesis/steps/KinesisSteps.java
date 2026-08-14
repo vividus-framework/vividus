@@ -62,8 +62,7 @@ public class KinesisSteps
 
     private KinesisClient getKinesisClient()
     {
-        return clientsContext.getServiceClient(KinesisClient.class, KinesisClient::builder,
-                () -> KinesisClient.builder().build());
+        return clientsContext.getServiceClient(KinesisClient::builder, () -> KinesisClient.builder().build());
     }
 
     /**

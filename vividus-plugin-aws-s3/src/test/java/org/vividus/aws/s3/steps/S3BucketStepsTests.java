@@ -282,7 +282,7 @@ class S3BucketStepsTests
     void testSteps(FailableConsumer<S3BucketSteps, IOException> test) throws IOException
     {
         S3BucketSteps steps = new S3BucketSteps(clientsContext, variableContext, new DateUtils(ZoneId.of("Z")));
-        when(clientsContext.getServiceClient(any(), any(), any())).thenReturn(amazonS3Client);
+        when(clientsContext.getServiceClient(any(), any())).thenReturn(amazonS3Client);
         test.accept(steps);
     }
 }

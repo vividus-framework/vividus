@@ -54,8 +54,7 @@ class AwsServiceClientsTestContextTests
         var clientBuilderSupplier = mock(Supplier.class);
         var defaultClient = new Object();
 
-        var actualClient = awsServiceClientsTestContext.getServiceClient(Object.class, clientBuilderSupplier,
-                () -> defaultClient);
+        var actualClient = awsServiceClientsTestContext.getServiceClient(clientBuilderSupplier, () -> defaultClient);
 
         assertEquals(defaultClient, actualClient);
         verifyNoInteractions(clientBuilderSupplier);
@@ -73,21 +72,15 @@ class AwsServiceClientsTestContextTests
         actualClient = createServiceClient(AwsServiceClientScope.SCENARIO, scenarioScopedClient);
         assertEquals(scenarioScopedClient, actualClient);
 
-        var clientBuilderSupplier = mock(Supplier.class);
-        Object defaultClient = new Object();
-
-        Object cachedClient = awsServiceClientsTestContext.getServiceClient(Object.class, clientBuilderSupplier,
-                () -> defaultClient);
+        var builder = mock(AwsClientBuilder.class);
+        Object cachedClient = awsServiceClientsTestContext.getServiceClient(() -> builder, Object::new);
 
         assertEquals(scenarioScopedClient, cachedClient);
-        verifyNoInteractions(clientBuilderSupplier);
 
         awsServiceClientsTestContext.clearScenarioScopedClients();
-        cachedClient = awsServiceClientsTestContext.getServiceClient(Object.class, clientBuilderSupplier,
-                () -> defaultClient);
+        cachedClient = awsServiceClientsTestContext.getServiceClient(() -> builder, Object::new);
 
         assertEquals(storyScopedClient, cachedClient);
-        verifyNoInteractions(clientBuilderSupplier);
     }
 
     @Test
@@ -111,6 +104,6 @@ class AwsServiceClientsTestContextTests
         when(builder.build()).thenReturn(expectedClient);
 
         awsServiceClientsTestContext.putCredentialsProvider(scope, credentialsProvider);
-        return awsServiceClientsTestContext.getServiceClient(Object.class, () -> builder, Object::new);
+        return awsServiceClientsTestContext.getServiceClient(() -> builder, Object::new);
     }
 }

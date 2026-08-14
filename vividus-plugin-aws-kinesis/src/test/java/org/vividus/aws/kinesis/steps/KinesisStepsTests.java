@@ -159,7 +159,7 @@ class KinesisStepsTests
     {
         KinesisClient kinesis = mock();
         KinesisSteps steps = new KinesisSteps(clientsContext, testContext, variableContext);
-        when(clientsContext.getServiceClient(any(), any(), any())).thenReturn(kinesis);
+        when(clientsContext.getServiceClient(any(), any())).thenReturn(kinesis);
         kinesisConsumer.accept(kinesis, steps);
     }
 }

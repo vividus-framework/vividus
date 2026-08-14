@@ -96,7 +96,7 @@ class DynamoDbStepsTests
                 .thenReturn(result);
 
         DynamoDbSteps steps = new DynamoDbSteps(roleArn, clientsContext, variableContext);
-        when(clientsContext.getServiceClient(any(), any(), any())).thenReturn(amazonDynamoDB);
+        when(clientsContext.getServiceClient(any(), any())).thenReturn(amazonDynamoDB);
 
         test.accept(steps);
 

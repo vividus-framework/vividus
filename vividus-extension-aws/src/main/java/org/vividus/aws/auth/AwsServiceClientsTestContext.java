@@ -40,27 +40,29 @@ public class AwsServiceClientsTestContext implements AwsServiceClientsContext
     }
 
     @Override
-    public <B extends AwsClientBuilder<B, T>, T> T getServiceClient(Class<T> clientClass,
+    public <B extends AwsClientBuilder<B, T>, T> T getServiceClient(
             Supplier<AwsClientBuilder<B, T>> clientBuilderSupplier, Supplier<T> defaultClientSupplier)
     {
         ScopedAwsServiceClients clients = getAwsServiceClients();
 
-        return getClient(clients, AwsServiceClientScope.SCENARIO, clientClass, clientBuilderSupplier)
-                .or(() -> getClient(clients, AwsServiceClientScope.STORY, clientClass, clientBuilderSupplier))
+        return getClient(clients, AwsServiceClientScope.SCENARIO, clientBuilderSupplier)
+                .or(() -> getClient(clients, AwsServiceClientScope.STORY, clientBuilderSupplier))
                 .orElseGet(defaultClientSupplier);
     }
 
     @SuppressWarnings("unchecked")
     private static <B extends AwsClientBuilder<B, T>, T> Optional<T> getClient(ScopedAwsServiceClients scopedClients,
-            AwsServiceClientScope scope, Class<T> clientClass, Supplier<AwsClientBuilder<B, T>> clientBuilderSupplier)
+            AwsServiceClientScope scope, Supplier<AwsClientBuilder<B, T>> clientBuilderSupplier)
     {
         return Optional.ofNullable(scopedClients.clients.get(scope)).map(clients ->
-                (T) clients.clients.computeIfAbsent(clientClass,
-                        k -> Optional.ofNullable(clients.credentialsProvider)
-                                .map(cp -> clientBuilderSupplier.get().credentialsProvider(cp).build())
-                                .orElse(null)
-                )
-        );
+        {
+            AwsClientBuilder<B, T> builder = clientBuilderSupplier.get();
+            return (T) clients.clients.computeIfAbsent(builder.getClass(),
+                    k -> Optional.ofNullable(clients.credentialsProvider)
+                            .map(cp -> builder.credentialsProvider(cp).build())
+                            .orElse(null)
+            );
+        });
     }
 
     @Override
