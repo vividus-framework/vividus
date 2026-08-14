@@ -1,0 +1,60 @@
+= AWS CloudWatch Plugin
+
+The plugin provides functionality to fetch the log events from https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html[Amazon CloudWatch Logs].
+
+:plugin-short-name: aws-cloudwatch
+include::partial$plugin-installation.adoc[]
+include::partial$aws.adoc[]
+
+== Steps
+
+=== Start listening for the log events
+
+Starts listening for the Amazon CloudWatch log events by capturing the current moment in time. The captured moment is later used as the start of the time range by the <<_wait_for_the_log_events_in_a_log_stream>> step.
+
+The step is useful when the moment the events of interest may start appearing is not known upfront, e.g. the events are triggered by some business actions performed after this step.
+
+[source,gherkin]
+----
+When I start listening for CloudWatch log events
+----
+
+=== Wait for the log events in a log stream
+
+Polls the specified log stream of the specified Amazon CloudWatch log group until at least one log event matching the filter pattern is found since the listening was started or the timeout expires, and then saves all the found events to the variable. The step is failed if no matching event appears within the timeout.
+
+The listening must be started beforehand by the <<_start_listening_for_the_log_events>> step. The time range grows on each polling attempt from the moment the listening was started up to the current moment. This handles the Amazon CloudWatch ingestion delay: the events produced right before the step execution are picked up as soon as they become available.
+
+[source,gherkin]
+----
+When I wait `$duration` with `$pollingDuration` polling until at least one event matching `$pattern` pattern appears in CloudWatch log group `$logGroupName` and log stream `$logStreamName` and save them to $scopes variable `$variableName`
+----
+
+* `$duration` - The maximum time to wait for the events, in https://en.wikipedia.org/wiki/ISO_8601#Durations[ISO-8601 duration format].
+* `$pollingDuration` - The interval between the polling attempts, in https://en.wikipedia.org/wiki/ISO_8601#Durations[ISO-8601 duration format].
+* `$pattern` - The https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html[filter pattern] to match the events against, if it's empty any event since the listening was started is matched.
+* `$logGroupName` - The name of the Amazon CloudWatch log group to fetch the events from.
+* `$logStreamName` - The name of the Amazon CloudWatch log stream to fetch the events from.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the events. The events are sorted from the newest to the oldest and are accessible via zero-based index and the event key, e.g. `${my-var[0].message}` returns the message of the most recent found event. The available keys are:
+** `eventId` - the ID of the event
+** `timestamp` - the time the event occurred at
+** `message` - the data contained in the event
+
+.Wait until the specific application instance logs any event after performing a business action
+[source,gherkin]
+----
+When I start listening for CloudWatch log events
+!-- Perform the business action that is expected to produce the log event, e.g. trigger a request
+When I wait `PT2M` with `PT10S` polling until at least one event matching `` pattern appears in CloudWatch log group `/aws/logs/my-application` and log stream `application.log` and save them to scenario variable `applicationEvents`
+Then `${applicationEvents[0].message}` is not equal to ``
+----
+
+.Wait until the application logs the processed order
+[source,gherkin]
+----
+When I start listening for CloudWatch log events
+!-- Perform the business action that places the order
+When I wait `PT2M` with `PT10S` polling until at least one event matching `"Order ${orderId} is processed"` pattern appears in CloudWatch log group `/aws/lambda/vividus-function` and log stream `vividus-function-instance-1` and save them to scenario variable `orderEvents`
+Then `${orderEvents[0].message}` matches `.*is processed.*`
+----

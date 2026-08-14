@@ -36,6 +36,7 @@ dependencies {
     implementation('com.applitools:eyes-universal-core-alpine:5.75.8')
 
     implementation project(':vividus-plugin-avro')
+    implementation project(':vividus-plugin-aws-cloudwatch')
     implementation project(':vividus-plugin-aws-dynamodb')
     implementation project(':vividus-plugin-aws-kinesis')
     implementation project(':vividus-plugin-aws-lambda')

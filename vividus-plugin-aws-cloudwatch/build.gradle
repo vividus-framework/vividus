@@ -1,0 +1,19 @@
+project.description = 'VIVIDUS plugin for Amazon CloudWatch'
+
+dependencies {
+    api project(':vividus-engine')
+    implementation project(':vividus-soft-assert')
+    implementation project(':vividus-test-context')
+    implementation project(':vividus-util')
+    implementation platform(libs.awssdk.bom)
+    implementation('software.amazon.awssdk:cloudwatchlogs')
+    implementation platform(libs.slf4j.bom)
+    implementation(libs.slf4j.api)
+
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
+    testImplementation(libs.slf4jTest)
+}
