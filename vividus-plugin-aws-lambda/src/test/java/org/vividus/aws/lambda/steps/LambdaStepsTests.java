@@ -46,6 +46,10 @@ import software.amazon.awssdk.services.lambda.model.LogType;
 @ExtendWith(MockitoExtension.class)
 class LambdaStepsTests
 {
+    private static final String PAYLOAD_RESULT = "result";
+    private static final String LOG_RESULT = "log-log-log";
+    private static final String EXECUTED_VERSION = "0.2.11";
+
     @Mock private AwsServiceClientsContext clientsContext;
     @Mock private VariableContext variableContext;
 
@@ -79,10 +83,10 @@ class LambdaStepsTests
         String variableName = "var";
         steps.invokeLambda(functionName, payload, scopes, variableName);
         Map<String, String> variableValue = new HashMap<>();
-        variableValue.put("payload", "result");
+        variableValue.put("payload", PAYLOAD_RESULT);
         variableValue.put("status-code", "500");
-        variableValue.put("log-result", "log-log-log");
-        variableValue.put("executed-version", "0.2.11");
+        variableValue.put("log-result", LOG_RESULT);
+        variableValue.put("executed-version", EXECUTED_VERSION);
         variableValue.putAll(extraExpectedEntries);
         verify(variableContext).putVariable(scopes, variableName, variableValue);
     }
@@ -90,10 +94,10 @@ class LambdaStepsTests
     private static InvokeResponse buildInvokeResponse(Consumer<InvokeResponse.Builder> resultDecorator)
     {
         InvokeResponse.Builder builder = InvokeResponse.builder()
-                .payload(SdkBytes.fromUtf8String("result"))
+                .payload(SdkBytes.fromUtf8String(PAYLOAD_RESULT))
                 .statusCode(500)
-                .logResult(Base64.getEncoder().encodeToString("log-log-log".getBytes(StandardCharsets.UTF_8)))
-                .executedVersion("0.2.11");
+                .logResult(Base64.getEncoder().encodeToString(LOG_RESULT.getBytes(StandardCharsets.UTF_8)))
+                .executedVersion(EXECUTED_VERSION);
         resultDecorator.accept(builder);
         return builder.build();
     }
