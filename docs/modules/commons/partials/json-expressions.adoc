@@ -1,0 +1,40 @@
+=== `escapeJSON`
+
+Escapes http://www.ietf.org/rfc/rfc8259.txt[reserved JSON characters]: converts any string into one that's properly escaped for inclusion in JSON as a value.
+
+[source, subs="+quotes"]
+----
+#{escapeJSON(*$input*)}
+----
+
+* *`$input`* - any string to be escaped
+
+.Escape JSON string
+|===
+|Expression |Result
+
+|`#{escapeJSON("abc"+"xyz")}`
+|`\"abc\"+\"xyz\"`
+|===
+
+=== `unescapeJSON`
+
+Unescapes a string containing http://www.ietf.org/rfc/rfc8259.txt[JSON] escape sequences to a string containing the actual Unicode characters corresponding to the escapes. Each expression application performs a single unescape pass, so for nested escaping apply the expression multiple times.
+
+[source, subs="+quotes"]
+----
+#{unescapeJSON(*$input*)}
+----
+
+* *`$input`* - any string to be unescaped
+
+.Unescape JSON string
+|===
+|Expression |Result
+
+|`#{unescapeJSON(\"abc\"+\"xyz\")}`
+|`"abc"+"xyz"`
+
+|`#{unescapeJSON(#{unescapeJSON(\\\"abc\\\"+\\\"xyz\\\")})}`
+|`"abc"+"xyz"`
+|===
