@@ -157,14 +157,14 @@ class S3BucketStepsTests
         mockGetObject(objectKey, data.getBytes(StandardCharsets.UTF_8));
 
         testSteps(steps -> steps.fetchObject(objectKey, S3_BUCKET_NAME, SCOPES, VARIABLE_NAME));
-        verify(amazonS3Client).getObjectAsBytes(argThat(request ->
+        verify(amazonS3Client).getObjectAsBytes(argThat((GetObjectRequest request) ->
                 S3_BUCKET_NAME.equals(request.bucket()) && objectKey.equals(request.key())));
         verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, data);
     }
 
     private void mockGetObject(String objectKey, byte[] data)
     {
-        when(amazonS3Client.getObjectAsBytes(argThat(request ->
+        when(amazonS3Client.getObjectAsBytes(argThat((GetObjectRequest request) ->
                 S3_BUCKET_NAME.equals(request.bucket()) && objectKey.equals(request.key()))))
                 .thenReturn(ResponseBytes.fromByteArray(GetObjectResponse.builder().build(), data));
     }
@@ -173,7 +173,7 @@ class S3BucketStepsTests
     void shouldSetObjectAcl() throws IOException
     {
         testSteps(steps -> steps.setObjectAcl(ObjectCannedACL.PUBLIC_READ_WRITE, S3_OBJECT_KEY, S3_BUCKET_NAME));
-        verify(amazonS3Client).putObjectAcl(argThat(request ->
+        verify(amazonS3Client).putObjectAcl(argThat((PutObjectAclRequest request) ->
                 S3_BUCKET_NAME.equals(request.bucket()) && S3_OBJECT_KEY.equals(request.key())
                         && ObjectCannedACL.PUBLIC_READ_WRITE.equals(request.acl())));
     }
@@ -182,7 +182,7 @@ class S3BucketStepsTests
     void shouldDeleteObject() throws IOException
     {
         testSteps(steps -> steps.deleteObject(S3_OBJECT_KEY, S3_BUCKET_NAME));
-        verify(amazonS3Client).deleteObject(argThat(request ->
+        verify(amazonS3Client).deleteObject(argThat((DeleteObjectRequest request) ->
                 S3_BUCKET_NAME.equals(request.bucket()) && S3_OBJECT_KEY.equals(request.key())));
     }
 

@@ -111,7 +111,7 @@ class KinesisStepsTests
             when(kinesis.getShardIterator(
                     argThat((GetShardIteratorRequest rq) -> STREAM_NAME.equals(rq.streamName())
                             && SHARD_ID.equals(rq.shardId())
-                            && ShardIteratorType.LATEST == rq.shardIteratorType()))))
+                            && ShardIteratorType.LATEST == rq.shardIteratorType())))
                     .thenReturn(shardIteratorResult);
             steps.createShardIterators(STREAM_NAME);
 
