@@ -42,6 +42,7 @@
     <bean class="org.vividus.ui.web.playwright.action.PlaywrightJavascriptActions" />
 
     <bean class="org.vividus.ui.web.playwright.action.ElementActions" />
+    <bean class="org.vividus.ui.web.playwright.action.PlaywrightNavigateActions" />
 
     <bean id="scrollActions" class="org.vividus.ui.web.playwright.action.PlaywrightScrollActions">
         <property name="stickyHeaderSizePercentage" value="${web-application.sticky-header-size-percentage}" />
