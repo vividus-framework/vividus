@@ -125,16 +125,18 @@ class S3BucketStepsTests
     {
         verify(amazonS3Client).putObject(argThat((PutObjectRequest request) ->
                 S3_BUCKET_NAME.equals(request.bucket()) && S3_OBJECT_KEY.equals(request.key())
-                        && contentType.equals(request.contentType())), argThat((RequestBody requestBody) -> {
-            try
-            {
-                return Arrays.equals(csv, IOUtils.toByteArray(requestBody.contentStreamProvider().newStream()));
-            }
-            catch (IOException e)
-            {
-                return false;
-            }
-        }));
+                        && contentType.equals(request.contentType())), argThat((RequestBody requestBody) ->
+                        {
+                            try
+                            {
+                                return Arrays.equals(csv,
+                                        IOUtils.toByteArray(requestBody.contentStreamProvider().newStream()));
+                            }
+                            catch (IOException e)
+                            {
+                                return false;
+                            }
+                        }));
     }
 
     @Test
