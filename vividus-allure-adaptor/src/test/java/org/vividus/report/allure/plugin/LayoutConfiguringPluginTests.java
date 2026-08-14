@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,46 +35,48 @@ import org.vividus.util.property.PropertyMappedCollection;
 class LayoutConfiguringPluginTests
 {
     @Test
-    void shouldGenerateIndexJs() throws IOException
+    void shouldGenerateStylesCss() throws IOException
     {
         assertEquals("""
-                'use strict';
-                allure.api.tabs = allure.api.tabs.filter(\
-                t => !['categories','suites','graph','timeline','behaviors'].includes(t.tabName));
-                delete allure.api.widgets.widgets['summary'];
-                delete allure.api.widgets.widgets['suites'];
-                delete allure.api.widgets.widgets['environment'];
-                delete allure.api.widgets.widgets['history-trend'];
-                delete allure.api.widgets.widgets['categories'];
-                delete allure.api.widgets.widgets['behaviors'];
-                delete allure.api.widgets.widgets['executors'];
-                delete allure.api.widgets.graph['status-chart'];
-                delete allure.api.widgets.graph['severity'];
-                delete allure.api.widgets.graph['duration'];
-                delete allure.api.widgets.graph['duration-trend'];
-                delete allure.api.widgets.graph['retry-trend'];
-                delete allure.api.widgets.graph['categories-trend'];
-                delete allure.api.widgets.graph['history-trend'];
-                """, Files.readString(generatePluginJsFile()).replace("\r", ""));
+                .side-nav__item:has([href="#categories"]) { display: none; }
+                .side-nav__item:has([href="#suites"]) { display: none; }
+                .side-nav__item:has([href="#graph"]) { display: none; }
+                .side-nav__item:has([href="#timeline"]) { display: none; }
+                .side-nav__item:has([href="#behaviors"]) { display: none; }
+                [data-widget-id="summary"] { display: none; }
+                [data-widget-id="suites"] { display: none; }
+                [data-widget-id="environment"] { display: none; }
+                [data-widget-id="history-trend"] { display: none; }
+                [data-widget-id="categories"] { display: none; }
+                [data-widget-id="behaviors"] { display: none; }
+                [data-widget-id="executors"] { display: none; }
+                [data-chart-id="status-chart"] { display: none; }
+                [data-chart-id="severity"] { display: none; }
+                [data-chart-id="duration"] { display: none; }
+                [data-chart-id="duration-trend"] { display: none; }
+                [data-chart-id="retry-trend"] { display: none; }
+                [data-chart-id="categories-trend"] { display: none; }
+                [data-chart-id="history-trend"] { display: none; }
+                """, Files.readString(generatePluginCssFile()).replace("\r", ""));
     }
 
     @Test
     @DisabledOnOs(OS.WINDOWS)
-    void shouldGenerateIndexJsWith644Permissions() throws IOException
+    void shouldGenerateStylesCssWith644Permissions() throws IOException
     {
-        var permissions = PosixFilePermissions.toString(Files.getPosixFilePermissions(generatePluginJsFile()));
+        var permissions = PosixFilePermissions.toString(Files.getPosixFilePermissions(generatePluginCssFile()));
         assertEquals("rw-r--r--", permissions);
     }
 
     @Test
-    void shouldNotGenerateIndexJsIfNoDataIsProvided() throws IOException
+    void shouldNotGenerateStylesCssIfNoDataIsProvided() throws IOException
     {
         var plugin = new LayoutConfiguringPlugin(new PropertyMappedCollection<>(Map.of()),
                 new PropertyMappedCollection<>(Map.of()), new PropertyMappedCollection<>(Map.of()));
         assertEquals(0, plugin.getPluginFiles().size());
     }
 
-    private Path generatePluginJsFile() throws IOException
+    private Path generatePluginCssFile() throws IOException
     {
         var plugin = new LayoutConfiguringPlugin(
                 new PropertyMappedCollection<>(createTabsConfiguration()),
@@ -83,7 +85,7 @@ class LayoutConfiguringPluginTests
         );
         var pluginFiles = plugin.getPluginFiles();
         assertEquals(1, pluginFiles.size());
-        return pluginFiles.get("index.js");
+        return pluginFiles.get("styles.css");
     }
 
     private static Map<String, Component> createTabsConfiguration()
