@@ -45,6 +45,7 @@ import org.vividus.variable.VariableScope;
 
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.ExecuteStatementRequest;
 import software.amazon.awssdk.services.dynamodb.model.ExecuteStatementResponse;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -85,15 +86,17 @@ class DynamoDbStepsTests
         });
     }
 
+    @SuppressWarnings("PMD.CloseResource")
     private void executeQuery(String roleArn, String partiqlQuery, ExecuteStatementResponse result,
             Consumer<DynamoDbSteps> test)
     {
         DynamoDbClient amazonDynamoDB = mock();
-        when(amazonDynamoDB.executeStatement(argThat(request -> partiqlQuery.equals(request.statement()))))
+        when(amazonDynamoDB.executeStatement(
+                argThat((ExecuteStatementRequest request) -> partiqlQuery.equals(request.statement()))))
                 .thenReturn(result);
 
         DynamoDbSteps steps = new DynamoDbSteps(roleArn, clientsContext, variableContext);
-        when(clientsContext.getServiceClient(any(), any())).thenReturn(amazonDynamoDB);
+        when(clientsContext.getServiceClient(any(), any(), any())).thenReturn(amazonDynamoDB);
 
         test.accept(steps);
 

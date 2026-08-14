@@ -19,7 +19,6 @@ package org.vividus.aws.dynamodb.steps;
 import java.math.BigDecimal;
 import java.util.Base64;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,8 +35,8 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ExecuteStatementRequest;
 import software.amazon.awssdk.services.dynamodb.model.ExecuteStatementResponse;
-import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 
 public class DynamoDbSteps
 {
@@ -140,6 +139,15 @@ public class DynamoDbSteps
         {
             return null;
         }
+        if (attributeValue.b() != null)
+        {
+            return Base64.getEncoder().encodeToString(attributeValue.b().asByteArray());
+        }
+        return toCollectionObject(attributeValue);
+    }
+
+    private static Object toCollectionObject(AttributeValue attributeValue)
+    {
         if (attributeValue.hasL())
         {
             return attributeValue.l().stream().map(DynamoDbSteps::toObject).toList();
@@ -162,26 +170,21 @@ public class DynamoDbSteps
                     .map(bytes -> Base64.getEncoder().encodeToString(bytes.asByteArray()))
                     .toList();
         }
-        if (attributeValue.b() != null)
-        {
-            return Base64.getEncoder().encodeToString(attributeValue.b().asByteArray());
-        }
         return attributeValue.toString();
     }
 
     private DynamoDbClient createDefaultDynamoDbClient()
     {
-        var amazonDynamoDBClientBuilder = DynamoDbClient.builder();
-        if (roleArn != null)
+        if (roleArn == null)
         {
-            AwsCredentialsProvider credentialsProvider = StsAssumeRoleCredentialsProvider.builder()
-                    .refreshRequest(AssumeRoleRequest.builder()
-                            .roleArn(roleArn)
-                            .roleSessionName("Vividus")
-                            .build())
-                    .build();
-            amazonDynamoDBClientBuilder.credentialsProvider(credentialsProvider);
+            return DynamoDbClient.builder().build();
         }
-        return amazonDynamoDBClientBuilder.build();
+        AwsCredentialsProvider credentialsProvider = StsAssumeRoleCredentialsProvider.builder()
+                .refreshRequest(AssumeRoleRequest.builder()
+                        .roleArn(roleArn)
+                        .roleSessionName("Vividus")
+                        .build())
+                .build();
+        return DynamoDbClient.builder().credentialsProvider(credentialsProvider).build();
     }
 }

@@ -46,7 +46,7 @@ class ConfiguringAwsCredentialsStepsTests
 
         steps.configureAwsCredentials(scope, accessKeyId, secretKey);
 
-        var credentialsProviderCaptor = ArgumentCaptor.forClass(AWSCredentialsProvider.class);
+        var credentialsProviderCaptor = ArgumentCaptor.forClass(AwsCredentialsProvider.class);
         verify(mockAwsServiceClientsContext).putCredentialsProvider(eq(scope), credentialsProviderCaptor.capture());
         var credentials = credentialsProviderCaptor.getValue().resolveCredentials();
         assertEquals(accessKeyId, credentials.accessKeyId());

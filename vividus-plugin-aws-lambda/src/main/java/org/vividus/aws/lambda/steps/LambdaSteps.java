@@ -105,7 +105,7 @@ public class LambdaSteps
         result.put("log-result",
                 new String(Base64.getDecoder().decode(invokeResult.logResult()), StandardCharsets.UTF_8));
         result.put("executed-version", invokeResult.executedVersion());
-        String functionError = invokeResult.functionErrorAsString();
+        String functionError = invokeResult.functionError();
         if (functionError != null)
         {
             result.put("function-error", functionError);

@@ -26,5 +26,5 @@ public interface AwsServiceClientsContext
     <B extends AwsClientBuilder<B, T>, T> T getServiceClient(Class<T> clientClass,
             Supplier<AwsClientBuilder<B, T>> clientBuilderSupplier, Supplier<T> defaultClientSupplier);
 
-    void putCredentialsProvider(AwsServiceClientScope scope, AWSCredentialsProvider credentialsProvider);
+    void putCredentialsProvider(AwsServiceClientScope scope, AwsCredentialsProvider credentialsProvider);
 }

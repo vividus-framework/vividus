@@ -16,8 +16,8 @@
 
 package org.vividus.aws.lambda.steps;
 
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,6 +39,7 @@ import org.vividus.variable.VariableScope;
 
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.lambda.LambdaClient;
+import software.amazon.awssdk.services.lambda.model.InvokeRequest;
 import software.amazon.awssdk.services.lambda.model.InvokeResponse;
 import software.amazon.awssdk.services.lambda.model.LogType;
 
@@ -61,42 +62,39 @@ class LambdaStepsTests
         testAwsLambdaInvocation(result -> result.functionError(error), Map.of("function-error", error));
     }
 
+    @SuppressWarnings("PMD.CloseResource")
     private void testAwsLambdaInvocation(Consumer<InvokeResponse.Builder> resultDecorator,
             Map<String, String> extraExpectedEntries)
     {
         LambdaClient awsLambda = mock();
-
-        String result = "result";
-        int statusCode = 500;
-        String logResult = "log-log-log";
-        String executedVersion = "0.2.11";
-        InvokeResponse.Builder invokeResultBuilder = InvokeResponse.builder()
-                .payload(SdkBytes.fromUtf8String(result))
-                .statusCode(statusCode)
-                .logResult(Base64.getEncoder().encodeToString(logResult.getBytes(StandardCharsets.UTF_8)))
-                .executedVersion(executedVersion);
-        resultDecorator.accept(invokeResultBuilder);
-        InvokeResponse invokeResult = invokeResultBuilder.build();
-
         String functionName = "function";
         String payload = "request";
-        when(awsLambda.invoke(argThat(request -> functionName.equals(request.functionName())
+        InvokeResponse invokeResult = buildInvokeResponse(resultDecorator);
+        when(awsLambda.invoke(argThat((InvokeRequest request) -> functionName.equals(request.functionName())
                 && payload.equals(request.payload().asUtf8String())
-                && LogType.TAIL.equals(request.logType())))).thenReturn(invokeResult);
-
+                && LogType.TAIL == request.logType()))).thenReturn(invokeResult);
         LambdaSteps steps = new LambdaSteps(clientsContext, variableContext);
-
-        when(clientsContext.getServiceClient(any(), any())).thenReturn(awsLambda);
-
+        when(clientsContext.getServiceClient(any(), any(), any())).thenReturn(awsLambda);
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
         String variableName = "var";
         steps.invokeLambda(functionName, payload, scopes, variableName);
         Map<String, String> variableValue = new HashMap<>();
-        variableValue.put("payload", result);
-        variableValue.put("status-code", Integer.toString(statusCode));
-        variableValue.put("log-result", logResult);
-        variableValue.put("executed-version", executedVersion);
+        variableValue.put("payload", "result");
+        variableValue.put("status-code", "500");
+        variableValue.put("log-result", "log-log-log");
+        variableValue.put("executed-version", "0.2.11");
         variableValue.putAll(extraExpectedEntries);
         verify(variableContext).putVariable(scopes, variableName, variableValue);
+    }
+
+    private static InvokeResponse buildInvokeResponse(Consumer<InvokeResponse.Builder> resultDecorator)
+    {
+        InvokeResponse.Builder builder = InvokeResponse.builder()
+                .payload(SdkBytes.fromUtf8String("result"))
+                .statusCode(500)
+                .logResult(Base64.getEncoder().encodeToString("log-log-log".getBytes(StandardCharsets.UTF_8)))
+                .executedVersion("0.2.11");
+        resultDecorator.accept(builder);
+        return builder.build();
     }
 }

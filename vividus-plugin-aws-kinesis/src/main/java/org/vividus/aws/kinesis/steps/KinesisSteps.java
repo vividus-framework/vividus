@@ -104,6 +104,7 @@ public class KinesisSteps
      * A shard iterator specifies the shard position from which to start reading data records sequentially.
      * @param streamName The name of the Amazon Kinesis data stream.
      */
+    @SuppressWarnings("PMD.CloseResource")
     @When("I start consuming records from Kinesis stream `$streamName`")
     public void createShardIterators(String streamName)
     {

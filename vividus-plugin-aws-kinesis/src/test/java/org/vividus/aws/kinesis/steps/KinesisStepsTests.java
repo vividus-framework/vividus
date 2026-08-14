@@ -44,9 +44,13 @@ import org.vividus.variable.VariableScope;
 
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
+import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
+import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorResponse;
+import software.amazon.awssdk.services.kinesis.model.ListShardsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListShardsResponse;
+import software.amazon.awssdk.services.kinesis.model.PutRecordRequest;
 import software.amazon.awssdk.services.kinesis.model.PutRecordResponse;
 import software.amazon.awssdk.services.kinesis.model.Record;
 import software.amazon.awssdk.services.kinesis.model.Shard;
@@ -78,7 +82,7 @@ class KinesisStepsTests
                     .shardId(SHARD_ID)
                     .sequenceNumber(sequenceNumber)
                     .build();
-            when(kinesis.putRecord(argThat(request -> STREAM_NAME.equals(request.streamName())
+            when(kinesis.putRecord(argThat((PutRecordRequest request) -> STREAM_NAME.equals(request.streamName())
                     && partitionKey.equals(request.partitionKey())
                     && DATA.equals(request.data().asUtf8String())))).thenReturn(result);
 
@@ -98,14 +102,16 @@ class KinesisStepsTests
             ListShardsResponse shards = ListShardsResponse.builder()
                     .shards(Shard.builder().shardId(SHARD_ID).build())
                     .build();
-            when(kinesis.listShards(argThat(rq -> STREAM_NAME.equals(rq.streamName())))).thenReturn(shards);
+            when(kinesis.listShards(
+                    argThat((ListShardsRequest rq) -> STREAM_NAME.equals(rq.streamName())))).thenReturn(shards);
 
             GetShardIteratorResponse shardIteratorResult = GetShardIteratorResponse.builder()
                     .shardIterator(SHARD_ITERATOR)
                     .build();
             when(kinesis.getShardIterator(
-                    argThat(rq -> STREAM_NAME.equals(rq.streamName()) && SHARD_ID.equals(rq.shardId())
-                            && ShardIteratorType.LATEST.equals(rq.shardIteratorType()))))
+                    argThat((GetShardIteratorRequest rq) -> STREAM_NAME.equals(rq.streamName())
+                            && SHARD_ID.equals(rq.shardId())
+                            && ShardIteratorType.LATEST == rq.shardIteratorType()))))
                     .thenReturn(shardIteratorResult);
             steps.createShardIterators(STREAM_NAME);
 
@@ -131,7 +137,8 @@ class KinesisStepsTests
                     .nextShardIterator(nextShardIterator)
                     .records(record)
                     .build();
-            when(kinesis.getRecords(argThat(rq -> SHARD_ITERATOR.equals(rq.shardIterator())))).thenReturn(result);
+            when(kinesis.getRecords(
+                    argThat((GetRecordsRequest rq) -> SHARD_ITERATOR.equals(rq.shardIterator())))).thenReturn(result);
 
             Set<VariableScope> scopes = Set.of(VariableScope.STEP);
             String variableName = "var-name";
@@ -147,11 +154,12 @@ class KinesisStepsTests
         });
     }
 
+    @SuppressWarnings("PMD.CloseResource")
     void runWithKinesisClient(BiConsumer<KinesisClient, KinesisSteps> kinesisConsumer)
     {
         KinesisClient kinesis = mock();
         KinesisSteps steps = new KinesisSteps(clientsContext, testContext, variableContext);
-        when(clientsContext.getServiceClient(any(), any())).thenReturn(kinesis);
+        when(clientsContext.getServiceClient(any(), any(), any())).thenReturn(kinesis);
         kinesisConsumer.accept(kinesis, steps);
     }
 }

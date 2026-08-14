@@ -57,14 +57,14 @@ public class AwsServiceClientsTestContext implements AwsServiceClientsContext
         return Optional.ofNullable(scopedClients.clients.get(scope)).map(clients ->
                 (T) clients.clients.computeIfAbsent(clientClass,
                         k -> Optional.ofNullable(clients.credentialsProvider)
-                                .map(credentials -> clientBuilderSupplier.get().credentialsProvider(credentials).build())
+                                .map(cp -> clientBuilderSupplier.get().credentialsProvider(cp).build())
                                 .orElse(null)
                 )
         );
     }
 
     @Override
-    public void putCredentialsProvider(AwsServiceClientScope scope, AWSCredentialsProvider credentialsProvider)
+    public void putCredentialsProvider(AwsServiceClientScope scope, AwsCredentialsProvider credentialsProvider)
     {
         getAwsServiceClients().clients.computeIfAbsent(scope,
                 k -> new AwsServiceClients()).credentialsProvider = credentialsProvider;
@@ -89,7 +89,7 @@ public class AwsServiceClientsTestContext implements AwsServiceClientsContext
 
     private static final class AwsServiceClients
     {
-        private AWSCredentialsProvider credentialsProvider;
+        private AwsCredentialsProvider credentialsProvider;
         private final Map<Class<?>, Object> clients = new HashMap<>();
     }
 }
