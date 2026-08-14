@@ -1,8 +1,9 @@
 project.description = 'VIVIDUS extension for AWS Cloud'
 
 dependencies {
-    api platform('com.amazonaws:aws-java-sdk-bom:1.12.797')
-    api('com.amazonaws:aws-java-sdk-core')
+    api platform(libs.awssdk.bom)
+    api('software.amazon.awssdk:auth')
+    api('software.amazon.awssdk:aws-core')
     api("org.vividus:jbehave-core:${versions.jbehave}")
     implementation project(':vividus-test-context')
 

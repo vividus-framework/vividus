@@ -23,13 +23,13 @@ import static org.mockito.Mockito.when;
 
 import java.util.function.Supplier;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.client.builder.AwsClientBuilder;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.vividus.testcontext.SimpleTestContext;
+
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 
 class AwsServiceClientsTestContextTests
 {
@@ -104,7 +104,7 @@ class AwsServiceClientsTestContextTests
     {
         var builder = mock(AwsClientBuilder.class);
         AWSCredentialsProvider credentialsProvider = mock();
-        when(builder.withCredentials(credentialsProvider)).thenReturn(builder);
+        when(builder.credentialsProvider(credentialsProvider)).thenReturn(builder);
         when(builder.build()).thenReturn(expectedClient);
 
         awsServiceClientsTestContext.putCredentialsProvider(scope, credentialsProvider);

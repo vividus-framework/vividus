@@ -16,14 +16,14 @@
 
 package org.vividus.aws.auth.steps;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-
 import org.jbehave.core.annotations.Given;
 import org.vividus.aws.auth.AwsServiceClientScope;
 import org.vividus.aws.auth.AwsServiceClientsContext;
+
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 
 public class ConfiguringAwsCredentialsSteps
 {
@@ -46,8 +46,8 @@ public class ConfiguringAwsCredentialsSteps
             + "`$secretKey`")
     public void configureAwsCredentials(AwsServiceClientScope scope, String accessKey, String secretKey)
     {
-        AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
-        AWSCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
+        AwsCredentials awsCredentials = AwsBasicCredentials.create(accessKey, secretKey);
+        AwsCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(awsCredentials);
         awsServiceClientsContext.putCredentialsProvider(scope, credentialsProvider);
     }
 }

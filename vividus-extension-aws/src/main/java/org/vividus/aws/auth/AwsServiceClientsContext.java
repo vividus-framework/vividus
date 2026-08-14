@@ -18,8 +18,8 @@ package org.vividus.aws.auth;
 
 import java.util.function.Supplier;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.client.builder.AwsClientBuilder;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 
 public interface AwsServiceClientsContext
 {

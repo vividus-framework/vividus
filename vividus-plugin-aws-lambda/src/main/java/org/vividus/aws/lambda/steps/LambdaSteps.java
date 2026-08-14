@@ -22,35 +22,35 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.amazonaws.services.lambda.AWSLambda;
-import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
-import com.amazonaws.services.lambda.model.InvokeRequest;
-import com.amazonaws.services.lambda.model.InvokeResult;
-import com.amazonaws.services.lambda.model.LogType;
-
 import org.jbehave.core.annotations.When;
 import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
 import org.vividus.variable.VariableScope;
+
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.lambda.LambdaClient;
+import software.amazon.awssdk.services.lambda.model.InvokeRequest;
+import software.amazon.awssdk.services.lambda.model.InvokeResponse;
+import software.amazon.awssdk.services.lambda.model.LogType;
 
 public class LambdaSteps
 {
     private final VariableContext variableContext;
     private final AwsServiceClientsContext clientsContext;
 
-    private final AWSLambda awsLambdaClient;
+    private final LambdaClient awsLambdaClient;
 
     public LambdaSteps(AwsServiceClientsContext clientsContext, VariableContext variableContext)
     {
         this.clientsContext = clientsContext;
         this.variableContext = variableContext;
 
-        this.awsLambdaClient = AWSLambdaClientBuilder.defaultClient();
+        this.awsLambdaClient = LambdaClient.builder().build();
     }
 
-    private AWSLambda getLambdaClient()
+    private LambdaClient getLambdaClient()
     {
-        return clientsContext.getServiceClient(AWSLambdaClientBuilder::standard, awsLambdaClient);
+        return clientsContext.getServiceClient(LambdaClient::builder, awsLambdaClient);
     }
 
     /**
@@ -95,19 +95,20 @@ public class LambdaSteps
             + "`$variableName`")
     public void invokeLambda(String functionName, String payload, Set<VariableScope> scopes, String variableName)
     {
-        InvokeRequest invokeRequest = new InvokeRequest()
-                .withFunctionName(functionName)
-                .withPayload(payload)
-                .withLogType(LogType.Tail);
-        InvokeResult invokeResult = getLambdaClient().invoke(invokeRequest);
+        InvokeRequest invokeRequest = InvokeRequest.builder()
+                .functionName(functionName)
+                .payload(SdkBytes.fromUtf8String(payload))
+                .logType(LogType.TAIL)
+                .build();
+        InvokeResponse invokeResult = getLambdaClient().invoke(invokeRequest);
 
         Map<String, String> result = new HashMap<>();
-        result.put("payload", new String(invokeResult.getPayload().array(), StandardCharsets.UTF_8));
-        result.put("status-code", invokeResult.getStatusCode().toString());
+        result.put("payload", new String(invokeResult.payload().asByteArray(), StandardCharsets.UTF_8));
+        result.put("status-code", invokeResult.statusCode().toString());
         result.put("log-result",
-                new String(Base64.getDecoder().decode(invokeResult.getLogResult()), StandardCharsets.UTF_8));
-        result.put("executed-version", invokeResult.getExecutedVersion());
-        String functionError = invokeResult.getFunctionError();
+                new String(Base64.getDecoder().decode(invokeResult.logResult()), StandardCharsets.UTF_8));
+        result.put("executed-version", invokeResult.executedVersion());
+        String functionError = invokeResult.functionErrorAsString();
         if (functionError != null)
         {
             result.put("function-error", functionError);

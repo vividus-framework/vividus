@@ -22,11 +22,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.client.builder.AwsClientBuilder;
-
 import org.jbehave.core.annotations.AfterScenario;
 import org.vividus.testcontext.TestContext;
+
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 
 public class AwsServiceClientsTestContext implements AwsServiceClientsContext
 {
@@ -60,7 +60,7 @@ public class AwsServiceClientsTestContext implements AwsServiceClientsContext
         return Optional.ofNullable(scopedClients.clients.get(scope)).map(clients ->
                 (T) clients.clients.computeIfAbsent(clientClass,
                         k -> Optional.ofNullable(clients.credentialsProvider)
-                                .map(credentials -> clientBuilderSupplier.get().withCredentials(credentials).build())
+                                .map(credentials -> clientBuilderSupplier.get().credentialsProvider(credentials).build())
                                 .orElse(null)
                 )
         );

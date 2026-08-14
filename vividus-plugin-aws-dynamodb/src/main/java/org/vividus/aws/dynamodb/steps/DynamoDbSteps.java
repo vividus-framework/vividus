@@ -16,24 +16,27 @@
 
 package org.vividus.aws.dynamodb.steps;
 
+import java.math.BigDecimal;
+import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider.Builder;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.ItemUtils;
-import com.amazonaws.services.dynamodbv2.model.ExecuteStatementRequest;
-import com.amazonaws.services.dynamodbv2.model.ExecuteStatementResult;
 
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
+
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.ExecuteStatementRequest;
+import software.amazon.awssdk.services.dynamodb.model.ExecuteStatementResponse;
+import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
 
 public class DynamoDbSteps
 {
@@ -41,26 +44,29 @@ public class DynamoDbSteps
 
     private final AwsServiceClientsContext clientsContext;
     private final VariableContext variableContext;
+    private final JsonUtils jsonUtils = new JsonUtils();
 
-    private final AmazonDynamoDB amazonDynamoDB;
+    private final DynamoDbClient amazonDynamoDB;
 
     public DynamoDbSteps(String roleArn, AwsServiceClientsContext clientsContext, VariableContext variableContext)
     {
         this.clientsContext = clientsContext;
         this.variableContext = variableContext;
 
-        AmazonDynamoDBClientBuilder amazonDynamoDBClientBuilder = AmazonDynamoDBClientBuilder.standard();
+        var amazonDynamoDBClientBuilder = DynamoDbClient.builder();
         if (roleArn != null)
         {
-            AWSCredentialsProvider credentialsProvider = new Builder(roleArn, "Vividus").build();
-            amazonDynamoDBClientBuilder.withCredentials(credentialsProvider);
+            AwsCredentialsProvider credentialsProvider = StsAssumeRoleCredentialsProvider.builder()
+                    .refreshRequest(request -> request.roleArn(roleArn).roleSessionName("Vividus"))
+                    .build();
+            amazonDynamoDBClientBuilder.credentialsProvider(credentialsProvider);
         }
         this.amazonDynamoDB = amazonDynamoDBClientBuilder.build();
     }
 
-    private AmazonDynamoDB getDynamoDbClient()
+    private DynamoDbClient getDynamoDbClient()
     {
-        return clientsContext.getServiceClient(AmazonDynamoDBClientBuilder::standard, amazonDynamoDB);
+        return clientsContext.getServiceClient(DynamoDbClient::builder, amazonDynamoDB);
     }
 
     /**
@@ -77,10 +83,10 @@ public class DynamoDbSteps
      * @see <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ql-reference.html">PartiQL</a>
      */
     @When("I execute query `$partiqlQuery` against DynamoDB")
-    public ExecuteStatementResult executeQuery(String partiqlQuery)
+    public ExecuteStatementResponse executeQuery(String partiqlQuery)
     {
         LOGGER.info("Executing query: {}", partiqlQuery);
-        ExecuteStatementRequest request = new ExecuteStatementRequest().withStatement(partiqlQuery);
+        ExecuteStatementRequest request = ExecuteStatementRequest.builder().statement(partiqlQuery).build();
         return getDynamoDbClient().executeStatement(request);
     }
 
@@ -108,11 +114,66 @@ public class DynamoDbSteps
             + "`$variableName`")
     public void executeQuery(String partiqlQuery, Set<VariableScope> scopes, String variableName)
     {
-        String jsonResult = executeQuery(partiqlQuery).getItems()
+        String jsonResult = jsonUtils.toJson(executeQuery(partiqlQuery).items().stream()
                 .stream()
-                .map(ItemUtils::toItem)
-                .map(Item::toJSON)
-                .collect(Collectors.joining(",", "[", "]"));
+                .map(DynamoDbSteps::toMap)
+                .toList());
         variableContext.putVariable(scopes, variableName, jsonResult);
+    }
+
+    private static Map<String, Object> toMap(Map<String, AttributeValue> values)
+    {
+        return values.entrySet()
+                .stream()
+                .collect(LinkedHashMap::new,
+                        (map, entry) -> map.put(entry.getKey(), toObject(entry.getValue())),
+                        LinkedHashMap::putAll);
+    }
+
+    private static Object toObject(AttributeValue attributeValue)
+    {
+        if (attributeValue.s() != null)
+        {
+            return attributeValue.s();
+        }
+        if (attributeValue.n() != null)
+        {
+            return new BigDecimal(attributeValue.n());
+        }
+        if (attributeValue.bool() != null)
+        {
+            return attributeValue.bool();
+        }
+        if (Boolean.TRUE.equals(attributeValue.nul()))
+        {
+            return null;
+        }
+        if (attributeValue.hasL())
+        {
+            return attributeValue.l().stream().map(DynamoDbSteps::toObject).toList();
+        }
+        if (attributeValue.hasM())
+        {
+            return toMap(attributeValue.m());
+        }
+        if (attributeValue.hasSs())
+        {
+            return attributeValue.ss();
+        }
+        if (attributeValue.hasNs())
+        {
+            return attributeValue.ns().stream().map(BigDecimal::new).toList();
+        }
+        if (attributeValue.hasBs())
+        {
+            return attributeValue.bs().stream()
+                    .map(bytes -> Base64.getEncoder().encodeToString(bytes.asByteArray()))
+                    .toList();
+        }
+        if (attributeValue.b() != null)
+        {
+            return Base64.getEncoder().encodeToString(attributeValue.b().asByteArray());
+        }
+        return attributeValue.toString();
     }
 }

@@ -19,12 +19,6 @@ package org.vividus.aws.secretsmanager.processor;
 import java.time.Duration;
 import java.util.Properties;
 
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClient;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
-import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -33,6 +27,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.vividus.configuration.AbstractPropertiesProcessor;
 import org.vividus.util.json.JsonPathUtils;
+
+import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
+import software.amazon.awssdk.services.secretsmanager.model.ResourceNotFoundException;
 
 public class AwsSecretsManagerPropertiesProcessor extends AbstractPropertiesProcessor
 {
@@ -47,27 +46,22 @@ public class AwsSecretsManagerPropertiesProcessor extends AbstractPropertiesProc
                 @Override
                 public String load(SecretId secretId) throws Exception
                 {
-                    AWSSecretsManager client = AWSSecretsManagerClient.builder()
-                            .withCredentials(new ProfileCredentialsProvider(secretId.profile))
-                            .build();
-
-                    try
+                    try (SecretsManagerClient client = SecretsManagerClient.builder()
+                            .credentialsProvider(ProfileCredentialsProvider.builder()
+                                    .profileName(secretId.profile)
+                                    .build())
+                            .build())
                     {
-                        GetSecretValueRequest getSecretValueRequest = new GetSecretValueRequest()
-                                .withSecretId(secretId.secret);
-
-                        GetSecretValueResult response = client.getSecretValue(getSecretValueRequest);
-                        return response.getSecretString();
+                        GetSecretValueRequest getSecretValueRequest = GetSecretValueRequest.builder()
+                                .secretId(secretId.secret)
+                                .build();
+                        return client.getSecretValue(getSecretValueRequest).secretString();
                     }
                     catch (ResourceNotFoundException thrown)
                     {
                         throw new IllegalArgumentException(String.format(
                                 "The requested secret '%s' was not found in AWS Secrets Manager using profile '%s'",
                                 secretId.secret, secretId.profile), thrown);
-                    }
-                    finally
-                    {
-                        client.shutdown();
                     }
                 }
             });

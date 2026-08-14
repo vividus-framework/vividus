@@ -19,11 +19,11 @@ package org.vividus.converter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 
 class CannedAccessControlListConverterTests
 {
@@ -31,13 +31,13 @@ class CannedAccessControlListConverterTests
 
     @ParameterizedTest
     @CsvSource({
-            "private, Private",
-            "Public-Read, PublicRead",
-            "aws-exec-read, AwsExecRead"
+            "private, PRIVATE",
+            "Public-Read, PUBLIC_READ",
+            "aws-exec-read, AWS_EXEC_READ"
     })
-    void shouldConvertSuccessfully(String input, CannedAccessControlList expected)
+    void shouldConvertSuccessfully(String input, ObjectCannedACL expected)
     {
-        assertEquals(expected, converter.convertValue(input, CannedAccessControlList.class));
+        assertEquals(expected, converter.convertValue(input, ObjectCannedACL.class));
     }
 
     @Test
@@ -45,7 +45,7 @@ class CannedAccessControlListConverterTests
     {
         String input = "any";
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> converter.convertValue(input, CannedAccessControlList.class));
+            () -> converter.convertValue(input, ObjectCannedACL.class));
         assertEquals(input + " is not a valid canned access control list", exception.getMessage());
     }
 }
