@@ -1,30 +1,5 @@
 <#if result.responseBody??>
 <#assign hash = result.hashCode()?c>
-<#if !responseBodyStylesIncluded??>
-<style>
-    .modal,
-    .modal-content,
-    .modal-title {
-        color: inherit;
-    }
-    .modal-body {
-        color: #333;
-    }
-    .modal-body pre {
-        padding: 9.5px;
-        color: #333;
-        background-color: #f5f5f5;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-    .btn-default {
-        color: #333;
-        background-color: #fff;
-        border-color: #ccc;
-    }
-</style>
-<#assign responseBodyStylesIncluded = true>
-</#if>
 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal_${hash}">
 Show HTTP response
 </button>
@@ -39,7 +14,7 @@ Show HTTP response
                 <pre><code id="pretty-code" class="html"><#outputformat "HTML">${result.responseBody}</#outputformat></code></pre>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
