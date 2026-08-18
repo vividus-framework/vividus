@@ -52,7 +52,6 @@ import software.amazon.awssdk.services.kinesis.model.ListShardsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListShardsResponse;
 import software.amazon.awssdk.services.kinesis.model.PutRecordRequest;
 import software.amazon.awssdk.services.kinesis.model.PutRecordResponse;
-import software.amazon.awssdk.services.kinesis.model.Record;
 import software.amazon.awssdk.services.kinesis.model.Shard;
 import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
 
@@ -125,6 +124,7 @@ class KinesisStepsTests
         });
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void shouldDrainKinesisRecordsToVariable()
     {
@@ -132,10 +132,9 @@ class KinesisStepsTests
         {
             when(testContext.get(GetShardIteratorResponse.class)).thenReturn(List.of(SHARD_ITERATOR));
             String nextShardIterator = "next-" + SHARD_ITERATOR;
-            Record record = Record.builder().data(SdkBytes.fromUtf8String(DATA)).build();
             GetRecordsResponse result = GetRecordsResponse.builder()
                     .nextShardIterator(nextShardIterator)
-                    .records(record)
+                    .records(r -> r.data(SdkBytes.fromUtf8String(DATA)))
                     .build();
             when(kinesis.getRecords(
                     argThat((GetRecordsRequest rq) -> SHARD_ITERATOR.equals(rq.shardIterator())))).thenReturn(result);

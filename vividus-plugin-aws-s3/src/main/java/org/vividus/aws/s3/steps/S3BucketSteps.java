@@ -192,18 +192,16 @@ public class S3BucketSteps
      * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      * </ul>
      * @param variableName the variable name
-     * @throws IOException in case of IO error during returned file processing
      */
     @When("I fetch object with key `$objectKey` from S3 bucket `$bucketName` and save result to $scopes variable"
             + " `$variableName`")
     public void fetchObject(String objectKey, String bucketName, Set<VariableScope> scopes, String variableName)
-            throws IOException
     {
         String content = fetchObject(bucketName, objectKey);
         variableContext.putVariable(scopes, variableName, content);
     }
 
-    private String fetchObject(String bucketName, String key) throws IOException
+    private String fetchObject(String bucketName, String key)
     {
         return getS3Client().getObjectAsBytes(GetObjectRequest.builder().bucket(bucketName).key(key).build())
                 .asString(StandardCharsets.UTF_8);

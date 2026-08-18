@@ -36,7 +36,6 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ExecuteStatementRequest;
 import software.amazon.awssdk.services.dynamodb.model.ExecuteStatementResponse;
 import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
-import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 
 public class DynamoDbSteps
 {
@@ -147,10 +146,7 @@ public class DynamoDbSteps
             return DynamoDbClient.builder().build();
         }
         AwsCredentialsProvider credentialsProvider = StsAssumeRoleCredentialsProvider.builder()
-                .refreshRequest(AssumeRoleRequest.builder()
-                        .roleArn(roleArn)
-                        .roleSessionName("Vividus")
-                        .build())
+                .refreshRequest(r -> r.roleArn(roleArn).roleSessionName("Vividus"))
                 .build();
         return DynamoDbClient.builder().credentialsProvider(credentialsProvider).build();
     }

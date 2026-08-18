@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
@@ -184,7 +185,7 @@ class DynamoDbStepsTests
             StsAssumeRoleCredentialsProvider.Builder stsBuilder = mock();
             StsAssumeRoleCredentialsProvider credentialsProvider = mock();
             stsProvider.when(StsAssumeRoleCredentialsProvider::builder).thenReturn(stsBuilder);
-            ArgumentCaptor<AssumeRoleRequest> requestCaptor = ArgumentCaptor.forClass(AssumeRoleRequest.class);
+            ArgumentCaptor<Consumer<AssumeRoleRequest.Builder>> requestCaptor = ArgumentCaptor.forClass(Consumer.class);
             when(stsBuilder.refreshRequest(requestCaptor.capture())).thenReturn(stsBuilder);
             when(stsBuilder.build()).thenReturn(credentialsProvider);
 
@@ -197,9 +198,11 @@ class DynamoDbStepsTests
             DynamoDbSteps steps = new DynamoDbSteps(ROLE_ARN, clientsContext, variableContext);
             steps.executeQuery(PARTIQL_QUERY);
 
-            AssumeRoleRequest assumeRoleRequest = requestCaptor.getValue();
-            assertEquals(ROLE_ARN, assumeRoleRequest.roleArn());
-            assertEquals("Vividus", assumeRoleRequest.roleSessionName());
+            AssumeRoleRequest.Builder assumeRoleRequestBuilder = mock(RETURNS_SELF);
+            requestCaptor.getValue().accept(assumeRoleRequestBuilder);
+            verify(assumeRoleRequestBuilder).roleArn(ROLE_ARN);
+            verify(assumeRoleRequestBuilder).roleSessionName("Vividus");
+
             verify(builder).credentialsProvider(credentialsProvider);
             verify(builder).build();
         }
