@@ -42,12 +42,12 @@ import org.vividus.util.ResourceUtils;
 class ExcelSheetWriterTests
 {
     private static final ExamplesTable CONTENT = new ExamplesTable("""
-            |name|status|name|
-            |First |OPEN   |MoreFirst|
+            |name  |status|surname   |
+            |First |OPEN  |MoreFirst |
             |Second|closed|MoreSecond|""");
     private static final String NAME = "name";
     private static final List<List<String>> EXPECTED_DATA = List.of(
-            List.of(NAME, "status", NAME),
+            List.of(NAME, "status", "surname"),
             List.of("First", "OPEN", "MoreFirst"),
             List.of("Second", "closed", "MoreSecond")
     );
@@ -123,6 +123,26 @@ class ExcelSheetWriterTests
 
         assertDataInSheet(pathTemp, 0, sheetA, EXPECTED_DATA);
         assertDataInSheet(pathTemp, 1, sheetB, EXPECTED_DATA);
+    }
+
+    @Test
+    void shouldCreateExcelWithNullPlaceholder() throws IOException
+    {
+        var content = new ExamplesTable("""
+                {nullPlaceholder=NULL}
+                |ColumnA|ColumnB|ColumnC|
+                |NULL   |value1 |NULL   |
+                |value2 |NULL   |value3 |""");
+
+        var pathTemp = createExcelFile();
+        EXCEL_SHEET_WRITER.createExcel(pathTemp, Optional.of(TEST_SHEET_NAME), content);
+
+        var expectedData = List.of(
+                List.of("ColumnA", "ColumnB", "ColumnC"),
+                List.of("",        "value1",  ""),
+                List.of("value2",  "",        "value3")
+        );
+        assertDataInSheet(pathTemp, 0, TEST_SHEET_NAME, expectedData);
     }
 
     private Path createExcelFile() throws IOException
