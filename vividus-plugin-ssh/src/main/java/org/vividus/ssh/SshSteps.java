@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.AfterStories;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.context.DynamicConfigurationManager;
 import org.vividus.context.VariableContext;
 import org.vividus.ssh.context.SshTestContext;
@@ -42,6 +44,8 @@ import org.vividus.variable.VariableScope;
 
 public class SshSteps
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SshSteps.class);
+
     private final DynamicConfigurationManager<SshConnectionParameters> sshConnectionParameters;
     private final VariableContext variableContext;
     private final Map<String, CommandExecutionManager<?>> commandExecutionManagers;
@@ -93,6 +97,13 @@ public class SshSteps
     public void openSshConnectionWithPortForwarding(SshPortForwardingParameters parameters)
             throws JSchException, AgentProxyException
     {
+        LOGGER.atInfo()
+                .addArgument(parameters::getLocalPort)
+                .addArgument(parameters::getRemoteHost)
+                .addArgument(parameters::getRemotePort)
+                .addArgument(parameters::getHost)
+                .addArgument(parameters::getPort)
+                .log("Opening SSH port forward from localhost:{} to {}:{} via SSH server {}:{}");
         Session session = sshSessionFactory.createSshSession(parameters);
         try
         {
