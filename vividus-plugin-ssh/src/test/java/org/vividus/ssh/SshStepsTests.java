@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.vividus.ssh;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -33,6 +34,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import com.jcraft.jsch.AgentProxyException;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -57,7 +61,7 @@ import org.vividus.ssh.sftp.SftpCommand;
 import org.vividus.ssh.sftp.SftpOutput;
 import org.vividus.variable.VariableScope;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class SshStepsTests
 {
     private static final String DESTINATION_PATH = "/path";
@@ -66,6 +70,12 @@ class SshStepsTests
     private static final int LOCAL_PORT = 8080;
     private static final String REMOTE_HOST = "remote-host";
     private static final int REMOTE_PORT = 9090;
+    private static final String SSH_HOST = "ssh-host";
+    private static final int SSH_PORT = 22;
+    private static final String PORT_FORWARD_LOG_MESSAGE =
+            "Opening SSH port forward from localhost:{} to {}:{} via SSH server {}:{}";
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(SshSteps.class);
 
     @Mock private DynamicConfigurationManager<SshConnectionParameters> sshConnectionParameters;
     @Mock private VariableContext variableContext;
@@ -97,10 +107,7 @@ class SshStepsTests
     @Test
     void shouldOpenSshConnectionWithPortForwardingAndCloseSessions() throws JSchException, AgentProxyException
     {
-        SshPortForwardingParameters params = new SshPortForwardingParameters();
-        params.setLocalPort(LOCAL_PORT);
-        params.setRemoteHost(REMOTE_HOST);
-        params.setRemotePort(REMOTE_PORT);
+        SshPortForwardingParameters params = createPortForwardingParameters();
 
         Session session = mock(Session.class);
         when(sshSessionFactory.createSshSession(params)).thenReturn(session);
@@ -109,6 +116,8 @@ class SshStepsTests
 
         verify(session).setPortForwardingL(LOCAL_PORT, REMOTE_HOST, REMOTE_PORT);
         verify(session).connect();
+        assertEquals(List.of(info(PORT_FORWARD_LOG_MESSAGE, LOCAL_PORT, REMOTE_HOST, REMOTE_PORT, SSH_HOST, SSH_PORT)),
+                logger.getLoggingEvents());
 
         sshSteps.closeSessions();
 
@@ -118,10 +127,7 @@ class SshStepsTests
     @Test
     void shouldCloseSshConnectionIfPortForwardingFails() throws JSchException, AgentProxyException
     {
-        SshPortForwardingParameters params = new SshPortForwardingParameters();
-        params.setLocalPort(LOCAL_PORT);
-        params.setRemoteHost(REMOTE_HOST);
-        params.setRemotePort(REMOTE_PORT);
+        SshPortForwardingParameters params = createPortForwardingParameters();
 
         Session session = mock(Session.class);
         when(sshSessionFactory.createSshSession(params)).thenReturn(session);
@@ -134,6 +140,8 @@ class SshStepsTests
 
         verify(session).connect();
         verify(session).disconnect();
+        assertEquals(List.of(info(PORT_FORWARD_LOG_MESSAGE, LOCAL_PORT, REMOTE_HOST, REMOTE_PORT, SSH_HOST, SSH_PORT)),
+                logger.getLoggingEvents());
     }
 
     @ParameterizedTest
@@ -260,5 +268,16 @@ class SshStepsTests
         var commandExecutionManager = mock(CommandExecutionManager.class);
         when(commandExecutionManagers.get(protocol.toString())).thenReturn(commandExecutionManager);
         return commandExecutionManager;
+    }
+
+    private SshPortForwardingParameters createPortForwardingParameters()
+    {
+        SshPortForwardingParameters params = new SshPortForwardingParameters();
+        params.setLocalPort(LOCAL_PORT);
+        params.setRemoteHost(REMOTE_HOST);
+        params.setRemotePort(REMOTE_PORT);
+        params.setHost(SSH_HOST);
+        params.setPort(SSH_PORT);
+        return params;
     }
 }
