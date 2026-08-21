@@ -28,14 +28,10 @@
 
 <#macro custom_controls>
 <#if result.stepUrl?hasContent>
-    <a href="${result.stepUrl}" target="_blank" class="btn btn-info applitools" role="button">Step editor
-        <span class="glyphicon glyphicon-wrench"></span>
-    </a>
+    <a href="${result.stepUrl}" target="_blank" class="btn btn-info applitools" role="button">Step editor</a>
 </#if>
 <#if result.batchUrl?hasContent>
-    <a href="${result.batchUrl}" target="_blank" class="btn btn-info applitools" role="button">Batch
-        <span class="glyphicon glyphicon-eye-open"></span>
-    </a>
+    <a href="${result.batchUrl}" target="_blank" class="btn btn-info applitools" role="button">Batch</a>
 </#if>
 </#macro>
 
