@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,26 @@
 
 package org.vividus.aws.dynamodb.steps;
 
+import java.math.BigDecimal;
+import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider.Builder;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.ItemUtils;
-import com.amazonaws.services.dynamodbv2.model.ExecuteStatementRequest;
-import com.amazonaws.services.dynamodbv2.model.ExecuteStatementResult;
 
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
+
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.ExecuteStatementRequest;
+import software.amazon.awssdk.services.dynamodb.model.ExecuteStatementResponse;
+import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
 
 public class DynamoDbSteps
 {
@@ -41,26 +43,20 @@ public class DynamoDbSteps
 
     private final AwsServiceClientsContext clientsContext;
     private final VariableContext variableContext;
+    private final JsonUtils jsonUtils = new JsonUtils();
 
-    private final AmazonDynamoDB amazonDynamoDB;
+    private final String roleArn;
 
     public DynamoDbSteps(String roleArn, AwsServiceClientsContext clientsContext, VariableContext variableContext)
     {
+        this.roleArn = roleArn;
         this.clientsContext = clientsContext;
         this.variableContext = variableContext;
-
-        AmazonDynamoDBClientBuilder amazonDynamoDBClientBuilder = AmazonDynamoDBClientBuilder.standard();
-        if (roleArn != null)
-        {
-            AWSCredentialsProvider credentialsProvider = new Builder(roleArn, "Vividus").build();
-            amazonDynamoDBClientBuilder.withCredentials(credentialsProvider);
-        }
-        this.amazonDynamoDB = amazonDynamoDBClientBuilder.build();
     }
 
-    private AmazonDynamoDB getDynamoDbClient()
+    private DynamoDbClient getDynamoDbClient()
     {
-        return clientsContext.getServiceClient(AmazonDynamoDBClientBuilder::standard, amazonDynamoDB);
+        return clientsContext.getServiceClient(DynamoDbClient::builder, this::createDefaultDynamoDbClient);
     }
 
     /**
@@ -77,10 +73,10 @@ public class DynamoDbSteps
      * @see <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ql-reference.html">PartiQL</a>
      */
     @When("I execute query `$partiqlQuery` against DynamoDB")
-    public ExecuteStatementResult executeQuery(String partiqlQuery)
+    public ExecuteStatementResponse executeQuery(String partiqlQuery)
     {
         LOGGER.info("Executing query: {}", partiqlQuery);
-        ExecuteStatementRequest request = new ExecuteStatementRequest().withStatement(partiqlQuery);
+        ExecuteStatementRequest request = ExecuteStatementRequest.builder().statement(partiqlQuery).build();
         return getDynamoDbClient().executeStatement(request);
     }
 
@@ -108,11 +104,50 @@ public class DynamoDbSteps
             + "`$variableName`")
     public void executeQuery(String partiqlQuery, Set<VariableScope> scopes, String variableName)
     {
-        String jsonResult = executeQuery(partiqlQuery).getItems()
-                .stream()
-                .map(ItemUtils::toItem)
-                .map(Item::toJSON)
-                .collect(Collectors.joining(",", "[", "]"));
+        String jsonResult = jsonUtils.toJson(executeQuery(partiqlQuery).items().stream()
+                .map(DynamoDbSteps::toMap)
+                .toList());
         variableContext.putVariable(scopes, variableName, jsonResult);
+    }
+
+    private static Map<String, Object> toMap(Map<String, AttributeValue> values)
+    {
+        return values.entrySet()
+                .stream()
+                .collect(LinkedHashMap::new,
+                        (map, entry) -> map.put(entry.getKey(), toObject(entry.getValue())),
+                        LinkedHashMap::putAll);
+    }
+
+    private static Object toObject(AttributeValue attributeValue)
+    {
+        return switch (attributeValue.type())
+        {
+            case S -> attributeValue.s();
+            case N -> new BigDecimal(attributeValue.n());
+            case BOOL -> attributeValue.bool();
+            case NUL -> null;
+            case B -> Base64.getEncoder().encodeToString(attributeValue.b().asByteArray());
+            case L -> attributeValue.l().stream().map(DynamoDbSteps::toObject).toList();
+            case M -> toMap(attributeValue.m());
+            case SS -> attributeValue.ss();
+            case NS -> attributeValue.ns().stream().map(BigDecimal::new).toList();
+            case BS -> attributeValue.bs().stream()
+                    .map(bytes -> Base64.getEncoder().encodeToString(bytes.asByteArray()))
+                    .toList();
+            default -> attributeValue.toString();
+        };
+    }
+
+    private DynamoDbClient createDefaultDynamoDbClient()
+    {
+        if (roleArn == null)
+        {
+            return DynamoDbClient.builder().build();
+        }
+        AwsCredentialsProvider credentialsProvider = StsAssumeRoleCredentialsProvider.builder()
+                .refreshRequest(r -> r.roleArn(roleArn).roleSessionName("Vividus"))
+                .build();
+        return DynamoDbClient.builder().credentialsProvider(credentialsProvider).build();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,13 @@ import static org.mockito.Mockito.when;
 
 import java.util.function.Supplier;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.client.builder.AwsClientBuilder;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.vividus.testcontext.SimpleTestContext;
+
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 
 class AwsServiceClientsTestContextTests
 {
@@ -54,7 +54,7 @@ class AwsServiceClientsTestContextTests
         var clientBuilderSupplier = mock(Supplier.class);
         var defaultClient = new Object();
 
-        var actualClient = awsServiceClientsTestContext.getServiceClient(clientBuilderSupplier, defaultClient);
+        var actualClient = awsServiceClientsTestContext.getServiceClient(clientBuilderSupplier, () -> defaultClient);
 
         assertEquals(defaultClient, actualClient);
         verifyNoInteractions(clientBuilderSupplier);
@@ -72,19 +72,15 @@ class AwsServiceClientsTestContextTests
         actualClient = createServiceClient(AwsServiceClientScope.SCENARIO, scenarioScopedClient);
         assertEquals(scenarioScopedClient, actualClient);
 
-        var clientBuilderSupplier = mock(Supplier.class);
-        Object defaultClient = new Object();
-
-        Object cachedClient = awsServiceClientsTestContext.getServiceClient(clientBuilderSupplier, defaultClient);
+        var builder = mock(AwsClientBuilder.class);
+        Object cachedClient = awsServiceClientsTestContext.getServiceClient(() -> builder, Object::new);
 
         assertEquals(scenarioScopedClient, cachedClient);
-        verifyNoInteractions(clientBuilderSupplier);
 
         awsServiceClientsTestContext.clearScenarioScopedClients();
-        cachedClient = awsServiceClientsTestContext.getServiceClient(clientBuilderSupplier, defaultClient);
+        cachedClient = awsServiceClientsTestContext.getServiceClient(() -> builder, Object::new);
 
         assertEquals(storyScopedClient, cachedClient);
-        verifyNoInteractions(clientBuilderSupplier);
     }
 
     @Test
@@ -103,11 +99,11 @@ class AwsServiceClientsTestContextTests
     private Object createServiceClient(AwsServiceClientScope scope, Object expectedClient)
     {
         var builder = mock(AwsClientBuilder.class);
-        AWSCredentialsProvider credentialsProvider = mock();
-        when(builder.withCredentials(credentialsProvider)).thenReturn(builder);
+        AwsCredentialsProvider credentialsProvider = mock();
+        when(builder.credentialsProvider(credentialsProvider)).thenReturn(builder);
         when(builder.build()).thenReturn(expectedClient);
 
         awsServiceClientsTestContext.putCredentialsProvider(scope, credentialsProvider);
-        return awsServiceClientsTestContext.getServiceClient(() -> builder, new Object());
+        return awsServiceClientsTestContext.getServiceClient(() -> builder, Object::new);
     }
 }
