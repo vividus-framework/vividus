@@ -4,7 +4,7 @@ dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-util')
 
-    implementation('org.apache.avro:avro:1.12.1')
+    implementation('org.apache.avro:avro:1.12.2')
     implementation platform(libs.slf4j.bom)
     implementation(libs.slf4j.api)
 
