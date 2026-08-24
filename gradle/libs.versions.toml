@@ -8,7 +8,7 @@ apache-commons-collections4 = { module = "org.apache.commons:commons-collections
 apache-commons-text = { module = "org.apache.commons:commons-text", version = "1.15.0" }
 apache-commons-codec = { module = "commons-codec:commons-codec", version = "1.22.1" }
 apache-commons-io = { module = "commons-io:commons-io", version = "2.22.0" }
-guava = { module = "com.google.guava:guava", version = "33.6.0-jre" }
+guava = { module = "com.google.guava:guava", version = "33.7.1-jre" }
 
 awssdk-bom = { module = "software.amazon.awssdk:bom", version = "2.51.2" }
 
