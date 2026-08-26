@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -79,10 +80,12 @@ class SetContextStepsTests
     private static final String XPATH = "someXpath";
     private static final String CURRENT_WINDOW_HANDLE = "{770e3411-5e19-4831-8f36-fc76e46a2807}";
     private static final String OTHER_WINDOW_HANDLE = "{248427e8-e67d-47ba-923f-4051f349f813}";
+    private static final String THIRD_WINDOW_HANDLE = "{9f3c2a1b-4d5e-6789-abcd-ef0123456789}";
     private static final String NEW_WINDOW_IS_FOUND = "New window is found";
     private static final String NEW_WINDOW = "New window '";
     private static final String A_FRAME = "A frame";
     private static final String FRAME_TO_SWITCH = "The frame to switch context";
+    private static final String SWITCHING_TO_A_NEW_TAB = "Switching to a new tab";
 
     private static final String TOTAL_NUMBER_OF_OPENED_TABS_MESSAGE = "Total number of opened tabs is {}";
 
@@ -143,7 +146,8 @@ class SetContextStepsTests
     {
         when(webDriverProvider.get()).thenReturn(mockedWebDiver);
         when(mockedWebDiver.getWindowHandle()).thenReturn(CURRENT_WINDOW_HANDLE);
-        when(mockedWebDiver.getWindowHandles()).thenReturn(Set.of(CURRENT_WINDOW_HANDLE, OTHER_WINDOW_HANDLE));
+        when(mockedWebDiver.getWindowHandles()).thenReturn(
+                new LinkedHashSet<>(List.of(CURRENT_WINDOW_HANDLE, OTHER_WINDOW_HANDLE)));
         TargetLocator targetLocator = mock();
         when(mockedWebDiver.switchTo()).thenReturn(targetLocator);
         setContextSteps.switchToTab();
@@ -152,7 +156,45 @@ class SetContextStepsTests
         ordered.verify(uiContext).reset();
         assertThat(logger.getLoggingEvents(), is(List.of(
                 info(TOTAL_NUMBER_OF_OPENED_TABS_MESSAGE, 2),
-                info("Switching to a new tab")
+                info(SWITCHING_TO_A_NEW_TAB)
+        )));
+    }
+
+    @Test
+    void shouldSwitchToNextTabWhenSeveralTabsAreOpened()
+    {
+        when(webDriverProvider.get()).thenReturn(mockedWebDiver);
+        when(mockedWebDiver.getWindowHandle()).thenReturn(OTHER_WINDOW_HANDLE);
+        when(mockedWebDiver.getWindowHandles()).thenReturn(
+                new LinkedHashSet<>(List.of(CURRENT_WINDOW_HANDLE, OTHER_WINDOW_HANDLE, THIRD_WINDOW_HANDLE)));
+        TargetLocator targetLocator = mock();
+        when(mockedWebDiver.switchTo()).thenReturn(targetLocator);
+        setContextSteps.switchToTab();
+        var ordered = inOrder(targetLocator, uiContext);
+        ordered.verify(targetLocator).window(THIRD_WINDOW_HANDLE);
+        ordered.verify(uiContext).reset();
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                info(TOTAL_NUMBER_OF_OPENED_TABS_MESSAGE, 3),
+                info(SWITCHING_TO_A_NEW_TAB)
+        )));
+    }
+
+    @Test
+    void shouldSwitchToFirstTabWhenCurrentTabIsLast()
+    {
+        when(webDriverProvider.get()).thenReturn(mockedWebDiver);
+        when(mockedWebDiver.getWindowHandle()).thenReturn(THIRD_WINDOW_HANDLE);
+        when(mockedWebDiver.getWindowHandles()).thenReturn(
+                new LinkedHashSet<>(List.of(CURRENT_WINDOW_HANDLE, OTHER_WINDOW_HANDLE, THIRD_WINDOW_HANDLE)));
+        TargetLocator targetLocator = mock();
+        when(mockedWebDiver.switchTo()).thenReturn(targetLocator);
+        setContextSteps.switchToTab();
+        var ordered = inOrder(targetLocator, uiContext);
+        ordered.verify(targetLocator).window(CURRENT_WINDOW_HANDLE);
+        ordered.verify(uiContext).reset();
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                info(TOTAL_NUMBER_OF_OPENED_TABS_MESSAGE, 3),
+                info(SWITCHING_TO_A_NEW_TAB)
         )));
     }
 
