@@ -16,7 +16,9 @@
 
 package org.vividus.ui.web.action;
 
-public interface INavigateActions extends NavigateActions
+public interface NavigateActions
 {
-    void navigateTo(String url);
+    String getCurrentUrl();
+
+    void refresh();
 }

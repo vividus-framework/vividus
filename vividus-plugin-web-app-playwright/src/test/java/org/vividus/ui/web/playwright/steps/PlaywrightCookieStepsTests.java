@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 package org.vividus.ui.web.playwright.steps;
 
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -26,11 +24,9 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Set;
 
-import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.Cookie;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,7 +35,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.StringComparisonRule;
-import org.vividus.ui.web.playwright.UiContext;
 import org.vividus.ui.web.playwright.action.PlaywrightCookieManager;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
@@ -54,7 +49,6 @@ class PlaywrightCookieStepsTests
     @Mock private PlaywrightCookieManager cookieManager;
     @Mock private VariableContext variableContext;
     @Mock private ISoftAssert softAssert;
-    @Mock private UiContext uiContext;
     @Mock private JsonUtils jsonUtils;
     @InjectMocks private PlaywrightCookieSteps cookieSteps;
 
@@ -97,20 +91,6 @@ class PlaywrightCookieStepsTests
     }
 
     @Test
-    void testSetAllCookies()
-    {
-        String testUrl = "https://www.vividus.org";
-        Page page = mock();
-        when(page.url()).thenReturn(testUrl);
-        when(uiContext.getCurrentPage()).thenReturn(page);
-
-        String tableAsString = "|cookieName|cookieValue|path|\n|hcpsid|1|/|\n|hcpsid|1|/|";
-        ExamplesTable table = new ExamplesTable(tableAsString);
-        cookieSteps.setAllCookies(table);
-        verify(cookieManager, times(2)).addCookie("hcpsid", "1", "/", testUrl);
-    }
-
-    @Test
     void shouldSaveCookieValueIntoVariableContext()
     {
         String value = "value";
@@ -121,24 +101,6 @@ class PlaywrightCookieStepsTests
         cookieSteps.saveCookieIntoVariable(COOKIE_NAME, scopes, VARIABLE_NAME);
         verify(variableContext).putVariable(scopes, VARIABLE_NAME, value);
         verifyCookieAssertion(true);
-    }
-
-    @Test
-    void shouldRemoveAllCookies()
-    {
-        cookieSteps.removeAllCookies();
-        var ordered = inOrder(cookieManager);
-        ordered.verify(cookieManager).deleteAllCookies();
-        ordered.verifyNoMoreInteractions();
-    }
-
-    @Test
-    void shouldRemoveCookie()
-    {
-        cookieSteps.removeCookie(COOKIE_NAME);
-        var ordered = inOrder(cookieManager);
-        ordered.verify(cookieManager).deleteCookie(COOKIE_NAME);
-        ordered.verifyNoMoreInteractions();
     }
 
     @Test

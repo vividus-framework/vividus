@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,23 +26,24 @@ import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.CookieStoreProvider;
 import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.ui.web.action.CookieManager;
+import org.vividus.ui.web.action.NavigateActions;
 
 public class BrowserAndHttpContextIntegrationSteps
 {
     private final CookieManager<?> cookieManager;
     private final CookieStoreProvider cookieStoreProvider;
     private final HttpTestContext httpTestContext;
-    private final Runnable refreshPageAction;
+    private final NavigateActions navigateActions;
     private final AttachmentPublisher attachmentPublisher;
 
     public BrowserAndHttpContextIntegrationSteps(CookieManager<?> cookieManager,
-            CookieStoreProvider cookieStoreProvider, HttpTestContext httpTestContext, Runnable refreshPageAction,
+            CookieStoreProvider cookieStoreProvider, HttpTestContext httpTestContext, NavigateActions navigateActions,
             AttachmentPublisher attachmentPublisher)
     {
         this.cookieManager = cookieManager;
         this.cookieStoreProvider = cookieStoreProvider;
         this.httpTestContext = httpTestContext;
-        this.refreshPageAction = refreshPageAction;
+        this.navigateActions = navigateActions;
         this.attachmentPublisher = attachmentPublisher;
     }
 
@@ -68,7 +69,7 @@ public class BrowserAndHttpContextIntegrationSteps
     public void setHttpCookiesToBrowser()
     {
         setHttpCookiesToBrowserWithoutApply();
-        refreshPageAction.run();
+        navigateActions.refresh();
     }
 
     /**
