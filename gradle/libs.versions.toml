@@ -64,7 +64,7 @@ mockito-core = { module = "org.mockito:mockito-core" }
 
 junitPioneer = { module = "org.junit-pioneer:junit-pioneer", version = "2.3.0" }
 slf4jTest = { module = "com.github.valfirst:slf4j-test", version = "3.0.3" }
-equalsverifier = { module = "nl.jqno.equalsverifier:equalsverifier", version = "4.5" }
+equalsverifier = { module = "nl.jqno.equalsverifier:equalsverifier", version = "4.5.1" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
