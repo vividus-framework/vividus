@@ -11,9 +11,7 @@
     <bean class="org.vividus.report.allure.plugin.EmbeddedPlugin">
         <constructor-arg index="0" value="behaviors" />
         <constructor-arg index="1">
-            <util:list value-type="java.lang.String">
-                <value>index.js</value>
-            </util:list>
+            <util:list value-type="java.lang.String" />
         </constructor-arg>
         <constructor-arg index="2">
             <bean class="io.qameta.allure.behaviors.BehaviorsPlugin" />

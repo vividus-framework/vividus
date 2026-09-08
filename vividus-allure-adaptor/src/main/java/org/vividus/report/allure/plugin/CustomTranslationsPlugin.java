@@ -30,11 +30,30 @@ public class CustomTranslationsPlugin extends DynamicPlugin
             throws IOException
     {
         super("custom-translations", "index.js", () -> {
+            if (customTranslations.getData().isEmpty())
+            {
+                return List.of();
+            }
             List<String> jsFileLines = new ArrayList<>();
+            jsFileLines.add("(function() {");
+            jsFileLines.add("  var translations = {};");
             customTranslations.getData().forEach((lang, value) -> jsFileLines.add(
-                            "allure.api.addTranslation('%s', %s);".formatted(lang, jsonUtils.toJson(value))
+                            "  translations['%s'] = %s;".formatted(lang, jsonUtils.toJson(value))
                     )
             );
+            jsFileLines.add("  var lang = document.documentElement.lang || 'en';");
+            jsFileLines.add("  var t = translations[lang] || translations['en'] || {};");
+            jsFileLines.add("  function applyTranslations(obj, prefix) {");
+            jsFileLines.add("    Object.keys(obj).forEach(function(key) {");
+            jsFileLines.add("      var fullKey = prefix ? prefix + '.' + key : key;");
+            jsFileLines.add("      if (typeof obj[key] === 'object' && obj[key] !== null) {");
+            jsFileLines.add("        applyTranslations(obj[key], fullKey);");
+            jsFileLines.add("      }");
+            jsFileLines.add("    });");
+            jsFileLines.add("  }");
+            jsFileLines.add("  if (t) { applyTranslations(t, ''); }");
+            jsFileLines.add("  window.__vividusCustomTranslations = translations;");
+            jsFileLines.add("})();");
             return jsFileLines;
         });
     }
