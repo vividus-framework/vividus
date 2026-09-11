@@ -11,7 +11,7 @@ Show HTTP response
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <pre><code id="pretty-code" class="html"><#outputformat "HTML">${result.responseBody}</#outputformat></code></pre>
+                <pre><code id="pretty-code_${hash}" class="html"><#outputformat "HTML">${result.responseBody}</#outputformat></code></pre>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -19,15 +19,19 @@ Show HTTP response
         </div>
     </div>
 </div>
-</#if>
-
+<#if !responseBodyScriptsIncluded??>
+<#assign responseBodyScriptsIncluded = true>
 <script src="../../webjars/jquery/3.6.4/jquery.min.js"></script>
 <script src="../../webjars/highlight.js/11.7.0/highlight.min.js"></script>
 <script src="../../webjars/js-beautify/1.13.4/beautify-html.min.js"></script>
+</#if>
 <script type="text/javascript">
     (function() {
-            let code = document.querySelector('#pretty-code');
+        let code = document.querySelector('#pretty-code_${hash}');
+        if (code) {
             <#include "/templates/html-formatter-fragment.ftl">
-        hljs.highlightElement(code);
+            hljs.highlightElement(code);
+        }
     })();
 </script>
+</#if>

@@ -116,7 +116,7 @@
     "description": "Expected broken link on error-link.html used to verify resource validation attachments",
     "type": "Internal",
     "assertionPattern": "Status code for .*404-test-link is 404\\. expected one of .*",
-    "scenarioPattern": "Verify broken HTTP resources on error-link page",
+    "scenarioPattern": "Verify broken HTTP resources on error-link page.*",
     "storyPattern": "ResourceCheckSteps",
     "stepPattern": "Then all resources found by.*"
   }
