@@ -22,8 +22,11 @@
 
     <bean id="mobileEmulationSteps" class="org.vividus.steps.ui.web.MobileEmulationSteps" />
 
+    <bean id="networkConditionsSteps" class="org.vividus.steps.ui.web.NetworkConditionsSteps" />
+
     <util:list id="stepBeanNames-WebApp" value-type="java.lang.String">
         <idref bean="webStorageSteps" />
         <idref bean="mobileEmulationSteps"/>
+        <idref bean="networkConditionsSteps"/>
     </util:list>
 </beans>
