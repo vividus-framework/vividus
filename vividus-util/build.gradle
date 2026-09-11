@@ -46,7 +46,7 @@ test {
 }
 
 dependencies {
-    api('org.freemarker:freemarker:2.3.34')
+    api('org.freemarker:freemarker:2.3.35')
 
     api platform(libs.jackson.bom)
     api(libs.jackson.core)
