@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,32 +18,19 @@ package org.vividus.aws.s3.steps;
 
 import static java.util.stream.Collectors.toMap;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ListObjectsV2Request;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
-
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Strings;
 import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.When;
@@ -58,6 +45,17 @@ import org.vividus.util.DateUtils;
 import org.vividus.util.ResourceUtils;
 import org.vividus.variable.VariableScope;
 
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
+import software.amazon.awssdk.services.s3.model.PutObjectAclRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
+
 public class S3BucketSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(S3BucketSteps.class);
@@ -66,20 +64,16 @@ public class S3BucketSteps
     private final VariableContext variableContext;
     private final DateUtils dateUtils;
 
-    private final AmazonS3 amazonS3Client;
-
     public S3BucketSteps(AwsServiceClientsContext clientsContext, VariableContext variableContext, DateUtils dateUtils)
     {
         this.clientsContext = clientsContext;
         this.variableContext = variableContext;
         this.dateUtils = dateUtils;
-
-        this.amazonS3Client = AmazonS3ClientBuilder.defaultClient();
     }
 
-    private AmazonS3 getS3Client()
+    private S3Client getS3Client()
     {
-        return clientsContext.getServiceClient(AmazonS3ClientBuilder::standard, amazonS3Client);
+        return clientsContext.getServiceClient(S3Client::builder, () -> S3Client.builder().build());
     }
 
     /**
@@ -144,11 +138,12 @@ public class S3BucketSteps
 
     private void uploadContent(String bucketName, String objectKey, byte[] content, String contentType)
     {
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentType(contentType);
-        objectMetadata.setContentLength(content.length);
-        InputStream inputStream = new ByteArrayInputStream(content);
-        getS3Client().putObject(bucketName, objectKey, inputStream, objectMetadata);
+        PutObjectRequest request = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(objectKey)
+                .contentType(contentType)
+                .build();
+        getS3Client().putObject(request, RequestBody.fromBytes(content));
     }
 
     /**
@@ -197,23 +192,19 @@ public class S3BucketSteps
      * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      * </ul>
      * @param variableName the variable name
-     * @throws IOException in case of IO error during returned file processing
      */
     @When("I fetch object with key `$objectKey` from S3 bucket `$bucketName` and save result to $scopes variable"
             + " `$variableName`")
     public void fetchObject(String objectKey, String bucketName, Set<VariableScope> scopes, String variableName)
-            throws IOException
     {
         String content = fetchObject(bucketName, objectKey);
         variableContext.putVariable(scopes, variableName, content);
     }
 
-    private String fetchObject(String bucketName, String key) throws IOException
+    private String fetchObject(String bucketName, String key)
     {
-        try (S3ObjectInputStream objectContent = getS3Client().getObject(bucketName, key).getObjectContent())
-        {
-            return IOUtils.toString(objectContent, StandardCharsets.UTF_8);
-        }
+        return getS3Client().getObjectAsBytes(GetObjectRequest.builder().bucket(bucketName).key(key).build())
+                .asString(StandardCharsets.UTF_8);
     }
 
     /**
@@ -232,9 +223,13 @@ public class S3BucketSteps
      * @param bucketName The name of the bucket containing the object whose ACL is being set
      */
     @When("I set ACL `$cannedAcl` for object with key `$objectKey` from S3 bucket `$bucketName`")
-    public void setObjectAcl(CannedAccessControlList cannedAcl, String objectKey, String bucketName)
+    public void setObjectAcl(ObjectCannedACL cannedAcl, String objectKey, String bucketName)
     {
-        getS3Client().setObjectAcl(bucketName, objectKey, cannedAcl);
+        getS3Client().putObjectAcl(PutObjectAclRequest.builder()
+                .acl(cannedAcl)
+                .bucket(bucketName)
+                .key(objectKey)
+                .build());
     }
 
     /**
@@ -251,7 +246,7 @@ public class S3BucketSteps
     @When("I delete object with key `$objectKey` from S3 bucket `$bucketName`")
     public void deleteObject(String objectKey, String bucketName)
     {
-        getS3Client().deleteObject(bucketName, objectKey);
+        getS3Client().deleteObject(DeleteObjectRequest.builder().bucket(bucketName).key(objectKey).build());
     }
 
     /**
@@ -301,54 +296,54 @@ public class S3BucketSteps
         Map<S3ObjectFilterType, String> filterParameters = filters.stream().collect(
                 toMap(S3ObjectFilter::getFilterType, S3ObjectFilter::getFilterValue));
 
-        ListObjectsV2Request request = new ListObjectsV2Request().withBucketName(bucketName);
-        Optional.ofNullable(filterParameters.get(S3ObjectFilterType.KEY_PREFIX)).ifPresent(request::setPrefix);
+        ListObjectsV2Request.Builder request = ListObjectsV2Request.builder().bucket(bucketName);
+        Optional.ofNullable(filterParameters.get(S3ObjectFilterType.KEY_PREFIX)).ifPresent(request::prefix);
 
-        Predicate<S3ObjectSummary> filter = buildFilter(filterParameters);
+        Predicate<S3Object> filter = buildFilter(filterParameters);
 
         List<String> keys = collectS3ObjectsKeys(request, filter);
         variableContext.putVariable(scopes, variableName, keys);
     }
 
-    private Predicate<S3ObjectSummary> buildFilter(Map<S3ObjectFilterType, String> filterParameters)
+    private Predicate<S3Object> buildFilter(Map<S3ObjectFilterType, String> filterParameters)
     {
-        Predicate<S3ObjectSummary> keySuffixPredicate = Optional.ofNullable(
+        Predicate<S3Object> keySuffixPredicate = Optional.ofNullable(
                 filterParameters.get(S3ObjectFilterType.KEY_SUFFIX))
-                .map(keySuffix -> (Predicate<S3ObjectSummary>) summary -> summary.getKey().endsWith(keySuffix))
+                .map(keySuffix -> (Predicate<S3Object>) summary -> summary.key().endsWith(keySuffix))
                 .orElseGet(() -> summary -> true);
 
-        Predicate<S3ObjectSummary> lowestModifiedPredicate = Optional.ofNullable(
+        Predicate<S3Object> lowestModifiedPredicate = Optional.ofNullable(
                 filterParameters.get(S3ObjectFilterType.OBJECT_MODIFIED_NOT_EARLIER_THAN))
                 .map(date -> dateUtils.parseDateTime(date, DateTimeFormatter.ISO_DATE_TIME))
                 .map(ZonedDateTime::toInstant)
-                .map(Date::from)
-                .map(date -> (Predicate<S3ObjectSummary>) summary -> summary.getLastModified().after(date))
+                .map(date -> (Predicate<S3Object>) summary -> summary.lastModified().isAfter(date))
                 .orElseGet(() -> summary -> true);
 
         return keySuffixPredicate.and(lowestModifiedPredicate);
     }
 
-    private List<String> collectS3ObjectsKeys(ListObjectsV2Request request, Predicate<S3ObjectSummary> filter)
+    private List<String> collectS3ObjectsKeys(ListObjectsV2Request.Builder request, Predicate<S3Object> filter)
     {
-        ListObjectsV2Result result;
+        ListObjectsV2Response result;
         List<String> keys = new ArrayList<>();
         int totalNumberOfObjects = 0;
+        String continuationToken = null;
 
         do
         {
-            result = getS3Client().listObjectsV2(request);
+            result = getS3Client().listObjectsV2(request.continuationToken(continuationToken).build());
 
-            List<S3ObjectSummary> objectSummaries = result.getObjectSummaries();
+            List<S3Object> objectSummaries = result.contents();
             totalNumberOfObjects += objectSummaries.size();
 
             objectSummaries.stream()
                     .filter(filter)
-                    .map(S3ObjectSummary::getKey)
+                    .map(S3Object::key)
                     .forEach(keys::add);
 
-            request.setContinuationToken(result.getNextContinuationToken());
+            continuationToken = result.nextContinuationToken();
         }
-        while (result.isTruncated());
+        while (Boolean.TRUE.equals(result.isTruncated()));
 
         LOGGER.info("The total number of S3 objects is {}", totalNumberOfObjects);
         LOGGER.atInfo().addArgument(keys::size).log("The number of S3 objects after filtering is {}");

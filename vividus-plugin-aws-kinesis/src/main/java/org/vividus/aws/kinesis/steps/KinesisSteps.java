@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,10 @@
 
 package org.vividus.aws.kinesis.steps;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import com.amazonaws.services.kinesis.AmazonKinesis;
-import com.amazonaws.services.kinesis.AmazonKinesisClientBuilder;
-import com.amazonaws.services.kinesis.model.GetRecordsRequest;
-import com.amazonaws.services.kinesis.model.GetRecordsResult;
-import com.amazonaws.services.kinesis.model.GetShardIteratorRequest;
-import com.amazonaws.services.kinesis.model.GetShardIteratorResult;
-import com.amazonaws.services.kinesis.model.ListShardsRequest;
-import com.amazonaws.services.kinesis.model.ListShardsResult;
-import com.amazonaws.services.kinesis.model.PutRecordResult;
-import com.amazonaws.services.kinesis.model.Record;
-import com.amazonaws.services.kinesis.model.Shard;
-import com.amazonaws.services.kinesis.model.ShardIteratorType;
 
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
@@ -43,16 +29,28 @@ import org.vividus.context.VariableContext;
 import org.vividus.testcontext.TestContext;
 import org.vividus.variable.VariableScope;
 
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.kinesis.KinesisClient;
+import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
+import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
+import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
+import software.amazon.awssdk.services.kinesis.model.GetShardIteratorResponse;
+import software.amazon.awssdk.services.kinesis.model.ListShardsRequest;
+import software.amazon.awssdk.services.kinesis.model.ListShardsResponse;
+import software.amazon.awssdk.services.kinesis.model.PutRecordRequest;
+import software.amazon.awssdk.services.kinesis.model.PutRecordResponse;
+import software.amazon.awssdk.services.kinesis.model.Record;
+import software.amazon.awssdk.services.kinesis.model.Shard;
+import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
+
 public class KinesisSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(KinesisSteps.class);
-    private static final Object KEY = GetShardIteratorResult.class;
+    private static final Object KEY = GetShardIteratorResponse.class;
 
     private final TestContext testContext;
     private final VariableContext variableContext;
     private final AwsServiceClientsContext clientsContext;
-
-    private final AmazonKinesis amazonKinesis;
 
     public KinesisSteps(AwsServiceClientsContext clientsContext, TestContext testContext,
             VariableContext variableContext)
@@ -60,13 +58,11 @@ public class KinesisSteps
         this.clientsContext = clientsContext;
         this.testContext = testContext;
         this.variableContext = variableContext;
-
-        this.amazonKinesis = AmazonKinesisClientBuilder.defaultClient();
     }
 
-    private AmazonKinesis getKinesisClient()
+    private KinesisClient getKinesisClient()
     {
-        return clientsContext.getServiceClient(AmazonKinesisClientBuilder::standard, amazonKinesis);
+        return clientsContext.getServiceClient(KinesisClient::builder, () -> KinesisClient.builder().build());
     }
 
     /**
@@ -91,11 +87,14 @@ public class KinesisSteps
     @When("I put record `$data` with partition key `$partitionKey` to Kinesis stream `$streamName`")
     public void putRecord(String data, String partitionKey, String streamName)
     {
-        ByteBuffer wrappedData = ByteBuffer.wrap(data.getBytes(StandardCharsets.UTF_8));
-        PutRecordResult result = getKinesisClient().putRecord(streamName, wrappedData, partitionKey);
+        PutRecordResponse result = getKinesisClient().putRecord(PutRecordRequest.builder()
+                .streamName(streamName)
+                .data(SdkBytes.fromString(data, StandardCharsets.UTF_8))
+                .partitionKey(partitionKey)
+                .build());
         LOGGER.atInfo()
-                .addArgument(result::getShardId)
-                .addArgument(result::getSequenceNumber)
+                .addArgument(result::shardId)
+                .addArgument(result::sequenceNumber)
                 .log("The data was placed to the shard with ID '{}' under the sequence number '{}'");
     }
 
@@ -104,27 +103,28 @@ public class KinesisSteps
      * A shard iterator specifies the shard position from which to start reading data records sequentially.
      * @param streamName The name of the Amazon Kinesis data stream.
      */
+    @SuppressWarnings("PMD.CloseResource")
     @When("I start consuming records from Kinesis stream `$streamName`")
     public void createShardIterators(String streamName)
     {
-        ListShardsRequest listShardsRequest = new ListShardsRequest().withStreamName(streamName);
-        AmazonKinesis amazonKinesisClient = getKinesisClient();
-        ListShardsResult listShardsResult = amazonKinesisClient.listShards(listShardsRequest);
-        List<Shard> shards = listShardsResult.getShards();
+        ListShardsRequest listShardsRequest = ListShardsRequest.builder().streamName(streamName).build();
+        KinesisClient amazonKinesisClient = getKinesisClient();
+        ListShardsResponse listShardsResult = amazonKinesisClient.listShards(listShardsRequest);
+        List<Shard> shards = listShardsResult.shards();
         LOGGER.atInfo()
                 .addArgument(streamName)
                 .addArgument(shards::size)
                 .log("The total number of shards in the stream '{}' is {}");
 
         List<String> shardIterators = shards.stream()
-                .map(Shard::getShardId)
-                .map(shardId -> new GetShardIteratorRequest()
-                        .withStreamName(streamName)
-                        .withShardId(shardId)
-                        .withShardIteratorType(ShardIteratorType.LATEST)
-                )
+                .map(Shard::shardId)
+                .map(shardId -> GetShardIteratorRequest.builder()
+                        .streamName(streamName)
+                        .shardId(shardId)
+                        .shardIteratorType(ShardIteratorType.LATEST)
+                        .build())
                 .map(amazonKinesisClient::getShardIterator)
-                .map(GetShardIteratorResult::getShardIterator)
+                .map(GetShardIteratorResponse::shardIterator)
                 .toList();
 
         LOGGER.info("Shard iterators are created: {}", shardIterators);
@@ -160,13 +160,13 @@ public class KinesisSteps
         {
             LOGGER.info("Getting records using shard iterator '{}'", shardIterator);
 
-            GetRecordsRequest request = new GetRecordsRequest().withShardIterator(shardIterator);
-            GetRecordsResult result = getKinesisClient().getRecords(request);
+            GetRecordsRequest request = GetRecordsRequest.builder().shardIterator(shardIterator).build();
+            GetRecordsResponse result = getKinesisClient().getRecords(request);
 
-            nextShardIterators.add(result.getNextShardIterator());
-            result.getRecords().stream()
-                    .map(Record::getData)
-                    .map(ByteBuffer::array)
+            nextShardIterators.add(result.nextShardIterator());
+            result.records().stream()
+                    .map(Record::data)
+                    .map(SdkBytes::asByteArray)
                     .map(data -> new String(data, StandardCharsets.UTF_8))
                     .forEach(records::add);
         }

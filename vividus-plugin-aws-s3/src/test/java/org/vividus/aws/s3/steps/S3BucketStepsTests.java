@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,34 +19,21 @@ package org.vividus.aws.s3.steps;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.sql.Date;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ListObjectsV2Request;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
@@ -67,6 +54,19 @@ import org.vividus.util.DateUtils;
 import org.vividus.util.ResourceUtils;
 import org.vividus.variable.VariableScope;
 
+import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
+import software.amazon.awssdk.services.s3.model.PutObjectAclRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
+
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class S3BucketStepsTests
 {
@@ -79,7 +79,7 @@ class S3BucketStepsTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(S3BucketSteps.class);
 
-    @Mock private AmazonS3 amazonS3Client;
+    @Mock private S3Client amazonS3Client;
     @Mock private AwsServiceClientsContext clientsContext;
     @Mock private VariableContext variableContext;
 
@@ -123,19 +123,20 @@ class S3BucketStepsTests
 
     private void verifyContentUploaded(byte[] csv, String contentType)
     {
-        verify(amazonS3Client).putObject(eq(S3_BUCKET_NAME), eq(S3_OBJECT_KEY), argThat(bais -> {
-            try
-            {
-                byte[] actual = IOUtils.toByteArray(bais);
-                bais.reset();
-                return Arrays.equals(csv, actual);
-            }
-            catch (IOException e)
-            {
-                return false;
-            }
-        }), argThat(metadata -> metadata.getContentLength() == csv.length && contentType
-                .equals(metadata.getContentType())));
+        verify(amazonS3Client).putObject(argThat((PutObjectRequest request) ->
+                S3_BUCKET_NAME.equals(request.bucket()) && S3_OBJECT_KEY.equals(request.key())
+                        && contentType.equals(request.contentType())), argThat((RequestBody requestBody) ->
+                        {
+                            try
+                            {
+                                return Arrays.equals(csv,
+                                        IOUtils.toByteArray(requestBody.contentStreamProvider().newStream()));
+                            }
+                            catch (IOException e)
+                            {
+                                return false;
+                            }
+                        }));
     }
 
     @Test
@@ -158,45 +159,47 @@ class S3BucketStepsTests
         mockGetObject(objectKey, data.getBytes(StandardCharsets.UTF_8));
 
         testSteps(steps -> steps.fetchObject(objectKey, S3_BUCKET_NAME, SCOPES, VARIABLE_NAME));
-        verify(amazonS3Client).getObject(S3_BUCKET_NAME, objectKey);
+        verify(amazonS3Client).getObjectAsBytes(argThat((GetObjectRequest request) ->
+                S3_BUCKET_NAME.equals(request.bucket()) && objectKey.equals(request.key())));
         verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, data);
     }
 
     private void mockGetObject(String objectKey, byte[] data)
     {
-        S3ObjectInputStream s3ObjectInputStream = new S3ObjectInputStream(new ByteArrayInputStream(data), null);
-        S3Object s3Object = mock(S3Object.class);
-        when(s3Object.getObjectContent()).thenReturn(s3ObjectInputStream);
-        when(amazonS3Client.getObject(S3_BUCKET_NAME, objectKey)).thenReturn(s3Object);
+        when(amazonS3Client.getObjectAsBytes(argThat((GetObjectRequest request) ->
+                S3_BUCKET_NAME.equals(request.bucket()) && objectKey.equals(request.key()))))
+                .thenReturn(ResponseBytes.fromByteArray(GetObjectResponse.builder().build(), data));
     }
 
     @Test
     void shouldSetObjectAcl() throws IOException
     {
-        testSteps(steps -> steps.setObjectAcl(CannedAccessControlList.PublicReadWrite, S3_OBJECT_KEY, S3_BUCKET_NAME));
-        verify(amazonS3Client).setObjectAcl(S3_BUCKET_NAME, S3_OBJECT_KEY, CannedAccessControlList.PublicReadWrite);
+        testSteps(steps -> steps.setObjectAcl(ObjectCannedACL.PUBLIC_READ_WRITE, S3_OBJECT_KEY, S3_BUCKET_NAME));
+        verify(amazonS3Client).putObjectAcl(argThat((PutObjectAclRequest request) ->
+                S3_BUCKET_NAME.equals(request.bucket()) && S3_OBJECT_KEY.equals(request.key())
+                        && ObjectCannedACL.PUBLIC_READ_WRITE.equals(request.acl())));
     }
 
     @Test
     void shouldDeleteObject() throws IOException
     {
         testSteps(steps -> steps.deleteObject(S3_OBJECT_KEY, S3_BUCKET_NAME));
-        verify(amazonS3Client).deleteObject(S3_BUCKET_NAME, S3_OBJECT_KEY);
+        verify(amazonS3Client).deleteObject(argThat((DeleteObjectRequest request) ->
+                S3_BUCKET_NAME.equals(request.bucket()) && S3_OBJECT_KEY.equals(request.key())));
     }
 
     @Test
     void shouldCollectKeysWithEmptyFilters() throws IOException
     {
         String key = "any";
-        S3ObjectSummary objectSummary = new S3ObjectSummary();
-        objectSummary.setKey(key);
-
-        ListObjectsV2Result result = new ListObjectsV2Result();
-        result.setTruncated(false);
-        result.getObjectSummaries().add(objectSummary);
+        S3Object objectSummary = S3Object.builder().key(key).build();
+        ListObjectsV2Response result = ListObjectsV2Response.builder()
+                .isTruncated(false)
+                .contents(objectSummary)
+                .build();
 
         when(amazonS3Client.listObjectsV2(argThat((ArgumentMatcher<ListObjectsV2Request>)
-                rq -> S3_BUCKET_NAME.equals(rq.getBucketName()) && rq.getPrefix() == null))).thenReturn(result);
+                rq -> S3_BUCKET_NAME.equals(rq.bucket()) && rq.prefix() == null))).thenReturn(result);
         testSteps(steps -> steps.collectObjectKeys(List.of(), S3_BUCKET_NAME, SCOPES, VARIABLE_NAME));
 
         verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, List.of(key));
@@ -211,32 +214,35 @@ class S3BucketStepsTests
         ZonedDateTime zonedDateThreshold = ZonedDateTime.parse(dateThreshold);
         String key = "/folder/object.xml";
 
-        S3ObjectSummary objectSummary1 = new S3ObjectSummary();
-        objectSummary1.setKey(key);
-        objectSummary1.setLastModified(Date.from(zonedDateThreshold.plusMinutes(1).toInstant()));
+        S3Object objectSummary1 = S3Object.builder()
+                .key(key)
+                .lastModified(zonedDateThreshold.plusMinutes(1).toInstant())
+                .build();
 
-        S3ObjectSummary objectSummary2 = new S3ObjectSummary();
-        objectSummary2.setKey(key);
-        objectSummary2.setLastModified(Date.from(zonedDateThreshold.toInstant()));
+        S3Object objectSummary2 = S3Object.builder()
+                .key(key)
+                .lastModified(zonedDateThreshold.toInstant())
+                .build();
 
+        ListObjectsV2Response result1 = ListObjectsV2Response.builder()
+                .contents(objectSummary1, objectSummary2)
+                .isTruncated(true)
+                .build();
 
-        ListObjectsV2Result result1 = new ListObjectsV2Result();
-        result1.getObjectSummaries().add(objectSummary1);
-        result1.getObjectSummaries().add(objectSummary2);
-        result1.setTruncated(true);
+        S3Object objectSummary3 = S3Object.builder()
+                .key("/folder/object.txt")
+                .lastModified(zonedDateThreshold.plusMinutes(1).toInstant())
+                .build();
 
-        S3ObjectSummary objectSummary3 = new S3ObjectSummary();
-        objectSummary3.setKey("/folder/object.txt");
-        objectSummary3.setLastModified(Date.from(zonedDateThreshold.plusMinutes(1).toInstant()));
-
-        ListObjectsV2Result result2 = new ListObjectsV2Result();
-        result2.getObjectSummaries().add(objectSummary3);
-        result2.setTruncated(false);
+        ListObjectsV2Response result2 = ListObjectsV2Response.builder()
+                .contents(objectSummary3)
+                .isTruncated(false)
+                .build();
 
         String prefix = "/folder/o";
 
         when(amazonS3Client.listObjectsV2(argThat((ArgumentMatcher<ListObjectsV2Request>)
-                    rq -> S3_BUCKET_NAME.equals(rq.getBucketName()) && prefix.equals(rq.getPrefix()))))
+                    rq -> S3_BUCKET_NAME.equals(rq.bucket()) && prefix.equals(rq.prefix()))))
                 .thenReturn(result1, result2);
 
         List<S3ObjectFilter> filters = createFilters(prefix, ".xml", dateThreshold);
@@ -275,21 +281,8 @@ class S3BucketStepsTests
 
     void testSteps(FailableConsumer<S3BucketSteps, IOException> test) throws IOException
     {
-        try (var builder = mockStatic(AmazonS3ClientBuilder.class))
-        {
-            builder.when(AmazonS3ClientBuilder::defaultClient).thenReturn(amazonS3Client);
-
-            AmazonS3ClientBuilder customClientBuilder = mock();
-            builder.when(AmazonS3ClientBuilder::standard).thenReturn(customClientBuilder);
-
-            S3BucketSteps steps = new S3BucketSteps(clientsContext, variableContext, new DateUtils(ZoneId.of("Z")));
-
-            when(clientsContext.getServiceClient(
-                    argThat((ArgumentMatcher<Supplier<AwsClientBuilder<AmazonS3ClientBuilder, AmazonS3>>>)
-                            supplier -> supplier.get().equals(customClientBuilder)), eq(amazonS3Client)))
-                    .thenReturn(amazonS3Client);
-
-            test.accept(steps);
-        }
+        S3BucketSteps steps = new S3BucketSteps(clientsContext, variableContext, new DateUtils(ZoneId.of("Z")));
+        when(clientsContext.getServiceClient(any(), any())).thenReturn(amazonS3Client);
+        test.accept(steps);
     }
 }

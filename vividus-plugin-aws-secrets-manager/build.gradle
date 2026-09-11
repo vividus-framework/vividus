@@ -3,8 +3,8 @@ project.description = 'VIVIDUS plugin for AWS Secrets Manager'
 dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-util')
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.797')
-    implementation('com.amazonaws:aws-java-sdk-secretsmanager')
+    implementation platform(libs.awssdk.bom)
+    implementation('software.amazon.awssdk:secretsmanager')
     implementation(libs.guava)
 
     testImplementation platform(libs.junit.bom)
