@@ -18,7 +18,7 @@ slf4j-jclOverSlf4j = { module = "org.slf4j:jcl-over-slf4j" }
 slf4j-julToSlf4j = { module = "org.slf4j:jul-to-slf4j" }
 slf4j-log4jOverSlf4j = { module = "org.slf4j:log4j-over-slf4j" }
 
-spring-bom = { module = "org.springframework:spring-framework-bom", version = "7.0.8" }
+spring-bom = { module = "org.springframework:spring-framework-bom", version = "7.0.9" }
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 spring-beans = { module = "org.springframework:spring-beans" }
 spring-context = { module = "org.springframework:spring-context" }
