@@ -12,7 +12,7 @@ guava = { module = "com.google.guava:guava", version = "33.7.1-jre" }
 
 awssdk-bom = { module = "software.amazon.awssdk:bom", version = "2.51.2" }
 
-slf4j-bom = { module = "org.slf4j:slf4j-bom", version = "2.0.18" }
+slf4j-bom = { module = "org.slf4j:slf4j-bom", version = "2.0.19" }
 slf4j-api = { module = "org.slf4j:slf4j-api" }
 slf4j-jclOverSlf4j = { module = "org.slf4j:jcl-over-slf4j" }
 slf4j-julToSlf4j = { module = "org.slf4j:jul-to-slf4j" }
