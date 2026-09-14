@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.ArrayList;
@@ -50,15 +51,26 @@ class ObjectPoolStepsTests
 {
     private static final String POOL_NAME = "users";
     private static final String VARIABLE_NAME = "user";
+    private static final String SIZE_VARIABLE_NAME = "poolSize";
     private static final String POOL_IS_EMPTY_ERROR = "The object pool with the name 'users' is empty";
+    private static final String POOL_IS_NOT_INITIALIZED_ERROR =
+            "The object pool with the name 'users' is not initialized";
+    private static final String ELEMENTS_SUFFIX = "element(s)";
     private static final String INIT_LOG_MESSAGE = "The object pool with the name '{}' is initialized with {} "
-            + "element(s)";
+            + ELEMENTS_SUFFIX;
+    private static final String REPLENISH_LOG_MESSAGE = "The object pool with the name '{}' is replenished with {} "
+            + ELEMENTS_SUFFIX;
+    private static final String SIZE_LOG_MESSAGE = "The size of the object pool with the name '{}' is {}";
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.SCENARIO);
     private static final ExamplesTable DATA = new ExamplesTable("""
             |login  |password|
             |user-1 |pass-1  |
             |user-2 |pass-2  |
             |user-3 |pass-3  |""");
+    private static final ExamplesTable ADDITIONAL_DATA = new ExamplesTable("""
+            |login  |password|
+            |user-4 |pass-4  |
+            |user-5 |pass-5  |""");
 
     private final List<Object> takenObjects = new ArrayList<>();
 
@@ -102,8 +114,80 @@ class ObjectPoolStepsTests
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
                 () -> steps.takeObjectFromPool(POOL_NAME, SCOPES, VARIABLE_NAME));
-        assertEquals("The object pool with the name 'users' is not initialized", exception.getMessage());
+        assertEquals(POOL_IS_NOT_INITIALIZED_ERROR, exception.getMessage());
         verifyNoInteractions(variableContext);
+        assertThat(logger.getLoggingEvents(), is(List.of()));
+    }
+
+    @Test
+    void shouldAddObjectsToExistingPool()
+    {
+        captureTakenObjects();
+        ObjectPoolSteps steps = new ObjectPoolSteps(false, testContext, variableContext);
+        steps.initializeObjectPool(POOL_NAME, DATA);
+        steps.takeObjectFromPool(POOL_NAME, SCOPES, VARIABLE_NAME);
+        steps.addObjectsToPool(POOL_NAME, ADDITIONAL_DATA);
+
+        int remainingSize = DATA.getRows().size() - 1 + ADDITIONAL_DATA.getRows().size();
+        drainPool(steps, remainingSize);
+
+        List<Object> objectsTakenAfterReplenish = takenObjects.subList(1, takenObjects.size());
+        assertEquals(DATA.getRows().size() + ADDITIONAL_DATA.getRows().size(), takenObjects.size());
+        assertEquals(takenObjects.size(), Set.copyOf(takenObjects).size());
+        assertEquals(remainingSize, objectsTakenAfterReplenish.size());
+        assertTrue(takenObjects.containsAll(DATA.getRows()));
+        assertTrue(objectsTakenAfterReplenish.containsAll(ADDITIONAL_DATA.getRows()));
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                info(INIT_LOG_MESSAGE, POOL_NAME, 3),
+                info(REPLENISH_LOG_MESSAGE, POOL_NAME, 2))));
+    }
+
+    @Test
+    void shouldSaveSizeOfObjectPool()
+    {
+        ObjectPoolSteps steps = new ObjectPoolSteps(false, testContext, variableContext);
+        steps.initializeObjectPool(POOL_NAME, DATA);
+
+        steps.saveObjectPoolSize(POOL_NAME, SCOPES, SIZE_VARIABLE_NAME);
+
+        verify(variableContext).putVariable(SCOPES, SIZE_VARIABLE_NAME, DATA.getRows().size());
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                info(INIT_LOG_MESSAGE, POOL_NAME, 3),
+                info(SIZE_LOG_MESSAGE, POOL_NAME, 3))));
+    }
+
+    @Test
+    void shouldSaveRemainingPoolSizeAfterTakingObject()
+    {
+        ObjectPoolSteps steps = new ObjectPoolSteps(false, testContext, variableContext);
+        steps.initializeObjectPool(POOL_NAME, DATA);
+        steps.takeObjectFromPool(POOL_NAME, SCOPES, VARIABLE_NAME);
+
+        steps.saveObjectPoolSize(POOL_NAME, SCOPES, SIZE_VARIABLE_NAME);
+
+        verify(variableContext).putVariable(SCOPES, SIZE_VARIABLE_NAME, DATA.getRows().size() - 1);
+    }
+
+    @Test
+    void shouldFailToSaveSizeOfNotInitializedPool()
+    {
+        ObjectPoolSteps steps = new ObjectPoolSteps(false, testContext, variableContext);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> steps.saveObjectPoolSize(POOL_NAME, SCOPES, SIZE_VARIABLE_NAME));
+        assertEquals(POOL_IS_NOT_INITIALIZED_ERROR, exception.getMessage());
+        verifyNoInteractions(variableContext);
+        assertThat(logger.getLoggingEvents(), is(List.of()));
+    }
+
+    @Test
+    void shouldFailToAddObjectsToNotInitializedPool()
+    {
+        ObjectPoolSteps steps = new ObjectPoolSteps(false, testContext, variableContext);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> steps.addObjectsToPool(POOL_NAME, ADDITIONAL_DATA));
+        assertEquals(POOL_IS_NOT_INITIALIZED_ERROR, exception.getMessage());
         assertThat(logger.getLoggingEvents(), is(List.of()));
     }
 

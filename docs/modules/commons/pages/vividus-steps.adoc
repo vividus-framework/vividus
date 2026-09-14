@@ -497,10 +497,10 @@ When I wait `PT30S` with `PT1S` polling until file matching `report-\d+\.csv` ap
 
 == Object pool
 
-Think of an object pool as a shared basket of items that your tests can borrow from. You fill the basket once with a
+Think of an object pool as a shared basket of items that your tests can borrow from. You fill the basket with a
 list of items (for example, a set of test user accounts), and then, whenever a test needs one, it picks an item out of
 the basket at random. Each item can be held by only one test at a time, so tests running side by side never accidentally
-grab the same account and interfere with each other.
+grab the same account and interfere with each other. If the basket runs low, you can add more items to it later.
 
 This is handy whenever you have a limited number of shared resources - such as logins, licenses, or reservations - that
 must be shared fairly across many tests.
@@ -544,6 +544,60 @@ Given I initialize object pool `credentials` with data:
 |user-2|pass-2  |
 |user-3|pass-3  |
 ----
+
+=== Add items to an existing basket
+
+Puts more items into a basket that already exists. Use this to top up a basket that is running low or empty, without
+creating a new one. Adding items to a basket that has not been initialized stops the test with an error. Every row of
+the table becomes one more item, and the column headers become the details of that item. Newly added items are shuffled
+and placed after the items that are already in the basket.
+
+[source,gherkin]
+----
+Given I add objects to object pool `$poolName`:$data
+----
+* `$poolName` - The name of the basket to add items to. The basket must already exist.
+* `$data` - The xref:ROOT:glossary.adoc#_examplestable[table] of items to add. Each row is one item.
+
+.Add two more user accounts to the "credentials" basket
+[source,gherkin]
+----
+Given I add objects to object pool `credentials`:
+|login |password|
+|user-4|pass-4  |
+|user-5|pass-5  |
+----
+
+=== Check how many items are left
+
+Saves how many items are still available in the basket. Items that a test has already taken are not counted until they
+are returned. Use the saved number to walk through every remaining item. Asking for the size of a basket that has not
+been initialized stops the test with an error. An empty basket saves `0`.
+
+The saved number is a snapshot. If another test adds items to the same basket at the same time, the number can be
+inaccurate.
+
+[source,gherkin]
+----
+When I save size of object pool `$poolName` to $scopes variable `$variableName`
+----
+* `$poolName` - The name of the basket to count items in.
+* `$scopes` - xref:commons:variables.adoc#_scopes[How long the stored number should stay available] (for example, for
+the current scenario or the whole story).
+* `$variableName` - The name you give to the number so you can use it later.
+
+.Take every remaining account from the "credentials" basket
+[source,gherkin]
+----
+When I save size of object pool `credentials` to scenario variable `credentialsCount`
+When I execute steps while counter is less than `${credentialsCount}` with increment `1` starting from `0`:
+|step                                                                                    |
+|When I take object from pool `credentials` and save it to scenario variable `credential`|
+|Then `${credential.login}` matches `user-[1-5]`                                         |
+----
+
+The counter starts at `0` and stops before the saved size, so each remaining item is taken once. Using
+`less than or equal to` would try to take one more item than the basket has and stop the test.
 
 === Take an item from the basket
 
