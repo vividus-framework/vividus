@@ -6,10 +6,13 @@ dependencies {
     implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.797')
     implementation('com.amazonaws:aws-java-sdk-secretsmanager')
     implementation(libs.guava)
+    implementation platform(libs.slf4j.bom)
+    implementation(libs.slf4j.api)
 
     testImplementation platform(libs.junit.bom)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platformLauncher)
     testImplementation platform(libs.mockito.bom)
     testImplementation(libs.mockito.junitJupiter)
+    testImplementation(libs.slf4jTest)
 }
