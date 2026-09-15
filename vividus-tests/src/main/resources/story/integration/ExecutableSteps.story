@@ -137,6 +137,15 @@ When I execute steps:
 Then `${iterator}` is = `2`
 
 
+Scenario: Verify step: When I execute steps and assert duration is $comparisonRule `$duration`:$stepsToExecute
+Given I initialize story variable `iterator` with value `0`
+When I execute steps and assert duration is less than `PT5S`:
+|step                                                                              |
+|Then `${iterator}` is = `0`                                                       |
+|Given I initialize story variable `iterator` with value `#{eval(${iterator} + 1)}`|
+Then `${iterator}` is = `1`
+
+
 Scenario: Verify step: When I `$number` times do:$stepsToExecute
 
 Given I initialize story variable `iterator` with value `0`

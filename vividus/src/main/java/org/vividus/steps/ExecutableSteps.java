@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,15 @@ import java.util.Optional;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
+import com.google.common.base.Stopwatch;
+
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.wait.MaxTimesBasedWaiter;
 import org.vividus.variable.VariableScope;
 
@@ -38,11 +41,13 @@ public class ExecutableSteps
     public static final int EXECUTIONS_NUMBER_THRESHOLD = 1000;
 
     private final VariableContext variableContext;
+    private final ISoftAssert softAssert;
     private final VariableComparator variableComparator;
 
-    public ExecutableSteps(VariableContext variableContext)
+    public ExecutableSteps(VariableContext variableContext, ISoftAssert softAssert)
     {
         this.variableContext = variableContext;
+        this.softAssert = softAssert;
         this.variableComparator = new VariableComparator()
         {
             @Override
@@ -98,6 +103,40 @@ public class ExecutableSteps
     public void performAllStepsUnconditionally(SubSteps stepsToExecute)
     {
         stepsToExecute.execute(Optional.empty());
+    }
+
+    /**
+     * Executes steps provided in ExamplesTable, measures their execution duration and asserts it against the expected
+     * duration using the comparison rule.
+     * <br>
+     * Usage example:
+     * <code>
+     * <br>When I execute steps and assert duration is less than `PT5S`:
+     * <br>|step                                                           |
+     * <br>|When I click on element located by `id(submit)`                |
+     * </code>
+     *
+     * @param comparisonRule The duration comparison rule. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param duration       The expected duration in
+     *                       <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format
+     * @param stepsToExecute ExamplesTable with steps to execute
+     */
+    @When("I execute steps and assert duration is $comparisonRule `$duration`:$stepsToExecute")
+    public void performAllStepsAndAssertDuration(ComparisonRule comparisonRule, Duration duration,
+            SubSteps stepsToExecute)
+    {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        stepsToExecute.execute(Optional.empty());
+        softAssert.assertThat("Steps execution duration", stopwatch.elapsed(),
+                comparisonRule.getComparisonRule(duration));
     }
 
     /**

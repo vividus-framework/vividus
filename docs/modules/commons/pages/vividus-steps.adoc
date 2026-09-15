@@ -176,6 +176,29 @@ When I execute steps:
 Then `${var}` is = `1`
 ----
 
+=== Execute steps and assert duration
+
+Executes the steps located in the table, measures their execution duration and asserts it against the expected duration
+using the comparison rule.
+
+[source,gherkin]
+----
+When I execute steps and assert duration is $comparisonRule `$duration`:$stepsToExecute
+----
+
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$duration` - The expected duration in {durations-format-link} format.
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
+
+.Execute steps and verify they complete in less than 5 seconds
+[source,gherkin]
+----
+When I execute steps and assert duration is less than `PT5S`:
+|step                                                                     |
+|Then `${var}` is = `0`                                                   |
+|Given I initialize story variable `var` with value `#{eval(${var} + 1)}` |
+----
+
 === Execute steps N times
 
 Step is designed to execute specified steps while counter with a certain limit matches a comparison rule. On each iteration the counter is increased on specified value, which is allowed to be either positive or negative. The seed value is used as a starting point for iteration. Current iteration index is available within steps to execute as `$\{iterationVariable}`.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.vividus.steps;
 
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -37,6 +40,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,6 +55,7 @@ class ExecutableStepsTests
     private static final String Y = "y";
 
     @Mock private VariableContext variableContext;
+    @Mock private ISoftAssert softAssert;
     @Mock private SubSteps subSteps;
     @InjectMocks private ExecutableSteps executableSteps;
 
@@ -88,6 +93,17 @@ class ExecutableStepsTests
     {
         executableSteps.performAllStepsUnconditionally(subSteps);
         verify(subSteps).execute(Optional.empty());
+    }
+
+    @Test
+    void shouldPerformAllStepsAndAssertDuration()
+    {
+        Duration expected = Duration.ofSeconds(5);
+        executableSteps.performAllStepsAndAssertDuration(ComparisonRule.LESS_THAN, expected, subSteps);
+        verify(subSteps).execute(Optional.empty());
+        verify(softAssert).assertThat(eq("Steps execution duration"),
+                argThat((Duration actual) -> actual != null && !actual.isNegative()),
+                argThat(matcher -> lessThan(expected).toString().equals(matcher.toString())));
     }
 
     @Test
