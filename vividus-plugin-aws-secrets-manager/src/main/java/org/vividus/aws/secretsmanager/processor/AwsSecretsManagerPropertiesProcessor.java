@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,17 +28,22 @@ import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.jayway.jsonpath.PathNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.configuration.AbstractPropertiesProcessor;
 import org.vividus.util.json.JsonPathUtils;
 
 public class AwsSecretsManagerPropertiesProcessor extends AbstractPropertiesProcessor
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsSecretsManagerPropertiesProcessor.class);
     private static final String PATH_SEPARATOR = "/";
+    private static final String DEFAULT_VALUE_SEPARATOR = ":";
     private static final String AWS_DEFAULT_PROFILE = "default";
-    private static final String PROPERTY_REGEX = "([^\\s]+?\\s*,\\s*)?[^\\s]+/[^\\s]+";
+    private static final String PROPERTY_REGEX = "([^\\s]+?\\s*,\\s*)?[^\\s]+/[^\\s:]+(?::.*)?";
     private static final String PROCESSOR_ENABLED_PROPERTY = "secrets-manager.aws-secrets-manager.enabled";
 
     private final LoadingCache<SecretId, String> secretsCache = CacheBuilder.newBuilder()
@@ -87,8 +92,8 @@ public class AwsSecretsManagerPropertiesProcessor extends AbstractPropertiesProc
     protected String processValue(String propertyName, String partOfPropertyValueToProcess)
     {
         Validate.isTrue(partOfPropertyValueToProcess.matches(PROPERTY_REGEX),
-                "The expected property value format is AWS_SECRETS_MANAGER(profile, secret/secret_key) "
-                + "or AWS_SECRETS_MANAGER(secret/secret_key)");
+                "The expected property value format is AWS_SECRETS_MANAGER(profile, secret/secret_key:default_value) "
+                + "or AWS_SECRETS_MANAGER(secret/secret_key:default_value)");
         String[] configVariables = partOfPropertyValueToProcess.split(",", 2);
 
         String profile = AWS_DEFAULT_PROFILE;
@@ -100,10 +105,32 @@ public class AwsSecretsManagerPropertiesProcessor extends AbstractPropertiesProc
         }
 
         String secret = StringUtils.substringBeforeLast(secretPath, PATH_SEPARATOR).strip();
-        String secretString = secretsCache.getUnchecked(new SecretId(profile, secret));
+        String keyWithOptionalDefault = StringUtils.substringAfterLast(secretPath, PATH_SEPARATOR);
+        String[] keyAndDefaultValue = StringUtils.splitPreserveAllTokens(keyWithOptionalDefault,
+                DEFAULT_VALUE_SEPARATOR, 2);
+        String key = keyAndDefaultValue[0];
+        String defaultValue = keyAndDefaultValue.length > 1 ? keyAndDefaultValue[1] : null;
 
-        String key = StringUtils.substringAfterLast(secretPath, PATH_SEPARATOR);
-        return JsonPathUtils.getData(secretString, "$." + key);
+        String secretString = secretsCache.getUnchecked(new SecretId(profile, secret));
+        try
+        {
+            return JsonPathUtils.getData(secretString, "$." + key);
+        }
+        catch (PathNotFoundException thrown)
+        {
+            if (defaultValue != null)
+            {
+                LOGGER.info(
+                        "The secret key '{}' was not found in the secret '{}' retrieved from AWS Secrets Manager "
+                                + "using profile '{}'. Using default value for property '{}'",
+                        key, secret, profile, propertyName);
+                return defaultValue;
+            }
+            throw new IllegalArgumentException(String.format(
+                    "The secret key '%s' was not found in the secret '%s' retrieved from AWS Secrets Manager using "
+                            + "profile '%s'",
+                    key, secret, profile), thrown);
+        }
     }
 
     private record SecretId(String profile, String secret)
