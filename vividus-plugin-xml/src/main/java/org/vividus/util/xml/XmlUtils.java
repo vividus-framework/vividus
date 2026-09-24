@@ -126,7 +126,12 @@ public final class XmlUtils
 
     public static void validateXmlAgainstXsd(String xml, String xsd) throws SAXException, IOException
     {
-        SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        // prohibit the use of all protocols by external entities:
+        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+
+        schemaFactory
                 .newSchema(createStreamSource(xsd))
                 .newValidator()
                 .validate(createStreamSource(xml));
