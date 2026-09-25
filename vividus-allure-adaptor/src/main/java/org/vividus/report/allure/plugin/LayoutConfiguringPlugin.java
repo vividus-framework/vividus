@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -31,35 +30,29 @@ public class LayoutConfiguringPlugin extends DynamicPlugin
     public LayoutConfiguringPlugin(PropertyMappedCollection<Component> tabs,
             PropertyMappedCollection<Component> widgets, PropertyMappedCollection<Component> charts) throws IOException
     {
-        super("layout-configuration", "index.js", () -> {
-            List<String> jsFileLines = new ArrayList<>();
+        super("layout-configuration", "styles.css", () -> {
+            List<String> cssLines = new ArrayList<>();
 
-            String tabsToExclude = tabs.getData().entrySet().stream()
+            tabs.getData().entrySet().stream()
                     .filter(e -> e.getValue().isDisabled())
                     .map(Entry::getKey)
-                    .map("'%s'"::formatted)
-                    .collect(Collectors.joining(","));
-            if (!tabsToExclude.isEmpty())
-            {
-                jsFileLines.add("allure.api.tabs = allure.api.tabs.filter(t => ![%s].includes(t.tabName));".formatted(
-                        tabsToExclude));
-            }
+                    .map(".side-nav__item:has([href=\"#%s\"]) { display: none; }"::formatted)
+                    .forEach(cssLines::add);
 
-            addJsLinesDisablingComponents(widgets, "delete allure.api.widgets.widgets['%s'];", jsFileLines);
-            addJsLinesDisablingComponents(charts, "delete allure.api.widgets.graph['%s'];", jsFileLines);
+            widgets.getData().entrySet().stream()
+                    .filter(e -> e.getValue().isDisabled())
+                    .map(Entry::getKey)
+                    .map("[data-widget-id=\"%s\"] { display: none; }"::formatted)
+                    .forEach(cssLines::add);
 
-            return jsFileLines;
+            charts.getData().entrySet().stream()
+                    .filter(e -> e.getValue().isDisabled())
+                    .map(Entry::getKey)
+                    .map("[data-chart-id=\"%s\"] { display: none; }"::formatted)
+                    .forEach(cssLines::add);
+
+            return cssLines;
         });
-    }
-
-    private static void addJsLinesDisablingComponents(PropertyMappedCollection<Component> components,
-            String jsLineFormat, List<String> jsFileLines)
-    {
-        components.getData().entrySet().stream()
-                .filter(e -> e.getValue().isDisabled())
-                .map(Entry::getKey)
-                .map(jsLineFormat::formatted)
-                .forEach(jsFileLines::add);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
