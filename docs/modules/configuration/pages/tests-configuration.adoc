@@ -152,7 +152,7 @@ e.g., `0`, `#`, specify the way indices are displayed.
 
 |`statistics.print-failures`
 |`false`
-|If set to `true` prints table of failures including: story, scenario, step and error message
+|If set to `true` prints failures in a tree-like structure including: story, scenario, step and error message
 
 |`report.text-length-diff-threshold`
 |`100`

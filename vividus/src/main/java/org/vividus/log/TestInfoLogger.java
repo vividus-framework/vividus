@@ -16,9 +16,6 @@
 
 package org.vividus.log;
 
-import static org.apache.commons.text.WordUtils.wrap;
-
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
@@ -42,20 +39,10 @@ import org.vividus.results.model.Failure;
 import org.vividus.results.model.Statistic;
 import org.vividus.util.ResourceUtils;
 
-import de.vandermeer.asciitable.AT_Context;
-import de.vandermeer.asciitable.AT_Renderer;
-import de.vandermeer.asciitable.AsciiTable;
-import de.vandermeer.asciitable.CWC_LongestLine;
-import de.vandermeer.asciithemes.a7.A7_Grids;
-import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
-
 public final class TestInfoLogger
 {
-    private static final int REGULAR_COLUMN_MAX_WIDTH = 36;
-    private static final int ERROR_COLUMN_MAX_WIDTH = 50;
-
-    private static final int MARGIN = 1;
     private static final String HYPHEN = "-";
+    private static final String SPACE = " ";
     private static final int HEADER_SIZE = 40;
     private static final String CATEGORY_FORMAT = "%s%n %s:%n";
     private static final String NEW_LINE = "%n";
@@ -175,41 +162,42 @@ public final class TestInfoLogger
         message.format(rowsSeparator);
         message.format(row, "TOTAL", story.getTotal(), scenario.getTotal(), step.getTotal());
         message.format(rowsSeparator);
-        resultsProvider.getFailures().ifPresent(failures -> addFailureTable(message, failures));
+        resultsProvider.getFailures().ifPresent(failures -> addFailures(message, failures));
     }
 
-    private void addFailureTable(Formatter message, List<Failure> failures)
+    private void addFailures(Formatter message, List<Failure> failures)
     {
         if (failures.isEmpty())
         {
             message.format("%n%n No Failures & Errors!");
             return;
         }
-        Collections.sort(failures, Comparator.comparing(Failure::getStory)
-                                             .thenComparing(Failure::getScenario)
-                                             .thenComparing(Failure::getStep)
-                                             .thenComparing(Failure::getMessage)
-        );
-        message.format("%n%n Failures & Errors:%n");
-        AT_Context context = new AT_Context();
-        context.setFrameLeftMargin(MARGIN);
-        context.setGrid(A7_Grids.minusBarPlus());
-        AsciiTable table = new AsciiTable(context);
-        table.addRule();
-        table.addRow("STORY", "SCENARIO", "STEP", "ERROR MESSAGE");
-        table.addRule();
-        failures.forEach(f -> table.addRow(
-                wrap(f.getStory(), REGULAR_COLUMN_MAX_WIDTH),
-                wrap(f.getScenario(), REGULAR_COLUMN_MAX_WIDTH),
-                wrap(f.getStep().replaceAll("\n|\r\n", "<br>"), REGULAR_COLUMN_MAX_WIDTH),
-                wrap(f.getMessage(), ERROR_COLUMN_MAX_WIDTH)
-        ));
-        table.addRule();
-        table.setRenderer(AT_Renderer.create().setCWC(new CWC_LongestLine()));
-        table.setPaddingLeftRight(1);
-        table.setPaddingBottom(1);
-        table.setTextAlignment(TextAlignment.LEFT);
-        message.format("%s%n", table.render());
+        failures.sort(Comparator.comparing(Failure::getStory)
+                                .thenComparing(Failure::getScenario)
+                                .thenComparing(Failure::getStep)
+                                .thenComparing(Failure::getMessage));
+        message.format("%n%n Failures & Errors:");
+        String errorIndent = SPACE.repeat("         └── Error: ".length());
+        String currentStory = null;
+        String currentScenario = null;
+        for (Failure f : failures)
+        {
+            if (!f.getStory().equals(currentStory))
+            {
+                currentStory = f.getStory();
+                currentScenario = null;
+                message.format("%n%n Story: %s", currentStory);
+            }
+            if (!f.getScenario().equals(currentScenario))
+            {
+                currentScenario = f.getScenario();
+                message.format("%n └── Scenario: %s", currentScenario);
+            }
+            String step = f.getStep().replaceAll("[\\r\\n]+", SPACE);
+            message.format("%n     └── Step: %s", step);
+            String indentedError = f.getMessage().replaceAll("\\r?\\n", "\n" + errorIndent);
+            message.format("%n         └── Error: %s", indentedError);
+        }
     }
 
     public static void logPropertiesSecurely(Properties properties)
