@@ -7,11 +7,11 @@ include::partial$plugin-installation.adoc[]
 
 == Properties
 
-It's allowed to configure unlimited number of WinRM connections via mechanism of the dynamic properties. The properties prefix example is:
+It is allowed to configure an unlimited number of WinRM connections via the dynamic properties mechanism. The properties prefix example is:
 ```properties
 winrm.server.my-server
 ```
-where `my-server` is a key used to refer WinRm connection in the steps. The key is defined by users, must be unique and can't contain dots.
+where `my-server` is a key used to refer to a WinRM connection in the steps. The key is defined by users, must be unique and cannot contain dots.
 
 :connection-parameters-prefix: winrm.server.<key>.
 :parameters-name: properties
@@ -21,15 +21,14 @@ include::partial$winrm-connection-parameters.adoc[]
 
 === Configure dynamic WinRM connection
 
-Creates a new dynamic WinRM connection from the provided parameters, the
-connection is available only within the story creating the connection.
+Creates a new dynamic WinRM connection from the provided parameters. The connection is available only within the story that creates the connection.
 
 [source,gherkin]
 ----
 When I configure WinRM connection with key `$connectionKey` and parameters:$connectionParameters
 ----
 
-* `$connectionKey` - The key to assign to the creating WinRM connection. In case if the key conflicts with a global connection key, the dynamic connection will take precedence within the story.
+* `$connectionKey` - The key to assign to the created WinRM connection. If the key conflicts with a global connection key, the dynamic connection takes precedence within the story.
 * `$connectionParameters` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with WinRM connection parameters.
 +
 :connection-parameters-prefix:
