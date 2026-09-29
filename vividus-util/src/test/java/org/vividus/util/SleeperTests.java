@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 class SleeperTests
 {
     @Test
     void testSleepDuration()
     {
-        try (var sleeper = Mockito.mockStatic(Sleeper.class))
+        try (var sleeper = mockStatic(Sleeper.class))
         {
             sleeper.when(() -> Sleeper.sleep(Duration.ofMillis(1))).thenCallRealMethod();
 

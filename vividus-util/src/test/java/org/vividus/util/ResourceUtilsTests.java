@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -131,7 +132,7 @@ class ResourceUtilsTests
 
         when(mockedUrl.toURI()).thenThrow(new URISyntaxException("bla", "bla-bla"));
         when(mockedUrl.getFile()).thenReturn(file.getPath());
-        try (var resourceUtils = Mockito.mockStatic(ResourceUtils.class, Mockito.CALLS_REAL_METHODS))
+        try (var resourceUtils = mockStatic(ResourceUtils.class, Mockito.CALLS_REAL_METHODS))
         {
             resourceUtils.when(() -> ResourceUtils.findResource(ResourceUtilsTests.class, RESOURCE_NAME))
                     .thenReturn(mockedUrl);
@@ -154,11 +155,11 @@ class ResourceUtilsTests
     @Test
     void testResourceLoadingIsFailedWithIoException()
     {
-        IOException ioException = new IOException("mocked IOException");
-        try (var ioUtils = Mockito.mockStatic(IOUtils.class))
+        var ioException = new IOException("mocked IOException");
+        try (var ioUtils = mockStatic(IOUtils.class))
         {
             ioUtils.when(() -> IOUtils.toString(any(URL.class), eq(StandardCharsets.UTF_8))).thenThrow(ioException);
-            UncheckedIOException exception = assertThrows(UncheckedIOException.class,
+            var exception = assertThrows(UncheckedIOException.class,
                     () -> ResourceUtils.loadResource(ResourceUtils.class, RESOURCE_NAME));
             assertEquals(ioException, exception.getCause());
         }
