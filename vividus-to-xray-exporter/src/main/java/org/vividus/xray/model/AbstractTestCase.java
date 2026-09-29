@@ -27,6 +27,9 @@ public abstract class AbstractTestCase
     private String description;
     private Set<String> labels;
     private Set<String> components;
+    private String priority;
+    private Set<String> fixVersions;
+    private Set<String> affectedVersions;
 
     public String getType()
     {
@@ -96,5 +99,35 @@ public abstract class AbstractTestCase
     public void setComponents(Set<String> components)
     {
         this.components = components;
+    }
+
+    public String getPriority()
+    {
+        return priority;
+    }
+
+    public void setPriority(String priority)
+    {
+        this.priority = priority;
+    }
+
+    public Set<String> getFixVersions()
+    {
+        return fixVersions;
+    }
+
+    public void setFixVersions(Set<String> fixVersions)
+    {
+        this.fixVersions = fixVersions;
+    }
+
+    public Set<String> getAffectedVersions()
+    {
+        return affectedVersions;
+    }
+
+    public void setAffectedVersions(Set<String> affectedVersions)
+    {
+        this.affectedVersions = affectedVersions;
     }
 }
