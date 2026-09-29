@@ -31,7 +31,7 @@ import org.mockito.Mockito;
 class SleeperTests
 {
     @Test
-    public void testSleepDuration()
+    void testSleepDuration()
     {
         try (var sleeper = Mockito.mockStatic(Sleeper.class))
         {
@@ -44,7 +44,7 @@ class SleeperTests
     }
 
     @Test
-    public void shouldSleepForGivenTimeout() throws InterruptedException
+    void shouldSleepForGivenTimeout() throws InterruptedException
     {
         TimeUnit timeUnit = mock();
         var timeout = 1L;
@@ -53,7 +53,7 @@ class SleeperTests
     }
 
     @Test
-    public void shouldWrapInterruptedExceptionAtSleep() throws InterruptedException
+    void shouldWrapInterruptedExceptionAtSleep() throws InterruptedException
     {
         TimeUnit timeUnit = mock();
         var timeout = 1L;

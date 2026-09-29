@@ -52,27 +52,27 @@ class ResourceUtilsTests
     private Path tempDirectory;
 
     @Test
-    public void testResourceLoadingFromRootAsStringIsSuccessful()
+    void testResourceLoadingFromRootAsStringIsSuccessful()
     {
         assertEquals(ROOT_RESOURCE_CONTENT, normalizeLineFeeds(ResourceUtils.loadResource(RESOURCE_NAME)));
     }
 
     @Test
-    public void testResourceLoadingFromRootAsByteArrayIsSuccessful()
+    void testResourceLoadingFromRootAsByteArrayIsSuccessful()
     {
         assertArrayEquals(ROOT_RESOURCE_CONTENT.getBytes(StandardCharsets.UTF_8),
                 normalizeBytes(ResourceUtils.loadResourceAsByteArray(RESOURCE_NAME)));
     }
 
     @Test
-    public void shouldLoadResourceFromRootAsByteArray() throws IOException
+    void shouldLoadResourceFromRootAsByteArray() throws IOException
     {
         assertArrayEquals(ROOT_RESOURCE_CONTENT.getBytes(StandardCharsets.UTF_8),
                 normalizeBytes(ResourceUtils.loadResourceOrFileAsByteArray(RESOURCE_NAME)));
     }
 
     @Test
-    public void shouldLoadFileAsByteArray() throws IOException
+    void shouldLoadFileAsByteArray() throws IOException
     {
         var file = Files.createFile(tempDirectory.resolve(RESOURCE_NAME)).toFile();
         Files.writeString(file.toPath(), ROOT_RESOURCE_CONTENT, StandardCharsets.UTF_8);
@@ -81,7 +81,7 @@ class ResourceUtilsTests
     }
 
     @Test
-    public void shouldFailIfTryingToLoadFolderAsByteArray() throws IOException
+    void shouldFailIfTryingToLoadFolderAsByteArray() throws IOException
     {
         var resourceNameOrFilePath = tempDirectory.toFile().getAbsolutePath();
         var exception = assertThrows(IllegalArgumentException.class,
@@ -91,7 +91,7 @@ class ResourceUtilsTests
     }
 
     @Test
-    public void shouldFailIfNeitherResourceNorFileIsFoundToBeLoadedAsByteArray()
+    void shouldFailIfNeitherResourceNorFileIsFoundToBeLoadedAsByteArray()
     {
         var resourceNameOrFilePath = "/non-existent.txt";
         var exception = assertThrows(IllegalArgumentException.class,
@@ -101,28 +101,28 @@ class ResourceUtilsTests
     }
 
     @Test
-    public void testResourceLoadingAsStringIsSuccessful()
+    void testResourceLoadingAsStringIsSuccessful()
     {
         assertEquals(RESOURCE_CONTENT,
                 normalizeLineFeeds(ResourceUtils.loadResource(ResourceUtils.class, RESOURCE_NAME)));
     }
 
     @Test
-    public void testResourceLoadingAsByteArrayIsSuccessful()
+    void testResourceLoadingAsByteArrayIsSuccessful()
     {
         assertArrayEquals(RESOURCE_CONTENT.getBytes(StandardCharsets.UTF_8),
                 normalizeBytes(ResourceUtils.loadResourceAsByteArray(ResourceUtils.class, RESOURCE_NAME)));
     }
 
     @Test
-    public void testFileLoadingIsSuccessful()
+    void testFileLoadingIsSuccessful()
     {
         File actual = ResourceUtils.loadFile(ResourceUtils.class, RESOURCE_NAME);
         Assertions.assertTrue(actual.exists());
     }
 
     @Test
-    public void testFileLoadingURISyntaxException() throws URISyntaxException, IOException
+    void testFileLoadingURISyntaxException() throws URISyntaxException, IOException
     {
         URL mockedUrl = mock(URL.class);
 
@@ -140,7 +140,7 @@ class ResourceUtilsTests
     }
 
     @Test
-    public void testUnexistentResourceLoadingIsFailed()
+    void testUnexistentResourceLoadingIsFailed()
     {
         String resourceName = "unexistent-test-resource.txt";
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -151,7 +151,7 @@ class ResourceUtilsTests
     }
 
     @Test
-    public void testResourceLoadingIsFailedWithIoException() throws IOException
+    void testResourceLoadingIsFailedWithIoException() throws IOException
     {
         IOException ioException = new IOException("mocked IOException");
         try (var ioUtils = Mockito.mockStatic(IOUtils.class))
@@ -164,7 +164,7 @@ class ResourceUtilsTests
     }
 
     @Test
-    public void shouldCreateTempFile() throws IOException
+    void shouldCreateTempFile() throws IOException
     {
         String data = "data";
         Path tempFilePath = ResourceUtils.createTempFile("index", ".js", data);
@@ -172,14 +172,14 @@ class ResourceUtilsTests
     }
 
     @Test
-    public void shouldCreateTempFileUsingName() throws IOException
+    void shouldCreateTempFileUsingName() throws IOException
     {
         Path tempFilePath = ResourceUtils.createTempFile("test.json");
         assertThat(tempFilePath.toString(), matchesPattern(".+test.+\\.json"));
     }
 
     @Test
-    public void shouldLoadResourceOrFileAsStream() throws IOException
+    void shouldLoadResourceOrFileAsStream() throws IOException
     {
         try (var inputStream = ResourceUtils.loadResourceOrFileAsStream(RESOURCE_NAME))
         {
