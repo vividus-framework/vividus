@@ -25,26 +25,22 @@ import static org.mockito.Mockito.verify;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-@RunWith(PowerMockRunner.class)
 public class SleeperTests
 {
     @Test
-    @PrepareForTest(Sleeper.class)
-    public void testSleepDuration() throws Exception
+    public void testSleepDuration()
     {
-        PowerMockito.mockStatic(Sleeper.class);
-        PowerMockito.doCallRealMethod().when(Sleeper.class, "sleep", Duration.ofMillis(1));
+        try (var sleeper = Mockito.mockStatic(Sleeper.class))
+        {
+            sleeper.when(() -> Sleeper.sleep(Duration.ofMillis(1))).thenCallRealMethod();
 
-        Sleeper.sleep(Duration.ofMillis(1));
+            Sleeper.sleep(Duration.ofMillis(1));
 
-        PowerMockito.verifyStatic(Sleeper.class);
-        Sleeper.sleep(1, TimeUnit.MILLISECONDS);
+            sleeper.verify(() -> Sleeper.sleep(1, TimeUnit.MILLISECONDS));
+        }
     }
 
     @Test
