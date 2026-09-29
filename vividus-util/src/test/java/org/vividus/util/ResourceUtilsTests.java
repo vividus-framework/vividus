@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,10 +75,10 @@ class ResourceUtilsTests
     @Test
     void shouldLoadFileAsByteArray() throws IOException
     {
-        var file = Files.createFile(tempDirectory.resolve(RESOURCE_NAME)).toFile();
-        Files.writeString(file.toPath(), ROOT_RESOURCE_CONTENT, StandardCharsets.UTF_8);
+        var file = Files.createFile(tempDirectory.resolve(RESOURCE_NAME));
+        Files.writeString(file, ROOT_RESOURCE_CONTENT, StandardCharsets.UTF_8);
         assertArrayEquals(ROOT_RESOURCE_CONTENT.getBytes(StandardCharsets.UTF_8),
-                normalizeBytes(ResourceUtils.loadResourceOrFileAsByteArray(file.getAbsolutePath())));
+                normalizeBytes(ResourceUtils.loadResourceOrFileAsByteArray(file.toAbsolutePath().toString())));
     }
 
     @Test
@@ -124,12 +125,12 @@ class ResourceUtilsTests
     @Test
     void testFileLoadingURISyntaxException() throws URISyntaxException, IOException
     {
-        URL mockedUrl = mock(URL.class);
+        URL mockedUrl = mock();
 
         File file = Files.createFile(tempDirectory.resolve(RESOURCE_NAME)).toFile();
 
-        Mockito.when(mockedUrl.toURI()).thenThrow(new URISyntaxException("bla", "bla-bla"));
-        Mockito.when(mockedUrl.getFile()).thenReturn(file.getPath());
+        when(mockedUrl.toURI()).thenThrow(new URISyntaxException("bla", "bla-bla"));
+        when(mockedUrl.getFile()).thenReturn(file.getPath());
         try (var resourceUtils = Mockito.mockStatic(ResourceUtils.class, Mockito.CALLS_REAL_METHODS))
         {
             resourceUtils.when(() -> ResourceUtils.findResource(ResourceUtilsTests.class, RESOURCE_NAME))
