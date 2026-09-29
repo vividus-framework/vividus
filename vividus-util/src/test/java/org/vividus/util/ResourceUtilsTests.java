@@ -82,7 +82,7 @@ class ResourceUtilsTests
     }
 
     @Test
-    void shouldFailIfTryingToLoadFolderAsByteArray() throws IOException
+    void shouldFailIfTryingToLoadFolderAsByteArray()
     {
         var resourceNameOrFilePath = tempDirectory.toFile().getAbsolutePath();
         var exception = assertThrows(IllegalArgumentException.class,
@@ -152,7 +152,7 @@ class ResourceUtilsTests
     }
 
     @Test
-    void testResourceLoadingIsFailedWithIoException() throws IOException
+    void testResourceLoadingIsFailedWithIoException()
     {
         IOException ioException = new IOException("mocked IOException");
         try (var ioUtils = Mockito.mockStatic(IOUtils.class))
