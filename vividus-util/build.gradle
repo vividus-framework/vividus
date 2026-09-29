@@ -1,50 +1,5 @@
 project.description = 'VIVIDUS utilities'
 
-//Additional SourceSets can be added to the jacocoOfflineSourceSets as needed by
-project.ext.jacocoOfflineSourceSets = [ 'main' ]
-tasks.register('doJacocoOfflineInstrumentation') {
-    dependsOn = [classes, project.configurations.jacocoAnt]
-    inputs.files classes.outputs.files
-    File outputDir = layout.buildDirectory.dir('instrumentedClasses').get().asFile
-    outputs.dir outputDir
-    doFirst {
-        project.delete(outputDir)
-        ant.taskdef(
-            resource: 'org/jacoco/ant/antlib.xml',
-            classpath: project.configurations.jacocoAnt.asPath,
-            uri: 'jacoco'
-        )
-        jacocoOfflineSourceSets.each { sourceSetName ->
-            def instrumentedClassedDir = "${outputDir}/${sourceSetName}"
-            files(sourceSets[sourceSetName].output.classesDirs).each { classesDir ->
-                if (classesDir.exists()) {
-                    ant.'jacoco:instrument'(destdir: instrumentedClassedDir) {
-                        fileset(dir: classesDir, includes: '**/*.class')
-                    }
-                    //Replace the classes dir in the test classpath with the instrumented one
-                    sourceSets.test.runtimeClasspath -= files(classesDir)
-                    sourceSets.test.runtimeClasspath = files(instrumentedClassedDir) + sourceSets.test.runtimeClasspath
-                }
-            }
-        }
-    }
-}
-test.dependsOn doJacocoOfflineInstrumentation
-
-//https://github.com/powermock/powermock/issues/1094
-test {
-    jvmArgs = [
-        '--add-opens=java.base/java.io=ALL-UNNAMED',
-        '--add-opens=java.base/java.lang=ALL-UNNAMED',
-        '--add-opens=java.base/java.net=ALL-UNNAMED',
-        '--add-opens=java.base/java.nio.file=ALL-UNNAMED',
-        '--add-opens=java.base/java.time=ALL-UNNAMED',
-        '--add-opens=java.base/java.util=ALL-UNNAMED',
-        '--add-opens=java.base/java.util.concurrent=ALL-UNNAMED',
-        '--add-opens=java.base/sun.nio.fs=ALL-UNNAMED'
-    ]
-}
-
 dependencies {
     api('org.freemarker:freemarker:2.3.35')
 
@@ -69,12 +24,8 @@ dependencies {
     testImplementation platform(libs.junit.bom)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platformLauncher)
-    testRuntimeOnly(libs.junit.vintageEngine)
-    testCompileOnly('junit:junit:4.13.2')
     testImplementation(libs.hamcrest)
     testImplementation platform(libs.mockito.bom)
     testImplementation(libs.mockito.junitJupiter)
-    testImplementation("com.github.powermock.powermock:powermock-api-mockito2:${versions.powermock}")
-    testImplementation("com.github.powermock.powermock:powermock-module-junit4:${versions.powermock}")
     testCompileOnly("com.github.spotbugs:spotbugs-annotations:${spotbugsVersion}")
 }

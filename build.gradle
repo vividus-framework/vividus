@@ -74,7 +74,6 @@ project.description = 'Vividus'
 ext {
     versions = [
         jbehave:                '6.0.0-alpha.11',
-        powermock:              'a0be5c4bbe',
         jsonPath:               '0e32295fde'
     ]
 }
