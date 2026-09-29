@@ -132,7 +132,8 @@ class BrowserContextProviderTests
     {
         try (var playwrightStaticMock = mockStatic(Playwright.class))
         {
-            playwrightStaticMock.when(Playwright::create).thenReturn(mock(Playwright.class));
+            Playwright playwright = mock();
+            playwrightStaticMock.when(Playwright::create).thenReturn(playwright);
 
             Browser firstBrowserInstance = mock();
             Browser secondBrowserInstance = mock();
