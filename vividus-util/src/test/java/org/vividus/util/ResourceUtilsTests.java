@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
-public class ResourceUtilsTests
+class ResourceUtilsTests
 {
     private static final String RESOURCE_NAME = "test-resource.txt";
     private static final String RESOURCE_CONTENT = "text line" + System.lineSeparator();
