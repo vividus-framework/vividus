@@ -90,6 +90,9 @@
     <bean id="dragAndDropSteps" class="org.vividus.ui.web.playwright.steps.DragAndDropSteps" />
     <bean id="keyboardSteps" class="org.vividus.ui.web.playwright.steps.KeyboardSteps" />
     <bean id="focusSteps" class="org.vividus.ui.web.playwright.steps.FocusSteps" />
+    <bean id="performanceMetrics" class="org.vividus.ui.web.playwright.action.PerformanceMetrics" />
+    <bean id="performanceSteps" class="org.vividus.ui.web.playwright.steps.PerformanceSteps" />
+    <bean id="videoPlayerSteps" class="org.vividus.ui.web.playwright.steps.VideoPlayerSteps" />
 
     <util:list id="stepBeanNames-WebPlaywrightUi" value-type="java.lang.String">
         <idref bean="cookieSteps" />
@@ -114,6 +117,8 @@
         <idref bean="dragAndDropSteps" />
         <idref bean="keyboardSteps" />
         <idref bean="focusSteps" />
+        <idref bean="performanceSteps" />
+        <idref bean="videoPlayerSteps" />
     </util:list>
 
     <util:list id="stepBeanNames-Playwright-Hooks">
