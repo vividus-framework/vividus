@@ -48,6 +48,11 @@ public class PlaywrightCookieSteps extends CookieSteps<Cookie>
 
     /**
      * Adds the cookies provided in the input ExamplesTable.
+     * <p>The actions performed by the step:</p>
+     * <ul>
+     * <li>add the cookies;</li>
+     * <li>refresh the current page (this action is required to apply the changes in cookies).</li>
+     * </ul>
      * <p>The cookie parameters to be defined in the ExamplesTable</p>
      * <ul>
      * <li><b>cookieName</b> - the name of the cookie to set</li>
@@ -65,6 +70,31 @@ public class PlaywrightCookieSteps extends CookieSteps<Cookie>
      */
     @When("I set all cookies for current domain:$parameters")
     public void setAllCookies(ExamplesTable parameters)
+    {
+        setAllCookiesWithoutApply(parameters);
+        uiContext.getCurrentPage().reload();
+    }
+
+    /**
+     * Adds the cookies provided in the input ExamplesTable, but does not apply the changes in cookies. The current
+     * page must be refreshed or the navigation must be performed to apply the cookie changes.
+     * <p>The cookie parameters to be defined in the ExamplesTable</p>
+     * <ul>
+     * <li><b>cookieName</b> - the name of the cookie to set</li>
+     * <li><b>cookieValue</b> - the value of the cookie to set</li>
+     * <li><b>path</b> - the path of the cookie to set</li>
+     * </ul>
+     * <p>Usage example:</p>
+     * <code>
+     * <br>When I set all cookies for current domain without applying changes:
+     * <br>|cookieName   |cookieValue |path |
+     * <br>|cookieAgreed |2           |/    |
+     * </code>
+     *
+     * @param parameters The parameters of the cookies to set as ExamplesTable
+     */
+    @When("I set all cookies for current domain without applying changes:$parameters")
+    public void setAllCookiesWithoutApply(ExamplesTable parameters)
     {
         setCookies(uiContext.getCurrentPage().url(), parameters);
     }
@@ -93,20 +123,54 @@ public class PlaywrightCookieSteps extends CookieSteps<Cookie>
 
     /**
      * Removes all cookies from the current domain.
+     * <p>The actions performed by the step:</p>
+     * <ul>
+     * <li>remove all cookies from the current domain;</li>
+     * <li>refresh the current page (this action is required to apply the changes in cookies).</li>
+     * </ul>
      */
     @When("I remove all cookies from current domain")
     public void removeAllCookies()
+    {
+        removeAllCookiesWithoutApply();
+        uiContext.getCurrentPage().reload();
+    }
+
+    /**
+     * Removes all cookies from the current domain, but does not apply the changes in cookies. The current page
+     * must be refreshed or the navigation must be performed to apply the cookie changes.
+     */
+    @When("I remove all cookies from current domain without applying changes")
+    public void removeAllCookiesWithoutApply()
     {
         cookieManager.deleteAllCookies();
     }
 
     /**
      * Removes the certain cookie from the current domain.
+     * <p>The actions performed by the step:</p>
+     * <ul>
+     * <li>remove the certain cookie from the current domain;</li>
+     * <li>refresh the current page (this action is required to apply the changes in cookies).</li>
+     * </ul>
      *
      * @param cookieName The name of the cookie to remove.
      */
     @When("I remove cookie with name `$cookieName` from current domain")
     public void removeCookie(String cookieName)
+    {
+        removeCookieWithoutApply(cookieName);
+        uiContext.getCurrentPage().reload();
+    }
+
+    /**
+     * Removes the certain cookie from the current domain, but does not apply the changes in cookies. The current
+     * page must be refreshed or the navigation must be performed to apply the cookie changes.
+     *
+     * @param cookieName The name of the cookie to remove.
+     */
+    @When("I remove cookie with name `$cookieName` from current domain without applying changes")
+    public void removeCookieWithoutApply(String cookieName)
     {
         cookieManager.deleteCookie(cookieName);
     }

@@ -454,6 +454,64 @@ When I select `$option` in dropdown located by `$locator`
 When I select `Red` in dropdown located by `id(colors)`
 ----
 
+=== Add an option to selection in dropdown
+
+Adds the option whose https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option#value[value attribute] is equal to the provided value (case-insensitive) to the options already selected in a multi-select dropdown. If the step is applied to a single-select dropdown, the step will fail.
+
+[source,gherkin]
+----
+When I add `$option` to selection in dropdown located by `$locator`
+----
+
+* `$option` - The option to add to the selection.
+* `$locator` - The <<_locator,locator>> used to find dropdown.
+
+.Add option with the value `Green` to selection in dropdown
+[source,gherkin]
+----
+When I add `Green` to selection in dropdown located by `id(colors)`
+----
+
+=== Validate dropdown options
+
+Checks whether dropdown list located by locator equals to expected list of options.
+
+[source,gherkin]
+----
+Then dropdown located by `$locator` contains options:$options
+----
+
+* `$locator` - The <<_locator,locator>> used to find dropdown.
+* `$options` - xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing expected options of the dropdown with the columns `state` (whether the option is selected) and `item` (the visible text of the option).
+
+.Validate dropdown options
+[source,gherkin]
+----
+Then dropdown located by `id(colors)` contains options:
+|state|item |
+|true |Red  |
+|false|Green|
+|false|Blue |
+----
+
+=== Validate selected option in dropdown
+
+Checks whether the currently selected option of a dropdown located by locator is equal to the expected option.
+
+[source,gherkin]
+----
+Then dropdown located by `$locator` exists and selected option is `$option`
+----
+
+* `$locator` - The <<_locator,locator>> used to find dropdown.
+* `$option` - The expected visible text of the selected option.
+
+.Validate selected option in dropdown
+[source,gherkin]
+----
+Then dropdown located by `id(colors)` exists and selected option is `Red`
+----
+
 include::plugins:partial$ui-element-css-property-steps.adoc[]
 
 include::plugins:partial$ui-elements-conditional-iteration-steps.adoc[]

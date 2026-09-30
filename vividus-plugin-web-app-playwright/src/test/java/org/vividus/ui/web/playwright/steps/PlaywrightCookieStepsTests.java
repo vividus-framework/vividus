@@ -18,6 +18,7 @@ package org.vividus.ui.web.playwright.steps;
 
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -50,6 +51,10 @@ class PlaywrightCookieStepsTests
     private static final String COOKIE_WITH_NAME_TEXT = "Cookie with the name that is equal to '";
     private static final String COOKIE_NAME = "SSESSf4342sds23e3t5fs";
     private static final String VARIABLE_NAME = "var";
+    private static final String TEST_URL = "https://www.vividus.org";
+    private static final String COOKIE_ROW_NAME = "hcpsid";
+    private static final String COOKIE_ROW_VALUE = "1";
+    private static final String COOKIE_ROW_PATH = "/";
 
     @Mock private PlaywrightCookieManager cookieManager;
     @Mock private VariableContext variableContext;
@@ -99,15 +104,29 @@ class PlaywrightCookieStepsTests
     @Test
     void testSetAllCookies()
     {
-        String testUrl = "https://www.vividus.org";
         Page page = mock();
-        when(page.url()).thenReturn(testUrl);
+        when(page.url()).thenReturn(TEST_URL);
         when(uiContext.getCurrentPage()).thenReturn(page);
 
         String tableAsString = "|cookieName|cookieValue|path|\n|hcpsid|1|/|\n|hcpsid|1|/|";
         ExamplesTable table = new ExamplesTable(tableAsString);
         cookieSteps.setAllCookies(table);
-        verify(cookieManager, times(2)).addCookie("hcpsid", "1", "/", testUrl);
+        verify(cookieManager, times(2)).addCookie(COOKIE_ROW_NAME, COOKIE_ROW_VALUE, COOKIE_ROW_PATH, TEST_URL);
+        verify(page).reload();
+    }
+
+    @Test
+    void testSetAllCookiesWithoutApply()
+    {
+        Page page = mock();
+        when(page.url()).thenReturn(TEST_URL);
+        when(uiContext.getCurrentPage()).thenReturn(page);
+
+        String tableAsString = "|cookieName|cookieValue|path|\n|hcpsid|1|/|";
+        ExamplesTable table = new ExamplesTable(tableAsString);
+        cookieSteps.setAllCookiesWithoutApply(table);
+        verify(cookieManager).addCookie(COOKIE_ROW_NAME, COOKIE_ROW_VALUE, COOKIE_ROW_PATH, TEST_URL);
+        verify(page, never()).reload();
     }
 
     @Test
@@ -126,19 +145,47 @@ class PlaywrightCookieStepsTests
     @Test
     void shouldRemoveAllCookies()
     {
+        Page page = mock();
+        when(uiContext.getCurrentPage()).thenReturn(page);
+
         cookieSteps.removeAllCookies();
+        var ordered = inOrder(cookieManager, page);
+        ordered.verify(cookieManager).deleteAllCookies();
+        ordered.verify(page).reload();
+        ordered.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void shouldRemoveAllCookiesWithoutApply()
+    {
+        cookieSteps.removeAllCookiesWithoutApply();
         var ordered = inOrder(cookieManager);
         ordered.verify(cookieManager).deleteAllCookies();
         ordered.verifyNoMoreInteractions();
+        verifyNoInteractions(uiContext);
     }
 
     @Test
     void shouldRemoveCookie()
     {
+        Page page = mock();
+        when(uiContext.getCurrentPage()).thenReturn(page);
+
         cookieSteps.removeCookie(COOKIE_NAME);
+        var ordered = inOrder(cookieManager, page);
+        ordered.verify(cookieManager).deleteCookie(COOKIE_NAME);
+        ordered.verify(page).reload();
+        ordered.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void shouldRemoveCookieWithoutApply()
+    {
+        cookieSteps.removeCookieWithoutApply(COOKIE_NAME);
         var ordered = inOrder(cookieManager);
         ordered.verify(cookieManager).deleteCookie(COOKIE_NAME);
         ordered.verifyNoMoreInteractions();
+        verifyNoInteractions(uiContext);
     }
 
     @Test
