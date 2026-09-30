@@ -398,6 +398,147 @@ When I execute javascript `JSON.stringify(window.performance.timing)` and save r
 Then number of JSON elements from `${timings}` by JSON path `$.connectStart` is = 1
 ----
 
+=== Drag and drop steps
+
+This set of steps facilitates the dragging and dropping of elements on a web page.
+
+==== Drag and drop using mouse
+
+Performs drag-and-drop operation for the specified elements.
+
+[source,gherkin]
+----
+When I drag element located by `$draggable` and drop it at $location of element located by `$target`
+----
+
+* `$draggable` - The <<_locator,locator>> used to find the element to be dragged.
+* `$location` - The position inside the target element bounding box to drop the draggable element at (`TOP`, `BOTTOM`, `LEFT`, `RIGHT`, `CENTER`, `LEFT_TOP`, `RIGHT_TOP`, `LEFT_BOTTOM`, `RIGHT_BOTTOM`).
+* `$target` - The <<_locator,locator>> used to find the target element.
+
+.Dragging the image on the page
+[source,gherkin]
+----
+When I drag element located by `id(item-number)` and drop it at RIGHT_BOTTOM of element located by `id(item-number)`
+----
+
+==== Drag and drop simulation
+
+Simulates a drag-and-drop operation for the specified elements, replicating the HTML5 drag and drop events without
+performing an actual mouse-based drag and drop. Use this step when the page-specific implementation of HTML5 drag and
+drop is not compatible with the native mouse-based drag and drop performed by the step above.
+
+[source,gherkin]
+----
+When I simulate drag of element located by `$draggable` and drop at element located by `$target`
+----
+
+* `$draggable` - The <<_locator,locator>> used to find the element to be dragged.
+* `$target` - The <<_locator,locator>> used to find the target element.
+
+.Simulation of dragging an image onto the page
+[source,gherkin]
+----
+When I simulate drag of element located by `id(item-number)` and drop at element located by `id(item-number)`
+----
+
+=== Keyboard steps
+
+==== Press keys
+
+Step for interaction with page via keyboard. Interacts with the current context element if it's set, otherwise
+interacts with the page.
+
+[source,gherkin]
+----
+When I press $keys on keyboard
+----
+
+* `$keys` - Comma-separated list of https://playwright.dev/java/docs/api/class-keyboard#keyboard-press[keys] to be
+pressed.
+
+.Press the ENTER key
+[source,gherkin]
+----
+When I press ENTER on keyboard
+----
+
+=== https://en.wikipedia.org/wiki/Focus_(computing)[Focus] Steps
+
+Focus indicates the act of selecting an element of a graphical user interface. Text entered at the keyboard or pasted
+from a clipboard is sent to the component which has the focus.
+
+==== Set focus on the context element
+
+Sets the focus on the context element, if it can be focused. The focused element is the element that will receive
+keyboard and similar events by default. The step does nothing if the context is not set.
+
+[source,gherkin]
+----
+When I set focus on context element
+----
+
+.Set focus on the element with ID "input-username"
+[source,gherkin]
+----
+When I change context to element located by `id(input-username)`
+When I set focus on context element
+----
+
+==== Set focus on the element
+
+Sets the focus on the element found by the specified locator, if it can be focused. The focused element is the
+element that will receive keyboard and similar events by default.
+
+[source,gherkin]
+----
+When I set focus on element located by `$locator`
+----
+* `$locator` - The <<_locator,locator>> used to find an element.
+
+.Set focus on the element with ID "input-username"
+[source,gherkin]
+----
+When I set focus on element located by `id(input-username)`
+----
+
+==== Check the context element focus state
+
+Checks if the context element is in the provided focus state by comparing the context element and the active
+element. The step does nothing if the context is not set.
+
+[source,gherkin]
+----
+Then context element is $focusState
+----
+* `$focusState` - The state to verify: `in focus` or `not in focus`.
+
+.Check the context element is in focus and do keyboard input
+[source,gherkin]
+----
+Then context element is in focus
+When I press ENTER on keyboard
+----
+
+==== Check the element focus state
+
+Checks if the element found by the specified locator is in the provided focus state by comparing the found element
+and the active element.
+
+[source,gherkin]
+----
+Then element located by `$locator` is $focusState
+----
+* `$locator` - The <<_locator,locator>> used to find an element.
+* `$focusState` - The state to verify: `in focus` or `not in focus`.
+
+.Check the element with ID "input-username" is in focus and do keyboard input
+[source,gherkin]
+----
+Then element located by `id(input-username)` is in focus
+When I change context to element located by `id(input-username)`
+When I press ENTER on keyboard
+----
+
 === Context steps
 ==== Switch to the default context of page
 

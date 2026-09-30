@@ -87,6 +87,9 @@
     <bean id="screenshotTakingSteps" class="org.vividus.ui.steps.ScreenshotTakingSteps" />
     <bean id="checkboxSteps" class="org.vividus.ui.web.playwright.steps.CheckboxSteps" />
     <bean id="sliderSteps" class="org.vividus.ui.web.playwright.steps.SliderSteps" />
+    <bean id="dragAndDropSteps" class="org.vividus.ui.web.playwright.steps.DragAndDropSteps" />
+    <bean id="keyboardSteps" class="org.vividus.ui.web.playwright.steps.KeyboardSteps" />
+    <bean id="focusSteps" class="org.vividus.ui.web.playwright.steps.FocusSteps" />
 
     <util:list id="stepBeanNames-WebPlaywrightUi" value-type="java.lang.String">
         <idref bean="cookieSteps" />
@@ -108,6 +111,9 @@
         <idref bean="screenshotTakingSteps" />
         <idref bean="checkboxSteps" />
         <idref bean="sliderSteps" />
+        <idref bean="dragAndDropSteps" />
+        <idref bean="keyboardSteps" />
+        <idref bean="focusSteps" />
     </util:list>
 
     <util:list id="stepBeanNames-Playwright-Hooks">
