@@ -436,6 +436,64 @@ When I switch to frame located by `id(parent)`
 Then text `Modal Frame Example` exists
 ----
 
+=== Select state in the checkbox
+
+A checkbox is a graphical user interface element. Performs the action with the flag found by the locator. The action is not performed if the checkbox is already in the desired state.
+
+[source,gherkin]
+----
+When I $checkBoxAction checkbox located by `$checkboxLocator`
+----
+
+* `$checkBoxAction` - The action to select a state of the checkbox, either `CHECK` or `UNCHECK`.
+* `$checkboxLocator` - The <<_locator,locator>> used to find the checkbox.
+
+.Check 'Terms & Conditions' checkbox
+[source,gherkin]
+----
+When I check checkbox located by `checkboxName(terms-and-conditions)`
+----
+
+=== Slider steps
+
+Steps allow to interact with https://www.w3schools.com/jsref/dom_obj_range.asp[slider] (input element with type = "range").
+
+==== Set value in the slider
+
+Set the specified value in the slider.
+
+[source,gherkin]
+----
+When I set value `$value` in slider located by `$locator`
+----
+
+* `$value` - The value to set in the slider. In most cases, it is a numeric value in the range of [0, 100].
+* `$locator` - The <<_locator,locator>> used to find a slider.
+
+.Set the value into the middle of the slider
+[source,gherkin]
+----
+When I set value `50` in slider located by `id(test_slider)`
+----
+
+==== Check value of the slider
+
+Check that the actual value in the slider equals to the value provided in the step.
+
+[source,gherkin]
+----
+Then value `$value` is selected in slider located by `$locator`
+----
+
+* `$value` - The expected value in the slider. In most cases, it is a numeric value in the range of [0, 100].
+* `$locator` - The <<_locator,locator>> used to find a slider.
+
+.Check that the value is set in the middle of the slider
+[source,gherkin]
+----
+Then value `50` is selected in slider located by `id(test_slider)`
+----
+
 === Select an option in dropdown
 
 Selects the first https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option[option] in dropdown whose https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option#value[value attribute] is equal to the provided value (case-insensitive).
