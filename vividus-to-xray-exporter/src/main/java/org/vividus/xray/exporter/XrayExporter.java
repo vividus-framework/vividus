@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-import org.apache.commons.lang3.function.FailableBiFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,25 +156,7 @@ public class XrayExporter
 
             AbstractTestCaseParameters parameters = parameterFactories.get(testCaseType).apply(scenarioTitle, scenario);
             AbstractTestCase testCase = testCaseFactories.get(testCaseType).apply(parameters);
-            if (testCaseId == null)
-            {
-                if (xrayExporterOptions.getTestCaseOptions().isUseScenarioTitleAsDescription())
-                {
-                    testCase.setDescription(scenario.getTitle());
-                }
-
-                testCaseId = xrayFacade.createTestCase(testCase);
-            }
-            else if (xrayExporterOptions.isTestCaseUpdatesEnabled())
-            {
-                xrayFacade.updateTestCase(testCaseId, testCase);
-            }
-            else
-            {
-                LOGGER.atInfo().addArgument(testCase::getType)
-                               .addArgument(testCaseId)
-                               .log("Skipping update of {} Test Case with ID {}");
-            }
+            testCaseId = createOrUpdateTestCase(testCaseId, testCase, scenario);
             createTestsLink(testCaseId, scenario);
             return Optional.of(entry(testCaseId, scenario));
         }
@@ -190,8 +171,35 @@ public class XrayExporter
         return Optional.empty();
     }
 
+    private String createOrUpdateTestCase(String testCaseId, AbstractTestCase testCase, Scenario scenario)
+            throws IOException, NonEditableIssueStatusException, JiraConfigurationException, NotUniqueMetaValueException
+    {
+        String key = testCaseId;
+        if (key == null)
+        {
+            if (xrayExporterOptions.getTestCaseOptions().isUseScenarioTitleAsDescription())
+            {
+                testCase.setDescription(scenario.getTitle());
+            }
+            key = xrayFacade.createTestCase(testCase);
+            updateTestRepositoryPath(key, scenario);
+        }
+        else if (xrayExporterOptions.isTestCaseUpdatesEnabled())
+        {
+            xrayFacade.updateTestCase(key, testCase);
+            updateTestRepositoryPath(key, scenario);
+        }
+        else
+        {
+            LOGGER.atInfo().addArgument(testCase::getType)
+                           .addArgument(key)
+                           .log("Skipping update of {} Test Case with ID {}");
+        }
+        return key;
+    }
+
     private ManualTestCaseParameters createManualTestCaseParameters(String storyTitle, Scenario scenario)
-            throws SyntaxException
+            throws SyntaxException, NotUniqueMetaValueException
     {
         ManualTestCaseParameters parameters = new ManualTestCaseParameters();
         fillTestCaseParameters(parameters, TestCaseType.MANUAL, scenario);
@@ -200,6 +208,7 @@ public class XrayExporter
     }
 
     private CucumberTestCaseParameters createCucumberTestCaseParameters(Scenario scenario)
+            throws NotUniqueMetaValueException
     {
         CucumberTestCaseParameters parameters = new CucumberTestCaseParameters();
         fillTestCaseParameters(parameters, TestCaseType.CUCUMBER, scenario);
@@ -210,12 +219,25 @@ public class XrayExporter
     }
 
     private <T extends AbstractTestCaseParameters> void fillTestCaseParameters(T parameters, TestCaseType type,
-            Scenario scenario)
+            Scenario scenario) throws NotUniqueMetaValueException
     {
         parameters.setType(type);
         parameters.setLabels(scenario.getMetaValues("xray.labels"));
         parameters.setComponents(scenario.getMetaValues("xray.components"));
+        parameters.setPriority(scenario.getUniqueMetaValue("xray.priority").orElse(null));
+        parameters.setFixVersions(XrayMetaValues.getCommaSeparatedValues(scenario, "xray.fixVersions"));
+        parameters.setAffectedVersions(XrayMetaValues.getCommaSeparatedValues(scenario, "xray.affectedVersions"));
         parameters.setSummary(scenario.getTitle());
+    }
+
+    private void updateTestRepositoryPath(String testCaseId, Scenario scenario)
+            throws IOException, NotUniqueMetaValueException
+    {
+        Optional<String> path = scenario.getUniqueMetaValue("xray.testRepositoryPath");
+        if (path.isPresent())
+        {
+            xrayFacade.updateTestRepositoryPath(testCaseId, path.get());
+        }
     }
 
     private void publishErrors()
@@ -250,8 +272,9 @@ public class XrayExporter
 
     @FunctionalInterface
     private interface CreateParametersFunction
-            extends FailableBiFunction<String, Scenario, AbstractTestCaseParameters, SyntaxException>
     {
+        AbstractTestCaseParameters apply(String title, Scenario scenario)
+                throws SyntaxException, NotUniqueMetaValueException;
     }
 
     @FunctionalInterface

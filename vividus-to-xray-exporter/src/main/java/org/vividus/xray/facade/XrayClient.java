@@ -38,4 +38,13 @@ public interface XrayClient
      * @throws IOException in case of any I/O errors
      */
     void addTestsToTestSet(String testSetKey, List<String> testCaseKeys) throws IOException;
+
+    /**
+     * Adds a test case to an existing folder in the Xray Test Repository.
+     *
+     * @param testCaseKey the Jira issue key of the test case
+     * @param path the repository folder path
+     * @throws IOException in case of any I/O errors
+     */
+    void addTestToRepository(String testCaseKey, String path) throws IOException;
 }

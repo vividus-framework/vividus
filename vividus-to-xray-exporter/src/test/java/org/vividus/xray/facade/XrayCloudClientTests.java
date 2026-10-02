@@ -234,6 +234,25 @@ class XrayCloudClientTests
     }
 
     @Test
+    void shouldAddTestToRepositoryFolder() throws IOException
+    {
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
+                .thenReturn(authResponse());
+        when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(GRAPHQL_PATH))))
+                .thenReturn(response(HttpStatus.SC_OK,
+                        "{\"data\":{\"getTests\":{\"results\":[{\"issueId\":\"uuid-test-1\","
+                                + "\"jira\":{\"project\":{\"id\":\"12345\"}}}]}}}"))
+                .thenReturn(response(HttpStatus.SC_OK,
+                        "{\"data\":{\"addTestsToFolder\":{\"folder\":{\"path\":\"/Applications/Web\"},"
+                                + "\"warnings\":[]}}}"));
+
+        createClient().addTestToRepository(TEST_CASE_KEY, "Applications/Web");
+
+        verify(httpClient, times(2)).execute(argThat(req -> req != null && requestMatchesUrl(req, GRAPHQL_URL)
+                && requestHasBearerToken(req, TOKEN)));
+    }
+
+    @Test
     void shouldLogWarningWhenAddTestsToTestSetReturnsWarning() throws IOException
     {
         when(httpClient.execute(argThat(req -> req != null && req.getPath().endsWith(AUTH_PATH))))
