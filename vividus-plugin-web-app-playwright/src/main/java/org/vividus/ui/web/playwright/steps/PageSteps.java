@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.StringComparisonRule;
+import org.vividus.ui.web.action.NavigateActions;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.ui.web.playwright.BrowserContextProvider;
 import org.vividus.ui.web.playwright.UiContext;
@@ -36,14 +37,17 @@ public class PageSteps
 {
     private final BrowserContextProvider browserContextProvider;
     private final UiContext uiContext;
+    private final NavigateActions navigateActions;
     private final WebApplicationConfiguration webApplicationConfiguration;
     private final ISoftAssert softAssert;
 
     public PageSteps(BrowserContextProvider browserContextProvider, UiContext uiContext,
+            NavigateActions navigateActions,
             WebApplicationConfiguration webApplicationConfiguration, ISoftAssert softAssert)
     {
         this.uiContext = uiContext;
         this.browserContextProvider = browserContextProvider;
+        this.navigateActions = navigateActions;
         this.webApplicationConfiguration = webApplicationConfiguration;
         this.softAssert = softAssert;
     }
@@ -113,7 +117,7 @@ public class PageSteps
     @When("I refresh page")
     public void refreshPage()
     {
-        uiContext.getCurrentPage().reload();
+        navigateActions.refresh();
     }
 
     /**

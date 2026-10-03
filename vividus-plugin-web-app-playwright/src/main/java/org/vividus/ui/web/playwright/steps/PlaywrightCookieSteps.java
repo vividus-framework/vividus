@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,52 +21,25 @@ import java.util.Set;
 import com.microsoft.playwright.options.Cookie;
 
 import org.jbehave.core.annotations.When;
-import org.jbehave.core.model.ExamplesTable;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.web.CookieSteps;
 import org.vividus.ui.web.action.CookieManager;
-import org.vividus.ui.web.playwright.UiContext;
+import org.vividus.ui.web.action.NavigateActions;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
 public class PlaywrightCookieSteps extends CookieSteps<Cookie>
 {
-    private final UiContext uiContext;
-    private final CookieManager<Cookie> cookieManager;
     private final VariableContext variableContext;
 
-    public PlaywrightCookieSteps(UiContext uiContext, CookieManager<Cookie> cookieManager,
+    public PlaywrightCookieSteps(CookieManager<Cookie> cookieManager, NavigateActions navigateActions,
             VariableContext variableContext, JsonUtils jsonUtils, ISoftAssert softAssert)
     {
-        super(cookieManager, cookie -> cookie.name, cookie -> cookie, variableContext, jsonUtils, softAssert);
-        this.uiContext = uiContext;
-        this.cookieManager = cookieManager;
+        super(cookieManager, cookie -> cookie.name, cookie -> cookie, navigateActions, variableContext, jsonUtils,
+                softAssert);
         this.variableContext = variableContext;
-    }
-
-    /**
-     * Adds the cookies provided in the input ExamplesTable.
-     * <p>The cookie parameters to be defined in the ExamplesTable</p>
-     * <ul>
-     * <li><b>cookieName</b> - the name of the cookie to set</li>
-     * <li><b>cookieValue</b> - the value of the cookie to set</li>
-     * <li><b>path</b> - the path of the cookie to set</li>
-     * </ul>
-     * <p>Usage example:</p>
-     * <code>
-     * <br>When I set all cookies for current domain:
-     * <br>|cookieName   |cookieValue |path |
-     * <br>|cookieAgreed |2           |/    |
-     * </code>
-     *
-     * @param parameters The parameters of the cookies to set as ExamplesTable
-     */
-    @When("I set all cookies for current domain:$parameters")
-    public void setAllCookies(ExamplesTable parameters)
-    {
-        setCookies(uiContext.getCurrentPage().url(), parameters);
     }
 
     /**
@@ -89,25 +62,5 @@ public class PlaywrightCookieSteps extends CookieSteps<Cookie>
     {
         assertCookieIsSet(StringComparisonRule.IS_EQUAL_TO, cookieName)
                 .ifPresent(cookie -> variableContext.putVariable(scopes, variableName, cookie.value));
-    }
-
-    /**
-     * Removes all cookies from the current domain.
-     */
-    @When("I remove all cookies from current domain")
-    public void removeAllCookies()
-    {
-        cookieManager.deleteAllCookies();
-    }
-
-    /**
-     * Removes the certain cookie from the current domain.
-     *
-     * @param cookieName The name of the cookie to remove.
-     */
-    @When("I remove cookie with name `$cookieName` from current domain")
-    public void removeCookie(String cookieName)
-    {
-        cookieManager.deleteCookie(cookieName);
     }
 }

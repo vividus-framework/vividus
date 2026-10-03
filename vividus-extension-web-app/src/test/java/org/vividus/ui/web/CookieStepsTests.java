@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,17 @@ package org.vividus.ui.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +40,7 @@ import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.web.action.CookieManager;
+import org.vividus.ui.web.action.NavigateActions;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
@@ -48,6 +52,7 @@ class CookieStepsTests
     private static final String VARIABLE_NAME = "var";
 
     @Mock private CookieManager<Cookie> cookieManager;
+    @Mock private NavigateActions navigateActions;
     @Mock private VariableContext variableContext;
     @Mock private JsonUtils jsonUtils;
     @Mock private ISoftAssert softAssert;
@@ -56,8 +61,8 @@ class CookieStepsTests
     @BeforeEach
     void beforeEach()
     {
-        cookieSteps = new CookieSteps<>(cookieManager, Cookie::name, cookie -> cookie, variableContext, jsonUtils,
-                softAssert);
+        cookieSteps = new CookieSteps<>(cookieManager, Cookie::name, cookie -> cookie, navigateActions, variableContext,
+                jsonUtils, softAssert);
     }
 
     @Test
@@ -102,7 +107,8 @@ class CookieStepsTests
     void shouldThrowAnExceptionIfCurrentUrlIsNotDefined()
     {
         ExamplesTable table = mock();
-        var iae = assertThrows(IllegalArgumentException.class, () -> cookieSteps.setCookies(null, table));
+        when(navigateActions.getCurrentUrl()).thenReturn(null);
+        var iae = assertThrows(IllegalArgumentException.class, () -> cookieSteps.setAllCookies(table));
         assertEquals("Current page URL is not provided. Please make sure to navigate to the correct page",
                 iae.getMessage());
     }
@@ -110,15 +116,67 @@ class CookieStepsTests
     @Test
     void shouldSetAllCookies()
     {
+        testSetAllCookies(cookieSteps::setAllCookies);
+        verify(navigateActions).refresh();
+    }
+
+    @Test
+    void shoutSetAllCookiesWithoutApplyingChanges()
+    {
+        testSetAllCookies(cookieSteps::setAllCookiesWithoutApply);
+        verifyNoMoreInteractions(navigateActions);
+    }
+
+    private void testSetAllCookies(Consumer<ExamplesTable> test)
+    {
         var testUrl = "https://www.vividus.org";
+        when(navigateActions.getCurrentUrl()).thenReturn(testUrl);
         var tableAsString = """
                 |cookieName|cookieValue|path|
-                |hcpsid    |1          |/   |
-                |hcpsid    |1          |/   |
+                |c1        |1          |/   |
+                |c1        |1          |/   |
                 """;
         var table = new ExamplesTable(tableAsString);
-        cookieSteps.setCookies(testUrl, table);
-        verify(cookieManager, times(2)).addCookie("hcpsid", "1", "/", testUrl);
+        test.accept(table);
+        verify(cookieManager, times(2)).addCookie("c1", "1", "/", testUrl);
+    }
+
+    @Test
+    void shouldRemoveAllCookies()
+    {
+        cookieSteps.removeAllCookies();
+        var ordered = inOrder(cookieManager, navigateActions);
+        ordered.verify(cookieManager).deleteAllCookies();
+        ordered.verify(navigateActions).refresh();
+        ordered.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void shouldRemoveAllCookiesWithoutApplyingChanges()
+    {
+        cookieSteps.removeAllCookiesWithoutApply();
+        var ordered = inOrder(cookieManager, navigateActions);
+        ordered.verify(cookieManager).deleteAllCookies();
+        ordered.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void shouldRemoveCookie()
+    {
+        cookieSteps.removeCookie(COOKIE_NAME);
+        var ordered = inOrder(cookieManager, navigateActions);
+        ordered.verify(cookieManager).deleteCookie(COOKIE_NAME);
+        ordered.verify(navigateActions).refresh();
+        ordered.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void shouldRemoveCookieWithoutApplyingChanges()
+    {
+        cookieSteps.removeCookieWithoutApply(COOKIE_NAME);
+        var ordered = inOrder(cookieManager, navigateActions);
+        ordered.verify(cookieManager).deleteCookie(COOKIE_NAME);
+        ordered.verifyNoMoreInteractions();
     }
 
     record Cookie(String name)
