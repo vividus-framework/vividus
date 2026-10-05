@@ -4,6 +4,7 @@ plugins {
 
 ext.buildSystemPath = file("${System.env.VIVIDUS_BUILD_SYSTEM_HOME?:buildSystemRootDir}/${buildSystemVersion}")
 
+apply from: "${buildSystemPath}/gradle/buildscript-repositories.gradle"
 apply from: "${buildSystemPath}/gradle/project.gradle"
 apply from: "${buildSystemPath}/gradle/jacoco.gradle"
 
