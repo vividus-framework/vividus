@@ -320,6 +320,66 @@ When I execute steps with delay `PT1S` at most 5 times while variable `var` is l
 Then `${var}` is = `3`
 ----
 
+=== Execute steps for each table row
+
+Executes the steps once for every row of the table. The current row is available within the steps as `$\{row}` and its
+zero-based index as `$\{rowIndex}`. Column values are read by column name, for example `$\{row.name}`.
+
+[source,gherkin]
+----
+When I execute steps:$stepsToExecute for each row of table:$table
+----
+
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column `step` containing the steps to execute for each row.
+* `$table` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] to iterate.
+
+.Greet each person from the table
+[source,gherkin]
+----
+When I execute steps:
+|step                                                                                      |
+|Given I initialize scenario variable `greet-${rowIndex}` with value `Hello, ${row.name}` |
+for each row of table:
+|name |
+|Alice|
+|Bob  |
+Then `${greet-0}` is = `Hello, Alice`
+Then `${greet-1}` is = `Hello, Bob`
+----
+
+=== Execute steps for each row of a table stored in a variable
+
+Executes the steps once for every row of the table stored in the variable. The variable must contain a table, for
+example one saved by
+xref:commons:vividus-steps.adoc#_initialize_variable_with_a_table[Initialize variable with a table]. The current row is
+available within the steps as `$\{row}` and its zero-based index as `$\{rowIndex}`. Column values are read by column
+name, for example `$\{row.name}`.
+
+[source,gherkin]
+----
+When I execute steps:$stepsToExecute for each row of table from variable `$variableName`
+----
+
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column `step` containing the steps to execute for each row.
+* `$variableName` - The name of the variable that contains the table.
++
+NOTE: Exactly variable name (e.g. `users`) is expected here, *not* variable reference: pass:[<s>${users}</s>]
+
+.Greet each person from a previously saved table
+[source,gherkin]
+----
+When I initialize scenario variable `users` with values:
+|name |
+|Alice|
+|Bob  |
+When I execute steps:
+|step                                                                                      |
+|Given I initialize scenario variable `greet-${rowIndex}` with value `Hello, ${row.name}` |
+for each row of table from variable `users`
+Then `${greet-0}` is = `Hello, Alice`
+Then `${greet-1}` is = `Hello, Bob`
+----
+
 === Execute steps if a condition is "true"
 
 Steps designed to execute specified steps if result of a condition is "true".

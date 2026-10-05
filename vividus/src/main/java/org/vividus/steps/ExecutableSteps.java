@@ -20,6 +20,8 @@ import static org.apache.commons.lang3.Validate.inclusiveBetween;
 import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.time.Duration;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
@@ -31,6 +33,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.When;
+import org.jbehave.core.model.ExamplesTable;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.wait.MaxTimesBasedWaiter;
@@ -259,6 +262,78 @@ public class ExecutableSteps
     {
         Object variable = variableContext.getVariable(name);
         return variable == null || variableComparator.compare(variable, comparisonRule, expectedValue);
+    }
+
+    /**
+     * Executes the steps once for every row of the table. The current row is available within the steps as
+     * <code>${row}</code> (a column value as <code>${row.columnName}</code>) and its zero-based index as
+     * <code>${rowIndex}</code>.
+     * <br>
+     * Usage example:
+     * <pre>
+     * When I execute steps:
+     * |step                            |
+     * |Then `${row.name}` is = `Alice` |
+     * |Then `${rowIndex}` is = `0`     |
+     * for each row of table:
+     * |name |age|
+     * |Alice|30 |
+     * </pre>
+     *
+     * @param stepsToExecute The steps to execute for each row
+     * @param table          The table to iterate
+     */
+    @When(value = "I execute steps:$stepsToExecute for each row of table:$table", priority = 1)
+    public void executeStepsForEachRowOfTable(SubSteps stepsToExecute, ExamplesTable table)
+    {
+        executeForEachRow(table.getRows(), stepsToExecute);
+    }
+
+    /**
+     * Executes the steps once for every row of the table stored in the variable. The variable must contain a table, for
+     * example one saved by
+     * <code>When I initialize $scopes variable `$variableName` with values:$examplesTable</code>. The current row is
+     * available within the steps as <code>${row}</code> (a column value as <code>${row.columnName}</code>) and its
+     * zero-based index as <code>${rowIndex}</code>.
+     * <br>
+     * Usage example:
+     * <pre>
+     * When I execute steps:
+     * |step                            |
+     * |Then `${row.name}` is = `Alice` |
+     * |Then `${rowIndex}` is = `0`     |
+     * for each row of table from variable `users`
+     * </pre>
+     *
+     * @param stepsToExecute The steps to execute for each row
+     * @param variableName   The name of the variable that contains the table. Exactly the variable name is expected,
+     *                       not a variable reference
+     */
+    @When(value = "I execute steps:$stepsToExecute for each row of table from variable `$variableName`", priority = 1)
+    public void executeStepsForEachRowOfTableFromVariable(SubSteps stepsToExecute, String variableName)
+    {
+        executeForEachRow(asTableRows(variableName), stepsToExecute);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<? extends Map<String, ?>> asTableRows(String variableName)
+    {
+        Object variable = variableContext.getVariable(variableName);
+        isTrue(variable != null, "Variable `%s` is not set", variableName);
+        isTrue(variable instanceof List<?> rows && rows.stream().allMatch(Map.class::isInstance),
+                "The variable `%s` must contain a table", variableName);
+        return (List<? extends Map<String, ?>>) variable;
+    }
+
+    private void executeForEachRow(List<? extends Map<String, ?>> rows, SubSteps stepsToExecute)
+    {
+        int rowIndex = 0;
+        for (Map<String, ?> row : rows)
+        {
+            variableContext.putVariable(VariableScope.STEP, "row", row);
+            variableContext.putVariable(VariableScope.STEP, "rowIndex", rowIndex++);
+            stepsToExecute.execute(Optional.empty());
+        }
     }
 
     /**
