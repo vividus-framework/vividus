@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -32,10 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -46,7 +49,13 @@ import org.vividus.variable.VariableScope;
 @ExtendWith(MockitoExtension.class)
 class ExecutableStepsTests
 {
+    private static final String ROW = "row";
+    private static final String ROW_INDEX = "rowIndex";
+    private static final String NAME = "name";
+    private static final String ALICE = "Alice";
+    private static final String BOB = "Bob";
     private static final String KEY = "key";
+    private static final String NOT_A_TABLE = "The variable `key` must contain a table";
     private static final String ITERATION_VARIABLE = "iterationVariable";
     private static final String VALUE = "value";
     private static final String ONE = "1";
@@ -183,6 +192,84 @@ class ExecutableStepsTests
     {
         executableSteps.executeStepsWithPollingInterval(Duration.ZERO, 10, KEY, ComparisonRule.LESS_THAN, 1, subSteps);
         verify(subSteps, times(10)).execute(Optional.empty());
+    }
+
+    @Test
+    void shouldExecuteStepsForEachRowOfTable()
+    {
+        ExamplesTable table = new ExamplesTable("|name|\n|" + ALICE + "|\n|" + BOB + "|");
+        List<Map<String, String>> rows = table.getRows();
+        executableSteps.executeStepsForEachRowOfTable(subSteps, table);
+        verifyRowIterations(rows.get(0), rows.get(1));
+    }
+
+    @Test
+    void shouldNotExecuteStepsWhenTableHasNoRows()
+    {
+        executableSteps.executeStepsForEachRowOfTable(subSteps, new ExamplesTable("|name|"));
+        verifyNoInteractions(variableContext, subSteps);
+    }
+
+    @Test
+    void shouldExecuteStepsForEachRowOfTableFromVariable()
+    {
+        Map<String, String> firstRow = Map.of(NAME, ALICE);
+        Map<String, String> secondRow = Map.of(NAME, BOB);
+        when(variableContext.getVariable(KEY)).thenReturn(List.of(firstRow, secondRow));
+        executableSteps.executeStepsForEachRowOfTableFromVariable(subSteps, KEY);
+        verify(variableContext).getVariable(KEY);
+        verifyRowIterations(firstRow, secondRow);
+    }
+
+    @Test
+    void shouldNotExecuteStepsWhenVariableTableHasNoRows()
+    {
+        when(variableContext.getVariable(KEY)).thenReturn(List.of());
+        executableSteps.executeStepsForEachRowOfTableFromVariable(subSteps, KEY);
+        verify(variableContext).getVariable(KEY);
+        verifyNoMoreInteractions(variableContext);
+        verifyNoInteractions(subSteps);
+    }
+
+    @Test
+    void shouldFailWhenVariableWithTableIsNotSet()
+    {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> executableSteps.executeStepsForEachRowOfTableFromVariable(subSteps, KEY));
+        assertEquals("Variable `key` is not set", exception.getMessage());
+        verifyNoInteractions(subSteps);
+    }
+
+    @Test
+    void shouldFailWhenVariableIsNotATable()
+    {
+        when(variableContext.getVariable(KEY)).thenReturn(List.of(VALUE));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> executableSteps.executeStepsForEachRowOfTableFromVariable(subSteps, KEY));
+        assertEquals(NOT_A_TABLE, exception.getMessage());
+        verifyNoInteractions(subSteps);
+    }
+
+    @Test
+    void shouldFailWhenVariableValueIsNotATable()
+    {
+        when(variableContext.getVariable(KEY)).thenReturn(VALUE);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> executableSteps.executeStepsForEachRowOfTableFromVariable(subSteps, KEY));
+        assertEquals(NOT_A_TABLE, exception.getMessage());
+        verifyNoInteractions(subSteps);
+    }
+
+    private void verifyRowIterations(Map<String, String> firstRow, Map<String, String> secondRow)
+    {
+        InOrder inOrder = inOrder(variableContext, subSteps);
+        inOrder.verify(variableContext).putVariable(VariableScope.STEP, ROW, firstRow);
+        inOrder.verify(variableContext).putVariable(VariableScope.STEP, ROW_INDEX, 0);
+        inOrder.verify(subSteps).execute(Optional.empty());
+        inOrder.verify(variableContext).putVariable(VariableScope.STEP, ROW, secondRow);
+        inOrder.verify(variableContext).putVariable(VariableScope.STEP, ROW_INDEX, 1);
+        inOrder.verify(subSteps).execute(Optional.empty());
+        verifyNoMoreInteractions(variableContext, subSteps);
     }
 
     @Test

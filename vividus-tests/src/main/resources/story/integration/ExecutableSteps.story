@@ -175,3 +175,56 @@ When I execute steps with delay `PT0.5S` at most 2 times while variable `var` is
 |step                                                                       |
 |Given I initialize scenario variable `var` with value `#{eval(${var} + 1)}`|
 Then `${var}` is = `7`
+
+Scenario: Verify step: When I execute steps:$stepsToExecute for each row of table:$table
+Given I initialize story variable `iterator` with value `0`
+When I execute steps:
+|step                                                                                |
+|Given I initialize story variable `iterator` with value `#{eval(${iterator} + 1)}` |
+for each row of table:
+|name|
+Then `${iterator}` is = `0`
+When I execute steps:
+{headerSeparator=!, valueSeparator=!}
+!step                                                                                              !
+!Given I initialize scenario variable `name-${rowIndex}` with value `${row.name}`                  !
+!When the condition `true` is true I do                                                            !
+!|step                                                                                            |!
+!|Given I initialize scenario variable `age-${rowIndex}` with value `${row.age}`                  |!
+for each row of table:
+|name |age|
+|Alice|30 |
+|Bob  |25 |
+Then `${name-0}` is = `Alice`
+Then `${age-0}` is = `30`
+Then `${name-1}` is = `Bob`
+Then `${age-1}` is = `25`
+Then `${iterator}` is = `0`
+When variable `row` is not set I do:
+|step                                                                |
+|Given I initialize scenario variable `row-reset` with value `true`  |
+When variable `rowIndex` is not set I do:
+|step                                                                     |
+|Given I initialize scenario variable `rowIndex-reset` with value `true`  |
+Then `${row-reset}` is = `true`
+Then `${rowIndex-reset}` is = `true`
+
+Scenario: Verify step: When I execute steps:$stepsToExecute for each row of table from variable `$variableName`
+When I initialize scenario variable `people` with values:
+|name|
+|Ann |
+|Ben |
+When I execute steps:
+|step                                                                              |
+|Given I initialize scenario variable `person-${rowIndex}` with value `${row.name}`|
+for each row of table from variable `people`
+Then `${person-0}` is = `Ann`
+Then `${person-1}` is = `Ben`
+When variable `row` is not set I do:
+|step                                                                |
+|Given I initialize scenario variable `row-reset` with value `true`  |
+When variable `rowIndex` is not set I do:
+|step                                                                     |
+|Given I initialize scenario variable `rowIndex-reset` with value `true`  |
+Then `${row-reset}` is = `true`
+Then `${rowIndex-reset}` is = `true`
