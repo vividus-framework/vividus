@@ -27,9 +27,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 public class BrandLogoPlugin extends DynamicPlugin
 {
     private static final String CSS_TEMPLATE = """
-            .side-nav__brand {%n\
-              background: url('%s') no-repeat left center !important;%n\
-              background-size: 44px 44px !important;%n\
+            .side-nav__brand-icon {%n\
+              background: url('%s') no-repeat center !important;%n\
+              background-size: 100%% 100%% !important;%n\
             }""";
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH")
