@@ -205,6 +205,11 @@ public class XrayFacade
         xrayClient.addTestsToTestSet(testSetKey, testCaseKeys);
     }
 
+    public void updateTestRepositoryPath(String testCaseKey, String path) throws IOException
+    {
+        xrayClient.addTestToRepository(testCaseKey, path);
+    }
+
     private void checkIfIssueEditable(JiraEntity jiraEntity) throws NonEditableIssueStatusException
     {
         String status = jiraEntity.getStatus();
