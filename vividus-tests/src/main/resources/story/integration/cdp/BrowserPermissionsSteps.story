@@ -1,8 +1,8 @@
 Meta:
     @capability.webSocketUrl true
 
-!-- The location is emulated once the geolocation permission is granted, otherwise Chrome tries to get a real location
-!-- from the OS provider, which is slow and non-deterministic (e.g. on Windows).
+!-- The location is emulated up-front (before the permission is denied/granted), otherwise Chrome tries to get a real
+!-- location from the OS provider once the permission is granted, which is slow and non-deterministic (e.g. on Windows).
 
 Lifecycle:
 Examples:
