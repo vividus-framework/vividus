@@ -5,6 +5,10 @@ Meta:
 !-- location from the OS provider once the permission is granted, which is slow and non-deterministic (e.g. on Windows).
 
 Lifecycle:
+After:
+Scope: SCENARIO
+When I reset Geolocation emulation
+
 Examples:
 {transformer=FROM_LANDSCAPE}
 |denyInfoLocator|xpath(//p[contains(., 'User denied Geolocation')])|
@@ -21,7 +25,6 @@ When I set state of `geolocation` browser permission to `granted` for `${vividus
 When I refresh page
 Then text `Latitude: <latitude>` exists
 Then text `Longitude: <longitude>` exists
-When I reset Geolocation emulation
 
 
 Scenario: Verify step: When I set state of `$permission` browser permission to `$state`
@@ -33,7 +36,6 @@ When I set state of `geolocation` browser permission to `granted`
 When I refresh page
 Then text `Latitude: <latitude>` exists
 Then text `Longitude: <longitude>` exists
-When I reset Geolocation emulation
 
 
 Scenario: Verify step: When I configure browser permissions:$permissions
@@ -49,4 +51,3 @@ When I configure browser permissions:
 When I refresh page
 Then text `Latitude: <latitude>` exists
 Then text `Longitude: <longitude>` exists
-When I reset Geolocation emulation
