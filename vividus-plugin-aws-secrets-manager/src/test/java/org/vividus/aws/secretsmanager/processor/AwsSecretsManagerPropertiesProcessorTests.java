@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
@@ -49,9 +48,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
+import software.amazon.awssdk.services.secretsmanager.model.ResourceNotFoundException;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class AwsSecretsManagerPropertiesProcessorTests
@@ -78,25 +82,22 @@ class AwsSecretsManagerPropertiesProcessorTests
     @ParameterizedTest
     void shouldProcessValue(String profile, String secretId, String valueToProcess)
     {
-        GetSecretValueResult result = new GetSecretValueResult().withSecretString(SECRET_STRING);
+        GetSecretValueResponse result = GetSecretValueResponse.builder().secretString(SECRET_STRING).build();
 
-        try (MockedStatic<AWSSecretsManagerClient> clientStatic = mockStatic(AWSSecretsManagerClient.class);
-                MockedConstruction<ProfileCredentialsProvider> credentialsProviderMock = mockConstruction(
-                        ProfileCredentialsProvider.class,
-                        (mock, context) -> assertEquals(profile, context.arguments().get(0))))
+        try (MockedStatic<SecretsManagerClient> clientStatic = mockStatic(SecretsManagerClient.class))
         {
-            AWSSecretsManagerClientBuilder builder = mock(AWSSecretsManagerClientBuilder.class);
-            AWSSecretsManager client = mock(AWSSecretsManager.class);
+            SecretsManagerClientBuilder builder = mock(SecretsManagerClientBuilder.class);
+            SecretsManagerClient client = mock(SecretsManagerClient.class);
 
-            clientStatic.when(AWSSecretsManagerClient::builder).thenReturn(builder);
-            when(builder.withCredentials(any(ProfileCredentialsProvider.class))).thenReturn(builder);
+            clientStatic.when(SecretsManagerClient::builder).thenReturn(builder);
+            when(builder.credentialsProvider(any())).thenReturn(builder);
             when(builder.build()).thenReturn(client);
             ArgumentCaptor<GetSecretValueRequest> requestCaptor = ArgumentCaptor.forClass(GetSecretValueRequest.class);
             when(client.getSecretValue(requestCaptor.capture())).thenReturn(result);
 
             String value = processor.processValue(PROP_NAME, valueToProcess);
             assertEquals("value", value);
-            assertEquals(secretId, requestCaptor.getValue().getSecretId());
+            assertEquals(secretId, requestCaptor.getValue().secretId());
         }
     }
 
@@ -127,20 +128,17 @@ class AwsSecretsManagerPropertiesProcessorTests
     @ParameterizedTest
     void shouldHandleResourceNotFoundExceptionFromCache(String valueToProcess)
     {
-        try (MockedStatic<AWSSecretsManagerClient> clientStatic = mockStatic(AWSSecretsManagerClient.class);
-                MockedConstruction<ProfileCredentialsProvider> credentialsProviderMock = mockConstruction(
-                        ProfileCredentialsProvider.class,
-                        (mock, context) -> assertEquals("profileX", context.arguments().get(0))))
+        try (MockedStatic<SecretsManagerClient> clientStatic = mockStatic(SecretsManagerClient.class))
         {
-            AWSSecretsManagerClientBuilder builder = mock(AWSSecretsManagerClientBuilder.class);
-            AWSSecretsManager client = mock(AWSSecretsManager.class);
+            SecretsManagerClientBuilder builder = mock(SecretsManagerClientBuilder.class);
+            SecretsManagerClient client = mock(SecretsManagerClient.class);
 
-            clientStatic.when(AWSSecretsManagerClient::builder).thenReturn(builder);
-            when(builder.withCredentials(any(ProfileCredentialsProvider.class))).thenReturn(builder);
+            clientStatic.when(SecretsManagerClient::builder).thenReturn(builder);
+            when(builder.credentialsProvider(any())).thenReturn(builder);
             when(builder.build()).thenReturn(client);
 
             when(client.getSecretValue(any(GetSecretValueRequest.class)))
-                    .thenThrow(new ResourceNotFoundException("not found"));
+                    .thenThrow(ResourceNotFoundException.builder().message("not found").build());
 
             UncheckedExecutionException exception = assertThrows(UncheckedExecutionException.class,
                     () -> processor.processValue(PROP_NAME, valueToProcess));
