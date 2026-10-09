@@ -11,6 +11,7 @@ dependencies {
     implementation platform(libs.slf4j.bom)
     implementation(libs.slf4j.api)
     implementation(libs.jakarta.injectApi)
+    implementation(libs.guava)
 
     testImplementation platform(libs.junit.bom)
     testImplementation(libs.junit.jupiter)
