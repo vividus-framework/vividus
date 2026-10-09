@@ -29,7 +29,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
+import com.google.common.base.Suppliers;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Strings;
 import org.jbehave.core.annotations.AsParameters;
@@ -63,6 +65,7 @@ public class S3BucketSteps
     private final AwsServiceClientsContext clientsContext;
     private final VariableContext variableContext;
     private final DateUtils dateUtils;
+    private final Supplier<S3Client> defaultClient = Suppliers.memoize(() -> S3Client.builder().build());
 
     public S3BucketSteps(AwsServiceClientsContext clientsContext, VariableContext variableContext, DateUtils dateUtils)
     {
@@ -73,7 +76,7 @@ public class S3BucketSteps
 
     private S3Client getS3Client()
     {
-        return clientsContext.getServiceClient(S3Client::builder, () -> S3Client.builder().build());
+        return clientsContext.getServiceClient(S3Client::builder, defaultClient);
     }
 
     /**
