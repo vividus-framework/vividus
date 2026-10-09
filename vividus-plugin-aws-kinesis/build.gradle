@@ -5,6 +5,7 @@ dependencies {
     implementation platform(libs.awssdk.bom)
     implementation('software.amazon.awssdk:kinesis')
     implementation project(':vividus-extension-aws')
+    implementation(libs.guava)
     implementation platform(libs.slf4j.bom)
     implementation(libs.slf4j.api)
 

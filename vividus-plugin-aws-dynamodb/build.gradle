@@ -7,6 +7,7 @@ dependencies {
     implementation('software.amazon.awssdk:sts')
     implementation project(':vividus-extension-aws')
     implementation project(':vividus-util')
+    implementation(libs.guava)
     implementation platform(libs.slf4j.bom)
     implementation(libs.slf4j.api)
 

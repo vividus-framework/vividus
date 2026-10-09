@@ -5,6 +5,7 @@ dependencies {
     implementation platform(libs.awssdk.bom)
     implementation('software.amazon.awssdk:lambda')
     implementation project(':vividus-extension-aws')
+    implementation(libs.guava)
 
     testImplementation platform(libs.junit.bom)
     testImplementation(libs.junit.jupiter)
