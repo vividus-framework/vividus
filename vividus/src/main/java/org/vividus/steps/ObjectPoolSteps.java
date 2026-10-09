@@ -68,13 +68,55 @@ public class ObjectPoolSteps
     @Given("I initialize object pool `$poolName` with data:$data")
     public void initializeObjectPool(String poolName, ExamplesTable data)
     {
-        List<Map<String, String>> objects = data.getRows();
-        Collections.shuffle(objects);
+        List<Map<String, String>> objects = toShuffledObjects(data);
         ObjectPool existingPool = pools.putIfAbsent(poolName, new ObjectPool(objects));
         Validate.validState(existingPool == null, "The object pool with the name '%s' is already initialized",
                 poolName);
-        LOGGER.atInfo().addArgument(poolName).addArgument(objects::size)
-                .log("The object pool with the name '{}' is initialized with {} element(s)");
+        logPoolSize(poolName, objects, "The object pool with the name '{}' is initialized with {} element(s)");
+    }
+
+    /**
+     * Adds objects to an already initialized object pool. The added objects are shuffled and appended to the pool, so
+     * they become available for subsequent take operations. Adding objects to a pool that has not been initialized
+     * results in an error.
+     *
+     * @param poolName The name of the object pool to add the objects to.
+     * @param data     The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with the objects to add to the pool,
+     *                 every row is stored as a separate object represented by a map of the column names to the values.
+     */
+    @Given("I add objects to object pool `$poolName`:$data")
+    public void addObjectsToPool(String poolName, ExamplesTable data)
+    {
+        ObjectPool pool = getInitializedPool(poolName);
+        List<Map<String, String>> objects = toShuffledObjects(data);
+        pool.add(objects);
+        logPoolSize(poolName, objects, "The object pool with the name '{}' is replenished with {} element(s)");
+    }
+
+    /**
+     * Saves the number of objects currently available in the pool to the variable. Taken objects are not included until
+     * they are returned back to the pool. The saved number can be used to iterate over the remaining objects. The size
+     * is a snapshot: if another thread adds objects to the same pool at the same time, the saved number can be
+     * inaccurate.
+     *
+     * @param poolName     The name of the object pool to get the size of.
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     * <i>Available scopes:</i>
+     * <ul>
+     * <li><b>STEP</b> - the variable will be available only within the step,
+     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     * <li><b>STORY</b> - the variable will be available within the whole story,
+     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * </ul>
+     * @param variableName The name of the variable to store the pool size.
+     */
+    @When("I save size of object pool `$poolName` to $scopes variable `$variableName`")
+    public void saveObjectPoolSize(String poolName, Set<VariableScope> scopes, String variableName)
+    {
+        int size = getInitializedPool(poolName).size();
+        variableContext.putVariable(scopes, variableName, size);
+        LOGGER.atInfo().addArgument(poolName).addArgument(size)
+                .log("The size of the object pool with the name '{}' is {}");
     }
 
     /**
@@ -96,8 +138,7 @@ public class ObjectPoolSteps
     @When("I take object from pool `$poolName` and save it to $scopes variable `$variableName`")
     public void takeObjectFromPool(String poolName, Set<VariableScope> scopes, String variableName)
     {
-        ObjectPool pool = pools.get(poolName);
-        Validate.validState(pool != null, "The object pool with the name '%s' is not initialized", poolName);
+        ObjectPool pool = getInitializedPool(poolName);
         Map<String, String> object = pool.take(poolName);
         if (returnObjectsAfterStoryCompletion)
         {
@@ -113,6 +154,25 @@ public class ObjectPoolSteps
         {
             getTakenObjects().forEach((poolName, objects) -> objects.forEach(pools.get(poolName)::giveBack));
         }
+    }
+
+    private ObjectPool getInitializedPool(String poolName)
+    {
+        ObjectPool pool = pools.get(poolName);
+        Validate.validState(pool != null, "The object pool with the name '%s' is not initialized", poolName);
+        return pool;
+    }
+
+    private static List<Map<String, String>> toShuffledObjects(ExamplesTable data)
+    {
+        List<Map<String, String>> objects = data.getRows();
+        Collections.shuffle(objects);
+        return objects;
+    }
+
+    private static void logPoolSize(String poolName, List<Map<String, String>> objects, String message)
+    {
+        LOGGER.atInfo().addArgument(poolName).addArgument(objects::size).log(message);
     }
 
     private Map<String, List<Map<String, String>>> getTakenObjects()
@@ -139,6 +199,16 @@ public class ObjectPoolSteps
         private void giveBack(Map<String, String> object)
         {
             objects.add(object);
+        }
+
+        private void add(List<Map<String, String>> objectsToAdd)
+        {
+            objects.addAll(objectsToAdd);
+        }
+
+        private int size()
+        {
+            return objects.size();
         }
     }
 }

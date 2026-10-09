@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 
 import java.time.Duration;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BooleanSupplier;
 
 import org.hamcrest.Matcher;
@@ -185,12 +186,13 @@ public class SetContextSteps
     }
 
     /**
-     * Switch the focus of future browser commands to the new <b>tab</b>.
+     * Switch the focus of future browser commands to the next <b>tab</b>.
      * Actions performed at this step:
      * <ul>
      * <li>Gets identifier of the currently active tab;
-     * <li>Switches focus to the first available tab with another identifier. So if currently there are 3 opened
-     * tabs #1, #2, #3 and tab #2 is active one, using this step will switch focus to the tab #3;
+     * <li>Switches focus to the next tab after the currently active one. So if currently there are 3 opened
+     * tabs #1, #2, #3 and tab #2 is active one, using this step will switch focus to the tab #3. If the active tab
+     * is the last one, the step switches to the first tab;
      * </ul>
      * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context reference</i></a>
      */
@@ -199,19 +201,18 @@ public class SetContextSteps
     {
         WebDriver driver = webDriverProvider.get();
         String currentTab = driver.getWindowHandle();
-        Set<String> allTabs = driver.getWindowHandles();
+        List<String> allTabs = new ArrayList<>(driver.getWindowHandles());
         LOGGER.atInfo().addArgument(allTabs::size).log("Total number of opened tabs is {}");
-        allTabs.stream()
-            .filter(windowHandle -> !windowHandle.equals(currentTab))
-            .findFirst()
-            .ifPresentOrElse(
-                    newTab -> {
-                        LOGGER.info("Switching to a new tab");
-                        driver.switchTo().window(newTab);
-                        resetContext();
-                    },
-                    () -> descriptiveSoftAssert.recordFailedAssertion("Tab to switch is not found")
-            );
+        if (allTabs.size() <= 1)
+        {
+            descriptiveSoftAssert.recordFailedAssertion("Tab to switch is not found");
+            return;
+        }
+        int currentIndex = allTabs.indexOf(currentTab);
+        String newTab = allTabs.get((currentIndex + 1) % allTabs.size());
+        LOGGER.info("Switching to a new tab");
+        driver.switchTo().window(newTab);
+        resetContext();
     }
 
     /**

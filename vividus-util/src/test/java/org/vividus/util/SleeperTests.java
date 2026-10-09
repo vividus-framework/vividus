@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,35 +20,31 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.jupiter.api.Test;
 
-@RunWith(PowerMockRunner.class)
-public class SleeperTests
+class SleeperTests
 {
     @Test
-    @PrepareForTest(Sleeper.class)
-    public void testSleepDuration() throws Exception
+    void testSleepDuration()
     {
-        PowerMockito.mockStatic(Sleeper.class);
-        PowerMockito.doCallRealMethod().when(Sleeper.class, "sleep", Duration.ofMillis(1));
+        try (var sleeper = mockStatic(Sleeper.class))
+        {
+            sleeper.when(() -> Sleeper.sleep(Duration.ofMillis(1))).thenCallRealMethod();
 
-        Sleeper.sleep(Duration.ofMillis(1));
+            Sleeper.sleep(Duration.ofMillis(1));
 
-        PowerMockito.verifyStatic(Sleeper.class);
-        Sleeper.sleep(1, TimeUnit.MILLISECONDS);
+            sleeper.verify(() -> Sleeper.sleep(1, TimeUnit.MILLISECONDS));
+        }
     }
 
     @Test
-    public void shouldSleepForGivenTimeout() throws InterruptedException
+    void shouldSleepForGivenTimeout() throws InterruptedException
     {
         TimeUnit timeUnit = mock();
         var timeout = 1L;
@@ -57,7 +53,7 @@ public class SleeperTests
     }
 
     @Test
-    public void shouldWrapInterruptedExceptionAtSleep() throws InterruptedException
+    void shouldWrapInterruptedExceptionAtSleep() throws InterruptedException
     {
         TimeUnit timeUnit = mock();
         var timeout = 1L;

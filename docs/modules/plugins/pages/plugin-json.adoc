@@ -342,6 +342,8 @@ Given I initialize scenario variable `oneLineJson` with value `#{formatToOneLine
 )}`
 ----
 
+include::commons:partial$json-expressions.adoc[]
+
 == Steps
 
 :json-path: <<JSON Path, JSON path>>

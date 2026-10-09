@@ -1,0 +1,163 @@
+=== Network Conditions Emulation
+
+There are two different steps for network emulation. They look similar, but they control different things:
+
+[cols="1,2,2"]
+|===
+|What you want to test |Use this step |What it changes
+
+|Offline banner, disabled buttons, or any UI/logic that checks whether the browser is online
+|<<_override_network_state>>
+|What the page *thinks* about the network (browser online/offline status and connection info). Does *not* slow down or block real requests by itself.
+
+|Slow loading, spinners, timeouts, retries, or a degraded experience on a slow connection
+|<<_emulate_network_conditions>>
+|How real network requests *behave* (latency, throughput, blocked requests). Can also target only specific URLs. Does *not* change browser online/offline status by itself.
+
+|Both: the page should report a slow/offline network *and* requests should actually be affected
+|Use both steps together
+|Page state and real request behavior.
+|===
+
+[NOTE]
+====
+Both steps use similar fields (`offline`, `downloadThroughput`, `uploadThroughput`, `latency`) because they describe the same network quality values.
+The difference is *where* those values are applied:
+
+* In <<_override_network_state>>, the values are only *reported* to the page (what the application can read from the browser).
+* In <<_emulate_network_conditions>>, the values actually *control* request behavior (slower/blocked traffic).
+
+Setting `latency: 400` in override network state does not delay requests.
+Setting `latency: 400` in emulate network conditions does.
+====
+
+IMPORTANT: The steps are only supported by Chrome browser.
+
+==== Override network state
+
+Makes the page believe that the network state has changed.
+
+Choose this step when the application reads browser online/offline status or connection information and changes UI or logic based on that.
+
+This step alone is *not* enough if you need requests to become slow or fail. For that, use <<_emulate_network_conditions>> as well.
+
+[source,gherkin]
+----
+When I override network state with configuration:`$jsonConfiguration`
+----
+
+* `$jsonConfiguration` - The JSON containing network state *reported to the page*.
+Expected JSON fields include:
+** `offline` - The boolean flag. `true` to report the browser as offline, `false` to report it as online.
+** `downloadThroughput` - The number specifying download throughput in bytes/sec *reported* to the page. Use `-1` for no limit. Does not throttle requests.
+** `uploadThroughput` - The number specifying upload throughput in bytes/sec *reported* to the page. Use `-1` for no limit. Does not throttle requests.
+** `latency` - The number specifying latency in milliseconds *reported* to the page. Does not delay requests.
+.Show offline UI when the application checks browser online status
+[source,gherkin]
+----
+Given I am on page with URL `https://example.com`
+When I override network state with configuration:`{
+    "offline": true,
+    "downloadThroughput": 0,
+    "uploadThroughput": 0,
+    "latency": 0
+}`
+When I refresh page
+Then text `You are offline` exists
+----
+
+==== Emulate network conditions
+
+Changes how network requests actually behave.
+
+Choose this step when you need requests to be slower, limited in speed, or blocked, for example to verify loading indicators, timeouts, retries, or behavior under Slow 3G-like conditions.
+
+This step alone is *not* enough if the application decides what to show based on browser online/offline status. For that, use <<_override_network_state>> as well.
+
+[source,gherkin]
+----
+When I emulate network conditions with configuration:`$jsonConfiguration`
+----
+
+* `$jsonConfiguration` - The JSON containing network conditions rules *applied to real requests*.
+** `matchedNetworkConditions` - The array of rules. If several rules match a request, the first matching rule is used.
+*** `urlPattern` - The string with a URL pattern that selects which requests the rule applies to. This is *not* file-path / Ant-style globbing: matching uses the https://urlpattern.spec.whatwg.org/[URLPattern] constructor string syntax, and the pattern must be absolute. Use an empty string (`""`) to match *all* requests. `*` is a URLPattern wildcard (for example, `https://api.example.com/*` matches paths under that origin).
+*** `downloadThroughput` - The number specifying maximal download throughput in bytes/sec *applied to matching requests*. Use `-1` to disable download throttling.
+*** `uploadThroughput` - The number specifying maximal upload throughput in bytes/sec *applied to matching requests*. Use `-1` to disable upload throttling.
+*** `latency` - The number specifying extra delay in milliseconds *applied to matching requests*.
+*** `offline` - The boolean flag. `true` to block matching requests.
+.Slow down all requests
+[source,gherkin]
+----
+When I emulate network conditions with configuration:`{
+    "matchedNetworkConditions": [
+        {
+            "urlPattern": "",
+            "downloadThroughput": 50000,
+            "uploadThroughput": 50000,
+            "latency": 400
+        }
+    ]
+}`
+----
+
+.Slow down only API requests
+[source,gherkin]
+----
+When I emulate network conditions with configuration:`{
+    "matchedNetworkConditions": [
+        {
+            "urlPattern": "https://api.example.com/*",
+            "downloadThroughput": 20000,
+            "uploadThroughput": 10000,
+            "latency": 500
+        }
+    ]
+}`
+----
+
+==== Use both steps together
+
+Use both steps when the scenario must be realistic: the page should see the updated network state, and requests should actually be throttled or blocked.
+
+.Emulate a slow connection for both page state and requests
+[source,gherkin]
+----
+When I override network state with configuration:`{
+    "offline": false,
+    "downloadThroughput": 50000,
+    "uploadThroughput": 50000,
+    "latency": 400
+}`
+When I emulate network conditions with configuration:`{
+    "matchedNetworkConditions": [
+        {
+            "urlPattern": "",
+            "downloadThroughput": 50000,
+            "uploadThroughput": 50000,
+            "latency": 400
+        }
+    ]
+}`
+----
+
+==== Reset network conditions emulation
+
+Resets both overridden network state and emulated network conditions back to defaults.
+
+[source,gherkin]
+----
+When I reset network conditions emulation
+----
+
+.Reset after overriding network state
+[source,gherkin]
+----
+When I override network state with configuration:`{
+    "offline": true,
+    "downloadThroughput": 0,
+    "uploadThroughput": 0,
+    "latency": 0
+}`
+When I reset network conditions emulation
+----

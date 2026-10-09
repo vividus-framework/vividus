@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,58 +39,53 @@ import java.nio.file.Path;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Strings;
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mockito;
 
-@RunWith(PowerMockRunner.class)
-public class ResourceUtilsTests
+class ResourceUtilsTests
 {
     private static final String RESOURCE_NAME = "test-resource.txt";
     private static final String RESOURCE_CONTENT = "text line" + System.lineSeparator();
     private static final String ROOT_RESOURCE_CONTENT = "root" + System.lineSeparator();
 
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    @TempDir
+    private Path tempDirectory;
 
     @Test
-    public void testResourceLoadingFromRootAsStringIsSuccessful()
+    void testResourceLoadingFromRootAsStringIsSuccessful()
     {
         assertEquals(ROOT_RESOURCE_CONTENT, normalizeLineFeeds(ResourceUtils.loadResource(RESOURCE_NAME)));
     }
 
     @Test
-    public void testResourceLoadingFromRootAsByteArrayIsSuccessful()
+    void testResourceLoadingFromRootAsByteArrayIsSuccessful()
     {
         assertArrayEquals(ROOT_RESOURCE_CONTENT.getBytes(StandardCharsets.UTF_8),
                 normalizeBytes(ResourceUtils.loadResourceAsByteArray(RESOURCE_NAME)));
     }
 
     @Test
-    public void shouldLoadResourceFromRootAsByteArray() throws IOException
+    void shouldLoadResourceFromRootAsByteArray() throws IOException
     {
         assertArrayEquals(ROOT_RESOURCE_CONTENT.getBytes(StandardCharsets.UTF_8),
                 normalizeBytes(ResourceUtils.loadResourceOrFileAsByteArray(RESOURCE_NAME)));
     }
 
     @Test
-    public void shouldLoadFileAsByteArray() throws IOException
+    void shouldLoadFileAsByteArray() throws IOException
     {
-        var file = folder.newFile(RESOURCE_NAME);
-        Files.writeString(file.toPath(), ROOT_RESOURCE_CONTENT, StandardCharsets.UTF_8);
+        var file = Files.createFile(tempDirectory.resolve(RESOURCE_NAME));
+        Files.writeString(file, ROOT_RESOURCE_CONTENT, StandardCharsets.UTF_8);
         assertArrayEquals(ROOT_RESOURCE_CONTENT.getBytes(StandardCharsets.UTF_8),
-                normalizeBytes(ResourceUtils.loadResourceOrFileAsByteArray(file.getAbsolutePath())));
+                normalizeBytes(ResourceUtils.loadResourceOrFileAsByteArray(file.toAbsolutePath().toString())));
     }
 
     @Test
-    public void shouldFailIfTryingToLoadFolderAsByteArray() throws IOException
+    void shouldFailIfTryingToLoadFolderAsByteArray()
     {
-        var resourceNameOrFilePath = folder.getRoot().getAbsolutePath();
+        var resourceNameOrFilePath = tempDirectory.toFile().getAbsolutePath();
         var exception = assertThrows(IllegalArgumentException.class,
                 () -> ResourceUtils.loadResourceOrFileAsByteArray(resourceNameOrFilePath));
         assertEquals("Neither resource with name '" + Strings.CS.prependIfMissing(resourceNameOrFilePath, "/")
@@ -95,7 +93,7 @@ public class ResourceUtilsTests
     }
 
     @Test
-    public void shouldFailIfNeitherResourceNorFileIsFoundToBeLoadedAsByteArray()
+    void shouldFailIfNeitherResourceNorFileIsFoundToBeLoadedAsByteArray()
     {
         var resourceNameOrFilePath = "/non-existent.txt";
         var exception = assertThrows(IllegalArgumentException.class,
@@ -105,44 +103,46 @@ public class ResourceUtilsTests
     }
 
     @Test
-    public void testResourceLoadingAsStringIsSuccessful()
+    void testResourceLoadingAsStringIsSuccessful()
     {
         assertEquals(RESOURCE_CONTENT,
                 normalizeLineFeeds(ResourceUtils.loadResource(ResourceUtils.class, RESOURCE_NAME)));
     }
 
     @Test
-    public void testResourceLoadingAsByteArrayIsSuccessful()
+    void testResourceLoadingAsByteArrayIsSuccessful()
     {
         assertArrayEquals(RESOURCE_CONTENT.getBytes(StandardCharsets.UTF_8),
                 normalizeBytes(ResourceUtils.loadResourceAsByteArray(ResourceUtils.class, RESOURCE_NAME)));
     }
 
     @Test
-    public void testFileLoadingIsSuccessful()
+    void testFileLoadingIsSuccessful()
     {
         File actual = ResourceUtils.loadFile(ResourceUtils.class, RESOURCE_NAME);
         Assertions.assertTrue(actual.exists());
     }
 
     @Test
-    @PrepareForTest({ URL.class, ResourceUtils.class })
-    public void testFileLoadingURISyntaxException() throws URISyntaxException, IOException
+    void testFileLoadingURISyntaxException() throws URISyntaxException, IOException
     {
-        PowerMockito.spy(ResourceUtils.class);
-        URL mockedUrl = PowerMockito.mock(URL.class);
+        URL mockedUrl = mock();
 
-        File file = folder.newFile(RESOURCE_NAME);
+        File file = Files.createFile(tempDirectory.resolve(RESOURCE_NAME)).toFile();
 
-        PowerMockito.when(ResourceUtils.findResource(ResourceUtilsTests.class, RESOURCE_NAME)).thenReturn(mockedUrl);
-        PowerMockito.when(mockedUrl.toURI()).thenThrow(new URISyntaxException("bla", "bla-bla"));
-        PowerMockito.when(mockedUrl.getFile()).thenReturn(file.getPath());
-        File actual = ResourceUtils.loadFile(ResourceUtilsTests.class, RESOURCE_NAME);
-        assertThat(actual.getAbsolutePath(), equalTo(file.getAbsolutePath()));
+        when(mockedUrl.toURI()).thenThrow(new URISyntaxException("bla", "bla-bla"));
+        when(mockedUrl.getFile()).thenReturn(file.getPath());
+        try (var resourceUtils = mockStatic(ResourceUtils.class, Mockito.CALLS_REAL_METHODS))
+        {
+            resourceUtils.when(() -> ResourceUtils.findResource(ResourceUtilsTests.class, RESOURCE_NAME))
+                    .thenReturn(mockedUrl);
+            File actual = ResourceUtils.loadFile(ResourceUtilsTests.class, RESOURCE_NAME);
+            assertThat(actual.getAbsolutePath(), equalTo(file.getAbsolutePath()));
+        }
     }
 
     @Test
-    public void testUnexistentResourceLoadingIsFailed()
+    void testUnexistentResourceLoadingIsFailed()
     {
         String resourceName = "unexistent-test-resource.txt";
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -153,19 +153,20 @@ public class ResourceUtilsTests
     }
 
     @Test
-    @PrepareForTest(IOUtils.class)
-    public void testResourceLoadingIsFailedWithIoException() throws IOException
+    void testResourceLoadingIsFailedWithIoException()
     {
-        PowerMockito.mockStatic(IOUtils.class);
-        IOException ioException = new IOException("mocked IOException");
-        PowerMockito.when(IOUtils.toString(any(URL.class), eq(StandardCharsets.UTF_8))).thenThrow(ioException);
-        UncheckedIOException exception = assertThrows(UncheckedIOException.class,
-            () -> ResourceUtils.loadResource(ResourceUtils.class, RESOURCE_NAME));
-        assertEquals(ioException, exception.getCause());
+        var ioException = new IOException("mocked IOException");
+        try (var ioUtils = mockStatic(IOUtils.class))
+        {
+            ioUtils.when(() -> IOUtils.toString(any(URL.class), eq(StandardCharsets.UTF_8))).thenThrow(ioException);
+            var exception = assertThrows(UncheckedIOException.class,
+                    () -> ResourceUtils.loadResource(ResourceUtils.class, RESOURCE_NAME));
+            assertEquals(ioException, exception.getCause());
+        }
     }
 
     @Test
-    public void shouldCreateTempFile() throws IOException
+    void shouldCreateTempFile() throws IOException
     {
         String data = "data";
         Path tempFilePath = ResourceUtils.createTempFile("index", ".js", data);
@@ -173,14 +174,14 @@ public class ResourceUtilsTests
     }
 
     @Test
-    public void shouldCreateTempFileUsingName() throws IOException
+    void shouldCreateTempFileUsingName() throws IOException
     {
         Path tempFilePath = ResourceUtils.createTempFile("test.json");
         assertThat(tempFilePath.toString(), matchesPattern(".+test.+\\.json"));
     }
 
     @Test
-    public void shouldLoadResourceOrFileAsStream() throws IOException
+    void shouldLoadResourceOrFileAsStream() throws IOException
     {
         try (var inputStream = ResourceUtils.loadResourceOrFileAsStream(RESOURCE_NAME))
         {

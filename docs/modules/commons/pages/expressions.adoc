@@ -879,24 +879,7 @@ Escapes reserved characters in https://www.w3schools.com/html/html_entities.asp[
 |`M&amp;Ms`
 |===
 
-=== `escapeJSON`
-
-Escapes http://www.ietf.org/rfc/rfc4627.txt[reserved JSON characters]: converts any string into one that's properly escaped for inclusion in JSON as a value.
-
-[source, subs="+quotes"]
-----
-#{escapeJSON(*$input*)}
-----
-
-* *`$input`* - any string to be escaped
-
-.Escape JSON string
-|===
-|Expression |Result
-
-|`#{escapeJSON("abc"+"xyz")}`
-|`\"abc\"+\"xyz\"`
-|===
+include::partial$json-expressions.adoc[]
 
 === `quoteRegExp`
 

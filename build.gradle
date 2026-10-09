@@ -1,9 +1,10 @@
 plugins {
-  id 'org.sonarqube' version '7.3.1.8318'
+  id 'org.sonarqube' version '7.5.0.8588'
 }
 
 ext.buildSystemPath = file("${System.env.VIVIDUS_BUILD_SYSTEM_HOME?:buildSystemRootDir}/${buildSystemVersion}")
 
+apply from: "${buildSystemPath}/gradle/buildscript-repositories.gradle"
 apply from: "${buildSystemPath}/gradle/project.gradle"
 apply from: "${buildSystemPath}/gradle/jacoco.gradle"
 
@@ -74,7 +75,6 @@ project.description = 'Vividus'
 ext {
     versions = [
         jbehave:                '6.0.0-alpha.11',
-        powermock:              'a0be5c4bbe',
         jsonPath:               '0e32295fde'
     ]
 }

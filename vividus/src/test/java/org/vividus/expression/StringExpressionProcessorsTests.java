@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,8 @@ class StringExpressionProcessorsTests
                 arguments("anyOf(\\,)",                                                    ","),
                 arguments("escapeHTML(M&Ms)",                                              "M&amp;Ms"),
                 arguments("escapeJSON(\"abc\"\n\"xyz\")",                                  "\\\"abc\\\"\\n\\\"xyz\\\""),
+                arguments("unescapeJSON(\\\"abc\\\"\\n\\\"xyz\\\")",                       "\"abc\"\n\"xyz\""),
+                arguments("unescapeJSON(\\\\\\\"abc\\\\\\\")",                             "\\\"abc\\\""),
                 arguments("quoteRegExp(Customer(Username))",                               "\\QCustomer(Username)\\E"),
                 arguments("substringBefore(, a)",                                          ""),
                 arguments("substringBefore(abc, a)",                                       ""),
@@ -117,6 +119,14 @@ class StringExpressionProcessorsTests
     void testExecute(String expression, String expected)
     {
         assertEquals(expected, processors.execute(expression).get());
+    }
+
+    @Test
+    void shouldUnescapeNestedJsonEscaping()
+    {
+        String once = (String) processors.execute("unescapeJSON(\\\\\\\"abc\\\\\\\")").get();
+        assertEquals("\\\"abc\\\"", once);
+        assertEquals("\"abc\"", processors.execute("unescapeJSON(" + once + ")").get());
     }
 
     @ParameterizedTest

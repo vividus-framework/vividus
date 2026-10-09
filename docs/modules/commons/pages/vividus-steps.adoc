@@ -176,6 +176,29 @@ When I execute steps:
 Then `${var}` is = `1`
 ----
 
+=== Execute steps and assert duration
+
+Executes the steps located in the table, measures their execution duration and asserts it against the expected duration
+using the comparison rule.
+
+[source,gherkin]
+----
+When I execute steps and assert duration is $comparisonRule `$duration`:$stepsToExecute
+----
+
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$duration` - The expected duration in {durations-format-link} format.
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
+
+.Execute steps and verify they complete in less than 5 seconds
+[source,gherkin]
+----
+When I execute steps and assert duration is less than `PT5S`:
+|step                                                                     |
+|Then `${var}` is = `0`                                                   |
+|Given I initialize story variable `var` with value `#{eval(${var} + 1)}` |
+----
+
 === Execute steps N times
 
 Step is designed to execute specified steps while counter with a certain limit matches a comparison rule. On each iteration the counter is increased on specified value, which is allowed to be either positive or negative. The seed value is used as a starting point for iteration. Current iteration index is available within steps to execute as `$\{iterationVariable}`.
@@ -295,6 +318,66 @@ When I execute steps with delay `PT1S` at most 5 times while variable `var` is l
 |!step!                                                                                                                 |
 |!When I set the text found in search context to the 'scenario' variable 'var'!                                         |
 Then `${var}` is = `3`
+----
+
+=== Execute steps for each table row
+
+Executes the steps once for every row of the table. The current row is available within the steps as `$\{row}` and its
+zero-based index as `$\{rowIndex}`. Column values are read by column name, for example `$\{row.name}`.
+
+[source,gherkin]
+----
+When I execute steps:$stepsToExecute for each row of table:$table
+----
+
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column `step` containing the steps to execute for each row.
+* `$table` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] to iterate.
+
+.Greet each person from the table
+[source,gherkin]
+----
+When I execute steps:
+|step                                                                                      |
+|Given I initialize scenario variable `greet-${rowIndex}` with value `Hello, ${row.name}` |
+for each row of table:
+|name |
+|Alice|
+|Bob  |
+Then `${greet-0}` is = `Hello, Alice`
+Then `${greet-1}` is = `Hello, Bob`
+----
+
+=== Execute steps for each row of a table stored in a variable
+
+Executes the steps once for every row of the table stored in the variable. The variable must contain a table, for
+example one saved by
+xref:commons:vividus-steps.adoc#_initialize_variable_with_a_table[Initialize variable with a table]. The current row is
+available within the steps as `$\{row}` and its zero-based index as `$\{rowIndex}`. Column values are read by column
+name, for example `$\{row.name}`.
+
+[source,gherkin]
+----
+When I execute steps:$stepsToExecute for each row of table from variable `$variableName`
+----
+
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column `step` containing the steps to execute for each row.
+* `$variableName` - The name of the variable that contains the table.
++
+NOTE: Exactly variable name (e.g. `users`) is expected here, *not* variable reference: pass:[<s>${users}</s>]
+
+.Greet each person from a previously saved table
+[source,gherkin]
+----
+When I initialize scenario variable `users` with values:
+|name |
+|Alice|
+|Bob  |
+When I execute steps:
+|step                                                                                      |
+|Given I initialize scenario variable `greet-${rowIndex}` with value `Hello, ${row.name}` |
+for each row of table from variable `users`
+Then `${greet-0}` is = `Hello, Alice`
+Then `${greet-1}` is = `Hello, Bob`
 ----
 
 === Execute steps if a condition is "true"
@@ -497,10 +580,10 @@ When I wait `PT30S` with `PT1S` polling until file matching `report-\d+\.csv` ap
 
 == Object pool
 
-Think of an object pool as a shared basket of items that your tests can borrow from. You fill the basket once with a
+Think of an object pool as a shared basket of items that your tests can borrow from. You fill the basket with a
 list of items (for example, a set of test user accounts), and then, whenever a test needs one, it picks an item out of
 the basket at random. Each item can be held by only one test at a time, so tests running side by side never accidentally
-grab the same account and interfere with each other.
+grab the same account and interfere with each other. If the basket runs low, you can add more items to it later.
 
 This is handy whenever you have a limited number of shared resources - such as logins, licenses, or reservations - that
 must be shared fairly across many tests.
@@ -544,6 +627,60 @@ Given I initialize object pool `credentials` with data:
 |user-2|pass-2  |
 |user-3|pass-3  |
 ----
+
+=== Add items to an existing basket
+
+Puts more items into a basket that already exists. Use this to top up a basket that is running low or empty, without
+creating a new one. Adding items to a basket that has not been initialized stops the test with an error. Every row of
+the table becomes one more item, and the column headers become the details of that item. Newly added items are shuffled
+and placed after the items that are already in the basket.
+
+[source,gherkin]
+----
+Given I add objects to object pool `$poolName`:$data
+----
+* `$poolName` - The name of the basket to add items to. The basket must already exist.
+* `$data` - The xref:ROOT:glossary.adoc#_examplestable[table] of items to add. Each row is one item.
+
+.Add two more user accounts to the "credentials" basket
+[source,gherkin]
+----
+Given I add objects to object pool `credentials`:
+|login |password|
+|user-4|pass-4  |
+|user-5|pass-5  |
+----
+
+=== Check how many items are left
+
+Saves how many items are still available in the basket. Items that a test has already taken are not counted until they
+are returned. Use the saved number to walk through every remaining item. Asking for the size of a basket that has not
+been initialized stops the test with an error. An empty basket saves `0`.
+
+The saved number is a snapshot. If another test adds items to the same basket at the same time, the number can be
+inaccurate.
+
+[source,gherkin]
+----
+When I save size of object pool `$poolName` to $scopes variable `$variableName`
+----
+* `$poolName` - The name of the basket to count items in.
+* `$scopes` - xref:commons:variables.adoc#_scopes[How long the stored number should stay available] (for example, for
+the current scenario or the whole story).
+* `$variableName` - The name you give to the number so you can use it later.
+
+.Take every remaining account from the "credentials" basket
+[source,gherkin]
+----
+When I save size of object pool `credentials` to scenario variable `credentialsCount`
+When I execute steps while counter is less than `${credentialsCount}` with increment `1` starting from `0`:
+|step                                                                                    |
+|When I take object from pool `credentials` and save it to scenario variable `credential`|
+|Then `${credential.login}` matches `user-[1-5]`                                         |
+----
+
+The counter starts at `0` and stops before the saved size, so each remaining item is taken once. Using
+`less than or equal to` would try to take one more item than the basket has and stop the test.
 
 === Take an item from the basket
 

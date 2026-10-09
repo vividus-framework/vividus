@@ -1668,6 +1668,8 @@ Then value `50` is selected in slider located by `id(test_slider)`
 :selenium: true
 include::partial$common-web-app-mobile-emulation-steps.adoc[conditional="selenium"]
 
+include::partial$common-web-app-network-conditions-steps.adoc[]
+
 === Geolocation emulation
 
 ==== Emulate Geolocation

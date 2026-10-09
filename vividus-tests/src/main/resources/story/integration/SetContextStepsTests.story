@@ -153,3 +153,35 @@ When I click on element located by `xpath(//a[text() = 'here'])`
 When I attempt to close current tab with possibility to handle alert
 Then page title is equal to `Vividus Test Site`
 Then number of elements found by `xpath(//img[@name='vividus-logo'])` is equal to `1`
+
+Scenario: Verify step: "When I switch to new tab" switches to the next tab among several opened tabs
+When I close browser
+Given I am on page with URL `${vividus-test-site-url}/inputs.html`
+When I enter `Tab 1` in field located by `id(text)`
+When I open URL `${vividus-test-site-url}/inputs.html` in new tab
+When I enter `Tab 2` in field located by `id(text)`
+When I open URL `${vividus-test-site-url}/inputs.html` in new tab
+When I enter `Tab 3` in field located by `id(text)`
+When I open URL `${vividus-test-site-url}/inputs.html` in new tab
+When I enter `Tab 4` in field located by `id(text)`
+When I switch to new tab
+When I save text of element located by `id(output)` to SCENARIO variable `output`
+Then `${output}` is equal to `Tab 1`
+When I switch to new tab
+When I save text of element located by `id(output)` to SCENARIO variable `output`
+Then `${output}` is equal to `Tab 2`
+When I switch to new tab
+When I save text of element located by `id(output)` to SCENARIO variable `output`
+Then `${output}` is equal to `Tab 3`
+When I switch to new tab
+When I save text of element located by `id(output)` to SCENARIO variable `output`
+Then `${output}` is equal to `Tab 4`
+When I switch to new tab
+When I save text of element located by `id(output)` to SCENARIO variable `output`
+Then `${output}` is equal to `Tab 1`
+When I switch to new tab
+When I save text of element located by `id(output)` to SCENARIO variable `output`
+Then `${output}` is equal to `Tab 2`
+When I switch to new tab
+When I save text of element located by `id(output)` to SCENARIO variable `output`
+Then `${output}` is equal to `Tab 3`

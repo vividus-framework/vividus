@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,29 +130,35 @@ class BrowserContextProviderTests
     @Test
     void shouldReCreateClosedBrowser()
     {
-        Browser firstBrowserInstance = mock();
-        Browser secondBrowserInstance = mock();
-        Browser thirdBrowserInstance = mock();
-        when(browserType.launchBrowser(any(), any())).thenReturn(firstBrowserInstance).thenReturn(secondBrowserInstance)
-                .thenReturn(thirdBrowserInstance);
-        when(firstBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
-        when(firstBrowserInstance.isConnected()).thenReturn(true).thenReturn(false);
-        when(secondBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
-        when(secondBrowserInstance.isConnected()).thenReturn(false).thenReturn(false);
-        when(thirdBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
+        try (var playwrightStaticMock = mockStatic(Playwright.class))
+        {
+            Playwright playwright = mock();
+            playwrightStaticMock.when(Playwright::create).thenReturn(playwright);
 
-        browserContextProvider.get();
-        browserContextProvider.closeBrowserContext();
-        browserContextProvider.closeBrowserInstance();
-        browserContextProvider.get();
-        browserContextProvider.closeBrowserContext();
-        browserContextProvider.closeBrowserInstance();
-        browserContextProvider.get();
+            Browser firstBrowserInstance = mock();
+            Browser secondBrowserInstance = mock();
+            Browser thirdBrowserInstance = mock();
+            when(browserType.launchBrowser(any(), any())).thenReturn(firstBrowserInstance)
+                    .thenReturn(secondBrowserInstance).thenReturn(thirdBrowserInstance);
+            when(firstBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
+            when(firstBrowserInstance.isConnected()).thenReturn(true).thenReturn(false);
+            when(secondBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
+            when(secondBrowserInstance.isConnected()).thenReturn(false).thenReturn(false);
+            when(thirdBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
 
-        verify(firstBrowserInstance).close();
-        verify(secondBrowserInstance).close();
-        verify(browserType, times(3)).launchBrowser(any(), any());
-        verify(testContext, times(6)).put(any(), any());
+            browserContextProvider.get();
+            browserContextProvider.closeBrowserContext();
+            browserContextProvider.closeBrowserInstance();
+            browserContextProvider.get();
+            browserContextProvider.closeBrowserContext();
+            browserContextProvider.closeBrowserInstance();
+            browserContextProvider.get();
+
+            verify(firstBrowserInstance).close();
+            verify(secondBrowserInstance).close();
+            verify(browserType, times(3)).launchBrowser(any(), any());
+            verify(testContext, times(6)).put(any(), any());
+        }
     }
 
     static Stream<Arguments> tracingConfigurations()
