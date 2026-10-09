@@ -8,7 +8,6 @@ Lifecycle:
 After:
 Scope: SCENARIO
 When I reset Geolocation emulation
-
 Examples:
 {transformer=FROM_LANDSCAPE}
 |denyInfoLocator|xpath(//p[contains(., 'User denied Geolocation')])|
