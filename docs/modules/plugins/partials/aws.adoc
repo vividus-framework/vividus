@@ -5,8 +5,8 @@
 The plugin attempts to find AWS credentials by using https://docs.aws.amazon.com/sdk-for-java/v2/developer-guide/credentials-chain.html#credentials-default[the default credential provider chain]. The provider chain looks for credentials using the provided below options one by one starting from the top. If credentials are found at some point, the search stops and further options are not evaluated.
 
 . The AWS credentials scoped to either current scenario or story (configured via the xref:plugins:aws.adoc#_configure_authentication[corresponding step]).
+. The properties: `aws.accessKeyId` and `aws.secretAccessKey` (the optional property for session token is `aws.sessionToken`).
 . Environment variables: `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (the optional variable for session token is `AWS_SESSION_TOKEN`).
-. The properties: `system.aws.accessKeyId` and `system.aws.secretKey` (the optional property for session token is `system.aws.sessionToken`).
 . Web Identity Token credentials from the environment or container.
 . In the default credentials file (the location of this file varies by platform).
 . Credentials delivered through the Amazon EC2 container service if the `AWS_CONTAINER_CREDENTIALS_RELATIVE_URI` environment variable is set and security manager has permission to access the variable.
@@ -19,8 +19,8 @@ See the official https://docs.aws.amazon.com/sdk-for-java/v2/developer-guide/cre
 
 The plugin attempts to find AWS region by using https://docs.aws.amazon.com/sdk-for-java/v2/developer-guide/region-selection.html[the default region provider chain]. The provider chain looks for a region using the provided below options one by one starting from the top. If region is found at some point, the search stops and further options are not evaluated.
 
+. The property: `aws.region`.
 . Environment variable: `AWS_REGION`.
-. The property: `system.aws.region`.
 . AWS shared configuration file (usually located at `~/.aws/config`).
 . Use the Amazon EC2 instance metadata service to determine the region of the currently running Amazon EC2 instance.
 . If the plugin still hasn’t found a region by this point, client creation fails with an exception.

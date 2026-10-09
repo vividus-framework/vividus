@@ -20,7 +20,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
+import com.google.common.base.Suppliers;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +53,7 @@ public class KinesisSteps
     private final TestContext testContext;
     private final VariableContext variableContext;
     private final AwsServiceClientsContext clientsContext;
+    private final Supplier<KinesisClient> defaultClient = Suppliers.memoize(() -> KinesisClient.builder().build());
 
     public KinesisSteps(AwsServiceClientsContext clientsContext, TestContext testContext,
             VariableContext variableContext)
@@ -62,7 +65,7 @@ public class KinesisSteps
 
     private KinesisClient getKinesisClient()
     {
-        return clientsContext.getServiceClient(KinesisClient::builder, () -> KinesisClient.builder().build());
+        return clientsContext.getServiceClient(KinesisClient::builder, defaultClient);
     }
 
     /**

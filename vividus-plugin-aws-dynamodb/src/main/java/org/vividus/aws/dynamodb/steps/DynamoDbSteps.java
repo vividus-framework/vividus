@@ -21,7 +21,9 @@ import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
+import com.google.common.base.Suppliers;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +48,7 @@ public class DynamoDbSteps
     private final JsonUtils jsonUtils = new JsonUtils();
 
     private final String roleArn;
+    private final Supplier<DynamoDbClient> defaultClient = Suppliers.memoize(this::createDefaultDynamoDbClient);
 
     public DynamoDbSteps(String roleArn, AwsServiceClientsContext clientsContext, VariableContext variableContext)
     {
@@ -56,7 +59,7 @@ public class DynamoDbSteps
 
     private DynamoDbClient getDynamoDbClient()
     {
-        return clientsContext.getServiceClient(DynamoDbClient::builder, this::createDefaultDynamoDbClient);
+        return clientsContext.getServiceClient(DynamoDbClient::builder, defaultClient);
     }
 
     /**

@@ -21,7 +21,9 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
+import com.google.common.base.Suppliers;
 import org.jbehave.core.annotations.When;
 import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
@@ -37,6 +39,7 @@ public class LambdaSteps
 {
     private final VariableContext variableContext;
     private final AwsServiceClientsContext clientsContext;
+    private final Supplier<LambdaClient> defaultClient = Suppliers.memoize(() -> LambdaClient.builder().build());
 
     public LambdaSteps(AwsServiceClientsContext clientsContext, VariableContext variableContext)
     {
@@ -46,7 +49,7 @@ public class LambdaSteps
 
     private LambdaClient getLambdaClient()
     {
-        return clientsContext.getServiceClient(LambdaClient::builder, () -> LambdaClient.builder().build());
+        return clientsContext.getServiceClient(LambdaClient::builder, defaultClient);
     }
 
     /**
