@@ -83,7 +83,7 @@ class VividusMcpServerTests
         McpSchema.Tool mcpTool = testTool.getMcpTool();
         Tool tool = toolSpec.tool();
         assertEquals(mcpTool, tool);
-        assertNull(tool.inputSchema().properties());
+        assertNull(tool.inputSchema().get("properties"));
         CallToolResult call = toolSpec.callHandler().apply(null, null);
         assertEquals(error, call.isError());
         TextContent textContent = (TextContent) call.content().get(0);
