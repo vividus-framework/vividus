@@ -18,6 +18,7 @@ package org.vividus.mcp;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -70,7 +71,7 @@ class VividusMcpServerTests
             }
         };
 
-        new VividusMcpServer(List.of(tool)).startSyncServer();
+        assertDoesNotThrow(() -> new VividusMcpServer(List.of(tool)).startSyncServer());
     }
 
     @SuppressWarnings("unchecked")
