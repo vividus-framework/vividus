@@ -199,9 +199,22 @@ jobs:
         LIGHTHOUSE_API_KEY: ${{ secrets.LIGHTHOUSE_API_KEY }}
         CLOUDAMQP_USERNAME: ${{ secrets.CLOUDAMQP_USERNAME }}
         CLOUDAMQP_PASSWORD: ${{ secrets.CLOUDAMQP_PASSWORD }}
+        NEWRELIC_ACCOUNT_ID: ${{ secrets.NEWRELIC_ACCOUNT_ID }}
+        NEWRELIC_API_KEY: ${{ secrets.NEWRELIC_API_KEY }}
       shell: bash
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY && -n $MONGODB_USERNAME && -n $MONGODB_PASSWORD && -n $AWS_ACCESS_KEY_ID && -n $AWS_SECRET_ACCESS_KEY && -n $AWS_REGION && -n $AZURE_CLIENT_ID && -n $AZURE_CLIENT_SECRET && -n $AZURE_TENANT_ID && -n $AZURE_SUBSCRIPTION_ID && -n $AZURE_COSMOS_DB_KEY && -n $GMAIL_PASSWORD ]]; then
+            newrelic_args=()
+            if [[ -n $NEWRELIC_ACCOUNT_ID && -n $NEWRELIC_API_KEY ]]; then
+                newrelic_args+=(
+                    -Pvividus.newrelic.enabled=true
+                    "-Pvividus.newrelic.endpoint=https://insights-collector.eu01.nr-data.net/v1/accounts/${NEWRELIC_ACCOUNT_ID}/events"
+                    "-Pvividus.newrelic.api-key=${NEWRELIC_API_KEY}"
+                    "-Pvividus.newrelic.run-id=${GITHUB_RUN_ID}"
+                )
+            else
+                echo No NEWRELIC_ACCOUNT_ID and/or NEWRELIC_API_KEY, New Relic publishing is skipped
+            fi
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration-set.active=system \
                                                   -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
@@ -228,7 +241,8 @@ jobs:
                                                   -Pvividus.notifications.mail.recipient="vividus.team@gmail.com, ivan@vividus.dev" \
                                                   -Pvividus.notifications.mail.security-protocol=SSL \
                                                   -Pvividus.rabbitmq.cloudamqp.username=${CLOUDAMQP_USERNAME} \
-                                                  -Pvividus.rabbitmq.cloudamqp.password=${CLOUDAMQP_PASSWORD}
+                                                  -Pvividus.rabbitmq.cloudamqp.password=${CLOUDAMQP_PASSWORD} \
+                                                  "${newrelic_args[@]}"
         else
             echo No passwords/access keys are available, skipping system tests
         fi

@@ -13,6 +13,7 @@ ext.ignoreBeans='dynamoDbSteps,kinesisSteps,lambdaSteps,s3BucketSteps'
 
 dependencies {
     implementation project(':vividus')
+    implementation project(':vividus-agent-newrelic')
     implementation project(':vividus-plugin-accessibility')
     implementation project(':vividus-plugin-applitools')
     implementation project(':vividus-plugin-avro')

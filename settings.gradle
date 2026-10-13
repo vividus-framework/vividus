@@ -3,6 +3,7 @@ rootProject.name = 'vividus'
 include 'vividus-bom'
 
 include 'vividus'
+include 'vividus-agent-newrelic'
 include 'vividus-agent-reportportal'
 include 'vividus-allure-adaptor'
 include 'vividus-analytics'

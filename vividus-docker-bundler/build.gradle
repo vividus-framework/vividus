@@ -79,6 +79,7 @@ dependencies {
     implementation project(':vividus-plugin-xml')
     implementation project(':vividus-plugin-yaml')
 
+    implementation project(':vividus-agent-newrelic')
     implementation project(':vividus-agent-reportportal')
 
     implementation(libs.mysql.connector.j)
