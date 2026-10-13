@@ -1,5 +1,6 @@
 .Integrations
 * xref:reportportal.adoc[ReportPortal Agent]
+* xref:newrelic.adoc[New Relic Agent]
 * xref:docker.adoc[Docker]
 * Exporters
 ** xref:azure-devops-exporter.adoc[Azure DevOps Exporter]

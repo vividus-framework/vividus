@@ -1,0 +1,122 @@
+= New Relic
+
+https://docs.newrelic.com/docs/data-apis/ingest-apis/event-api/introduction-event-api/[New Relic Event API] receives custom events for the stories executed by VIVIDUS.
+
+:dependency-short-name: agent-newrelic
+include::ROOT:partial$dependency-installation.adoc[]
+
+Reporting is off until `newrelic.enabled` is `true`. Given stories, excluded stories, and dry runs are not sent.
+
+== Properties
+
+NOTE: The properties marked with bold are mandatory when New Relic reporting is enabled.
+
+[cols="5,3,2,6", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|*`newrelic.enabled`*
+a|`true` +
+`false`
+|`false`
+|Enables reporting to New Relic
+
+|*`newrelic.api-key`*
+|API key
+|empty
+|Insights insert key or Ingest license key, sent in the `Api-Key` header.
+The key can be stored with xref:configuration:secrets-management.adoc[secrets management]
+
+|*`newrelic.endpoint`*
+|URL
+|empty
+|Event API URL, including the account ID. US accounts use `https://insights-collector.newrelic.com/v1/accounts/ACCOUNT_ID/events`. EU accounts use `https://insights-collector.eu01.nr-data.net/v1/accounts/ACCOUNT_ID/events`
+
+|`newrelic.run-id`
+|Any string
+|empty
+|Value of the `runId` attribute on every event. A generated UUID is used when the property is empty
+
+|`newrelic.publish-timeout`
+|ISO-8601 duration
+|`PT1M`
+|How long to wait for in-flight story events after the stories finish
+
+|`newrelic.event.attribute.<name>`
+|Any string
+|empty
+|Custom attribute added to every event. `<name>` must be at most 255 characters and may contain only letters, digits, underscores, colons, periods, and slashes. A name that breaks these rules, or `eventType`, `runId`, `storyName`, `phase`, or `status`, is skipped and a warning is logged
+|===
+
+== Events
+
+Before the stories of a run, VIVIDUS posts a `VividusRun` event with `phase` `started`. After the stories it posts a `VividusRun` event with `phase` `finished` and `status` `passed` or `failed`. After each completed story it posts a `VividusStory` event with `status` `passed` or `failed`. Each request body is a JSON array with that single event. Every event carries the same `runId`: the value of `newrelic.run-id`, or a generated UUID when that property is empty.
+
+[source,sql]
+----
+SELECT * FROM VividusRun WHERE runId = '5d8c1a2e-3b4f-4c6d-9e10-11a2b3c4d5e6' FACET phase
+----
+
+The finished run is `failed` when any included story failed, and `passed` otherwise. On `VividusStory`, `status` is `failed` when the story or a given story failed, and `passed` otherwise. Pending and skipped steps do not mark the story as failed. Given stories are not sent as their own events. Excluded stories are not sent.
+
+[source,sql]
+----
+SELECT * FROM VividusStory WHERE runId = '5d8c1a2e-3b4f-4c6d-9e10-11a2b3c4d5e6' FACET status
+----
+
+.Custom attributes used in the examples below
+[source,properties]
+----
+newrelic.enabled=true
+newrelic.api-key=NRAK-example
+newrelic.endpoint=https://insights-collector.newrelic.com/v1/accounts/12345/events
+newrelic.event.attribute.environment=staging
+newrelic.event.attribute.teamName=qa
+----
+
+.`VividusRun`, sent before the stories
+[source,json]
+----
+[
+  {
+    "eventType": "VividusRun",
+    "runId": "5d8c1a2e-3b4f-4c6d-9e10-11a2b3c4d5e6",
+    "phase": "started",
+    "environment": "staging",
+    "teamName": "qa"
+  }
+]
+----
+
+.`VividusRun`, sent after the stories
+[source,json]
+----
+[
+  {
+    "eventType": "VividusRun",
+    "runId": "5d8c1a2e-3b4f-4c6d-9e10-11a2b3c4d5e6",
+    "phase": "finished",
+    "status": "passed",
+    "environment": "staging",
+    "teamName": "qa"
+  }
+]
+----
+
+.`VividusStory`, sent after the story `Login`
+[source,json]
+----
+[
+  {
+    "eventType": "VividusStory",
+    "runId": "5d8c1a2e-3b4f-4c6d-9e10-11a2b3c4d5e6",
+    "storyName": "Login",
+    "status": "passed",
+    "environment": "staging",
+    "teamName": "qa"
+  }
+]
+----
