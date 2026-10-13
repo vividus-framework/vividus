@@ -21,23 +21,23 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.jspecify.annotations.Nullable;
 import org.vividus.mcp.tool.VividusTool;
 
 import io.modelcontextprotocol.json.McpJsonMapper;
-import io.modelcontextprotocol.json.jackson2.JacksonMcpJsonMapper;
+import io.modelcontextprotocol.json.jackson3.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
+import tools.jackson.databind.json.JsonMapper;
 
 public class VividusMcpServer
 {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final McpJsonMapper mcpJsonMapper = new JacksonMcpJsonMapper(JsonMapper.builder().build());
 
     private final List<VividusTool> tools;
 
@@ -50,7 +50,6 @@ public class VividusMcpServer
     {
         List<SyncToolSpecification> toolSpecs = tools.stream().map(this::asToolSpecification).toList();
 
-        McpJsonMapper mcpJsonMapper = new JacksonMcpJsonMapper(objectMapper);
         McpServerTransportProvider transportProvider = new StdioServerTransportProvider(mcpJsonMapper);
         McpServer.sync(transportProvider)
                  .serverInfo("vividus-mcp-server", "0.6.16")
@@ -68,7 +67,7 @@ public class VividusMcpServer
                 .callHandler((exchange, request) -> {
                     try
                     {
-                        String content = objectMapper.writeValueAsString(tool.getContent());
+                        String content = mcpJsonMapper.writeValueAsString(tool.getContent());
                         return McpSchema.CallToolResult.builder()
                                 .content(List.of(new McpSchema.TextContent(content)))
                                 .isError(false)

@@ -18,6 +18,7 @@ package org.vividus.mcp;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -46,6 +48,32 @@ import io.modelcontextprotocol.spec.McpSchema.Tool;
 
 class VividusMcpServerTests
 {
+    @Test
+    void shouldBuildSyncServerWithToolSchema()
+    {
+        String property = "value";
+        VividusTool tool = new VividusTool()
+        {
+            @Override
+            public Tool getMcpTool()
+            {
+                return Tool.builder()
+                        .name("test_tool")
+                        .inputSchema(new McpSchema.JsonSchema("object",
+                                Map.of(property, Map.of("type", "string")), List.of(property), null, null, null))
+                        .build();
+            }
+
+            @Override
+            public Object getContent()
+            {
+                return "schema_content";
+            }
+        };
+
+        assertDoesNotThrow(() -> new VividusMcpServer(List.of(tool)).startSyncServer());
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     void shouldStartSyncServer()
