@@ -40,7 +40,6 @@ import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -142,11 +141,41 @@ class AwsSecretsManagerPropertiesProcessorTests
             when(client.getSecretValue(any(GetSecretValueRequest.class)))
                     .thenThrow(new ResourceNotFoundException("not found"));
 
-            UncheckedExecutionException exception = assertThrows(UncheckedExecutionException.class,
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                     () -> processor.processValue(PROP_NAME, valueToProcess));
             assertEquals(
-                    "The requested secret 'secretName' was not found in AWS Secrets Manager using profile 'profileX'",
-                    exception.getCause().getMessage());
+                    "Failed to resolve secret 'secretName' from AWS Secrets Manager using profile 'profileX' for "
+                            + "property 'property_name': the requested secret was not found",
+                    exception.getMessage());
+            assertEquals(ResourceNotFoundException.class, exception.getCause().getClass());
+        }
+    }
+
+    @Test
+    void shouldIncludeSecretContextWhenResolutionFails()
+    {
+        try (MockedStatic<AWSSecretsManagerClient> clientStatic = mockStatic(AWSSecretsManagerClient.class);
+                MockedConstruction<ProfileCredentialsProvider> credentialsProviderMock = mockConstruction(
+                        ProfileCredentialsProvider.class,
+                        (mock, context) -> assertEquals("profileX", context.arguments().get(0))))
+        {
+            AWSSecretsManagerClientBuilder builder = mock(AWSSecretsManagerClientBuilder.class);
+            AWSSecretsManager client = mock(AWSSecretsManager.class);
+
+            clientStatic.when(AWSSecretsManagerClient::builder).thenReturn(builder);
+            when(builder.withCredentials(any(ProfileCredentialsProvider.class))).thenReturn(builder);
+            when(builder.build()).thenReturn(client);
+
+            when(client.getSecretValue(any(GetSecretValueRequest.class)))
+                    .thenThrow(new IllegalArgumentException("profile file cannot be null"));
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> processor.processValue(PROP_NAME, "profileX, secretName/key"));
+            assertEquals(
+                    "Failed to resolve secret 'secretName' from AWS Secrets Manager using profile 'profileX' for "
+                            + "property 'property_name': profile file cannot be null",
+                    exception.getMessage());
+            assertEquals("profile file cannot be null", exception.getCause().getMessage());
         }
     }
 

@@ -28,6 +28,7 @@ import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.jayway.jsonpath.PathNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -63,12 +64,6 @@ public class AwsSecretsManagerPropertiesProcessor extends AbstractPropertiesProc
 
                         GetSecretValueResult response = client.getSecretValue(getSecretValueRequest);
                         return response.getSecretString();
-                    }
-                    catch (ResourceNotFoundException thrown)
-                    {
-                        throw new IllegalArgumentException(String.format(
-                                "The requested secret '%s' was not found in AWS Secrets Manager using profile '%s'",
-                                secretId.secret, secretId.profile), thrown);
                     }
                     finally
                     {
@@ -111,7 +106,7 @@ public class AwsSecretsManagerPropertiesProcessor extends AbstractPropertiesProc
         String key = keyAndDefaultValue[0];
         String defaultValue = keyAndDefaultValue.length > 1 ? keyAndDefaultValue[1] : null;
 
-        String secretString = secretsCache.getUnchecked(new SecretId(profile, secret));
+        String secretString = getCachedSecret(propertyName, profile, secret);
         try
         {
             return JsonPathUtils.getData(secretString, "$." + key);
@@ -130,6 +125,24 @@ public class AwsSecretsManagerPropertiesProcessor extends AbstractPropertiesProc
                     "The secret key '%s' was not found in the secret '%s' retrieved from AWS Secrets Manager using "
                             + "profile '%s'",
                     key, secret, profile), thrown);
+        }
+    }
+
+    private String getCachedSecret(String propertyName, String profile, String secret)
+    {
+        try
+        {
+            return secretsCache.getUnchecked(new SecretId(profile, secret));
+        }
+        catch (UncheckedExecutionException thrown)
+        {
+            Throwable cause = thrown.getCause();
+            String reason = cause instanceof ResourceNotFoundException
+                    ? "the requested secret was not found"
+                    : cause.getMessage();
+            throw new IllegalArgumentException(String.format(
+                    "Failed to resolve secret '%s' from AWS Secrets Manager using profile '%s' for property '%s': %s",
+                    secret, profile, propertyName, reason), cause);
         }
     }
 
