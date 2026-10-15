@@ -92,7 +92,7 @@ dependencies {
     implementation(libs.apache.commons.codec)
     implementation(libs.hamcrest)
     implementation(libs.guava)
-    implementation('io.github.classgraph:classgraph:4.8.196')
+    implementation('io.github.classgraph:classgraph:4.8.198')
     implementation('io.github.java-diff-utils:java-diff-utils:4.17')
     implementation('org.apache.commons:commons-jexl3:3.7.0')
     implementation('net.datafaker:datafaker:2.7.0')
