@@ -50,6 +50,23 @@ class VividusInitializationCheckerTests
     private final TestLogger logger = TestLoggerFactory.getTestLogger(VividusInitializationChecker.class);
 
     @Test
+    void shouldHighlightInitializationFailure()
+    {
+        try (var vividus = mockStatic(Vividus.class))
+        {
+            var exception = new IllegalStateException("Initialization failed");
+            vividus.when(Vividus::init).thenThrow(exception);
+
+            var thrown = assertThrows(IllegalStateException.class,
+                    () -> VividusInitializationChecker.main(new String[0]));
+
+            assertEquals(exception, thrown);
+            assertThat(logger.getLoggingEvents(),
+                    equalTo(List.of(error("VIVIDUS initialization failed: {}", exception.toString()))));
+        }
+    }
+
+    @Test
     @StdIo
     @SuppressWarnings("checkstyle:RegexpSingleline")
     void testPrintHelp(StdOut stdOut) throws ParseException, IOException
