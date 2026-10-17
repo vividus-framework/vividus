@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ class BrandLogoPluginTests
 {
     private static final String PATH = "/allure-plugins/vividus-logo/vividus-logo.svg";
     private static final String EXPECTED_CSS = """
-            .side-nav__brand {
-              background: url('vividus-logo.svg') no-repeat left center !important;
-              background-size: 44px 44px !important;
+            .side-nav__brand-icon {
+              background: url('vividus-logo.svg') no-repeat center !important;
+              background-size: 100% 100% !important;
             }
             """;
     private final PluginFilesLoader pluginFilesLoader = new PluginFilesLoader();

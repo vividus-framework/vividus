@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -31,39 +34,50 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class AllureReportPatchingConsistencyTests
 {
-    private static final String APP_JS = "/app.js";
-    private static final String STYLES_CSS = "/styles.css";
+    private static final String IS_ENTRY = "isEntry";
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     static Stream<Arguments> allureSourceContainsText()
     {
         return Stream.of(
-                Arguments.of(APP_JS, "\"unknown\":\"Unknown\""),
-                Arguments.of(APP_JS, "\"failed\",\"broken\",\"passed\",\"skipped\",\"unknown\""),
-                Arguments.of(APP_JS,
-                        "var t=this.statistic,e=t.passed,n=void 0===e?0:e,r=t.failed,o=void 0===r?0:r,i=t.broken,a=void"
-                                + " 0===i?0:i,s=t.total;return(void 0===s?0:s)?n?\"\""
-                                + ".concat(this.formatNumber(n/(n+o+a)*100),\"%\"):\"0%\":\"???\""),
-                Arguments.of(STYLES_CSS, "#ffd050"),
-                Arguments.of(STYLES_CSS, "#d35ebe"),
-                Arguments.of(STYLES_CSS, "#fffae6"),
-                Arguments.of(STYLES_CSS, "#faebf7"),
-                Arguments.of(STYLES_CSS, "#ffeca0"),
-                Arguments.of(STYLES_CSS, "#ecb7e2"));
+                Arguments.of("unknown:`Unknown`"),
+                Arguments.of("`failed`,`broken`,`passed`,`skipped`,`unknown`"),
+                Arguments.of("--color-status-broken-bg:var(--palette-amber-day-darken-2)"),
+                Arguments.of("--color-status-unknown-bg:var(--palette-violet-day-darken-1)"));
     }
 
     @ParameterizedTest
     @MethodSource("allureSourceContainsText")
-    void testAllureSourceContainsText(String fileName, String text) throws IOException
+    void testAllureSourceContainsText(String text) throws IOException
     {
-        assertTrue(readFile(fileName).contains(text));
+        String content = findAssetJsContent();
+        assertNotNull(content, "Could not find JS asset file from vite-manifest.json");
+        assertTrue(content.contains(text),
+                "JS asset file does not contain expected text: %s".formatted(text));
     }
 
-    private String readFile(String fileName) throws IOException
+    private String findAssetJsContent() throws IOException
     {
-        try (InputStream is = getClass().getResourceAsStream(fileName))
+        try (InputStream manifestStream = getClass().getClassLoader().getResourceAsStream("vite-manifest.json"))
         {
-            assertNotNull(is);
-            return IOUtils.toString(is, StandardCharsets.UTF_8);
+            assertNotNull(manifestStream, "vite-manifest.json not found in classpath");
+            JsonNode manifest = MAPPER.readTree(manifestStream);
+            String jsFileName = null;
+            for (var entry : manifest.properties())
+            {
+                JsonNode node = entry.getValue();
+                if (node.has(IS_ENTRY) && node.get(IS_ENTRY).asBoolean())
+                {
+                    jsFileName = node.get("file").asText();
+                    break;
+                }
+            }
+            assertNotNull(jsFileName, "No entry JS file found in vite-manifest.json");
+            try (InputStream is = getClass().getClassLoader().getResourceAsStream(jsFileName))
+            {
+                assertNotNull(is, "File %s not found in classpath".formatted(jsFileName));
+                return IOUtils.toString(is, StandardCharsets.UTF_8);
+            }
         }
     }
 }
