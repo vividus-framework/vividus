@@ -72,6 +72,9 @@ class GenericWaitStepsTests
     private static final Locator LOCATOR = new Locator(TestLocatorType.SEARCH, VALUE);
     private static final String ELEMENT_TO_VALIDATE_EXISTENCE = "The element to validate existence";
     private static final String ELEMENT_TO_VALIDATE_STOP_MOVEMENT = "The element to validate stop of its movement";
+
+    private static final String TEXT_MATCHING_REGEX_ASSERTION_MESSAGE =
+            "Element located by `search 'value' (visible)` has text matching regex `[a-z]+`";
     private static final Duration TIMEOUT = Duration.ofSeconds(1L);
     private static final String LOCATOR_VISIBILITY_ERROR = "The step supports locators with VISIBLE visibility settings"
             + " only, but the locator is `search 'value' (invisible)`";
@@ -329,15 +332,20 @@ class GenericWaitStepsTests
         when(searchActions.findElement(LOCATOR)).thenReturn(Optional.of(element));
         when(elementActions.getElementText(element)).thenReturn(VALUE);
 
-        waitSteps.waitUntilElementHasTextMatchingRegex(LOCATOR, ALL_LETTERS_PATTERN);
-
+        var waitResult = new WaitResult<Boolean>();
+        waitResult.setWaitPassed(true);
         ArgumentCaptor<IExpectedSearchContextCondition<Boolean>> captor = ArgumentCaptor
                 .forClass(IExpectedSearchContextCondition.class);
-        verify(waitActions).wait(eq(context), captor.capture());
+        when(waitActions.wait(eq(context), captor.capture(), eq(false))).thenReturn(waitResult);
+
+        waitSteps.waitUntilElementHasTextMatchingRegex(LOCATOR, ALL_LETTERS_PATTERN);
+
         IExpectedSearchContextCondition<Boolean> condition = captor.getValue();
         assertTrue(condition.apply(context));
         assertEquals("text matching regex ('[a-z]+') to be present in element located by  Search: 'value';"
                 + " Visibility: VISIBLE;", condition.toString());
+        verify(softAssert).assertTrue(
+                TEXT_MATCHING_REGEX_ASSERTION_MESSAGE, true);
     }
 
     @SuppressWarnings("unchecked")
@@ -347,14 +355,19 @@ class GenericWaitStepsTests
         SearchContext context = mockSearchContext();
         when(searchActions.findElement(LOCATOR)).thenReturn(Optional.empty());
 
-        waitSteps.waitUntilElementHasTextMatchingRegex(LOCATOR, ALL_LETTERS_PATTERN);
-
+        var waitResult = new WaitResult<Boolean>();
+        waitResult.setWaitPassed(false);
         ArgumentCaptor<IExpectedSearchContextCondition<Boolean>> captor = ArgumentCaptor
                 .forClass(IExpectedSearchContextCondition.class);
-        verify(waitActions).wait(eq(context), captor.capture());
+        when(waitActions.wait(eq(context), captor.capture(), eq(false))).thenReturn(waitResult);
+
+        waitSteps.waitUntilElementHasTextMatchingRegex(LOCATOR, ALL_LETTERS_PATTERN);
+
         IExpectedSearchContextCondition<Boolean> condition = captor.getValue();
         assertFalse(condition.apply(context));
         verifyNoInteractions(elementActions);
+        verify(softAssert).assertTrue(
+                TEXT_MATCHING_REGEX_ASSERTION_MESSAGE, false);
     }
 
     @SuppressWarnings("unchecked")
@@ -367,14 +380,19 @@ class GenericWaitStepsTests
         when(searchActions.findElement(LOCATOR)).thenReturn(Optional.of(element));
         when(elementActions.getElementText(element)).thenReturn("123");
 
-        waitSteps.waitUntilElementHasTextMatchingRegex(LOCATOR, ALL_LETTERS_PATTERN);
-
+        var waitResult = new WaitResult<Boolean>();
+        waitResult.setWaitPassed(false);
         ArgumentCaptor<IExpectedSearchContextCondition<Boolean>> captor = ArgumentCaptor
                 .forClass(IExpectedSearchContextCondition.class);
-        verify(waitActions).wait(eq(context), captor.capture());
+        when(waitActions.wait(eq(context), captor.capture(), eq(false))).thenReturn(waitResult);
+
+        waitSteps.waitUntilElementHasTextMatchingRegex(LOCATOR, ALL_LETTERS_PATTERN);
+
         IExpectedSearchContextCondition<Boolean> condition = captor.getValue();
         assertFalse(condition.apply(context));
         verifyNoMoreInteractions(elementActions);
+        verify(softAssert).assertTrue(
+                TEXT_MATCHING_REGEX_ASSERTION_MESSAGE, false);
     }
 
     @Test
