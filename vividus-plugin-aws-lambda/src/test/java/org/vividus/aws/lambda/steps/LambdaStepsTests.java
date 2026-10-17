@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,41 +16,40 @@
 
 package org.vividus.aws.lambda.steps;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
-
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.lambda.AWSLambda;
-import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
-import com.amazonaws.services.lambda.model.InvokeRequest;
-import com.amazonaws.services.lambda.model.InvokeResult;
-import com.amazonaws.services.lambda.model.LogType;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
 import org.vividus.variable.VariableScope;
 
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.lambda.LambdaClient;
+import software.amazon.awssdk.services.lambda.model.InvokeRequest;
+import software.amazon.awssdk.services.lambda.model.InvokeResponse;
+import software.amazon.awssdk.services.lambda.model.LogType;
+
 @ExtendWith(MockitoExtension.class)
 class LambdaStepsTests
 {
+    private static final String PAYLOAD_RESULT = "result";
+    private static final String LOG_RESULT = "log-log-log";
+    private static final String EXECUTED_VERSION = "0.2.11";
+
     @Mock private AwsServiceClientsContext clientsContext;
     @Mock private VariableContext variableContext;
 
@@ -64,56 +63,42 @@ class LambdaStepsTests
     void shouldInvokeAwsLambdaWithError()
     {
         String error = "error";
-        testAwsLambdaInvocation(result -> result.setFunctionError(error), Map.of("function-error", error));
+        testAwsLambdaInvocation(result -> result.functionError(error), Map.of("function-error", error));
     }
 
-    private void testAwsLambdaInvocation(Consumer<InvokeResult> resultDecorator,
+    @SuppressWarnings("PMD.CloseResource")
+    private void testAwsLambdaInvocation(Consumer<InvokeResponse.Builder> resultDecorator,
             Map<String, String> extraExpectedEntries)
     {
-        try (var builder = mockStatic(AWSLambdaClientBuilder.class))
-        {
-            AWSLambda awsLambda = mock();
-            builder.when(AWSLambdaClientBuilder::defaultClient).thenReturn(awsLambda);
+        LambdaClient awsLambda = mock();
+        String functionName = "function";
+        String payload = "request";
+        InvokeResponse invokeResult = buildInvokeResponse(resultDecorator);
+        when(awsLambda.invoke(argThat((InvokeRequest request) -> functionName.equals(request.functionName())
+                && payload.equals(request.payload().asUtf8String())
+                && LogType.TAIL == request.logType()))).thenReturn(invokeResult);
+        LambdaSteps steps = new LambdaSteps(clientsContext, variableContext);
+        when(clientsContext.getServiceClient(any(), any())).thenReturn(awsLambda);
+        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
+        String variableName = "var";
+        steps.invokeLambda(functionName, payload, scopes, variableName);
+        Map<String, String> variableValue = new HashMap<>();
+        variableValue.put("payload", PAYLOAD_RESULT);
+        variableValue.put("status-code", "500");
+        variableValue.put("log-result", LOG_RESULT);
+        variableValue.put("executed-version", EXECUTED_VERSION);
+        variableValue.putAll(extraExpectedEntries);
+        verify(variableContext).putVariable(scopes, variableName, variableValue);
+    }
 
-            AWSLambdaClientBuilder customClientBuilder = mock();
-            builder.when(AWSLambdaClientBuilder::standard).thenReturn(customClientBuilder);
-
-            String result = "result";
-            int statusCode = 500;
-            String logResult = "log-log-log";
-            String executedVersion = "0.2.11";
-            InvokeResult invokeResult = new InvokeResult();
-            invokeResult.setPayload(ByteBuffer.wrap(result.getBytes(StandardCharsets.UTF_8)));
-            invokeResult.setStatusCode(statusCode);
-            invokeResult.setLogResult(Base64.getEncoder().encodeToString(logResult.getBytes(StandardCharsets.UTF_8)));
-            invokeResult.setExecutedVersion(executedVersion);
-            resultDecorator.accept(invokeResult);
-
-            String functionName = "function";
-            String payload = "request";
-            InvokeRequest invokeRequest = new InvokeRequest()
-                    .withFunctionName(functionName)
-                    .withPayload(payload)
-                    .withLogType(LogType.Tail);
-            when(awsLambda.invoke(invokeRequest)).thenReturn(invokeResult);
-
-            LambdaSteps steps = new LambdaSteps(clientsContext, variableContext);
-
-            when(clientsContext.getServiceClient(
-                    argThat((ArgumentMatcher<Supplier<AwsClientBuilder<AWSLambdaClientBuilder, AWSLambda>>>)
-                            supplier -> supplier.get().equals(customClientBuilder)), eq(awsLambda)))
-                    .thenReturn(awsLambda);
-
-            Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-            String variableName = "var";
-            steps.invokeLambda(functionName, payload, scopes, variableName);
-            Map<String, String> variableValue = new HashMap<>();
-            variableValue.put("payload", result);
-            variableValue.put("status-code", Integer.toString(statusCode));
-            variableValue.put("log-result", logResult);
-            variableValue.put("executed-version", executedVersion);
-            variableValue.putAll(extraExpectedEntries);
-            verify(variableContext).putVariable(scopes, variableName, variableValue);
-        }
+    private static InvokeResponse buildInvokeResponse(Consumer<InvokeResponse.Builder> resultDecorator)
+    {
+        InvokeResponse.Builder builder = InvokeResponse.builder()
+                .payload(SdkBytes.fromUtf8String(PAYLOAD_RESULT))
+                .statusCode(500)
+                .logResult(Base64.getEncoder().encodeToString(LOG_RESULT.getBytes(StandardCharsets.UTF_8)))
+                .executedVersion(EXECUTED_VERSION);
+        resultDecorator.accept(builder);
+        return builder.build();
     }
 }
