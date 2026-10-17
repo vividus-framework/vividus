@@ -75,6 +75,9 @@ class TestCaseFactoryTests
         assertEquals(ASSIGNEE, testCase.getAssignee());
         assertEquals(parameters.getLabels(), testCase.getLabels());
         assertEquals(parameters.getComponents(), testCase.getComponents());
+        assertEquals(parameters.getPriority(), testCase.getPriority());
+        assertEquals(parameters.getFixVersions(), testCase.getFixVersions());
+        assertEquals(parameters.getAffectedVersions(), testCase.getAffectedVersions());
         assertEquals(parameters.getSummary(), testCase.getSummary());
     }
 
@@ -87,6 +90,9 @@ class TestCaseFactoryTests
         testCase.setSummary("summary");
         testCase.setLabels(Set.of("labels-1"));
         testCase.setComponents(Set.of("components-1"));
+        testCase.setPriority("High");
+        testCase.setFixVersions(Set.of("Release-1.0", "Release-1.1"));
+        testCase.setAffectedVersions(Set.of("Release-0.9"));
         return (T) testCase;
     }
 }

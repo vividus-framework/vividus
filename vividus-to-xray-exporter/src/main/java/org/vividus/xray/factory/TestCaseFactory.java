@@ -59,5 +59,8 @@ public class TestCaseFactory
         testCase.setSummary(parameters.getSummary());
         testCase.setLabels(parameters.getLabels());
         testCase.setComponents(parameters.getComponents());
+        testCase.setPriority(parameters.getPriority());
+        testCase.setFixVersions(parameters.getFixVersions());
+        testCase.setAffectedVersions(parameters.getAffectedVersions());
     }
 }

@@ -93,6 +93,8 @@ class XrayExporterTests
 {
     private static final String UPDATECUCUMBER_RESOURCE_KEY = "updatecucumber";
     private static final String ISSUE_ID = "STUB-0";
+    private static final String FIX_VERSION = "Release-1.0";
+    private static final String AFFECTED_VERSION = "Release-0.9";
     private static final String SCENARIO_TITLE = "Dummy scenario";
     private static final String STORY_TITLE = "storyPath";
     private static final String ERROR_MESSAGE = "Got an error while exporting";
@@ -218,6 +220,11 @@ class XrayExporterTests
         verify(xrayFacade).updateTestCase(ISSUE_ID, testCase);
         verifyManualTestCaseParameters(Set.of("dummy-label-1", "dummy-label-2"),
                 Set.of("dummy-component-1", "dummy-component-2"));
+        ManualTestCaseParameters parameters = manualTestCaseParametersCaptor.getValue();
+        assertEquals("High", parameters.getPriority());
+        assertEquals(Set.of(FIX_VERSION, "Release-1.1"), parameters.getFixVersions());
+        assertEquals(Set.of(AFFECTED_VERSION, FIX_VERSION), parameters.getAffectedVersions());
+        verify(xrayFacade).updateTestRepositoryPath(ISSUE_ID, "Applications/Web/Authentication");
 
         verify(xrayFacade).updateTestExecution(testExecution, List.of(ROOT));
         List<Entry<String, Scenario>> scenarios = scenariosCaptor.getValue();
