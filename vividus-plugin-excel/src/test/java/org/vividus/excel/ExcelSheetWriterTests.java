@@ -42,12 +42,12 @@ import org.vividus.util.ResourceUtils;
 class ExcelSheetWriterTests
 {
     private static final ExamplesTable CONTENT = new ExamplesTable("""
-            |name|status|name|
+            |name|status|surname|
             |First |OPEN   |MoreFirst|
             |Second|closed|MoreSecond|""");
     private static final String NAME = "name";
     private static final List<List<String>> EXPECTED_DATA = List.of(
-            List.of(NAME, "status", NAME),
+            List.of(NAME, "status", "surname"),
             List.of("First", "OPEN", "MoreFirst"),
             List.of("Second", "closed", "MoreSecond")
     );
@@ -105,6 +105,16 @@ class ExcelSheetWriterTests
                 () -> EXCEL_SHEET_WRITER.createExcel(pathTemp, Optional.of(TEST_SHEET_NAME),
                         new ExamplesTable(String.format("|#{withColumnCellsType(%s, name,value)}|%n||", dataType))));
         assertEquals(String.format("The %s value isn't specified", dataType), exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionForDuplicateColumns() throws IOException
+    {
+        var pathTemp = createExcelFile();
+        var content = new ExamplesTable("|name|status|name|\n|First|OPEN|MoreFirst|");
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> EXCEL_SHEET_WRITER.createExcel(pathTemp, Optional.of(TEST_SHEET_NAME), content));
+        assertEquals("ExamplesTable contains duplicate column names: [name]", exception.getMessage());
     }
 
     @Test
