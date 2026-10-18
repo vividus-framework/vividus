@@ -23,20 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.function.Consumer;
 
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClient;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
-import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
@@ -49,9 +42,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.MockedConstruction;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
+import software.amazon.awssdk.services.secretsmanager.model.ResourceNotFoundException;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class AwsSecretsManagerPropertiesProcessorTests
@@ -78,32 +76,22 @@ class AwsSecretsManagerPropertiesProcessorTests
     @ParameterizedTest
     void shouldProcessValue(String profile, String secretId, String valueToProcess)
     {
-        GetSecretValueResult result = new GetSecretValueResult().withSecretString(SECRET_STRING);
+        var result = GetSecretValueResponse.builder().secretString(SECRET_STRING).build();
 
-        try (MockedStatic<AWSSecretsManagerClient> clientStatic = mockStatic(AWSSecretsManagerClient.class);
-                MockedConstruction<ProfileCredentialsProvider> credentialsProviderMock = mockConstruction(
-                        ProfileCredentialsProvider.class,
-                        (mock, context) -> assertEquals(profile, context.arguments().get(0))))
-        {
-            AWSSecretsManagerClientBuilder builder = mock(AWSSecretsManagerClientBuilder.class);
-            AWSSecretsManager client = mock(AWSSecretsManager.class);
-
-            clientStatic.when(AWSSecretsManagerClient::builder).thenReturn(builder);
-            when(builder.withCredentials(any(ProfileCredentialsProvider.class))).thenReturn(builder);
-            when(builder.build()).thenReturn(client);
-            ArgumentCaptor<GetSecretValueRequest> requestCaptor = ArgumentCaptor.forClass(GetSecretValueRequest.class);
+        testSecretsManager(profile, client -> {
+            var requestCaptor = ArgumentCaptor.forClass(GetSecretValueRequest.class);
             when(client.getSecretValue(requestCaptor.capture())).thenReturn(result);
 
             String value = processor.processValue(PROP_NAME, valueToProcess);
             assertEquals("value", value);
-            assertEquals(secretId, requestCaptor.getValue().getSecretId());
-        }
+            assertEquals(secretId, requestCaptor.getValue().secretId());
+        });
     }
 
     @Test
     void shouldThrowExceptionForInvalidFormat()
     {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        var exception = assertThrows(IllegalArgumentException.class,
                 () -> processor.processValue("test", "invalid-format"));
         assertEquals(
                 "The expected property value format is AWS_SECRETS_MANAGER(profile, "
@@ -127,27 +115,16 @@ class AwsSecretsManagerPropertiesProcessorTests
     @ParameterizedTest
     void shouldHandleResourceNotFoundExceptionFromCache(String valueToProcess)
     {
-        try (MockedStatic<AWSSecretsManagerClient> clientStatic = mockStatic(AWSSecretsManagerClient.class);
-                MockedConstruction<ProfileCredentialsProvider> credentialsProviderMock = mockConstruction(
-                        ProfileCredentialsProvider.class,
-                        (mock, context) -> assertEquals("profileX", context.arguments().get(0))))
-        {
-            AWSSecretsManagerClientBuilder builder = mock(AWSSecretsManagerClientBuilder.class);
-            AWSSecretsManager client = mock(AWSSecretsManager.class);
-
-            clientStatic.when(AWSSecretsManagerClient::builder).thenReturn(builder);
-            when(builder.withCredentials(any(ProfileCredentialsProvider.class))).thenReturn(builder);
-            when(builder.build()).thenReturn(client);
-
+        testSecretsManager("profileX", client -> {
             when(client.getSecretValue(any(GetSecretValueRequest.class)))
-                    .thenThrow(new ResourceNotFoundException("not found"));
+                    .thenThrow(ResourceNotFoundException.builder().message("not found").build());
 
-            UncheckedExecutionException exception = assertThrows(UncheckedExecutionException.class,
+            var exception = assertThrows(UncheckedExecutionException.class,
                     () -> processor.processValue(PROP_NAME, valueToProcess));
             assertEquals(
                     "The requested secret 'secretName' was not found in AWS Secrets Manager using profile 'profileX'",
                     exception.getCause().getMessage());
-        }
+        });
     }
 
     @CsvSource(value = {
@@ -159,19 +136,9 @@ class AwsSecretsManagerPropertiesProcessorTests
     void shouldUseDefaultValueWhenSecretKeyIsMissing(String profile, String secretId, String valueToProcess,
             String expectedValue)
     {
-        GetSecretValueResult result = new GetSecretValueResult().withSecretString(SECRET_STRING);
+        var result = GetSecretValueResponse.builder().secretString(SECRET_STRING).build();
 
-        try (MockedStatic<AWSSecretsManagerClient> clientStatic = mockStatic(AWSSecretsManagerClient.class);
-                MockedConstruction<ProfileCredentialsProvider> credentialsProviderMock = mockConstruction(
-                        ProfileCredentialsProvider.class,
-                        (mock, context) -> assertEquals(profile, context.arguments().get(0))))
-        {
-            AWSSecretsManagerClientBuilder builder = mock(AWSSecretsManagerClientBuilder.class);
-            AWSSecretsManager client = mock(AWSSecretsManager.class);
-
-            clientStatic.when(AWSSecretsManagerClient::builder).thenReturn(builder);
-            when(builder.withCredentials(any(ProfileCredentialsProvider.class))).thenReturn(builder);
-            when(builder.build()).thenReturn(client);
+        testSecretsManager(profile, client -> {
             when(client.getSecretValue(any(GetSecretValueRequest.class))).thenReturn(result);
 
             assertEquals(expectedValue, processor.processValue(PROP_NAME, valueToProcess));
@@ -179,32 +146,45 @@ class AwsSecretsManagerPropertiesProcessorTests
                     "The secret key '{}' was not found in the secret '{}' retrieved from AWS Secrets Manager "
                             + "using profile '{}'. Using default value for property '{}'",
                     "missing-key", secretId, profile, PROP_NAME))));
-        }
+        });
     }
 
     @Test
     void shouldThrowExceptionWhenSecretKeyIsMissingAndNoDefaultValue()
     {
-        GetSecretValueResult result = new GetSecretValueResult().withSecretString(SECRET_STRING);
+        var result = GetSecretValueResponse.builder().secretString(SECRET_STRING).build();
 
-        try (MockedStatic<AWSSecretsManagerClient> clientStatic = mockStatic(AWSSecretsManagerClient.class);
-                MockedConstruction<ProfileCredentialsProvider> credentialsProviderMock = mockConstruction(
-                        ProfileCredentialsProvider.class))
-        {
-            AWSSecretsManagerClientBuilder builder = mock(AWSSecretsManagerClientBuilder.class);
-            AWSSecretsManager client = mock(AWSSecretsManager.class);
-
-            clientStatic.when(AWSSecretsManagerClient::builder).thenReturn(builder);
-            when(builder.withCredentials(any(ProfileCredentialsProvider.class))).thenReturn(builder);
-            when(builder.build()).thenReturn(client);
+        testSecretsManager("default", client -> {
             when(client.getSecretValue(any(GetSecretValueRequest.class))).thenReturn(result);
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            var exception = assertThrows(IllegalArgumentException.class,
                     () -> processor.processValue(PROP_NAME, "secret/missing-key"));
             assertEquals(
                     "The secret key 'missing-key' was not found in the secret 'secret' retrieved from AWS Secrets "
                             + "Manager using profile 'default'",
                     exception.getMessage());
+        });
+    }
+
+    @SuppressWarnings("PMD.CloseResource")
+    void testSecretsManager(String profile, Consumer<SecretsManagerClient> clientConsumer)
+    {
+        try (var clientStatic = mockStatic(SecretsManagerClient.class);
+             var profileCredentialsProvider = mockStatic(ProfileCredentialsProvider.class))
+        {
+            ProfileCredentialsProvider.Builder providerBuilder = mock();
+            ProfileCredentialsProvider provider = mock();
+            profileCredentialsProvider.when(ProfileCredentialsProvider::builder).thenReturn(providerBuilder);
+            when(providerBuilder.profileName(profile)).thenReturn(providerBuilder);
+            when(providerBuilder.build()).thenReturn(provider);
+
+            SecretsManagerClientBuilder clientBuilder = mock(SecretsManagerClientBuilder.class);
+            SecretsManagerClient client = mock(SecretsManagerClient.class);
+            clientStatic.when(SecretsManagerClient::builder).thenReturn(clientBuilder);
+            when(clientBuilder.credentialsProvider(provider)).thenReturn(clientBuilder);
+            when(clientBuilder.build()).thenReturn(client);
+
+            clientConsumer.accept(client);
         }
     }
 }

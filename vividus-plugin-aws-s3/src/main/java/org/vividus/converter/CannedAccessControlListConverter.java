@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,17 @@ package org.vividus.converter;
 
 import java.util.stream.Stream;
 
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-
 import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 
 import jakarta.inject.Named;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 
 @Named
-public class CannedAccessControlListConverter extends FunctionalParameterConverter<String, CannedAccessControlList>
+public class CannedAccessControlListConverter extends FunctionalParameterConverter<String, ObjectCannedACL>
 {
     public CannedAccessControlListConverter()
     {
-        super(acl -> Stream.of(CannedAccessControlList.values())
+        super(acl -> Stream.of(ObjectCannedACL.values())
                 .filter(value -> value.toString().equalsIgnoreCase(acl))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(acl + " is not a valid canned access control list")));

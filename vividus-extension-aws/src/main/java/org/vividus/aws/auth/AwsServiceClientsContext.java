@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@ package org.vividus.aws.auth;
 
 import java.util.function.Supplier;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.client.builder.AwsClientBuilder;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 
 public interface AwsServiceClientsContext
 {
     <B extends AwsClientBuilder<B, T>, T> T getServiceClient(Supplier<AwsClientBuilder<B, T>> clientBuilderSupplier,
-            T defaultClient);
+            Supplier<T> defaultClientSupplier);
 
-    void putCredentialsProvider(AwsServiceClientScope scope, AWSCredentialsProvider credentialsProvider);
+    void putCredentialsProvider(AwsServiceClientScope scope, AwsCredentialsProvider credentialsProvider);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.client.builder.AwsClientBuilder;
-
 import org.jbehave.core.annotations.AfterScenario;
 import org.vividus.testcontext.TestContext;
+
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 
 public class AwsServiceClientsTestContext implements AwsServiceClientsContext
 {
@@ -41,33 +41,32 @@ public class AwsServiceClientsTestContext implements AwsServiceClientsContext
 
     @Override
     public <B extends AwsClientBuilder<B, T>, T> T getServiceClient(
-            Supplier<AwsClientBuilder<B, T>> clientBuilderSupplier, T defaultClient)
+            Supplier<AwsClientBuilder<B, T>> clientBuilderSupplier, Supplier<T> defaultClientSupplier)
     {
         ScopedAwsServiceClients clients = getAwsServiceClients();
 
-        @SuppressWarnings("unchecked")
-        Class<T> clientClass = (Class<T>) defaultClient.getClass();
-
-        return getClient(clients, AwsServiceClientScope.SCENARIO, clientClass, clientBuilderSupplier)
-                .or(() -> getClient(clients, AwsServiceClientScope.STORY, clientClass, clientBuilderSupplier))
-                .orElse(defaultClient);
+        return getClient(clients, AwsServiceClientScope.SCENARIO, clientBuilderSupplier)
+                .or(() -> getClient(clients, AwsServiceClientScope.STORY, clientBuilderSupplier))
+                .orElseGet(defaultClientSupplier);
     }
 
     @SuppressWarnings("unchecked")
     private static <B extends AwsClientBuilder<B, T>, T> Optional<T> getClient(ScopedAwsServiceClients scopedClients,
-            AwsServiceClientScope scope, Class<T> clientClass, Supplier<AwsClientBuilder<B, T>> clientBuilderSupplier)
+            AwsServiceClientScope scope, Supplier<AwsClientBuilder<B, T>> clientBuilderSupplier)
     {
         return Optional.ofNullable(scopedClients.clients.get(scope)).map(clients ->
-                (T) clients.clients.computeIfAbsent(clientClass,
-                        k -> Optional.ofNullable(clients.credentialsProvider)
-                                .map(credentials -> clientBuilderSupplier.get().withCredentials(credentials).build())
-                                .orElse(null)
-                )
-        );
+        {
+            AwsClientBuilder<B, T> builder = clientBuilderSupplier.get();
+            return (T) clients.clients.computeIfAbsent(builder.getClass(),
+                    k -> Optional.ofNullable(clients.credentialsProvider)
+                            .map(cp -> builder.credentialsProvider(cp).build())
+                            .orElse(null)
+            );
+        });
     }
 
     @Override
-    public void putCredentialsProvider(AwsServiceClientScope scope, AWSCredentialsProvider credentialsProvider)
+    public void putCredentialsProvider(AwsServiceClientScope scope, AwsCredentialsProvider credentialsProvider)
     {
         getAwsServiceClients().clients.computeIfAbsent(scope,
                 k -> new AwsServiceClients()).credentialsProvider = credentialsProvider;
@@ -92,7 +91,7 @@ public class AwsServiceClientsTestContext implements AwsServiceClientsContext
 
     private static final class AwsServiceClients
     {
-        private AWSCredentialsProvider credentialsProvider;
+        private AwsCredentialsProvider credentialsProvider;
         private final Map<Class<?>, Object> clients = new HashMap<>();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,6 +28,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.aws.auth.AwsServiceClientScope;
 import org.vividus.aws.auth.AwsServiceClientsContext;
+
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 
 @ExtendWith(MockitoExtension.class)
 class ConfiguringAwsCredentialsStepsTests
@@ -46,10 +46,10 @@ class ConfiguringAwsCredentialsStepsTests
 
         steps.configureAwsCredentials(scope, accessKeyId, secretKey);
 
-        var credentialsProviderCaptor = ArgumentCaptor.forClass(AWSCredentialsProvider.class);
+        var credentialsProviderCaptor = ArgumentCaptor.forClass(AwsCredentialsProvider.class);
         verify(mockAwsServiceClientsContext).putCredentialsProvider(eq(scope), credentialsProviderCaptor.capture());
-        var credentials = credentialsProviderCaptor.getValue().getCredentials();
-        assertEquals(accessKeyId, credentials.getAWSAccessKeyId());
-        assertEquals(secretKey, credentials.getAWSSecretKey());
+        var credentials = credentialsProviderCaptor.getValue().resolveCredentials();
+        assertEquals(accessKeyId, credentials.accessKeyId());
+        assertEquals(secretKey, credentials.secretAccessKey());
     }
 }
