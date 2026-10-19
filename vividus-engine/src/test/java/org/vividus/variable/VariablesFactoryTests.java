@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,7 +61,7 @@ class VariablesFactoryTests
         when(propertyParser.getPropertyValuesByPrefix(GLOBAL_PROPERTY_PREFIX)).thenReturn(GLOBAL_VARIABLES);
         var configuration = new BatchConfiguration();
         configuration.setVariables(Map.of(KEY1, BATCH, KEY2, BATCH));
-        when(runContext.getRunningBatch()).thenReturn(configuration);
+        when(runContext.getRunningBatchIfPresent()).thenReturn(Optional.of(configuration));
     }
 
     @Test
@@ -72,6 +73,19 @@ class VariablesFactoryTests
 
         assertEquals(NEXT_BATCHES, variables.getVariable(KEY1));
         assertEquals(BATCH, variables.getVariable(KEY2));
+        assertEquals(GLOBAL, variables.getVariable(KEY3));
+    }
+
+    @Test
+    void shouldCreateVariablesWithoutRunningBatch() throws IOException
+    {
+        variablesFactory.init();
+        when(runContext.getRunningBatchIfPresent()).thenReturn(Optional.empty());
+        variablesFactory.addNextBatchesVariable(KEY1, NEXT_BATCHES);
+        Variables variables = variablesFactory.createVariables();
+
+        assertEquals(NEXT_BATCHES, variables.getVariable(KEY1));
+        assertEquals(GLOBAL, variables.getVariable(KEY2));
         assertEquals(GLOBAL, variables.getVariable(KEY3));
     }
 }

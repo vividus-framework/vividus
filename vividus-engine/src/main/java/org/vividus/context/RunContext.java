@@ -17,6 +17,7 @@
 package org.vividus.context;
 
 import java.util.Deque;
+import java.util.Optional;
 
 import org.vividus.batch.BatchConfiguration;
 import org.vividus.model.RunningStory;
@@ -38,6 +39,13 @@ public interface RunContext
      * @throws IllegalStateException if no batch is running
      */
     BatchConfiguration getRunningBatch();
+
+    /**
+     * Returns the configuration of the currently running batch, if present.
+     *
+     * @return an optional containing the running batch configuration, or empty if no batch is running
+     */
+    Optional<BatchConfiguration> getRunningBatchIfPresent();
 
     void setDryRun(boolean dryRun);
 
