@@ -19,6 +19,7 @@ package org.vividus.context;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Story;
@@ -35,8 +36,8 @@ public class RunTestContext implements RunContext
     private TestContext testContext;
 
     // must be initialized for jbehave-junit-runner
-    private volatile @Nullable RunningBatch runningBatch =
-            new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration());
+    private final AtomicReference<@Nullable RunningBatch> runningBatch =
+            new AtomicReference<>(new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration()));
     private boolean dryRun;
     private RunState runState = RunState.NOT_STARTED;
 
@@ -88,12 +89,12 @@ public class RunTestContext implements RunContext
 
     public void putRunningBatch(String batchKey, BatchConfiguration batchConfiguration)
     {
-        runningBatch = new RunningBatch(batchKey, batchConfiguration);
+        runningBatch.set(new RunningBatch(batchKey, batchConfiguration));
     }
 
     public void removeRunningBatch()
     {
-        runningBatch = null;
+        runningBatch.set(null);
     }
 
     @Override
@@ -111,13 +112,13 @@ public class RunTestContext implements RunContext
     @Override
     public Optional<BatchConfiguration> getRunningBatchIfPresent()
     {
-        RunningBatch currentRunningBatch = runningBatch;
+        RunningBatch currentRunningBatch = runningBatch.get();
         return Optional.ofNullable(currentRunningBatch).map(RunningBatch::configuration);
     }
 
     private RunningBatch getRunningBatchState()
     {
-        RunningBatch currentRunningBatch = runningBatch;
+        RunningBatch currentRunningBatch = runningBatch.get();
         if (currentRunningBatch == null)
         {
             throw new IllegalStateException(NO_RUNNING_BATCH);
