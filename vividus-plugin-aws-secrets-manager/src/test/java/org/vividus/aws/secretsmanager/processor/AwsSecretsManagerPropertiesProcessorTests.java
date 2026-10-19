@@ -58,6 +58,10 @@ class AwsSecretsManagerPropertiesProcessorTests
 {
     private static final String PROP_NAME = "property_name";
     private static final String SECRET_STRING = "{\"key\":\"value\"}";
+    private static final String PROFILE = "profileX";
+    private static final String PROFILE_FILE_ERROR = "profile file cannot be null";
+    private static final String RESOLUTION_FAILURE_PREFIX = "Failed to resolve secret 'secretName' from AWS Secrets "
+            + "Manager using profile '" + PROFILE + "' for property '" + PROP_NAME + "': ";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AwsSecretsManagerPropertiesProcessor.class);
 
@@ -130,7 +134,7 @@ class AwsSecretsManagerPropertiesProcessorTests
         try (MockedStatic<AWSSecretsManagerClient> clientStatic = mockStatic(AWSSecretsManagerClient.class);
                 MockedConstruction<ProfileCredentialsProvider> credentialsProviderMock = mockConstruction(
                         ProfileCredentialsProvider.class,
-                        (mock, context) -> assertEquals("profileX", context.arguments().get(0))))
+                        (mock, context) -> assertEquals(PROFILE, context.arguments().get(0))))
         {
             AWSSecretsManagerClientBuilder builder = mock(AWSSecretsManagerClientBuilder.class);
             AWSSecretsManager client = mock(AWSSecretsManager.class);
@@ -142,11 +146,36 @@ class AwsSecretsManagerPropertiesProcessorTests
             when(client.getSecretValue(any(GetSecretValueRequest.class)))
                     .thenThrow(new ResourceNotFoundException("not found"));
 
-            UncheckedExecutionException exception = assertThrows(UncheckedExecutionException.class,
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                     () -> processor.processValue(PROP_NAME, valueToProcess));
-            assertEquals(
-                    "The requested secret 'secretName' was not found in AWS Secrets Manager using profile 'profileX'",
-                    exception.getCause().getMessage());
+            assertEquals(RESOLUTION_FAILURE_PREFIX + "the requested secret was not found", exception.getMessage());
+            assertEquals(UncheckedExecutionException.class, exception.getCause().getClass());
+            assertEquals(ResourceNotFoundException.class, exception.getCause().getCause().getClass());
+        }
+    }
+
+    @Test
+    void shouldIncludeSecretContextWhenResolutionFails()
+    {
+        try (MockedStatic<AWSSecretsManagerClient> clientStatic = mockStatic(AWSSecretsManagerClient.class);
+                MockedConstruction<ProfileCredentialsProvider> credentialsProviderMock = mockConstruction(
+                        ProfileCredentialsProvider.class,
+                        (mock, context) -> assertEquals(PROFILE, context.arguments().get(0))))
+        {
+            AWSSecretsManagerClientBuilder builder = mock(AWSSecretsManagerClientBuilder.class);
+            AWSSecretsManager client = mock(AWSSecretsManager.class);
+
+            clientStatic.when(AWSSecretsManagerClient::builder).thenReturn(builder);
+            when(builder.withCredentials(any(ProfileCredentialsProvider.class))).thenReturn(builder);
+            when(builder.build()).thenReturn(client);
+
+            when(client.getSecretValue(any(GetSecretValueRequest.class)))
+                    .thenThrow(new IllegalArgumentException(PROFILE_FILE_ERROR));
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> processor.processValue(PROP_NAME, PROFILE + ", secretName/key"));
+            assertEquals(RESOLUTION_FAILURE_PREFIX + PROFILE_FILE_ERROR, exception.getMessage());
+            assertEquals(PROFILE_FILE_ERROR, exception.getCause().getCause().getMessage());
         }
     }
 
