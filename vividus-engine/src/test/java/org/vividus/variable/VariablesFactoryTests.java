@@ -74,5 +74,4 @@ class VariablesFactoryTests
         assertEquals(BATCH, variables.getVariable(KEY2));
         assertEquals(GLOBAL, variables.getVariable(KEY3));
     }
-
 }
