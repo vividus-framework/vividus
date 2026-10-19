@@ -21,6 +21,7 @@ import java.util.LinkedList;
 
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Story;
+import org.jspecify.annotations.Nullable;
 import org.vividus.batch.BatchConfiguration;
 import org.vividus.model.RunningStory;
 import org.vividus.testcontext.TestContext;
@@ -33,7 +34,7 @@ public class RunTestContext implements RunContext
     private TestContext testContext;
 
     // must be initialized for jbehave-junit-runner
-    private RunningBatch runningBatch = new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration(), true);
+    private @Nullable RunningBatch runningBatch = new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration());
     private boolean dryRun;
     private RunState runState = RunState.NOT_STARTED;
 
@@ -85,12 +86,12 @@ public class RunTestContext implements RunContext
 
     public void putRunningBatch(String batchKey, BatchConfiguration batchConfiguration)
     {
-        runningBatch = new RunningBatch(batchKey, batchConfiguration, true);
+        runningBatch = new RunningBatch(batchKey, batchConfiguration);
     }
 
     public void removeRunningBatch()
     {
-        runningBatch = new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration(), false);
+        runningBatch = null;
     }
 
     @Override
@@ -107,7 +108,7 @@ public class RunTestContext implements RunContext
 
     private RunningBatch getRunningBatchState()
     {
-        if (!runningBatch.active())
+        if (runningBatch == null)
         {
             throw new IllegalStateException(NO_RUNNING_BATCH);
         }
@@ -166,7 +167,7 @@ public class RunTestContext implements RunContext
         COMPLETED;
     }
 
-    private record RunningBatch(String key, BatchConfiguration configuration, boolean active)
+    private record RunningBatch(String key, BatchConfiguration configuration)
     {
     }
 }
