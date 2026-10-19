@@ -23,17 +23,16 @@ import java.util.Optional;
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Story;
 import org.vividus.batch.BatchConfiguration;
-import org.vividus.batch.BatchStorage;
 import org.vividus.model.RunningStory;
 import org.vividus.testcontext.TestContext;
 
 public class RunTestContext implements RunContext
 {
     private TestContext testContext;
-    private BatchStorage batchStorage;
 
     // must be initialized for jbehave-junit-runner
     private Optional<String> runningBatchKey = Optional.of("batch-1");
+    private Optional<BatchConfiguration> runningBatch = Optional.empty();
     private boolean dryRun;
     private RunState runState = RunState.NOT_STARTED;
 
@@ -83,14 +82,16 @@ public class RunTestContext implements RunContext
         return testContext.get("RunningGivenStory", LinkedList::new);
     }
 
-    public void putRunningBatch(String batchKey)
+    public void putRunningBatch(String batchKey, BatchConfiguration batchConfiguration)
     {
         runningBatchKey = Optional.of(batchKey);
+        runningBatch = Optional.of(batchConfiguration);
     }
 
     public void removeRunningBatch()
     {
         runningBatchKey = Optional.empty();
+        runningBatch = Optional.empty();
     }
 
     @Override
@@ -102,7 +103,7 @@ public class RunTestContext implements RunContext
     @Override
     public BatchConfiguration getRunningBatch()
     {
-        return batchStorage.getBatchConfiguration(getRunningBatchKey());
+        return runningBatch.orElseThrow(() -> new IllegalStateException("No running batch is found"));
     }
 
     public Status getStoryStatus(Story story)
@@ -148,11 +149,6 @@ public class RunTestContext implements RunContext
     public void setTestContext(TestContext testContext)
     {
         this.testContext = testContext;
-    }
-
-    public void setBatchStorage(BatchStorage batchStorage)
-    {
-        this.batchStorage = batchStorage;
     }
 
     private enum RunState

@@ -85,7 +85,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.batch.BatchConfiguration;
-import org.vividus.batch.BatchStorage;
 import org.vividus.context.ReportControlContext;
 import org.vividus.context.RunTestContext;
 import org.vividus.model.RunningScenario;
@@ -154,7 +153,6 @@ class AllureStoryReporterTests
 
     @Captor private ArgumentCaptor<TestResult> testResultCaptor;
     @Mock private IAllureReportGenerator allureReportGenerator;
-    @Mock private BatchStorage batchStorage;
     @Spy private final TestContext testContext = new SimpleTestContext();
     @Mock private IAllureRunContext allureRunContext;
     @Mock private IVerificationErrorAdapter verificationErrorAdapter;
@@ -173,7 +171,6 @@ class AllureStoryReporterTests
     {
         RunTestContext context = new RunTestContext();
         context.setTestContext(testContext);
-        context.setBatchStorage(batchStorage);
         runTestContext = spy(context);
         initStoryReporter(true);
         linkedQueueItem = new LinkedQueueItem<>(SCENARIO_UID);
@@ -392,17 +389,15 @@ class AllureStoryReporterTests
 
     private void mockRunningBatchName()
     {
-        String batchKey = mockBatchExecutionConfiguration();
-        runTestContext.putRunningBatch(batchKey);
+        BatchConfiguration batchConfiguration = mockBatchExecutionConfiguration();
+        runTestContext.putRunningBatch("batch-1", batchConfiguration);
     }
 
-    private String mockBatchExecutionConfiguration()
+    private BatchConfiguration mockBatchExecutionConfiguration()
     {
-        String batchKey = "batch-1";
         BatchConfiguration config = new BatchConfiguration();
         config.setName(BATCH_NAME);
-        when(batchStorage.getBatchConfiguration(batchKey)).thenReturn(config);
-        return batchKey;
+        return config;
     }
 
     @Test

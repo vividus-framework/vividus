@@ -100,7 +100,7 @@ class BatchedEmbedderTests
             failures.put(key, throwable);
             return true;
         }));
-        mockBatchConfiguration(true);
+        BatchConfiguration batchConfiguration = mockBatchConfiguration(true);
         Map<String, List<String>> batches = new LinkedHashMap<>();
         batches.put(BATCH, testStoryPaths);
         batches.put("batch-2", List.of("path2"));
@@ -112,7 +112,7 @@ class BatchedEmbedderTests
         ordered.verify(embedderMonitor).usingControls(argThat(this::assertEmbedderControls));
         List<ExecutorService> service = new ArrayList<>(1);
         ordered.verify(spy).useExecutorService(argThat(service::add));
-        ordered.verify(runTestContext).putRunningBatch(BATCH);
+        ordered.verify(runTestContext).putRunningBatch(BATCH, batchConfiguration);
         ordered.verify(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter),
                 argThat(failures -> failures.size() == 1 && failures.containsKey(key) && failures
                         .containsValue(throwable)));
@@ -132,14 +132,14 @@ class BatchedEmbedderTests
         List<String> testStoryPaths = List.of(PATH);
         EmbedderControls mockedEmbedderControls = mockEmbedderControls(spy);
         when(mockedEmbedderControls.threads()).thenReturn(THREADS);
-        mockBatchConfiguration(false);
+        BatchConfiguration batchConfiguration = mockBatchConfiguration(false);
         spy.runStoriesAsPaths(Map.of(BATCH, testStoryPaths));
         InOrder ordered = inOrder(spy, embedderMonitor, storyManager, runTestContext, variableContext);
         ordered.verify(spy).processSystemProperties();
         ordered.verify(embedderMonitor).usingControls(mockedEmbedderControls);
         List<ExecutorService> service = new ArrayList<>(1);
         ordered.verify(spy).useExecutorService(argThat(service::add));
-        ordered.verify(runTestContext).putRunningBatch(BATCH);
+        ordered.verify(runTestContext).putRunningBatch(BATCH, batchConfiguration);
         ordered.verify(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter), any(BatchFailures.class));
         ordered.verify(variableContext).clearBatchVariables();
         ordered.verify(runTestContext).removeRunningBatch();
@@ -262,12 +262,12 @@ class BatchedEmbedderTests
         return mockedEmbedderControls;
     }
 
-    private void mockBatchConfiguration(boolean failFast)
+    private BatchConfiguration mockBatchConfiguration(boolean failFast)
     {
-        mockBatchConfiguration(failFast, null);
+        return mockBatchConfiguration(failFast, null);
     }
 
-    private void mockBatchConfiguration(boolean failFast, Boolean failStoryFast)
+    private BatchConfiguration mockBatchConfiguration(boolean failFast, Boolean failStoryFast)
     {
         var batchConfiguration = spy(new BatchConfiguration());
         batchConfiguration.overrideStoryExecutionTimeout(Duration.ofHours(1));
@@ -276,6 +276,7 @@ class BatchedEmbedderTests
         batchConfiguration.setFailFast(failFast);
         when(batchConfiguration.isFailStoryFast()).thenReturn(failStoryFast);
         when(batchStorage.getBatchConfiguration(BATCH)).thenReturn(batchConfiguration);
+        return batchConfiguration;
     }
 
     private boolean assertEmbedderControls(EmbedderControls controls)
