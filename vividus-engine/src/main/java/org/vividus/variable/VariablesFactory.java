@@ -49,7 +49,7 @@ public class VariablesFactory implements IVariablesFactory
     public Variables createVariables()
     {
         Map<String, Object> merged = new HashMap<>(globalVariables);
-        runContext.getRunningBatchIfPresent().ifPresent(batch -> merged.putAll(batch.getVariables()));
+        merged.putAll(runContext.getRunningBatch().getVariables());
         merged.putAll(nextBatchesVariables);
         return new Variables(merged);
     }

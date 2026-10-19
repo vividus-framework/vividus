@@ -118,8 +118,8 @@ public class NewRelicSteps
         Status status = evaluateStoryStatus(story);
         storyStatus.remove();
         runFailed.compareAndSet(false, status == Status.FAILED);
-        int batchIndex = BatchStorage.getBatchIndex(runContext.getRunningBatchKey());
-        VividusStoryEvent event = new VividusStoryEvent(runId, story.getName(), batchIndex, status,
+        VividusStoryEvent event = new VividusStoryEvent(runId, story.getName(),
+                BatchStorage.getBatchIndex(runContext.getRunningBatchKey()), status,
                 customAttributes);
         pendingStoryEvents.add(CompletableFuture.runAsync(() -> publisher.postEvent(event)));
     }
