@@ -88,6 +88,9 @@ class NewRelicStepsTests
     private static final String QA = "qa";
     private static final String STORY_EVENT = "VividusStory";
     private static final String LOGIN = "Login";
+    private static final String BATCH_KEY = "batch-2";
+    private static final int BATCH_INDEX = 2;
+    private static final String BATCH_INDEX_ATTRIBUTE = "batchIndex";
     private static final String PROVIDED_RUN_ID = "build-42";
     private static final String BLANK_RUN_ID = " ";
     private static final String RESERVED_ATTRIBUTE =
@@ -201,7 +204,8 @@ class NewRelicStepsTests
         assertInstanceOf(String.class, event.getRunId());
         assertEquals(Map.of(ENVIRONMENT, STAGING, TEAM_NAME, QA, TEAM_WITH_LEADING_DIGIT, DROPPED),
                 event.getAttributes());
-        assertEquals(List.of(warn(INVALID_ATTRIBUTE, LONG_ATTRIBUTE_NAME), warn(RESERVED_ATTRIBUTE, EVENT_TYPE),
+        assertEquals(List.of(warn(INVALID_ATTRIBUTE, LONG_ATTRIBUTE_NAME),
+                warn(RESERVED_ATTRIBUTE, BATCH_INDEX_ATTRIBUTE), warn(RESERVED_ATTRIBUTE, EVENT_TYPE),
                 warn(RESERVED_ATTRIBUTE, PHASE), warn(RESERVED_ATTRIBUTE, RUN_ID), warn(RESERVED_ATTRIBUTE, STATUS),
                 warn(RESERVED_ATTRIBUTE, STORY_NAME), warn(INVALID_ATTRIBUTE, HYPHENATED_TEAM_NAME)),
                 LOGGER.getLoggingEvents());
@@ -414,6 +418,7 @@ class NewRelicStepsTests
         when(runningStory.isNotExcluded()).thenReturn(true);
         when(runningStory.isFailed()).thenReturn(failed);
         when(runningStory.getName()).thenReturn(LOGIN);
+        when(runContext.getRunningBatchKey()).thenReturn(BATCH_KEY);
     }
 
     private static void assertStoryEvent(NewRelicEvent runEvent, NewRelicEvent storyEvent, Status expectedStatus)
@@ -424,6 +429,7 @@ class NewRelicStepsTests
         assertEquals(STORY_EVENT, story.getEventType());
         assertEquals(run.getRunId(), story.getRunId());
         assertEquals(LOGIN, story.getStoryName());
+        assertEquals(BATCH_INDEX, story.getBatchIndex());
         assertEquals(expectedStatus, story.getStatus());
         assertEquals(Map.of(ENVIRONMENT, STAGING), story.getAttributes());
     }
@@ -468,6 +474,7 @@ class NewRelicStepsTests
         when(runningStory.isNotExcluded()).thenReturn(true);
         when(runningStory.isFailed()).thenReturn(false);
         when(runningStory.getName()).thenReturn(LOGIN);
+        when(runContext.getRunningBatchKey()).thenReturn(BATCH_KEY);
 
         steps.beforeStories();
         steps.afterGivenStory();
@@ -509,6 +516,7 @@ class NewRelicStepsTests
         attributes.put(EVENT_TYPE, DROPPED);
         attributes.put(RUN_ID, DROPPED);
         attributes.put(STORY_NAME, DROPPED);
+        attributes.put(BATCH_INDEX_ATTRIBUTE, DROPPED);
         attributes.put(PHASE, DROPPED);
         attributes.put(STATUS, DROPPED);
         attributes.put("empty", null);
