@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Story;
-import org.jspecify.annotations.Nullable;
 import org.vividus.batch.BatchConfiguration;
 import org.vividus.model.RunningStory;
 import org.vividus.testcontext.TestContext;
@@ -37,8 +36,8 @@ public class RunTestContext implements RunContext
     private TestContext testContext;
 
     // must be initialized for jbehave-junit-runner
-    private final AtomicReference<@Nullable RunningBatch> runningBatch =
-            new AtomicReference<>(new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration()));
+    private final AtomicReference<Optional<RunningBatch>> runningBatch =
+            new AtomicReference<>(Optional.of(new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration())));
     private final AtomicBoolean dryRun = new AtomicBoolean();
     private RunState runState = RunState.NOT_STARTED;
 
@@ -90,12 +89,12 @@ public class RunTestContext implements RunContext
 
     public void putRunningBatch(String batchKey, BatchConfiguration batchConfiguration)
     {
-        runningBatch.set(new RunningBatch(batchKey, batchConfiguration));
+        runningBatch.set(Optional.of(new RunningBatch(batchKey, batchConfiguration)));
     }
 
     public void removeRunningBatch()
     {
-        runningBatch.set(null);
+        runningBatch.set(Optional.empty());
     }
 
     @Override
@@ -110,21 +109,9 @@ public class RunTestContext implements RunContext
         return getRunningBatchState().configuration();
     }
 
-    @Override
-    public Optional<BatchConfiguration> getRunningBatchIfPresent()
-    {
-        RunningBatch currentRunningBatch = runningBatch.get();
-        return Optional.ofNullable(currentRunningBatch).map(RunningBatch::configuration);
-    }
-
     private RunningBatch getRunningBatchState()
     {
-        RunningBatch currentRunningBatch = runningBatch.get();
-        if (currentRunningBatch == null)
-        {
-            throw new IllegalStateException(NO_RUNNING_BATCH);
-        }
-        return currentRunningBatch;
+        return runningBatch.get().orElseThrow(() -> new IllegalStateException(NO_RUNNING_BATCH));
     }
 
     public Status getStoryStatus(Story story)
