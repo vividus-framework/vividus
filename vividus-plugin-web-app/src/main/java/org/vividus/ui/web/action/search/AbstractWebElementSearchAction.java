@@ -40,7 +40,8 @@ public abstract class AbstractWebElementSearchAction extends AbstractElementActi
 
     /**
      * XPath 1.0 has no lower-case function, so the case is folded with translate(): both alphabet strings must
-     * have the same length and the same letter order. Latin and Cyrillic letters are supported.
+     * have the same length and the same letter order. Only ASCII Latin and the Russian, Ukrainian and Belarusian
+     * Cyrillic letters are folded, other alphabets are not.
      */
     protected static final String TRANSLATE_TO_LOWER_CASE = String.format("translate(%%s, '%s', '%s')",
             UPPER_CASE_LETTERS, LOWER_CASE_LETTERS);
