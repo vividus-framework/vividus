@@ -389,15 +389,14 @@ class AllureStoryReporterTests
 
     private void mockRunningBatchName()
     {
-        BatchConfiguration batchConfiguration = mockBatchExecutionConfiguration();
-        runTestContext.putRunningBatch("batch-1", batchConfiguration);
+        mockBatchExecutionConfiguration();
     }
 
-    private BatchConfiguration mockBatchExecutionConfiguration()
+    private void mockBatchExecutionConfiguration()
     {
         BatchConfiguration config = new BatchConfiguration();
         config.setName(BATCH_NAME);
-        return config;
+        runTestContext.putRunningBatch("batch-1", config);
     }
 
     @Test
