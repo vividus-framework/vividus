@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.vividus.batch.BatchConfiguration;
@@ -109,6 +110,7 @@ class RunTestContextTests
         BatchConfiguration batchConfiguration = new BatchConfiguration();
         runTestContext.putRunningBatch(BATCH_KEY, batchConfiguration);
         assertEquals(batchConfiguration, runTestContext.getRunningBatch());
+        assertEquals(Optional.of(batchConfiguration), runTestContext.getRunningBatchIfPresent());
     }
 
     @Test
@@ -127,6 +129,7 @@ class RunTestContextTests
         runTestContext.removeRunningBatch();
         IllegalStateException exception = assertThrows(IllegalStateException.class, runTestContext::getRunningBatch);
         assertEquals(NO_RUNNING_BATCH, exception.getMessage());
+        assertEquals(Optional.empty(), runTestContext.getRunningBatchIfPresent());
     }
 
     @Test

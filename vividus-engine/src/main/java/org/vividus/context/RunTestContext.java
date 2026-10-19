@@ -18,6 +18,7 @@ package org.vividus.context;
 
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Optional;
 
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Story;
@@ -34,7 +35,8 @@ public class RunTestContext implements RunContext
     private TestContext testContext;
 
     // must be initialized for jbehave-junit-runner
-    private @Nullable RunningBatch runningBatch = new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration());
+    private volatile @Nullable RunningBatch runningBatch =
+            new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration());
     private boolean dryRun;
     private RunState runState = RunState.NOT_STARTED;
 
@@ -106,13 +108,21 @@ public class RunTestContext implements RunContext
         return getRunningBatchState().configuration();
     }
 
+    @Override
+    public Optional<BatchConfiguration> getRunningBatchIfPresent()
+    {
+        RunningBatch currentRunningBatch = runningBatch;
+        return Optional.ofNullable(currentRunningBatch).map(RunningBatch::configuration);
+    }
+
     private RunningBatch getRunningBatchState()
     {
-        if (runningBatch == null)
+        RunningBatch currentRunningBatch = runningBatch;
+        if (currentRunningBatch == null)
         {
             throw new IllegalStateException(NO_RUNNING_BATCH);
         }
-        return runningBatch;
+        return currentRunningBatch;
     }
 
     public Status getStoryStatus(Story story)
