@@ -100,7 +100,7 @@ class BatchedEmbedderTests
             failures.put(key, throwable);
             return true;
         }));
-        BatchConfiguration batchConfiguration = mockBatchConfiguration(true);
+        final BatchConfiguration batchConfiguration = mockBatchConfiguration(true);
         Map<String, List<String>> batches = new LinkedHashMap<>();
         batches.put(BATCH, testStoryPaths);
         batches.put("batch-2", List.of("path2"));

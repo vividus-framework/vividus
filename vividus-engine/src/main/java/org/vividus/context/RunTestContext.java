@@ -28,6 +28,8 @@ import org.vividus.testcontext.TestContext;
 
 public class RunTestContext implements RunContext
 {
+    private static final String NO_RUNNING_BATCH = "No running batch is found";
+
     private TestContext testContext;
 
     // must be initialized for jbehave-junit-runner
@@ -97,13 +99,13 @@ public class RunTestContext implements RunContext
     @Override
     public String getRunningBatchKey()
     {
-        return runningBatchKey.orElseThrow(() -> new IllegalStateException("No running batch is found"));
+        return runningBatchKey.orElseThrow(() -> new IllegalStateException(NO_RUNNING_BATCH));
     }
 
     @Override
     public BatchConfiguration getRunningBatch()
     {
-        return runningBatch.orElseThrow(() -> new IllegalStateException("No running batch is found"));
+        return runningBatch.orElseThrow(() -> new IllegalStateException(NO_RUNNING_BATCH));
     }
 
     public Status getStoryStatus(Story story)
