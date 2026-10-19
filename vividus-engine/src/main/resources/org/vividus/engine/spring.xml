@@ -6,6 +6,7 @@
 
     <bean id="runContext" class="org.vividus.context.RunTestContext">
         <property name="testContext" ref="testContext" />
+        <property name="batchStorage" ref="batchStorage" />
     </bean>
 
     <bean class="org.vividus.context.ReportControlContext" />

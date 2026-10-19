@@ -23,11 +23,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.vividus.batch.BatchConfiguration;
+import org.vividus.batch.BatchStorage;
 import org.vividus.model.RunningStory;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
@@ -97,6 +100,17 @@ class RunTestContextTests
     {
         runTestContext.putRunningBatch(BATCH_KEY);
         assertEquals(BATCH_KEY, runTestContext.getRunningBatchKey());
+    }
+
+    @Test
+    void testGetRunningBatch()
+    {
+        BatchStorage batchStorage = mock(BatchStorage.class);
+        runTestContext.setBatchStorage(batchStorage);
+        runTestContext.putRunningBatch(BATCH_KEY);
+        BatchConfiguration batchConfiguration = new BatchConfiguration();
+        when(batchStorage.getBatchConfiguration(BATCH_KEY)).thenReturn(batchConfiguration);
+        assertEquals(batchConfiguration, runTestContext.getRunningBatch());
     }
 
     @Test

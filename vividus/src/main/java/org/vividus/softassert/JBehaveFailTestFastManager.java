@@ -19,7 +19,6 @@ package org.vividus.softassert;
 import java.util.Optional;
 
 import org.vividus.batch.BatchConfiguration;
-import org.vividus.batch.BatchStorage;
 import org.vividus.context.RunContext;
 import org.vividus.testcontext.TestContext;
 
@@ -28,23 +27,20 @@ public class JBehaveFailTestFastManager implements FailTestFastManager
     private static final Object FAIL_TEST_CASE_FAST_KEY = JBehaveFailTestFastManager.class;
 
     private final RunContext runContext;
-    private final BatchStorage batchStorage;
     private final TestContext testContext;
 
     private boolean failTestCaseFast;
 
-    public JBehaveFailTestFastManager(RunContext runContext, BatchStorage batchStorage, TestContext testContext)
+    public JBehaveFailTestFastManager(RunContext runContext, TestContext testContext)
     {
         this.runContext = runContext;
-        this.batchStorage = batchStorage;
         this.testContext = testContext;
     }
 
     @Override
     public boolean isFailTestCaseFast()
     {
-        String batchKey = runContext.getRunningBatchKey();
-        BatchConfiguration batchConfiguration = batchStorage.getBatchConfiguration(batchKey);
+        BatchConfiguration batchConfiguration = runContext.getRunningBatch();
         return testContext.get(FAIL_TEST_CASE_FAST_KEY,
                 () -> Optional.ofNullable(batchConfiguration.isFailScenarioFast()).orElse(failTestCaseFast));
     }
