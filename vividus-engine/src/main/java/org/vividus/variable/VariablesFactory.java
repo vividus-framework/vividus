@@ -18,11 +18,8 @@ package org.vividus.variable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
-import org.vividus.batch.BatchStorage;
 import org.vividus.context.RunContext;
 import org.vividus.util.property.IPropertyParser;
 
@@ -31,33 +28,28 @@ public class VariablesFactory implements IVariablesFactory
     private static final String VARIABLES_PROPERTY_PREFIX = "variables.";
 
     private final IPropertyParser propertyParser;
-    private final BatchStorage batchStorage;
     private final RunContext runContext;
 
     private Map<String, String> globalVariables;
-    private Map<String, Map<String, String>> batchVariables;
     private final Map<String, Object> nextBatchesVariables = new ConcurrentHashMap<>();
 
-    public VariablesFactory(IPropertyParser propertyParser, RunContext runContext, BatchStorage batchStorage)
+    public VariablesFactory(IPropertyParser propertyParser, RunContext runContext)
     {
         this.propertyParser = propertyParser;
         this.runContext = runContext;
-        this.batchStorage = batchStorage;
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void init()
     {
         globalVariables = propertyParser.getPropertyValuesByPrefix(VARIABLES_PROPERTY_PREFIX);
-        batchVariables = batchStorage.getBatchConfigurations().entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey, e -> e.getValue().getVariables()));
     }
 
     @Override
     public Variables createVariables()
     {
         Map<String, Object> merged = new HashMap<>(globalVariables);
-        Optional.ofNullable(batchVariables.get(runContext.getRunningBatchKey())).ifPresent(merged::putAll);
+        merged.putAll(runContext.getRunningBatch().getVariables());
         merged.putAll(nextBatchesVariables);
         return new Variables(merged);
     }

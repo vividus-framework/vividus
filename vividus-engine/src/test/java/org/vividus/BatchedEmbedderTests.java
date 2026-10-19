@@ -100,7 +100,7 @@ class BatchedEmbedderTests
             failures.put(key, throwable);
             return true;
         }));
-        final BatchConfiguration batchConfiguration = mockBatchConfiguration(true);
+        mockBatchConfiguration(true);
         Map<String, List<String>> batches = new LinkedHashMap<>();
         batches.put(BATCH, testStoryPaths);
         batches.put("batch-2", List.of("path2"));
@@ -112,6 +112,7 @@ class BatchedEmbedderTests
         ordered.verify(embedderMonitor).usingControls(argThat(this::assertEmbedderControls));
         List<ExecutorService> service = new ArrayList<>(1);
         ordered.verify(spy).useExecutorService(argThat(service::add));
+        BatchConfiguration batchConfiguration = batchStorage.getBatchConfiguration(BATCH);
         ordered.verify(runTestContext).putRunningBatch(BATCH, batchConfiguration);
         ordered.verify(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter),
                 argThat(failures -> failures.size() == 1 && failures.containsKey(key) && failures
