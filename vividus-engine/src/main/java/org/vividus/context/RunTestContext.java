@@ -18,11 +18,9 @@ package org.vividus.context;
 
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.Optional;
 
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Story;
-import org.jspecify.annotations.Nullable;
 import org.vividus.batch.BatchConfiguration;
 import org.vividus.model.RunningStory;
 import org.vividus.testcontext.TestContext;
@@ -34,7 +32,7 @@ public class RunTestContext implements RunContext
     private TestContext testContext;
 
     // must be initialized for jbehave-junit-runner
-    private @Nullable RunningBatch runningBatch = new RunningBatch("batch-1", null);
+    private RunningBatch runningBatch = new RunningBatch("batch-1", new BatchConfiguration(), true);
     private boolean dryRun;
     private RunState runState = RunState.NOT_STARTED;
 
@@ -86,31 +84,33 @@ public class RunTestContext implements RunContext
 
     public void putRunningBatch(String batchKey, BatchConfiguration batchConfiguration)
     {
-        runningBatch = new RunningBatch(batchKey, batchConfiguration);
+        runningBatch = new RunningBatch(batchKey, batchConfiguration, true);
     }
 
     public void removeRunningBatch()
     {
-        runningBatch = new RunningBatch(null, null);
+        runningBatch = new RunningBatch("batch-1", new BatchConfiguration(), false);
     }
 
     @Override
     public String getRunningBatchKey()
     {
-        return Optional.ofNullable(getRunningBatchState().key())
-                .orElseThrow(() -> new IllegalStateException(NO_RUNNING_BATCH));
+        return getRunningBatchState().key();
     }
 
     @Override
     public BatchConfiguration getRunningBatch()
     {
-        return Optional.ofNullable(getRunningBatchState().configuration())
-                .orElseThrow(() -> new IllegalStateException(NO_RUNNING_BATCH));
+        return getRunningBatchState().configuration();
     }
 
     private RunningBatch getRunningBatchState()
     {
-        return Optional.ofNullable(runningBatch).orElseThrow(() -> new IllegalStateException(NO_RUNNING_BATCH));
+        if (!runningBatch.active())
+        {
+            throw new IllegalStateException(NO_RUNNING_BATCH);
+        }
+        return runningBatch;
     }
 
     public Status getStoryStatus(Story story)
@@ -165,7 +165,7 @@ public class RunTestContext implements RunContext
         COMPLETED;
     }
 
-    private record RunningBatch(@Nullable String key, @Nullable BatchConfiguration configuration)
+    private record RunningBatch(String key, BatchConfiguration configuration, boolean active)
     {
     }
 }
