@@ -34,6 +34,7 @@ public interface RunContext
     /**
      * Returns the configuration of the currently running batch.
      *
+     * @return the configuration of the currently running batch
      * @throws IllegalStateException if no batch is running
      */
     BatchConfiguration getRunningBatch();
