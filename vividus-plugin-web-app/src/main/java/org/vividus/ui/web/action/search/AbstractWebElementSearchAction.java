@@ -33,8 +33,17 @@ import jakarta.inject.Inject;
 
 public abstract class AbstractWebElementSearchAction extends AbstractElementAction
 {
-    protected static final String TRANSLATE_TO_LOWER_CASE = "translate(%s,"
-            + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')";
+    private static final String UPPER_CASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            + "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯЄІЇҐЎ";
+    private static final String LOWER_CASE_LETTERS = "abcdefghijklmnopqrstuvwxyz"
+            + "абвгдеёжзийклмнопрстуфхцчшщъыьэюяєіїґў";
+
+    /**
+     * XPath 1.0 has no lower-case function, so the case is folded with translate(): both alphabet strings must
+     * have the same length and the same letter order. Latin and Cyrillic letters are supported.
+     */
+    protected static final String TRANSLATE_TO_LOWER_CASE = String.format("translate(%%s, '%s', '%s')",
+            UPPER_CASE_LETTERS, LOWER_CASE_LETTERS);
     private static final String TRANSLATE_TO_LOWER_CASE_FORMATTED = String.format(TRANSLATE_TO_LOWER_CASE, ".");
     private static final String ELEMENT_WITH_ANY_ATTRIBUTE_OR_TEXT_CASE_INSENSITIVE = String
             .format("[text()[%2$s=%1$s] or @*[%2$s=%1$s] or *[%2$s=%1$s]", "%1$s", TRANSLATE_TO_LOWER_CASE_FORMATTED);

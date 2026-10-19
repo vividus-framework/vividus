@@ -50,7 +50,7 @@ and moves handling of spaces up to user
 |caseSensitiveText(Description)
 
 |`caseInsensitiveText`
-|case insensitive text of an element
+|case insensitive text of an element (Latin and Cyrillic letters are matched regardless of case)
 |caseInsensitiveText(description)
 
 |`imageSrc`
