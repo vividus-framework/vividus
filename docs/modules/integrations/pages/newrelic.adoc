@@ -48,12 +48,12 @@ The key can be stored with xref:configuration:secrets-management.adoc[secrets ma
 |`newrelic.event.attribute.<name>`
 |Any string
 |empty
-|Custom attribute added to every event. `<name>` must be at most 255 characters and may contain only letters, digits, underscores, colons, periods, and slashes. A name that breaks these rules, or `eventType`, `runId`, `storyName`, `phase`, or `status`, is skipped and a warning is logged
+|Custom attribute added to every event. `<name>` must be at most 255 characters and may contain only letters, digits, underscores, colons, periods, and slashes. A name that breaks these rules, or `eventType`, `runId`, `storyName`, `batchIndex`, `phase`, or `status`, is skipped and a warning is logged
 |===
 
 == Events
 
-Before the stories of a run, VIVIDUS posts a `VividusRun` event with `phase` `started`. After the stories it posts a `VividusRun` event with `phase` `finished` and `status` `passed` or `failed`. After each completed story it posts a `VividusStory` event with `status` `passed` or `failed`. Each request body is a JSON array with that single event. Every event carries the same `runId`: the value of `newrelic.run-id`, or a generated UUID when that property is empty.
+Before the stories of a run, VIVIDUS posts a `VividusRun` event with `phase` `started`. After the stories it posts a `VividusRun` event with `phase` `finished` and `status` `passed` or `failed`. After each completed story it posts a `VividusStory` event with `status` `passed` or `failed` and `batchIndex`, the index of the batch the story belongs to (for example, `1` for `batch-1`). Each request body is a JSON array with that single event. Every event carries the same `runId`: the value of `newrelic.run-id`, or a generated UUID when that property is empty.
 
 [source,sql]
 ----
@@ -114,6 +114,7 @@ newrelic.event.attribute.teamName=qa
     "eventType": "VividusStory",
     "runId": "5d8c1a2e-3b4f-4c6d-9e10-11a2b3c4d5e6",
     "storyName": "Login",
+    "batchIndex": 1,
     "status": "passed",
     "environment": "staging",
     "teamName": "qa"

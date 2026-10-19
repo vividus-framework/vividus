@@ -31,16 +31,19 @@ class VividusStoryEventTests
 {
     private static final String RUN_ID = "run-1";
     private static final String LOGIN = "Login";
+    private static final int BATCH_INDEX = 1;
 
     private final JsonUtils jsonUtils = jsonUtils();
 
     @Test
     void shouldSerializeStoryEvent()
     {
-        VividusStoryEvent story = new VividusStoryEvent(RUN_ID, LOGIN, Status.FAILED, Map.of("team_name", "qa"));
+        VividusStoryEvent story = new VividusStoryEvent(RUN_ID, LOGIN, BATCH_INDEX, Status.FAILED,
+                Map.of("team_name", "qa"));
 
         assertEquals(jsonUtils.readTree("""
-                {"eventType":"VividusStory","runId":"run-1","storyName":"Login","status":"failed","team_name":"qa"}"""),
+                {"eventType":"VividusStory","runId":"run-1","storyName":"Login","batchIndex":1,
+                "status":"failed","team_name":"qa"}"""),
                 jsonUtils.readTree(jsonUtils.toJson(story)));
     }
 

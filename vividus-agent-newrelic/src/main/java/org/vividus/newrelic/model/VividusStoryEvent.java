@@ -23,18 +23,26 @@ public final class VividusStoryEvent extends NewRelicEvent
     private static final String EVENT_TYPE = "VividusStory";
 
     private final String storyName;
+    private final int batchIndex;
     private final Status status;
 
-    public VividusStoryEvent(String runId, String storyName, Status status, Map<String, String> attributes)
+    public VividusStoryEvent(String runId, String storyName, int batchIndex, Status status,
+            Map<String, String> attributes)
     {
         super(EVENT_TYPE, runId, attributes);
         this.storyName = storyName;
+        this.batchIndex = batchIndex;
         this.status = status;
     }
 
     public String getStoryName()
     {
         return storyName;
+    }
+
+    public int getBatchIndex()
+    {
+        return batchIndex;
     }
 
     public Status getStatus()

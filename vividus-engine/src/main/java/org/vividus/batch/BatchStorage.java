@@ -97,7 +97,12 @@ public final class BatchStorage
 
     private Comparator<String> getBatchKeyComparator()
     {
-        return Comparator.comparingInt(batchKey -> Integer.parseInt(Strings.CS.removeStart(batchKey, BATCH)));
+        return Comparator.comparingInt(BatchStorage::getBatchIndex);
+    }
+
+    public static int getBatchIndex(String batchKey)
+    {
+        return Integer.parseInt(Strings.CS.removeStart(batchKey, BATCH));
     }
 
     public Map<String, BatchConfiguration> getBatchConfigurations()

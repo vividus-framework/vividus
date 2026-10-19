@@ -39,6 +39,7 @@ import org.jbehave.core.annotations.BeforeStories;
 import org.jbehave.core.embedder.StoryControls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.batch.BatchStorage;
 import org.vividus.context.RunContext;
 import org.vividus.model.RunningStory;
 import org.vividus.newrelic.model.RunPhase;
@@ -54,7 +55,8 @@ public class NewRelicSteps
     private static final String ATTRIBUTE_PREFIX = "newrelic.event.attribute.";
     private static final int MAX_ATTRIBUTE_NAME_LENGTH = 255;
 
-    private static final Set<String> RESERVED_ATTRIBUTES = Set.of("eventType", "runId", "storyName", "phase", "status");
+    private static final Set<String> RESERVED_ATTRIBUTES = Set.of("eventType", "runId", "storyName", "batchIndex",
+            "phase", "status");
     private static final Pattern ATTRIBUTE_NAME = Pattern.compile("[A-Za-z0-9:._/]+");
 
     private final NewRelicEventPublisher publisher;
@@ -116,7 +118,9 @@ public class NewRelicSteps
         Status status = evaluateStoryStatus(story);
         storyStatus.remove();
         runFailed.compareAndSet(false, status == Status.FAILED);
-        VividusStoryEvent event = new VividusStoryEvent(runId, story.getName(), status, customAttributes);
+        int batchIndex = BatchStorage.getBatchIndex(runContext.getRunningBatchKey());
+        VividusStoryEvent event = new VividusStoryEvent(runId, story.getName(), batchIndex, status,
+                customAttributes);
         pendingStoryEvents.add(CompletableFuture.runAsync(() -> publisher.postEvent(event)));
     }
 
