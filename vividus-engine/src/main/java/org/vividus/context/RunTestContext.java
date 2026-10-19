@@ -27,12 +27,13 @@ import org.vividus.testcontext.TestContext;
 
 public class RunTestContext implements RunContext
 {
+    private static final String DEFAULT_BATCH_KEY = "batch-1";
     private static final String NO_RUNNING_BATCH = "No running batch is found";
 
     private TestContext testContext;
 
     // must be initialized for jbehave-junit-runner
-    private RunningBatch runningBatch = new RunningBatch("batch-1", new BatchConfiguration(), true);
+    private RunningBatch runningBatch = new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration(), true);
     private boolean dryRun;
     private RunState runState = RunState.NOT_STARTED;
 
@@ -89,7 +90,7 @@ public class RunTestContext implements RunContext
 
     public void removeRunningBatch()
     {
-        runningBatch = new RunningBatch("batch-1", new BatchConfiguration(), false);
+        runningBatch = new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration(), false);
     }
 
     @Override
