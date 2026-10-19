@@ -31,6 +31,11 @@ public interface RunContext
 
     String getRunningBatchKey();
 
+    /**
+     * Returns the configuration of the currently running batch.
+     *
+     * @throws IllegalStateException if no batch is running
+     */
     BatchConfiguration getRunningBatch();
 
     void setDryRun(boolean dryRun);
