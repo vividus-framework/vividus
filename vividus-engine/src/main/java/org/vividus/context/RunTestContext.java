@@ -36,8 +36,8 @@ public class RunTestContext implements RunContext
     private TestContext testContext;
 
     // must be initialized for jbehave-junit-runner
-    private final AtomicReference<Optional<RunningBatch>> runningBatch =
-            new AtomicReference<>(Optional.of(new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration())));
+    private final AtomicReference<@Nullable RunningBatch> runningBatch =
+            new AtomicReference<>(new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration()));
     private final AtomicBoolean dryRun = new AtomicBoolean();
     private RunState runState = RunState.NOT_STARTED;
 
@@ -89,12 +89,12 @@ public class RunTestContext implements RunContext
 
     public void putRunningBatch(String batchKey, BatchConfiguration batchConfiguration)
     {
-        runningBatch.set(Optional.of(new RunningBatch(batchKey, batchConfiguration)));
+        runningBatch.set(new RunningBatch(batchKey, batchConfiguration));
     }
 
     public void removeRunningBatch()
     {
-        runningBatch.set(Optional.empty());
+        runningBatch.set(null);
     }
 
     @Override
@@ -111,7 +111,9 @@ public class RunTestContext implements RunContext
 
     private RunningBatch getRunningBatchState()
     {
-        return runningBatch.get().orElseThrow(() -> new IllegalStateException(NO_RUNNING_BATCH));
+        RunningBatch currentRunningBatch = runningBatch.get();
+        return Optional.ofNullable(currentRunningBatch)
+                .orElseThrow(() -> new IllegalStateException(NO_RUNNING_BATCH));
     }
 
     public Status getStoryStatus(Story story)
