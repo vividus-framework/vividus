@@ -35,6 +35,7 @@ import org.vividus.testcontext.TestContext;
 
 class RunTestContextTests
 {
+    private static final String NO_RUNNING_BATCH = "No running batch is found";
     private static final String BATCH_KEY = "batchKey";
 
     private final RunTestContext runTestContext = new RunTestContext();
@@ -114,7 +115,7 @@ class RunTestContextTests
         runTestContext.putRunningBatch(BATCH_KEY, new BatchConfiguration());
         runTestContext.removeRunningBatch();
         IllegalStateException exception = assertThrows(IllegalStateException.class, runTestContext::getRunningBatchKey);
-        assertEquals("No running batch is found", exception.getMessage());
+        assertEquals(NO_RUNNING_BATCH, exception.getMessage());
     }
 
     @Test
@@ -123,7 +124,7 @@ class RunTestContextTests
         runTestContext.putRunningBatch(BATCH_KEY, new BatchConfiguration());
         runTestContext.removeRunningBatch();
         IllegalStateException exception = assertThrows(IllegalStateException.class, runTestContext::getRunningBatch);
-        assertEquals("No running batch is found", exception.getMessage());
+        assertEquals(NO_RUNNING_BATCH, exception.getMessage());
     }
 
     @Test
