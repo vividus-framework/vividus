@@ -33,7 +33,7 @@ import org.xml.sax.InputSource;
 class AbstractWebElementSearchActionTests
 {
     private static final String PAGE = "<main><h1>Видеоматериалы</h1><h2>Videos</h2><p>їжак</p><p>ЇЖАК</p>"
-            + "<p>Ёжик</p></main>";
+            + "<p>Ёжик</p><p>ЄІЇҐЎ</p></main>";
 
     @ParameterizedTest
     @CsvSource({
@@ -44,6 +44,9 @@ class AbstractWebElementSearchActionTests
         // Ukrainian letters and Yo
         "їжак, 2",
         "ЁЖИК, 1",
+        // every Ukrainian and Belarusian letter that has no Russian counterpart, in both cases
+        "єіїґў, 1",
+        "ЄІЇҐЎ, 1",
         // Latin still works
         "videos, 1",
         "VIDEOS, 1",
