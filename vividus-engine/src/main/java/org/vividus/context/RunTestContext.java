@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Story;
+import org.jspecify.annotations.Nullable;
 import org.vividus.batch.BatchConfiguration;
 import org.vividus.model.RunningStory;
 import org.vividus.testcontext.TestContext;
