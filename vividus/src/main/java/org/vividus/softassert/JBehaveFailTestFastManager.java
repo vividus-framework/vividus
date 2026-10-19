@@ -18,7 +18,6 @@ package org.vividus.softassert;
 
 import java.util.Optional;
 
-import org.vividus.batch.BatchConfiguration;
 import org.vividus.context.RunContext;
 import org.vividus.testcontext.TestContext;
 
