@@ -50,7 +50,6 @@ import org.jbehave.core.steps.StepCreator.PendingStep;
 import org.jbehave.core.steps.Timing;
 import org.vividus.AbstractReportControlStoryReporter;
 import org.vividus.JBehaveFailureUnwrapper;
-import org.vividus.batch.BatchStorage;
 import org.vividus.context.ReportControlContext;
 import org.vividus.context.RunContext;
 import org.vividus.model.RunningScenario;
@@ -87,7 +86,6 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
 
     private final AllureLifecycle lifecycle;
     private final IAllureReportGenerator allureReportGenerator;
-    private final BatchStorage batchStorage;
     private final TestContext testContext;
     private final IAllureRunContext allureRunContext;
     private final IVerificationErrorAdapter verificationErrorAdapter;
@@ -95,14 +93,13 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     private final boolean showParametersSection;
 
     public AllureStoryReporter(boolean showParametersSection, ReportControlContext reportControlContext,
-            RunContext runContext, IAllureReportGenerator allureReportGenerator, BatchStorage batchStorage,
-            TestContext testContext, IAllureRunContext allureRunContext,
+            RunContext runContext, IAllureReportGenerator allureReportGenerator, TestContext testContext,
+            IAllureRunContext allureRunContext,
             IVerificationErrorAdapter verificationErrorAdapter)
     {
         super(reportControlContext, runContext);
         this.lifecycle = Allure.getLifecycle();
         this.allureReportGenerator = allureReportGenerator;
-        this.batchStorage = batchStorage;
         this.testContext = testContext;
         this.allureRunContext = allureRunContext;
         this.verificationErrorAdapter = verificationErrorAdapter;
@@ -211,8 +208,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
 
     private String getBatchName()
     {
-        String runningBatchKey = getRunContext().getRunningBatchKey();
-        return batchStorage.getBatchConfiguration(runningBatchKey).getName();
+        return getRunContext().getRunningBatch().getName();
     }
 
     @Override

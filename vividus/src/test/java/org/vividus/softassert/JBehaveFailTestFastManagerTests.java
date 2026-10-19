@@ -34,7 +34,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.batch.BatchConfiguration;
-import org.vividus.batch.BatchStorage;
 import org.vividus.context.RunContext;
 import org.vividus.testcontext.TestContext;
 
@@ -44,7 +43,6 @@ class JBehaveFailTestFastManagerTests
     private static final Object FAIL_TEST_CASE_FAST_KEY = JBehaveFailTestFastManager.class;
 
     @Mock private RunContext runContext;
-    @Mock private BatchStorage batchStorage;
     @Mock private TestContext testContext;
 
     @InjectMocks private JBehaveFailTestFastManager failTestFastManager;
@@ -58,11 +56,9 @@ class JBehaveFailTestFastManagerTests
     })
     void shouldProvideFailFastValue(boolean expectedValue, boolean propertyValue, Boolean configurationValue)
     {
-        var key = "key";
         failTestFastManager.setFailTestCaseFast(propertyValue);
-        when(runContext.getRunningBatchKey()).thenReturn(key);
         var configuration = mock(BatchConfiguration.class);
-        when(batchStorage.getBatchConfiguration(key)).thenReturn(configuration);
+        when(runContext.getRunningBatch()).thenReturn(configuration);
         when(configuration.isFailScenarioFast()).thenReturn(configurationValue);
         doAnswer(a ->
         {

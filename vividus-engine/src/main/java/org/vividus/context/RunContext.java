@@ -18,6 +18,7 @@ package org.vividus.context;
 
 import java.util.Deque;
 
+import org.vividus.batch.BatchConfiguration;
 import org.vividus.model.RunningStory;
 
 public interface RunContext
@@ -29,6 +30,8 @@ public interface RunContext
     Deque<RunningStory> getStoriesChain();
 
     String getRunningBatchKey();
+
+    BatchConfiguration getRunningBatch();
 
     void setDryRun(boolean dryRun);
 

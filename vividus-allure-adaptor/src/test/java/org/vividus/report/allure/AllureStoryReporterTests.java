@@ -173,6 +173,7 @@ class AllureStoryReporterTests
     {
         RunTestContext context = new RunTestContext();
         context.setTestContext(testContext);
+        context.setBatchStorage(batchStorage);
         runTestContext = spy(context);
         initStoryReporter(true);
         linkedQueueItem = new LinkedQueueItem<>(SCENARIO_UID);
@@ -181,7 +182,7 @@ class AllureStoryReporterTests
     private void initStoryReporter(boolean showParametersSection) throws IllegalAccessException
     {
         allureStoryReporter = new AllureStoryReporter(showParametersSection, reportControlContext, runTestContext,
-                allureReportGenerator, batchStorage, testContext, allureRunContext, verificationErrorAdapter);
+                allureReportGenerator, testContext, allureRunContext, verificationErrorAdapter);
         FieldUtils.writeField(allureStoryReporter, "lifecycle", allureLifecycle, true);
         allureStoryReporter.setNext(next);
     }
