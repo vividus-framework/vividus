@@ -19,6 +19,7 @@ package org.vividus.context;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.jbehave.core.embedder.PerformableTree.Status;
@@ -38,7 +39,7 @@ public class RunTestContext implements RunContext
     // must be initialized for jbehave-junit-runner
     private final AtomicReference<@Nullable RunningBatch> runningBatch =
             new AtomicReference<>(new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration()));
-    private boolean dryRun;
+    private final AtomicBoolean dryRun = new AtomicBoolean();
     private RunState runState = RunState.NOT_STARTED;
 
     public void putRunningStory(RunningStory story, boolean givenStory)
@@ -139,13 +140,13 @@ public class RunTestContext implements RunContext
     @Override
     public void setDryRun(boolean dryRun)
     {
-        this.dryRun = dryRun;
+        this.dryRun.set(dryRun);
     }
 
     @Override
     public boolean isDryRun()
     {
-        return dryRun;
+        return dryRun.get();
     }
 
     @Override
