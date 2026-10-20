@@ -104,6 +104,13 @@ class RunTestContextTests
     }
 
     @Test
+    void testGetRunningBatchIndex()
+    {
+        runTestContext.putRunningBatch("batch-42", new BatchConfiguration());
+        assertEquals(42, runTestContext.getRunningBatchIndex());
+    }
+
+    @Test
     void testGetRunningBatch()
     {
         BatchConfiguration batchConfiguration = new BatchConfiguration();
@@ -117,6 +124,15 @@ class RunTestContextTests
         runTestContext.putRunningBatch(BATCH_KEY, new BatchConfiguration());
         runTestContext.removeRunningBatch();
         IllegalStateException exception = assertThrows(IllegalStateException.class, runTestContext::getRunningBatchKey);
+        assertEquals(NO_RUNNING_BATCH, exception.getMessage());
+    }
+
+    @Test
+    void testGetRunningBatchIndexWithoutRunningBatch()
+    {
+        runTestContext.removeRunningBatch();
+        IllegalStateException exception =
+                assertThrows(IllegalStateException.class, runTestContext::getRunningBatchIndex);
         assertEquals(NO_RUNNING_BATCH, exception.getMessage());
     }
 
