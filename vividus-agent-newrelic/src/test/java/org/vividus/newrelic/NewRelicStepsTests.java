@@ -418,7 +418,7 @@ class NewRelicStepsTests
         when(runningStory.isNotExcluded()).thenReturn(true);
         when(runningStory.isFailed()).thenReturn(failed);
         when(runningStory.getName()).thenReturn(LOGIN);
-        when(runContext.getRunningBatchKey()).thenReturn(BATCH_KEY);
+        when(runContext.getRunningBatchIndex()).thenReturn(BATCH_INDEX);
     }
 
     private static void assertStoryEvent(NewRelicEvent runEvent, NewRelicEvent storyEvent, Status expectedStatus)
@@ -474,7 +474,7 @@ class NewRelicStepsTests
         when(runningStory.isNotExcluded()).thenReturn(true);
         when(runningStory.isFailed()).thenReturn(false);
         when(runningStory.getName()).thenReturn(LOGIN);
-        when(runContext.getRunningBatchKey()).thenReturn(BATCH_KEY);
+        when(runContext.getRunningBatchIndex()).thenReturn(BATCH_INDEX);
 
         steps.beforeStories();
         steps.afterGivenStory();

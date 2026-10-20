@@ -32,6 +32,14 @@ public interface RunContext
     String getRunningBatchKey();
 
     /**
+     * Gets the index of the currently running batch.
+     *
+     * @return current batch index
+     * @throws IllegalStateException if no batch is running
+     */
+    int getRunningBatchIndex();
+
+    /**
      * Returns the configuration of the currently running batch.
      *
      * @return the configuration of the currently running batch
