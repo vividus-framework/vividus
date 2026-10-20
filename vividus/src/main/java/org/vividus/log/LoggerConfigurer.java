@@ -48,7 +48,7 @@ public final class LoggerConfigurer
     private static void configureLog4j2()
     {
         Predicate<String> log4j2XmlPredicate = Pattern.compile("log4j2-vividus.*\\.xml").asMatchPredicate();
-        try (ScanResult scanResult = new ClassGraph().acceptPackagesNonRecursive("").scan();
+        try (ScanResult scanResult = new ClassGraph().enableClasspath().acceptPackagesNonRecursive("").scan();
                 ResourceList log4j2Resources = scanResult.getAllResources()
                         .filter(resource -> log4j2XmlPredicate.test(resource.getPath())))
         {

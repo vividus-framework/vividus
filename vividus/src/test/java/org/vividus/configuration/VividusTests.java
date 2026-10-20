@@ -43,6 +43,7 @@ class VividusTests
         try (MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
                 MockedStatic<TestInfoLogger> testInfoLogger = mockStatic(TestInfoLogger.class);
                 MockedConstruction<ClassGraph> classGraph = mockConstruction(ClassGraph.class, (mock, context) -> {
+                    when(mock.enableClasspath()).thenReturn(mock);
                     when(mock.acceptPackagesNonRecursive("")).thenReturn(mock);
                     ScanResult scanResult = Mockito.mock(ScanResult.class);
                     when(mock.scan()).thenReturn(scanResult);
