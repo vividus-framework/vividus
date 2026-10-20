@@ -18,7 +18,6 @@ package org.vividus.context;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -93,7 +92,7 @@ class RunTestContextTests
     void testGetDefaultRunningBatchKey()
     {
         assertEquals("batch-1", runTestContext.getRunningBatchKey());
-        assertNotNull(runTestContext.getRunningBatch());
+        assertNull(runTestContext.getRunningBatch());
     }
 
     @Test
