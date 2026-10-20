@@ -51,11 +51,12 @@ class ButtonNameSearchTests
     private static final String BUTTON_WITH_ANY_ATTRIBUTE_NAME_PATTERN = "*[(local-name()='button' and "
             + "(@*=%1$s or .=%1$s)) or (local-name()='input' and ((@type='submit' or "
             + "@type='button') and (@*=%1$s or .=%1$s)))]";
-    private static final String CASE_INSENSITIVE_LOCATOR = "[text()[normalize-space"
+    private static final String CASE_INSENSITIVE_LOCATOR = CaseInsensitiveXpaths.withAllAlphabets(
+            "[text()[normalize-space"
             + "(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))=%1$s] or @*["
             + "normalize-space(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))=%1$s] or "
             + "*[normalize-space(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))"
-            + "=%1$s]";
+            + "=%1$s]");
     private static final String BUTTON_TEXT_LOCATOR = ".//button" + CASE_INSENSITIVE_LOCATOR;
     private static final String INPUT_TEXT_LOCATOR = ".//input" + CASE_INSENSITIVE_LOCATOR;
 

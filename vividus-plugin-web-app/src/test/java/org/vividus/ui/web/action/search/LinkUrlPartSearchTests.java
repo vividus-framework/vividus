@@ -126,8 +126,8 @@ class LinkUrlPartSearchTests
     {
         SearchParameters parameters = new SearchParameters(URL_PART, Visibility.ALL, false);
         search.setCaseSensitiveSearch(false);
-        String linkUrlPartXpath = ".//a[contains (translate(@href,"
-                + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), \"urlpart\")]";
+        String linkUrlPartXpath = CaseInsensitiveXpaths.withAllAlphabets(".//a[contains (translate(@href,"
+                + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), \"urlpart\")]");
         when(searchContext.findElements(By.xpath(linkUrlPartXpath))).thenReturn(webElements);
         assertEquals(webElements, search.search(searchContext, parameters));
         assertThat(logger.getLoggingEvents(), equalTo(List.of(
