@@ -53,6 +53,7 @@ class VividusTests
             Vividus.init();
             List<ClassGraph> constructedScanners = classGraph.constructed();
             assertThat(constructedScanners, hasSize(1));
+            verify(constructedScanners.get(0)).enableClasspath();
             verify(classGraph.constructed().get(0)).scan();
             testInfoLogger.verify(TestInfoLogger::drawBanner);
             beanFactory.verify(BeanFactory::open);
