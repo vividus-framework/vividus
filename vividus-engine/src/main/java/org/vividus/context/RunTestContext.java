@@ -20,7 +20,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Story;
@@ -37,8 +36,7 @@ public class RunTestContext implements RunContext
     private TestContext testContext;
 
     // must be initialized for jbehave-junit-runner
-    private final AtomicReference<@Nullable RunningBatch> runningBatch =
-            new AtomicReference<>(new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration()));
+    private @Nullable RunningBatch runningBatch = new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration());
     private final AtomicBoolean dryRun = new AtomicBoolean();
     private RunState runState = RunState.NOT_STARTED;
 
@@ -90,12 +88,13 @@ public class RunTestContext implements RunContext
 
     public void putRunningBatch(String batchKey, BatchConfiguration batchConfiguration)
     {
-        runningBatch.set(new RunningBatch(batchKey, batchConfiguration));
+        runningBatch = new RunningBatch(batchKey, batchConfiguration);
     }
 
+    @SuppressWarnings("PMD.NullAssignment")
     public void removeRunningBatch()
     {
-        runningBatch.set(null);
+        runningBatch = null;
     }
 
     @Override
@@ -112,7 +111,7 @@ public class RunTestContext implements RunContext
 
     private RunningBatch getRunningBatchState()
     {
-        RunningBatch currentRunningBatch = runningBatch.get();
+        RunningBatch currentRunningBatch = runningBatch;
         return Optional.ofNullable(currentRunningBatch)
                 .orElseThrow(() -> new IllegalStateException(NO_RUNNING_BATCH));
     }
