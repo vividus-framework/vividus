@@ -36,7 +36,7 @@ public class RunTestContext implements RunContext
     private TestContext testContext;
 
     // must be initialized for jbehave-junit-runner
-    private @Nullable RunningBatch runningBatch = new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration());
+    private @Nullable RunningBatch runningBatch = new RunningBatch(DEFAULT_BATCH_KEY, null);
     private boolean dryRun;
     private RunState runState = RunState.NOT_STARTED;
 
