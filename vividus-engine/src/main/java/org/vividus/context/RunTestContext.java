@@ -31,7 +31,6 @@ import org.vividus.testcontext.TestContext;
 public class RunTestContext implements RunContext
 {
     private static final String DEFAULT_BATCH_KEY = "batch-1";
-    private static final String NO_RUNNING_BATCH = "No running batch is found";
 
     private TestContext testContext;
 
@@ -118,8 +117,8 @@ public class RunTestContext implements RunContext
     private RunningBatch getRunningBatchState()
     {
         RunningBatch currentRunningBatch = runningBatch;
-        return Optional.ofNullable(currentRunningBatch)
-                .orElseThrow(() -> new IllegalStateException(NO_RUNNING_BATCH));
+        return Optional.ofNullable(currentRunningBatch).orElseThrow(
+                () -> new IllegalStateException("No running batch is found"));
     }
 
     public Status getStoryStatus(Story story)

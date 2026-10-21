@@ -88,7 +88,6 @@ class NewRelicStepsTests
     private static final String QA = "qa";
     private static final String STORY_EVENT = "VividusStory";
     private static final String LOGIN = "Login";
-    private static final String BATCH_KEY = "batch-2";
     private static final int BATCH_INDEX = 2;
     private static final String BATCH_INDEX_ATTRIBUTE = "batchIndex";
     private static final String PROVIDED_RUN_ID = "build-42";
