@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package org.vividus.batch;
+package org.vividus.model;
+
+import org.vividus.batch.BatchConfiguration;
+import org.vividus.batch.BatchStorage;
 
 /**
  * Represents the batch currently being executed.

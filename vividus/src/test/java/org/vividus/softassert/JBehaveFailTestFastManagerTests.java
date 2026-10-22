@@ -34,8 +34,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.batch.BatchConfiguration;
-import org.vividus.batch.RunningBatch;
 import org.vividus.context.RunContext;
+import org.vividus.model.RunningBatch;
 import org.vividus.testcontext.TestContext;
 
 @ExtendWith(MockitoExtension.class)
