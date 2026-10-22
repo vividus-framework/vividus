@@ -90,7 +90,7 @@ class RunTestContextTests
     }
 
     @Test
-    void testGetDefaultRunningBatchKey()
+    void testGetDefaultRunningBatch()
     {
         assertEquals(BATCH_1_KEY, runTestContext.getRunningBatch().getBatchKey());
         assertEquals(1, runTestContext.getRunningBatch().getBatchIndex());

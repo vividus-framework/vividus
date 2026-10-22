@@ -100,11 +100,6 @@ public class RunTestContext implements RunContext
     @Override
     public RunningBatch getRunningBatch()
     {
-        return getRunningBatchState();
-    }
-
-    private RunningBatch getRunningBatchState()
-    {
         RunningBatch currentRunningBatch = runningBatch;
         return Optional.ofNullable(currentRunningBatch).orElseThrow(
                 () -> new IllegalStateException("No running batch is found"));
