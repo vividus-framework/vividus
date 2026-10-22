@@ -18,6 +18,7 @@ package org.vividus.context;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,7 +37,7 @@ import org.vividus.testcontext.TestContext;
 class RunTestContextTests
 {
     private static final String NO_RUNNING_BATCH = "No running batch is found";
-    private static final String BATCH_KEY = "batchKey";
+    private static final String BATCH_1_KEY = "batch-1";
 
     private final RunTestContext runTestContext = new RunTestContext();
 
@@ -91,7 +92,7 @@ class RunTestContextTests
     @Test
     void testGetDefaultRunningBatchKey()
     {
-        assertEquals("batch-1", runTestContext.getRunningBatch().getBatchKey());
+        assertEquals(BATCH_1_KEY, runTestContext.getRunningBatch().getBatchKey());
         assertEquals(1, runTestContext.getRunningBatch().getBatchIndex());
         assertNotNull(runTestContext.getRunningBatch().getBatchConfiguration());
     }
@@ -109,10 +110,9 @@ class RunTestContextTests
     }
 
     @Test
-    @Test
     void testRemoveRunningBatch()
     {
-        runTestContext.putRunningBatch(BATCH_KEY, new BatchConfiguration());
+        runTestContext.putRunningBatch(BATCH_1_KEY, new BatchConfiguration());
         runTestContext.removeRunningBatch();
         IllegalStateException exception = assertThrows(IllegalStateException.class, runTestContext::getRunningBatch);
         assertEquals(NO_RUNNING_BATCH, exception.getMessage());

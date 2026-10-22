@@ -161,5 +161,4 @@ public class RunTestContext implements RunContext
         RUNNING,
         COMPLETED;
     }
-
 }
