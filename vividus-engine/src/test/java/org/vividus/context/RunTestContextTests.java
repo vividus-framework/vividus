@@ -91,50 +91,24 @@ class RunTestContextTests
     @Test
     void testGetDefaultRunningBatchKey()
     {
-        assertEquals("batch-1", runTestContext.getRunningBatchKey());
-        assertNull(runTestContext.getRunningBatch());
-    }
-
-    @Test
-    void testGetRunningBatchKey()
-    {
-        runTestContext.putRunningBatch(BATCH_KEY, new BatchConfiguration());
-        assertEquals(BATCH_KEY, runTestContext.getRunningBatchKey());
-    }
-
-    @Test
-    void testGetRunningBatchIndex()
-    {
-        runTestContext.putRunningBatch("batch-42", new BatchConfiguration());
-        assertEquals(42, runTestContext.getRunningBatchIndex());
+        assertEquals("batch-1", runTestContext.getRunningBatch().getBatchKey());
+        assertEquals(1, runTestContext.getRunningBatch().getBatchIndex());
+        assertNotNull(runTestContext.getRunningBatch().getBatchConfiguration());
     }
 
     @Test
     void testGetRunningBatch()
     {
+        String batchKey = "batch-42";
         BatchConfiguration batchConfiguration = new BatchConfiguration();
-        runTestContext.putRunningBatch(BATCH_KEY, batchConfiguration);
-        assertEquals(batchConfiguration, runTestContext.getRunningBatch());
+        runTestContext.putRunningBatch(batchKey, batchConfiguration);
+        var runningBatch = runTestContext.getRunningBatch();
+        assertEquals(batchKey, runningBatch.getBatchKey());
+        assertEquals(42, runningBatch.getBatchIndex());
+        assertEquals(batchConfiguration, runningBatch.getBatchConfiguration());
     }
 
     @Test
-    void testRemoveRunningBatchKey()
-    {
-        runTestContext.putRunningBatch(BATCH_KEY, new BatchConfiguration());
-        runTestContext.removeRunningBatch();
-        IllegalStateException exception = assertThrows(IllegalStateException.class, runTestContext::getRunningBatchKey);
-        assertEquals(NO_RUNNING_BATCH, exception.getMessage());
-    }
-
-    @Test
-    void testGetRunningBatchIndexWithoutRunningBatch()
-    {
-        runTestContext.removeRunningBatch();
-        IllegalStateException exception =
-                assertThrows(IllegalStateException.class, runTestContext::getRunningBatchIndex);
-        assertEquals(NO_RUNNING_BATCH, exception.getMessage());
-    }
-
     @Test
     void testRemoveRunningBatch()
     {

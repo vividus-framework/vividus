@@ -118,7 +118,7 @@ public class NewRelicSteps
         storyStatus.remove();
         runFailed.compareAndSet(false, status == Status.FAILED);
         VividusStoryEvent event = new VividusStoryEvent(runId, story.getName(),
-                runContext.getRunningBatchIndex(), status, customAttributes);
+                runContext.getRunningBatch().getBatchIndex(), status, customAttributes);
         pendingStoryEvents.add(CompletableFuture.runAsync(() -> publisher.postEvent(event)));
     }
 
