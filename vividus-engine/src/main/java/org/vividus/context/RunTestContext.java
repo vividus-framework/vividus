@@ -24,7 +24,7 @@ import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Story;
 import org.jspecify.annotations.Nullable;
 import org.vividus.batch.BatchConfiguration;
-import org.vividus.batch.RunningBatch;
+import org.vividus.model.RunningBatch;
 import org.vividus.model.RunningStory;
 import org.vividus.testcontext.TestContext;
 
@@ -35,8 +35,7 @@ public class RunTestContext implements RunContext
     private TestContext testContext;
 
     // must be initialized for jbehave-junit-runner
-    private @Nullable RunningBatch runningBatch =
-            new RunningBatch(DEFAULT_BATCH_KEY, new BatchConfiguration());
+    private @Nullable RunningBatch runningBatch = new RunningBatch(DEFAULT_BATCH_KEY, null);
     private boolean dryRun;
     private RunState runState = RunState.NOT_STARTED;
 
@@ -100,8 +99,7 @@ public class RunTestContext implements RunContext
     @Override
     public RunningBatch getRunningBatch()
     {
-        RunningBatch currentRunningBatch = runningBatch;
-        return Optional.ofNullable(currentRunningBatch).orElseThrow(
+        return Optional.ofNullable(runningBatch).orElseThrow(
                 () -> new IllegalStateException("No running batch is found"));
     }
 

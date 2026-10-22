@@ -18,7 +18,7 @@ package org.vividus.context;
 
 import java.util.Deque;
 
-import org.vividus.batch.RunningBatch;
+import org.vividus.model.RunningBatch;
 import org.vividus.model.RunningStory;
 
 public interface RunContext

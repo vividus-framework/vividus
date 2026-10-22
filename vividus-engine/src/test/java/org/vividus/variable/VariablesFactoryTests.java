@@ -28,8 +28,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.batch.BatchConfiguration;
-import org.vividus.batch.RunningBatch;
 import org.vividus.context.RunContext;
+import org.vividus.model.RunningBatch;
 import org.vividus.util.property.PropertyParser;
 
 @ExtendWith(MockitoExtension.class)
