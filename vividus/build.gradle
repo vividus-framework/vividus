@@ -93,7 +93,7 @@ dependencies {
     implementation(libs.hamcrest)
     implementation(libs.guava)
     implementation('io.github.classgraph:classgraph:5.0.0')
-    implementation('io.github.java-diff-utils:java-diff-utils:4.17')
+    implementation('io.github.java-diff-utils:java-diff-utils:4.18')
     implementation('org.apache.commons:commons-jexl3:3.7.0')
     implementation('net.datafaker:datafaker:2.7.0')
 
