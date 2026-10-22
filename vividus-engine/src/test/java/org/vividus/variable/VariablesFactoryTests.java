@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.batch.BatchConfiguration;
+import org.vividus.batch.RunningBatch;
 import org.vividus.context.RunContext;
 import org.vividus.util.property.PropertyParser;
 
@@ -60,7 +61,7 @@ class VariablesFactoryTests
         when(propertyParser.getPropertyValuesByPrefix(GLOBAL_PROPERTY_PREFIX)).thenReturn(GLOBAL_VARIABLES);
         var configuration = new BatchConfiguration();
         configuration.setVariables(Map.of(KEY1, BATCH, KEY2, BATCH));
-        when(runContext.getRunningBatch()).thenReturn(configuration);
+        when(runContext.getRunningBatch()).thenReturn(new RunningBatch("batch-1", configuration));
     }
 
     @Test

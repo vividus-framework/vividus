@@ -40,7 +40,7 @@ public class JBehaveFailTestFastManager implements FailTestFastManager
     public boolean isFailTestCaseFast()
     {
         return testContext.get(FAIL_TEST_CASE_FAST_KEY,
-                () -> Optional.ofNullable(runContext.getRunningBatch().isFailScenarioFast())
+                () -> Optional.ofNullable(runContext.getRunningBatch().getBatchConfiguration().isFailScenarioFast())
                         .orElse(failTestCaseFast));
     }
 

@@ -18,7 +18,7 @@ package org.vividus.context;
 
 import java.util.Deque;
 
-import org.vividus.batch.BatchConfiguration;
+import org.vividus.batch.RunningBatch;
 import org.vividus.model.RunningStory;
 
 public interface RunContext
@@ -29,23 +29,13 @@ public interface RunContext
 
     Deque<RunningStory> getStoriesChain();
 
-    String getRunningBatchKey();
-
     /**
-     * Gets the index of the currently running batch.
+     * Returns the currently running batch.
      *
-     * @return current batch index
+     * @return the currently running batch
      * @throws IllegalStateException if no batch is running
      */
-    int getRunningBatchIndex();
-
-    /**
-     * Returns the configuration of the currently running batch.
-     *
-     * @return the configuration of the currently running batch
-     * @throws IllegalStateException if no batch is running
-     */
-    BatchConfiguration getRunningBatch();
+    RunningBatch getRunningBatch();
 
     void setDryRun(boolean dryRun);
 

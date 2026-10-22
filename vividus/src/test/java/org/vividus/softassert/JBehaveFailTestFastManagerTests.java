@@ -34,6 +34,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.batch.BatchConfiguration;
+import org.vividus.batch.RunningBatch;
 import org.vividus.context.RunContext;
 import org.vividus.testcontext.TestContext;
 
@@ -58,7 +59,7 @@ class JBehaveFailTestFastManagerTests
     {
         failTestFastManager.setFailTestCaseFast(propertyValue);
         var configuration = mock(BatchConfiguration.class);
-        when(runContext.getRunningBatch()).thenReturn(configuration);
+        when(runContext.getRunningBatch()).thenReturn(new RunningBatch("batch-1", configuration));
         when(configuration.isFailScenarioFast()).thenReturn(configurationValue);
         doAnswer(a ->
         {
