@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,20 @@ import java.util.Optional;
 
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Story;
+import org.jspecify.annotations.Nullable;
+import org.vividus.batch.BatchConfiguration;
+import org.vividus.model.RunningBatch;
 import org.vividus.model.RunningStory;
 import org.vividus.testcontext.TestContext;
 
 public class RunTestContext implements RunContext
 {
+    private static final String DEFAULT_BATCH_KEY = "batch-1";
+
     private TestContext testContext;
 
     // must be initialized for jbehave-junit-runner
-    private Optional<String> runningBatchKey = Optional.of("batch-1");
+    private @Nullable RunningBatch runningBatch = new RunningBatch(DEFAULT_BATCH_KEY, null);
     private boolean dryRun;
     private RunState runState = RunState.NOT_STARTED;
 
@@ -80,20 +85,22 @@ public class RunTestContext implements RunContext
         return testContext.get("RunningGivenStory", LinkedList::new);
     }
 
-    public void putRunningBatch(String batchKey)
+    public void putRunningBatch(String batchKey, BatchConfiguration batchConfiguration)
     {
-        runningBatchKey = Optional.of(batchKey);
+        runningBatch = new RunningBatch(batchKey, batchConfiguration);
     }
 
+    @SuppressWarnings("PMD.NullAssignment")
     public void removeRunningBatch()
     {
-        runningBatchKey = Optional.empty();
+        runningBatch = null;
     }
 
     @Override
-    public String getRunningBatchKey()
+    public RunningBatch getRunningBatch()
     {
-        return runningBatchKey.orElseThrow(() -> new IllegalStateException("No running batch is found"));
+        return Optional.ofNullable(runningBatch).orElseThrow(
+                () -> new IllegalStateException("No running batch is found"));
     }
 
     public Status getStoryStatus(Story story)
