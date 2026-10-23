@@ -26,7 +26,7 @@ dependencies {
     implementation(libs.apache.commons.lang3)
     implementation(libs.apache.commons.collections4)
 
-    implementation('org.zeroturnaround:zt-zip:1.18.2')
+    implementation('org.zeroturnaround:zt-zip:1.18.3')
 
     implementation(libs.jsonUnit)
 
