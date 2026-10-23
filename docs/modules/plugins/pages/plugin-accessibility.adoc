@@ -49,7 +49,7 @@ The step can be used to test accessibility using the following engines:
 
 ==== Axe Core
 
-:axe-version: 4.7
+:axe-version: 4.14
 
 Axe Core is a powerful and accurate accessibility toolkit can get you to 80% issue coverage, or more, during development. It supports a wide range of standards such as `WCAG 2.0`, `WCAG 2.1`, `WCAG 2.2`, `Section 508`, `ACT` and so on.
 
