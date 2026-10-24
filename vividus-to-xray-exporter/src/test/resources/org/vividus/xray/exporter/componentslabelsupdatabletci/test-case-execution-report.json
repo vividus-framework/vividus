@@ -29,6 +29,26 @@
           "keyword": "@",
           "name": "xray.labels",
           "value": "dummy-label-1; dummy-label-2"
+        },
+        {
+          "keyword": "@",
+          "name": "xray.testRepositoryPath",
+          "value": "Applications/Web/Authentication"
+        },
+        {
+          "keyword": "@",
+          "name": "xray.priority",
+          "value": "High"
+        },
+        {
+          "keyword": "@",
+          "name": "xray.fixVersions",
+          "value": "Release-1.0, Release-1.1"
+        },
+        {
+          "keyword": "@",
+          "name": "xray.affectedVersions",
+          "value": "Release-0.9,Release-1.0"
         }
       ],
       "examples": {

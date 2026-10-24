@@ -44,6 +44,11 @@ class XrayServerClientTests
     private static final String TEST_SET_KEY = "TEST-2";
     private static final String TEST_CASE_KEY_1 = "TEST-3";
     private static final String TEST_CASE_KEY_2 = "TEST-4";
+    private static final String ISSUE_PROJECT_ENDPOINT = "/rest/api/latest/issue/";
+    private static final String PROJECT_FIELDS_QUERY = "?fields=project";
+    private static final String PROJECT_ISSUE_RESPONSE = "{\"fields\":{\"project\":{\"key\":\"TEST\"}}}";
+    private static final String REPOSITORY_FOLDERS_ENDPOINT =
+            "/rest/raven/1.0/api/testrepository/TEST/folders";
     private static final String IMPORT_ENDPOINT = "/rest/raven/1.0/import/execution";
     private static final String EXECUTION_JSON = "{\"tests\":[]}";
     private static final String CONFIG_ERROR = "config error";
@@ -101,6 +106,41 @@ class XrayServerClientTests
         verify(jiraClient).executePost(
                 "/rest/raven/1.0/api/testset/" + TEST_SET_KEY + "/test",
                 "{\"add\":[\"TEST-3\",\"TEST-4\"]}");
+    }
+
+    @Test
+    void shouldAddTestToExistingRepositoryFolder() throws IOException, JiraConfigurationException
+    {
+        String foldersResponse = "{\"folders\":[{\"id\":1,\"name\":\"Applications\",\"folders\":["
+                + "{\"id\":2,\"name\":\"Web\",\"folders\":["
+                + "{\"id\":3,\"name\":\"Authentication\",\"folders\":[]}]}]}]}";
+        when(jiraClientProvider.getByIssueKey(TEST_CASE_KEY_1)).thenReturn(jiraClient);
+        when(jiraClient.executeGet(ISSUE_PROJECT_ENDPOINT + TEST_CASE_KEY_1 + PROJECT_FIELDS_QUERY))
+                .thenReturn(PROJECT_ISSUE_RESPONSE);
+        when(jiraClient.executeGet(REPOSITORY_FOLDERS_ENDPOINT))
+                .thenReturn(foldersResponse);
+
+        XrayServerClient client = new XrayServerClient(jiraClientProvider, null);
+        client.addTestToRepository(TEST_CASE_KEY_1, "/Applications/Web/Authentication/");
+
+        verify(jiraClient).executePut("/rest/raven/1.0/api/testrepository/TEST/folders/3/tests",
+                "{\"add\":[\"TEST-3\"]}");
+    }
+
+    @Test
+    void shouldFailWhenRepositoryFolderDoesNotExist() throws IOException, JiraConfigurationException
+    {
+        when(jiraClientProvider.getByIssueKey(TEST_CASE_KEY_1)).thenReturn(jiraClient);
+        when(jiraClient.executeGet(ISSUE_PROJECT_ENDPOINT + TEST_CASE_KEY_1 + PROJECT_FIELDS_QUERY))
+                .thenReturn(PROJECT_ISSUE_RESPONSE);
+        when(jiraClient.executeGet(REPOSITORY_FOLDERS_ENDPOINT))
+                .thenReturn("{\"folders\":[]}");
+
+        XrayServerClient client = new XrayServerClient(jiraClientProvider, null);
+        IOException thrown = assertThrows(IOException.class,
+                () -> client.addTestToRepository(TEST_CASE_KEY_1, "Applications/Unknown"));
+
+        assertEquals("Xray Test Repository folder path 'Applications/Unknown' does not exist", thrown.getMessage());
     }
 
     @Test
