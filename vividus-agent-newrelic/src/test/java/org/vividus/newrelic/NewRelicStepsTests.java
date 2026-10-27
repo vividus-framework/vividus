@@ -58,7 +58,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.batch.BatchConfiguration;
 import org.vividus.context.RunContext;
+import org.vividus.model.RunningBatch;
 import org.vividus.model.RunningStory;
 import org.vividus.newrelic.model.NewRelicEvent;
 import org.vividus.newrelic.model.RunPhase;
@@ -418,7 +420,7 @@ class NewRelicStepsTests
         when(runningStory.isNotExcluded()).thenReturn(true);
         when(runningStory.isFailed()).thenReturn(failed);
         when(runningStory.getName()).thenReturn(LOGIN);
-        when(runContext.getRunningBatchKey()).thenReturn(BATCH_KEY);
+        when(runContext.getRunningBatch()).thenReturn(new RunningBatch(BATCH_KEY, new BatchConfiguration()));
     }
 
     private static void assertStoryEvent(NewRelicEvent runEvent, NewRelicEvent storyEvent, Status expectedStatus)
@@ -474,7 +476,7 @@ class NewRelicStepsTests
         when(runningStory.isNotExcluded()).thenReturn(true);
         when(runningStory.isFailed()).thenReturn(false);
         when(runningStory.getName()).thenReturn(LOGIN);
-        when(runContext.getRunningBatchKey()).thenReturn(BATCH_KEY);
+        when(runContext.getRunningBatch()).thenReturn(new RunningBatch(BATCH_KEY, new BatchConfiguration()));
 
         steps.beforeStories();
         steps.afterGivenStory();
