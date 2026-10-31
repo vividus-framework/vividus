@@ -679,7 +679,7 @@ jobs:
                                                 -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                 -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                 -Pvividus.allure.executor.report-name="SauceLabs iOS System tests report" \
-                                                -Pvividus.variables.app-url=storage:filename=vividus-test-app-ios-$TEST_APP_VERSION.zip \
+                                                -Pvividus.variables.app-url=https://github.com/vividus-framework/vividus-test-app/releases/download/$TEST_APP_VERSION/vividus-test-app-ios-$TEST_APP_VERSION.zip \
                                                 -Pvividus.statistics.print-failures=true \
                                                 -Pvividus.ui.context.self-healing=true
 
@@ -714,7 +714,7 @@ jobs:
                                                 -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                 -Pvividus.allure.executor.report-name="SauceLabs iOS Proxy tests report" \
                                                 -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com" \
-                                                -Pvividus.variables.app-url=storage:filename=vividus-test-app-ios-$TEST_APP_VERSION.zip
+                                                -Pvividus.variables.app-url=https://github.com/vividus-framework/vividus-test-app/releases/download/$TEST_APP_VERSION/vividus-test-app-ios-$TEST_APP_VERSION.zip
 
       - name: SauceLabs - iOS Proxy - Mobile App - Publish system tests report
         if: always()
@@ -744,7 +744,7 @@ jobs:
                                                 -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                 -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                 -Pvividus.allure.executor.report-name="SauceLabs Android System tests report" \
-                                                -Pvividus.variables.app-url=storage:filename=vividus-test-app-android-$TEST_APP_VERSION.zip \
+                                                -Pvividus.variables.app-url=https://github.com/vividus-framework/vividus-test-app/releases/download/$TEST_APP_VERSION/vividus-test-app-android-$TEST_APP_VERSION.zip \
                                                 -Pvividus.statistics.print-failures=true
 
       - name: SauceLabs - Android - Mobile App - Publish system tests report
@@ -778,7 +778,7 @@ jobs:
                                                 -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                 -Pvividus.allure.executor.report-name="SauceLabs Android Proxy tests report" \
                                                 -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com" \
-                                                -Pvividus.variables.app-url=storage:filename=vividus-test-app-android-$TEST_APP_VERSION.zip
+                                                -Pvividus.variables.app-url=https://github.com/vividus-framework/vividus-test-app/releases/download/$TEST_APP_VERSION/vividus-test-app-android-$TEST_APP_VERSION.zip
 
       - name: SauceLabs - Android Proxy - Mobile App - Publish system tests report
         if: always()
