@@ -454,6 +454,8 @@ Then SSL rating for URL `$url` is $comparisonRule `$gradeName`
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
 * `$gradeName` - The name of {grade}. The possible values: `A+`, `A`, `A-`, `B`, `C`, `D`, `E`, `F`, `T`, `M`.
 
+NOTE: The properties marked with *bold* are mandatory.
+
 .Properties
 [cols="3,1,1,3", options="header"]
 |===
@@ -466,6 +468,11 @@ Then SSL rating for URL `$url` is $comparisonRule `$gradeName`
 |`URL`
 |`https://api.ssllabs.com`
 |SSL Labs endpoint.
+
+|[subs=+quotes]`*ssl-labs.email*`
+|`string`
+|`<empty>`
+|The email address registered via the https://github.com/ssllabs/ssllabs-scan/blob/master/ssllabs-api-docs-v4.md#register-for-scan-api-initiation-and-result-fetching-[SSL Labs registration API].
 
 |===
 
