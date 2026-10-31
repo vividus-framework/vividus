@@ -1,6 +1,6 @@
 Scenario: Validate element is ignored when native header to cut is set
 Meta: @layout tablet
-Given I am on page with URL `data:text/html;base64,PGh0bWwgbGFuZz0iZW4iPjxoZWFkPjx0aXRsZT5FeGFtcGxlIERvbWFpbjwvdGl0bGU+PG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xIj48c3R5bGU+Ym9keXtiYWNrZ3JvdW5kOiNlZWU7d2lkdGg6NjB2dzttYXJnaW46MTV2aCBhdXRvO2ZvbnQtZmFtaWx5OnN5c3RlbS11aSxzYW5zLXNlcmlmfWgxe2ZvbnQtc2l6ZToxLjVlbX1kaXZ7b3BhY2l0eTowLjh9YTpsaW5rLGE6dmlzaXRlZHtjb2xvcjojMzQ4fTwvc3R5bGU+PC9oZWFkPjxib2R5PjxkaXY+PGgxPkV4YW1wbGUgRG9tYWluPC9oMT48cD5UaGlzIGRvbWFpbiBpcyBmb3IgdXNlIGluIGRvY3VtZW50YXRpb24gZXhhbXBsZXMgd2l0aG91dCBuZWVkaW5nIHBlcm1pc3Npb24uIEF2b2lkIHVzZSBpbiBvcGVyYXRpb25zLjwvcD48cD48YSBocmVmPSIjIj5MZWFybiBtb3JlPC9hPjwvcD48L2Rpdj4KPC9ib2R5PjwvaHRtbD4=`
+Given I am on page with URL `https://web.archive.org/web/20251030235939id_/http://example.com/`
 When I COMPARE_AGAINST baseline with name `ipad-ignore-element` ignoring:
 |ELEMENT       |
 |By.tagName(h1)|
