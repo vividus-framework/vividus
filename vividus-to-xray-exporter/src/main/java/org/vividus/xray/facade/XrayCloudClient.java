@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.lang3.Strings;
@@ -45,6 +46,9 @@ public class XrayCloudClient implements XrayClient
     private static final String AUTHENTICATE_PATH = "/authenticate";
     private static final String IMPORT_EXECUTION_PATH = "/import/execution";
     private static final String GRAPHQL_PATH = "/graphql";
+    private static final String SLASH = "/";
+    private static final String DATA = "data";
+    private static final String BACKSLASH = "\\";
     private static final String COMMA_SEPARATOR = ", ";
     private static final String DOUBLE_QUOTE = "\"";
 
@@ -56,7 +60,7 @@ public class XrayCloudClient implements XrayClient
 
     public XrayCloudClient(String apiBaseUrl, String clientId, String clientSecret, IHttpClient httpClient)
     {
-        this.apiBaseUrl = Strings.CS.appendIfMissing(apiBaseUrl, "/") + "api/v2";
+        this.apiBaseUrl = Strings.CS.appendIfMissing(apiBaseUrl, SLASH) + "api/v2";
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.httpClient = httpClient;
@@ -131,6 +135,70 @@ public class XrayCloudClient implements XrayClient
             LOGGER.atWarn().addArgument(warning)
                   .log("Warning received from Xray Cloud while adding tests to test set: {}");
         }
+    }
+
+    @Override
+    public void addTestToRepository(String testCaseKey, String path) throws IOException
+    {
+        String jql = "issueKey = " + DOUBLE_QUOTE + escapeJql(testCaseKey) + DOUBLE_QUOTE;
+        String query = String.format(
+                "{ getTests(jql: %s, limit: 1) { results { issueId jira(fields: [\"project\"]) } } }", quote(jql));
+        String response = executeGraphQL(query);
+        JsonNode test = OBJECT_MAPPER.readTree(response).path(DATA).path("getTests").path("results").path(0);
+        String testIssueId = test.path("issueId").asText(null);
+        String projectId = test.path("jira").path("project").path("id").asText(null);
+        if (testIssueId == null || projectId == null)
+        {
+            throw new IOException("Could not resolve Xray project and issue IDs for test case: " + testCaseKey);
+        }
+
+        String folderPath = SLASH + path.replaceAll("^/+|/+$", "");
+        addTestToFolder(path, folderPath, testIssueId, projectId);
+    }
+
+    private void addTestToFolder(String path, String folderPath, String testIssueId, String projectId)
+            throws IOException
+    {
+        String mutation = String.format(
+                "mutation { addTestsToFolder(projectId: %s, path: %s, testIssueIds: [%s]) "
+                        + "{ folder { path } warnings } }",
+                quote(projectId), quote(folderPath), quote(testIssueId));
+        JsonNode folderResponse = OBJECT_MAPPER.readTree(executeGraphQL(mutation));
+        throwIfGraphQLErrors(folderResponse, path);
+        logFolderWarnings(folderResponse);
+    }
+
+    private static void throwIfGraphQLErrors(JsonNode response, String path) throws IOException
+    {
+        JsonNode errors = response.path("errors");
+        if (errors.isArray() && !errors.isEmpty())
+        {
+            String error = errors.path(0).path("message").asText();
+            throw new IOException("Failed to add test case to Xray Test Repository folder '" + path + "': " + error);
+        }
+    }
+
+    private static void logFolderWarnings(JsonNode response)
+    {
+        JsonNode warnings = response.path(DATA).path("addTestsToFolder").path("warnings");
+        String warning = warnings.isArray() && !warnings.isEmpty() ? warnings.path(0).asText()
+                : warnings.isTextual() ? warnings.asText() : null;
+        if (warning != null)
+        {
+            LOGGER.atWarn().addArgument(warning)
+                  .log("Warning received from Xray Cloud while adding test to Test Repository folder: {}");
+        }
+    }
+
+    private static String quote(String value) throws IOException
+    {
+        return OBJECT_MAPPER.writeValueAsString(value);
+    }
+
+    private static String escapeJql(String value)
+    {
+        return value.replace(BACKSLASH, BACKSLASH + BACKSLASH)
+                .replace(DOUBLE_QUOTE, BACKSLASH + DOUBLE_QUOTE);
     }
 
     private String executeGraphQL(String query) throws IOException

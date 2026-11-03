@@ -25,6 +25,25 @@
         "name": "component-2"
       }
     ],
+    "priority": {
+      "name": "High"
+    },
+    "fixVersions": [
+      {
+        "name": "Release-1.0"
+      },
+      {
+        "name": "Release-1.1"
+      }
+    ],
+    "versions": [
+      {
+        "name": "Release-0.9"
+      },
+      {
+        "name": "Release-1.0"
+      }
+    ],
     "cucumber-scenario-type-field": {
       "value": "scenario-type"
     },

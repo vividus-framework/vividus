@@ -274,6 +274,22 @@ include::partial$authentication.adoc[]
 |`@xray.components component-1;component-2`
 |Set components to the exported test case
 
+|`xray.testRepositoryPath`
+|`@xray.testRepositoryPath=Applications/Web/Authentication`
+|Place the test in the existing Xray Test Repository folder. The folder must already exist.
+
+|`xray.priority`
+|`@xray.priority=High`
+|Set the Jira priority. The priority must already exist in Jira.
+
+|`xray.fixVersions`
+|`@xray.fixVersions=Release-1.0,Release-1.1`
+|Set one or more existing Jira Fix Versions. Separate multiple versions with commas or semicolons.
+
+|`xray.affectedVersions`
+|`@xray.affectedVersions=Release-0.9,Release-1.0`
+|Set one or more existing Jira Affected Versions. Separate multiple versions with commas or semicolons.
+
 |`xray.skip-export`
 |`@xray.skip-export`
 |Skip test case while exporting
