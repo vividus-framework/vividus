@@ -39,3 +39,8 @@ Scenario: Verification of the URI exclusion mechanism via 'resource-checker.uri-
 Given I am on page with URL `${vividus-test-site-url}/visualTestIntegration.html`
 When I change context to element located by `linkText(Home)`
 Then all resources found by CSS selector `a` in ${context-source-code} are valid
+
+Scenario: Verify broken HTTP resources on error-link page
+Then all resources found by CSS selector `a[href]` are valid on:
+|pages                                    |
+|${vividus-test-site-url}/error-link.html|

@@ -6,32 +6,27 @@
     <meta charset="utf-8">
     <title>Resources check result table</title>
     <link rel="stylesheet" href="../../styles.css"/>
-    <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../../webjars/bootstrap/5.3.1/css/bootstrap.min.css"/>
 </head>
 <body>
     <style>
         .passed {
-            background-color: #DFF0D8;
-            color: #3C763D;
+            --bs-table-bg: #DFF0D8;
         }
         .blocked {
-            background-color: #F2DEDE;
-            color: #A94442;
+            --bs-table-bg: #F2DEDE;
         }
         .failed {
-            background-color: #F2DEDE;
-            color: #A94442;
+            --bs-table-bg: #F2DEDE;
         }
         .broken {
-            background-color: #CCB3FF;
-            color: #661AFF;
+            --bs-table-bg: #CCB3FF;
         }
         .skipped {
-            background-color: #D6D8DB;
+            --bs-table-bg: #D6D8DB;
         }
         .value-failed:nth-child(even) {
-            background-color: #F2DEDE;
-            color: #A94442;
+            --bs-table-bg: #F2DEDE;
         }
         table {
             border-collapse: collapse;
@@ -43,22 +38,22 @@
         }
     </style>
 
-    <table class="table table-hover table-bordered table-condensed fixedHeader">
+    <table class="table table-hover table-bordered table-sm fixedHeader">
         <thead>
             <tr>
-                <th/>
+                <th>
                     Checked URL
                 </th>
-                <th/>
+                <th>
                     CSS selector
                 </th>
                 <th>
                     Check Status
                 </th>
-                <th/>
+                <th>
                     Response
                 </th>
-                <th/>
+                <th>
                     Checked on page
                 </th>
             </tr>
@@ -97,6 +92,6 @@
                 </#list>
         </tbody>
     </table>
-    <script src="../../webjars/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="../../webjars/bootstrap/5.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>
