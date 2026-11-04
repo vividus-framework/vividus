@@ -121,7 +121,7 @@ public class GenericWaitSteps
             Function<Locator, IExpectedSearchContextCondition<T>> conditionFactory)
     {
         checkLocatorVisibility(locator);
-        waitForCondition(conditionFactory.apply(locator));
+        waitActions.wait(getSearchContext(), conditionFactory.apply(locator));
     }
 
     private void checkLocatorVisibility(Locator locator)
@@ -334,7 +334,7 @@ public class GenericWaitSteps
         appendIf(duration.toMinutesPart() != 0, "m' minutes' ", durationBuilder);
         appendIf(duration.toSecondsPart() != 0, "s' seconds' ", durationBuilder);
         appendIf(duration.toMillisPart() != 0, "S' millis'", durationBuilder);
-        Validate.isTrue(durationBuilder.length() > 0, "Unable to convert duration %s", duration);
+        Validate.isTrue(!durationBuilder.isEmpty(), "Unable to convert duration %s", duration);
         return DurationFormatUtils.formatDuration(duration.toMillis(), durationBuilder.toString().strip());
     }
 
@@ -344,11 +344,6 @@ public class GenericWaitSteps
         {
             builder.append(value);
         }
-    }
-
-    private void waitForCondition(IExpectedSearchContextCondition<?> condition)
-    {
-        waitActions.wait(getSearchContext(), condition);
     }
 
     private SearchContext getSearchContext()

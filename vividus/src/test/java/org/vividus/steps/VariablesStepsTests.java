@@ -162,7 +162,7 @@ class VariablesStepsTests
     {
         Map<String, Object> map1 = Map.of(KEY_1, 2);
         Map<String, Object> map2 = Map.of(KEY_1, 2L);
-        BigDecimal twoBD = new BigDecimal(2);
+        BigDecimal twoBD = BigDecimal.TWO;
         assertFalse(variablesSteps.compareVariables(map1, ComparisonRule.EQUAL_TO, map2));
         verify(softAssert).assertTrue(TABLES_ARE_EQUAL, true);
 

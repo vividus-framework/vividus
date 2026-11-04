@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ public class DescriptiveWait<F> implements Wait<F>
 {
     private final FluentWait<F> wait;
     private Duration timeout;
-    private Function<? super F, ?> isTrue;
+    private Function<? super F, ?> condition;
 
     public DescriptiveWait(FluentWait<F> wait)
     {
@@ -41,17 +41,17 @@ public class DescriptiveWait<F> implements Wait<F>
     }
 
     @Override
-    public <T> T until(Function<? super F, T> isTrue)
+    public <T> T until(Function<? super F, T> condition)
     {
-        this.isTrue = isTrue;
-        return wait.until(isTrue);
+        this.condition = condition;
+        return wait.until(condition);
     }
 
     @Override
     public String toString()
     {
         return "Wait with timeout of " + DurationFormatUtils.formatDurationWords(timeout.toMillis(), true, true)
-                + ". Condition: " + isTrue;
+                + ". Condition: " + condition;
     }
 
     public Duration getTimeout()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,13 +83,17 @@ class VaultStoredPropertiesProcessorTests
     void shouldRejectInvalidSecretPaths(String fullSecretPath) throws IOException
     {
         var propertyName = "invalid-property";
-        var exception = assertThrows(IllegalArgumentException.class,
-                () -> new VaultStoredPropertiesProcessor().processValue(propertyName, fullSecretPath));
-        assertEquals(
-                "Full secret path must follow pattern 'engine/path_with_separators/key', but '" + fullSecretPath
-                        + "' was found in property '" + propertyName + "'", exception.getMessage());
+        try (var processor = new VaultStoredPropertiesProcessor())
+        {
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> processor.processValue(propertyName, fullSecretPath));
+            assertEquals(
+                    "Full secret path must follow pattern 'engine/path_with_separators/key', but '" + fullSecretPath
+                            + "' was found in property '" + propertyName + "'", exception.getMessage());
+        }
     }
 
+    @SuppressWarnings("PMD.CloseResource")
     @Test
     void shouldUseNamespaceForEnterpriseVaultWhenConfigured() throws IOException
     {
@@ -177,10 +181,13 @@ class VaultStoredPropertiesProcessorTests
     })
     void shouldPrintLogAboutDeprecation(String propertyValue) throws IOException
     {
-        new VaultStoredPropertiesProcessor().processProperty("old-property-name", propertyValue);
-        assertThat(logger.getLoggingEvents(), is(List.of(
-                warn("`VAULT(...)` placeholder is deprecated and will be removed in VIVIDUS 0.7.0, "
-                        + "please use `HASHI_CORP_VAULT(...)` placeholder instead."))));
+        try (var processor = new VaultStoredPropertiesProcessor())
+        {
+            processor.processProperty("old-property-name", propertyValue);
+            assertThat(logger.getLoggingEvents(), is(List.of(
+                    warn("`VAULT(...)` placeholder is deprecated and will be removed in VIVIDUS 0.7.0, "
+                            + "please use `HASHI_CORP_VAULT(...)` placeholder instead."))));
+        }
     }
 
     @ParameterizedTest
@@ -192,8 +199,11 @@ class VaultStoredPropertiesProcessorTests
     })
     void shouldNotPrintLogAboutDeprecation(String propertyValue) throws IOException
     {
-        new VaultStoredPropertiesProcessor().processProperty("new-property-name", propertyValue);
-        assertEquals(0, logger.getLoggingEvents().size());
+        try (var processor = new VaultStoredPropertiesProcessor())
+        {
+            processor.processProperty("new-property-name", propertyValue);
+            assertEquals(0, logger.getLoggingEvents().size());
+        }
     }
 
     @Test
@@ -201,6 +211,9 @@ class VaultStoredPropertiesProcessorTests
     {
         var properties = new Properties();
         properties.put("property", "HASHI_CORP_VAULT(secret/vividus/test/username)");
-        assertEquals(properties, new VaultStoredPropertiesProcessor().processProperties(properties));
+        try (var processor = new VaultStoredPropertiesProcessor())
+        {
+            assertEquals(properties, processor.processProperties(properties));
+        }
     }
 }
