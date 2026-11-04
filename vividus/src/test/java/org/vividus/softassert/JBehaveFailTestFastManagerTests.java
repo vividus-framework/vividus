@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.batch.BatchConfiguration;
-import org.vividus.batch.BatchStorage;
 import org.vividus.context.RunContext;
+import org.vividus.model.RunningBatch;
 import org.vividus.testcontext.TestContext;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,7 +44,6 @@ class JBehaveFailTestFastManagerTests
     private static final Object FAIL_TEST_CASE_FAST_KEY = JBehaveFailTestFastManager.class;
 
     @Mock private RunContext runContext;
-    @Mock private BatchStorage batchStorage;
     @Mock private TestContext testContext;
 
     @InjectMocks private JBehaveFailTestFastManager failTestFastManager;
@@ -58,11 +57,9 @@ class JBehaveFailTestFastManagerTests
     })
     void shouldProvideFailFastValue(boolean expectedValue, boolean propertyValue, Boolean configurationValue)
     {
-        var key = "key";
         failTestFastManager.setFailTestCaseFast(propertyValue);
-        when(runContext.getRunningBatchKey()).thenReturn(key);
         var configuration = mock(BatchConfiguration.class);
-        when(batchStorage.getBatchConfiguration(key)).thenReturn(configuration);
+        when(runContext.getRunningBatch()).thenReturn(new RunningBatch("batch-1", configuration));
         when(configuration.isFailScenarioFast()).thenReturn(configurationValue);
         doAnswer(a ->
         {

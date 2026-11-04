@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.vividus.batch.BatchConfiguration;
 import org.vividus.model.RunningStory;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
 
 class RunTestContextTests
 {
-    private static final String BATCH_KEY = "batchKey";
+    private static final String NO_RUNNING_BATCH = "No running batch is found";
+    private static final String BATCH_1_KEY = "batch-1";
 
     private final RunTestContext runTestContext = new RunTestContext();
 
@@ -87,25 +89,32 @@ class RunTestContextTests
     }
 
     @Test
-    void testGetDefaultRunningBatchKey()
+    void testGetDefaultRunningBatch()
     {
-        assertEquals("batch-1", runTestContext.getRunningBatchKey());
+        assertEquals(BATCH_1_KEY, runTestContext.getRunningBatch().getBatchKey());
+        assertEquals(1, runTestContext.getRunningBatch().getBatchIndex());
+        assertNull(runTestContext.getRunningBatch().getBatchConfiguration());
     }
 
     @Test
-    void testGetRunningBatchKey()
+    void testGetRunningBatch()
     {
-        runTestContext.putRunningBatch(BATCH_KEY);
-        assertEquals(BATCH_KEY, runTestContext.getRunningBatchKey());
+        String batchKey = "batch-42";
+        BatchConfiguration batchConfiguration = new BatchConfiguration();
+        runTestContext.putRunningBatch(batchKey, batchConfiguration);
+        var runningBatch = runTestContext.getRunningBatch();
+        assertEquals(batchKey, runningBatch.getBatchKey());
+        assertEquals(42, runningBatch.getBatchIndex());
+        assertEquals(batchConfiguration, runningBatch.getBatchConfiguration());
     }
 
     @Test
-    void testRemoveRunningBatchKey()
+    void testRemoveRunningBatch()
     {
-        runTestContext.putRunningBatch(BATCH_KEY);
+        runTestContext.putRunningBatch(BATCH_1_KEY, new BatchConfiguration());
         runTestContext.removeRunningBatch();
-        IllegalStateException exception = assertThrows(IllegalStateException.class, runTestContext::getRunningBatchKey);
-        assertEquals("No running batch is found", exception.getMessage());
+        IllegalStateException exception = assertThrows(IllegalStateException.class, runTestContext::getRunningBatch);
+        assertEquals(NO_RUNNING_BATCH, exception.getMessage());
     }
 
     @Test

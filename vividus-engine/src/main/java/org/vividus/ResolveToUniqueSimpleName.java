@@ -55,6 +55,6 @@ public class ResolveToUniqueSimpleName extends ResolveToSimpleName
         String storyNameOutput = Strings.CS.removeEnd(storyName, "story")
                                             .replace(UNIX_PATH_SEPARATOR, '.') + extension;
 
-        return runContext.getRunningBatchKey() + File.separator + storyNameOutput;
+        return runContext.getRunningBatch().getBatchKey() + File.separator + storyNameOutput;
     }
 }
