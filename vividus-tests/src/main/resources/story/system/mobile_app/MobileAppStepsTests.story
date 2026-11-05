@@ -449,16 +449,25 @@ When I execute sequence of touch actions:
 |TAP |By.accessibilityId(menuToggler)|
 When I tap on element located by `xpath(<carouselViewXpath>)`
 Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
+When I change context to element located by `accessibilityId(<firstItemAccessibilityId>)`
+Given I initialize scenario variable `x` with value `#{eval(${context-x-coordinate} + ${context-width} / 2)}`
+Given I initialize scenario variable `y` with value `#{eval(${context-y-coordinate} + ${context-height} / 2)}`
+When I reset context
 When I execute sequence of touch actions:
-|type          |argument                                      |
-|TAP_AND_HOLD  |By.accessibilityId(<firstItemAccessibilityId>)|
-|MOVE_BY_OFFSET|(-200, 0)                                     |
-|RELEASE       |                                              |
+|type          |argument    |
+|MOVE_BY_OFFSET|(${x}, ${y})|
+|TAP_AND_HOLD  |            |
+|MOVE_BY_OFFSET|(-200, 0)   |
+|RELEASE       |            |
 When I wait until element located by `accessibilityId(<firstItemAccessibilityId>)` disappears
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `1`
+When I change context to element located by `accessibilityId(<secondItemAccessibilityId>)`
+Given I initialize scenario variable `x` with value `#{eval(${context-x-coordinate} + ${context-width} / 2)}`
+Given I initialize scenario variable `y` with value `#{eval(${context-y-coordinate} + ${context-height} / 2)}`
+When I reset context
 When I execute sequence of touch actions:
 |type          |argument                                       |
-|MOVE_TO       |By.accessibilityId(<secondItemAccessibilityId>)|
+|MOVE_BY_OFFSET|(${x}, ${y})                                  |
 |TAP_AND_HOLD  |                                               |
 |MOVE_BY_OFFSET|(200, 0)                                       |
 |RELEASE       |                                               |
