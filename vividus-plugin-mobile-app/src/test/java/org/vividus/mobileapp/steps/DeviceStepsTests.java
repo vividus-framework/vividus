@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.ScreenOrientation;
 import org.vividus.context.VariableContext;
 import org.vividus.mobileapp.action.DeviceActions;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.DataWrapper;
 import org.vividus.variable.VariableScope;
 
@@ -58,6 +59,7 @@ class DeviceStepsTests
 
     @Mock private DeviceActions deviceActions;
     @Mock private VariableContext variableContext;
+    @Mock private ISoftAssert softAssert;
     private DeviceSteps deviceSteps;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(DeviceSteps.class);
@@ -65,7 +67,7 @@ class DeviceStepsTests
     @BeforeEach
     void init()
     {
-        deviceSteps = new DeviceSteps(DEVICE_FOLDER, deviceActions, variableContext);
+        deviceSteps = new DeviceSteps(DEVICE_FOLDER, deviceActions, variableContext, softAssert);
     }
 
     static Stream<Arguments> dataProvider()
@@ -116,6 +118,27 @@ class DeviceStepsTests
         when(deviceActions.pullFile(DEVICE_FILE_PATH)).thenReturn(BINARY_CONTENT);
         deviceSteps.downloadFileFromDevice(DEVICE_FILE_PATH, variableScopes, variableName);
         verify(variableContext).putVariable(variableScopes, variableName, BINARY_CONTENT);
+    }
+
+    @Test
+    void shouldRecordPassedAssertionWhenFileDoesNotExistOnDevice()
+    {
+        when(deviceActions.fileExists(DEVICE_FILE_PATH)).thenReturn(false);
+
+        deviceSteps.verifyFileDoesNotExistOnDevice(DEVICE_FILE_PATH);
+
+        verify(softAssert).recordPassedAssertion(
+                "The file '%s' does not exist on the device".formatted(DEVICE_FILE_PATH));
+    }
+
+    @Test
+    void shouldRecordFailedAssertionWhenFileExistsOnDevice()
+    {
+        when(deviceActions.fileExists(DEVICE_FILE_PATH)).thenReturn(true);
+
+        deviceSteps.verifyFileDoesNotExistOnDevice(DEVICE_FILE_PATH);
+
+        verify(softAssert).recordFailedAssertion("The file '%s' exists on the device".formatted(DEVICE_FILE_PATH));
     }
 
     @Test
