@@ -19,11 +19,13 @@ package org.vividus.steps;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,6 +39,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import org.hamcrest.Matcher;
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -112,6 +115,51 @@ class VariablesStepsTests
         doAnswer(getAssertionAnswer(passed)).when(softAssert).assertThat(eq(description), eq(variable1), any(), any());
         assertEquals(passed, variablesSteps.compareVariables(variable1, ComparisonRule.EQUAL_TO, variable2));
         verify(diffAttachmentPublisher, times(published)).publishDiff(TITLE, variable1, variable2);
+    }
+
+    @Test
+    void shouldCompareEqualBinaryVariables()
+    {
+        byte[] expected = { 1, 2, 3 };
+        byte[] actual = { 1, 2, 3 };
+        String description = "Binary values with lengths %d and %d are equal"
+                .formatted(expected.length, actual.length);
+        doReturn(true).when(softAssert).recordPassedAssertion(description);
+
+        assertTrue(variablesSteps.compareVariables(expected, ComparisonRule.EQUAL_TO, actual));
+
+        verify(softAssert).recordPassedAssertion(description);
+        verify(softAssert, never()).recordFailedAssertion(any(String.class));
+        verifyNoInteractions(diffAttachmentPublisher);
+    }
+
+    @Test
+    void shouldCompareUnequalBinaryVariables()
+    {
+        byte[] expected = { 1, 2, 3 };
+        byte[] actual = { 3, 2, 1 };
+        String description = "Binary values with lengths %d and %d are not equal"
+                .formatted(expected.length, actual.length);
+        doReturn(false).when(softAssert).recordFailedAssertion(description);
+
+        assertFalse(variablesSteps.compareVariables(expected, ComparisonRule.EQUAL_TO, actual));
+
+        verify(softAssert).recordFailedAssertion(description);
+        verify(softAssert, never()).recordPassedAssertion(any(String.class));
+        verifyNoInteractions(diffAttachmentPublisher);
+    }
+
+    @Test
+    void shouldCompareBinaryVariableWithNonBinaryVariable()
+    {
+        doAnswer(invocation ->
+        {
+            Object actual = invocation.getArgument(1);
+            Matcher<?> matcher = invocation.getArgument(2);
+            return matcher.matches(actual);
+        }).when(softAssert).assertThat(any(), any(), any(), any());
+
+        assertFalse(variablesSteps.compareVariables(new byte[] { 1 }, ComparisonRule.EQUAL_TO, "[1]"));
     }
 
     static Stream<Object> variableValues()

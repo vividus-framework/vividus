@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.steps;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,11 @@ public abstract class VariableComparator
     {
         if (ComparisonRule.EQUAL_TO == condition)
         {
-            if (isEmptyOrListOfMaps(variable1) && isEmptyOrListOfMaps(variable2))
+            if (variable1 instanceof byte[] bytes1 && variable2 instanceof byte[] bytes2)
+            {
+                return compareBinary(bytes1, bytes2);
+            }
+            else if (isEmptyOrListOfMaps(variable1) && isEmptyOrListOfMaps(variable2))
             {
                 return compareListsOfMaps(variable1, variable2);
             }
@@ -56,6 +61,11 @@ public abstract class VariableComparator
     }
 
     protected abstract <T extends Comparable<T>> boolean compareValues(T value1, ComparisonRule condition, T value2);
+
+    protected boolean compareBinary(byte[] bytes1, byte[] bytes2)
+    {
+        return Arrays.equals(bytes1, bytes2);
+    }
 
     protected boolean compareListsOfMaps(Object variable1, Object variable2)
     {

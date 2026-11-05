@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,16 @@ public class VariablesSteps
                     }
                 };
                 return softAssert.assertThat(description, value1, condition.getComparisonRule(value2), resultConsumer);
+            }
+
+            @Override
+            protected boolean compareBinary(byte[] bytes1, byte[] bytes2)
+            {
+                return super.compareBinary(bytes1, bytes2)
+                        ? softAssert.recordPassedAssertion("Binary values with lengths %d and %d are equal"
+                                .formatted(bytes1.length, bytes2.length))
+                        : softAssert.recordFailedAssertion("Binary values with lengths %d and %d are not equal"
+                                .formatted(bytes1.length, bytes2.length));
             }
 
             @Override

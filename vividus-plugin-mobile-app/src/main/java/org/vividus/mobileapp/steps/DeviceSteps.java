@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ import java.nio.file.Paths;
 import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
+import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.ScreenOrientation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.context.VariableContext;
 import org.vividus.mobileapp.action.DeviceActions;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.DataWrapper;
 import org.vividus.util.ResourceUtils;
 import org.vividus.variable.VariableScope;
@@ -37,12 +39,15 @@ public class DeviceSteps
     private final DeviceActions deviceActions;
     private final String folderForFileUpload;
     private final VariableContext variableContext;
+    private final ISoftAssert softAssert;
 
-    public DeviceSteps(String folderForFileUpload, DeviceActions deviceActions, VariableContext variableContext)
+    public DeviceSteps(String folderForFileUpload, DeviceActions deviceActions, VariableContext variableContext,
+            ISoftAssert softAssert)
     {
         this.folderForFileUpload = folderForFileUpload;
         this.deviceActions = deviceActions;
         this.variableContext = variableContext;
+        this.softAssert = softAssert;
     }
 
     /**
@@ -122,6 +127,23 @@ public class DeviceSteps
     {
         byte[] data = deviceActions.pullFile(filePath);
         variableContext.putVariable(scopes, variableName, data);
+    }
+
+    /**
+     * Verifies that a file does not exist on the device.
+     * @param deviceFilePath path of the file on the device
+     */
+    @Then("file `$deviceFilePath` does not exist on device")
+    public void verifyFileDoesNotExistOnDevice(String deviceFilePath)
+    {
+        if (deviceActions.fileExists(deviceFilePath))
+        {
+            softAssert.recordFailedAssertion("The file '%s' exists on the device".formatted(deviceFilePath));
+        }
+        else
+        {
+            softAssert.recordPassedAssertion("The file '%s' does not exist on the device".formatted(deviceFilePath));
+        }
     }
 
     /**
