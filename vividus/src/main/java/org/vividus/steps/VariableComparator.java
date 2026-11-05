@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.steps;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -28,16 +29,22 @@ public abstract class VariableComparator
 {
     public boolean compare(Object variable1, ComparisonRule condition, Object variable2)
     {
-        if (ComparisonRule.EQUAL_TO == condition)
+        if (isBinaryComparison(variable1, condition, variable2))
         {
-            if (isEmptyOrListOfMaps(variable1) && isEmptyOrListOfMaps(variable2))
-            {
-                return compareListsOfMaps(variable1, variable2);
-            }
-            else if (variable1 instanceof Map && variable2 instanceof Map)
-            {
-                return compareListsOfMaps(List.of(variable1), List.of(variable2));
-            }
+            return compareBinary((byte[]) variable1, condition, (byte[]) variable2);
+        }
+        return compareNonBinary(variable1, condition, variable2);
+    }
+
+    private boolean compareNonBinary(Object variable1, ComparisonRule condition, Object variable2)
+    {
+        if (isEqualListOfMapsComparison(variable1, condition, variable2))
+        {
+            return compareListsOfMaps(variable1, variable2);
+        }
+        if (isEqualMapComparison(variable1, condition, variable2))
+        {
+            return compareListsOfMaps(List.of(variable1), List.of(variable2));
         }
         String variable1AsString = String.valueOf(variable1);
         String variable2AsString = String.valueOf(variable2);
@@ -50,12 +57,34 @@ public abstract class VariableComparator
         return compareValues(variable1AsString, condition, variable2AsString);
     }
 
+    private boolean isEqualListOfMapsComparison(Object variable1, ComparisonRule condition, Object variable2)
+    {
+        return ComparisonRule.EQUAL_TO == condition
+                && isEmptyOrListOfMaps(variable1) && isEmptyOrListOfMaps(variable2);
+    }
+
+    private boolean isEqualMapComparison(Object variable1, ComparisonRule condition, Object variable2)
+    {
+        return ComparisonRule.EQUAL_TO == condition && variable1 instanceof Map && variable2 instanceof Map;
+    }
+
+    private boolean isBinaryComparison(Object variable1, ComparisonRule condition, Object variable2)
+    {
+        return (ComparisonRule.EQUAL_TO == condition || ComparisonRule.NOT_EQUAL_TO == condition)
+                && variable1 instanceof byte[] && variable2 instanceof byte[];
+    }
+
     protected boolean isEmptyOrListOfMaps(Object list)
     {
         return list instanceof List && (((List<?>) list).isEmpty() || ((List<?>) list).get(0) instanceof Map);
     }
 
     protected abstract <T extends Comparable<T>> boolean compareValues(T value1, ComparisonRule condition, T value2);
+
+    protected boolean compareBinary(byte[] bytes1, ComparisonRule condition, byte[] bytes2)
+    {
+        return (condition == ComparisonRule.EQUAL_TO) == Arrays.equals(bytes1, bytes2);
+    }
 
     protected boolean compareListsOfMaps(Object variable1, Object variable2)
     {

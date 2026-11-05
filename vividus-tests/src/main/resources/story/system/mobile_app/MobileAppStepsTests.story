@@ -219,13 +219,12 @@ When I wait until element located by `xpath(<welcomeMessageXpath>)` appears
 Scenario: [Android] Verify step: 'When I upload file `$filePath` to device'
 Meta:
     @targetPlatform android
+Given I initialize scenario variable `expected-image` with value `#{loadBinaryResource(/data/mobile-upload-image.png)}`
 When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `xpath(//android.widget.TextView[@text='Image'])`
 When I upload file `/data/mobile-upload-image.png` to device
-When I tap on element located by `accessibilityId(selectImage)`
-When I tap on element located by `xpath(//android.widget.TextView[@text='Pictures'])`
-When I tap on element located by `xpath((//android.view.ViewGroup[contains(@content-desc, "Photo taken")])[1])`
-Then number of elements found by `xpath(//android.widget.TextView[@text='228x228'])` is equal to `1`
+When I download file `/sdcard/Pictures/mobile-upload-image.png` from device and save its content to scenario variable `uploaded-image`
+Then `${expected-image}` is equal to `${uploaded-image}`
 
 
 Scenario: [iOS] Verify step: 'When I upload file `$filePath` to device' AND 'iosClassChain' locator AND 'iosNsPredicate' locator
@@ -242,11 +241,10 @@ When I wait until element located by `xpath(//XCUIElementTypeStaticText[@value='
 Scenario: [Android] Verify step: 'I upload file with name `$fileName` and data `$data` to device'
 Meta:
     @targetPlatform android
+Given I initialize scenario variable `expected-image` with value `#{loadBinaryResource(/data/file_for_upload_step.png)}`
 When I upload file with name `file_for_upload_step.png` and data `#{loadBinaryResource(/data/file_for_upload_step.png)}` to device
-When I tap on element located by `accessibilityId(selectImage)`
-When I tap on element located by `xpath(//android.widget.TextView[@text='Pictures'])`
-When I tap on element located by `xpath((//android.view.ViewGroup[contains(@content-desc, "Photo taken")])[1])`
-Then number of elements found by `xpath(//android.widget.TextView[@text='569x407'])` is equal to `1`
+When I download file `/sdcard/Pictures/file_for_upload_step.png` from device and save its content to scenario variable `uploaded-image`
+Then `${expected-image}` is equal to `${uploaded-image}`
 
 
 Scenario: [iOS] Verify step: 'I upload file with name `$fileName` and data `$data` to device'
@@ -303,8 +301,8 @@ Meta:
     @targetPlatform android
 When I delete file `/sdcard/Pictures/mobile-upload-image.png` from device
 When I delete file `/sdcard/Pictures/file_for_upload_step.png` from device
-When I tap on element located by `accessibilityId(selectImage)`
-When I wait until element located by `xpath(//android.widget.TextView[@text='Pictures'])` disappears
+Then file `/sdcard/Pictures/mobile-upload-image.png` does not exist on device
+Then file `/sdcard/Pictures/file_for_upload_step.png` does not exist on device
 
 
 Scenario: [iOS] Verify step: 'When I delete file `$filePath` from device'

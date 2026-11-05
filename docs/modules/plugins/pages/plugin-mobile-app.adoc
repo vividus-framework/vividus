@@ -475,6 +475,24 @@ include::partial$mobile-remote-file-path.adoc[]
 When I delete file `/sdcard/Pictures/avatar.png` from device
 ----
 
+==== Verify a file does not exist on the device
+
+Checks that a file cannot be downloaded from the device.
+
+[source,gherkin]
+----
+Then file `$filePath` does not exist on device
+----
+
+* `$filePath` - The path of the file to check on the device.
+
+.Verify a deleted file
+[source,gherkin]
+----
+When I delete file `/sdcard/Pictures/avatar.png` from device
+Then file `/sdcard/Pictures/avatar.png` does not exist on device
+----
+
 IMPORTANT: On iOS real device to add or delete photo or video to/from "Camera Roll" you need upload/delete photos or
 videos to/from */DCIM/100APPLE/* folder and then trigger a rebuild of the "Camera Roll" database by deleting the old
 databases. You can accomplish it by deleting following files: */PhotoData/Photos.sqlite*, */PhotoData/Photos.sqlite-shm*,
