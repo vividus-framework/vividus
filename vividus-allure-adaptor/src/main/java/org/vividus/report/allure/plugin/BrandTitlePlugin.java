@@ -22,23 +22,29 @@ import java.util.List;
 public class BrandTitlePlugin extends DynamicPlugin
 {
     private static final String CSS_TEMPLATE = """
-            .side-nav__brand span {%n\
+            .side-nav__brand-text {%n\
               display: none;%n\
             }%n\
             .side-nav__brand:after {%n\
               content: '%s';%n\
-              padding-left: 15px;%n\
-              font-size: 22px;%n\
-              font-weight: normal;%n\
+              font-size: var(--font-size-xl);%n\
+              font-weight: var(--font-weight-extra-bold);%n\
+              color: var(--color-text-primary);%n\
             }%n\
-            .side-nav__footer :last-child .side-nav__collapse .side-nav__text::after {%n\
+            .side-nav__footer:after {%n\
               content: 'Powered by Allure';%n\
-              color: #999;%n\
+              color: var(--color-text-tertiary);%n\
               display: block;%n\
               width: 100%%;%n\
               text-align: center;%n\
               padding-top: 20px;%n\
-              font-size: 11px;%n\
+              font-size: var(--font-size-xs);%n\
+            }%n\
+            .side-nav_collapsed .side-nav__brand:after {%n\
+              display: none;%n\
+            }%n\
+            .side-nav_collapsed .side-nav__footer:after {%n\
+              display: none;%n\
             }""";
 
     public BrandTitlePlugin(String brandTitle) throws IOException

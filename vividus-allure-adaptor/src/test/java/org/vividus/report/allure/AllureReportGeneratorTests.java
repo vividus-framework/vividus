@@ -31,7 +31,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -261,8 +260,7 @@ class AllureReportGeneratorTests
             fileUtils.verify(() -> FileUtils.copyInputStreamToFile(eq(folder.getInputStream()), any(File.class)),
                     never());
             fileUtils.verify(() -> FileUtils.copyInputStreamToFile(eq(resource.getInputStream()), any(File.class)));
-            fileUtils.verify(() -> FileUtils.writeStringToFile(any(File.class), eq(text), eq(StandardCharsets.UTF_8)),
-                    times(2));
+            fileUtils.verify(() -> FileUtils.writeStringToFile(any(File.class), eq(text), eq(StandardCharsets.UTF_8)));
             fileUtils.verify(() -> FileUtils
                     .copyDirectory(argThat(arg -> arg.getAbsolutePath().equals(resolveTrendsDir(reportDirectory))),
                             eq(historyDirectory.toFile())));
