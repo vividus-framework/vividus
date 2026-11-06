@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,7 @@ import io.qameta.allure.util.ResultsUtils;
 public class AllureStoryReporter extends AbstractReportControlStoryReporter
 {
     private static final String CURRENT_STEP_KEY = "allureCurrentLinkedStep";
+    private static final String SCENARIO_STAGE_STEP_KEY = "allureScenarioStageStep";
     private static final String PENDING_STEP_MARKER = "The step is not implemented";
 
     private final AllureLifecycle lifecycle;
@@ -295,6 +296,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     public void afterScenarioSteps(Stage stage, Lifecycle.ExecutionType type)
     {
         super.afterScenarioSteps(stage, type);
+        stopScenarioStageStep();
         allureRunContext.resetScenarioExecutionStage();
     }
 
@@ -437,15 +439,33 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
         if (!allureRunContext.isStepInProgress())
         {
             ScenarioExecutionStage scenarioExecutionStage = allureRunContext.getScenarioExecutionStage();
-            if (ScenarioExecutionStage.BEFORE_STEPS == scenarioExecutionStage)
+            if (scenarioExecutionStage != null && getLinkedStep().isRootItem())
             {
-                startStep("@BeforeScenario");
+                startScenarioStageStep(scenarioExecutionStage);
             }
-            else if (ScenarioExecutionStage.AFTER_STEPS == scenarioExecutionStage && getLinkedStep().isRootItem())
-            {
-                startStep("@AfterScenario");
-                updateStepStatus(Status.PASSED);
-            }
+        }
+    }
+
+    private void startScenarioStageStep(ScenarioExecutionStage scenarioExecutionStage)
+    {
+        if (ScenarioExecutionStage.BEFORE_STEPS == scenarioExecutionStage)
+        {
+            startStep("@BeforeScenario");
+        }
+        else
+        {
+            startStep("@AfterScenario");
+            updateStepStatus(Status.PASSED);
+        }
+        testContext.put(SCENARIO_STAGE_STEP_KEY, getLinkedStep());
+    }
+
+    private void stopScenarioStageStep()
+    {
+        LinkedQueueItem<String> scenarioStageStep = testContext.remove(SCENARIO_STAGE_STEP_KEY);
+        if (scenarioStageStep != null && scenarioStageStep.equals(getLinkedStep()))
+        {
+            stopStep();
         }
     }
 

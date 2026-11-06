@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,6 @@ class AllureStoryReporterTests
     private static final String SCENARIO_UID = "scenarioUid";
     private static final long THREAD_ID = Thread.currentThread().getId();
     private static final String STEP_UID = SCENARIO_UID + DASH + THREAD_ID;
-    private static final String SUB_STEP_UID = STEP_UID + DASH + THREAD_ID;
     private static final String CURRENT_STEP_KEY = "allureCurrentLinkedStep";
     private static final String STORY_NAME = "name";
     private static final String EXPECTED_SCENARIO_TEST_CASE_ID = "testScenarioTestCaseId";
@@ -148,6 +147,7 @@ class AllureStoryReporterTests
     private static final String LIFECYCLE_BEFORE_STORY = "Lifecycle: Before story";
     private static final String LIFECYCLE_AFTER_STORY = "Lifecycle: After story";
     private static final String COMMENT_STEP = "!-- Comment";
+    private static final String BEFORE_SCENARIO_STEP = "@BeforeScenario";
 
     private static final String TEST_CASE_ID = "testCaseId";
     private static final String REQUIREMENT_ID = "requirementId";
@@ -255,6 +255,31 @@ class AllureStoryReporterTests
         InOrder ordered = inOrder(allureRunContext, next);
         ordered.verify(next).afterScenarioSteps(Stage.AFTER, ExecutionType.SYSTEM);
         ordered.verify(allureRunContext).resetScenarioExecutionStage();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "BEFORE, BEFORE_STEPS, @BeforeScenario",
+            "AFTER,  AFTER_STEPS,  @AfterScenario"
+    })
+    void shouldStopScenarioStageStepInAfterScenarioSteps(Stage stage, ScenarioExecutionStage scenarioExecutionStage,
+            String scenarioStageStepName)
+    {
+        testContext.put(CURRENT_STEP_KEY, linkedQueueItem);
+        when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.BEFORE_SCENARIO);
+        mockAddLogStep(scenarioExecutionStage);
+        allureStoryReporter.afterScenarioSteps(stage, ExecutionType.SYSTEM);
+        InOrder ordered = inOrder(allureLifecycle, allureRunContext, next);
+        ordered.verify(allureLifecycle).startStep(eq(SCENARIO_UID), eq(STEP_UID),
+                argThat(s -> scenarioStageStepName.equals(s.getName())));
+        ordered.verify(allureRunContext).startStep();
+        ordered.verify(allureLifecycle).startStep(eq(STEP_UID), anyString(),
+                argThat(s -> LOG_ENTRY.equals(s.getName())));
+        ordered.verify(next).afterScenarioSteps(stage, ExecutionType.SYSTEM);
+        ordered.verify(allureLifecycle).stopStep(STEP_UID);
+        ordered.verify(allureRunContext).stopStep();
+        ordered.verify(allureRunContext).resetScenarioExecutionStage();
+        assertEquals(linkedQueueItem, testContext.get(CURRENT_STEP_KEY));
     }
 
     @ParameterizedTest
@@ -710,13 +735,13 @@ class AllureStoryReporterTests
     @Test
     void testAddLogBeforeAnyScenarioStepIsStarted()
     {
-        mockStepUid();
+        mockScenarioUid(false);
         when(allureRunContext.isStepInProgress()).thenReturn(false);
         mockAddLogStep(ScenarioExecutionStage.BEFORE_STEPS);
-        verify(allureLifecycle).startStep(eq(STEP_UID), eq(SUB_STEP_UID),
-                argThat(s -> "@BeforeScenario".equals(s.getName())));
+        verify(allureLifecycle).startStep(eq(SCENARIO_UID), eq(STEP_UID),
+                argThat(s -> BEFORE_SCENARIO_STEP.equals(s.getName())));
         verify(allureRunContext).startStep();
-        verify(allureLifecycle).startStep(eq(STEP_UID), anyString(), argThat(s -> LOG_ENTRY.equals(s.getName())));
+        verify(allureLifecycle).startStep(eq(SCENARIO_UID), anyString(), argThat(s -> LOG_ENTRY.equals(s.getName())));
         verify(allureLifecycle).stopStep(anyString());
         verifyNoMoreInteractions(allureLifecycle);
     }
@@ -732,11 +757,12 @@ class AllureStoryReporterTests
         verifyNoMoreInteractions(allureLifecycle);
     }
 
-    @Test
-    void testAddLogAfterStepNotRoot()
+    @ParameterizedTest
+    @EnumSource(ScenarioExecutionStage.class)
+    void testAddLogStepNotRoot(ScenarioExecutionStage scenarioExecutionStage)
     {
         mockStepUid();
-        mockAddLogStep(ScenarioExecutionStage.AFTER_STEPS);
+        mockAddLogStep(scenarioExecutionStage);
         verify(allureLifecycle).startStep(eq(STEP_UID), anyString(),
                 argThat(s -> LOG_ENTRY.equals(s.getName())));
         verify(allureLifecycle).stopStep(anyString());
@@ -958,14 +984,34 @@ class AllureStoryReporterTests
     @Test
     void testFailedCreateBeforeScenarioStep()
     {
+        testContext.put(CURRENT_STEP_KEY, linkedQueueItem);
+        when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.BEFORE_SCENARIO);
         when(allureRunContext.getScenarioExecutionStage()).thenReturn(ScenarioExecutionStage.BEFORE_STEPS);
-        testFailed(new UUIDExceptionWrapper());
-        verify(allureLifecycle, times(2)).updateStep(eq(STEP_UID), anyStepResultConsumer());
-        verify(allureLifecycle).startStep(eq(STEP_UID), eq(SUB_STEP_UID), any(StepResult.class));
+        Throwable throwable = new UUIDExceptionWrapper();
+        allureStoryReporter.failed(GIVEN_STEP, throwable);
+        allureStoryReporter.afterScenarioSteps(Stage.BEFORE, ExecutionType.SYSTEM);
+        verify(next).failed(GIVEN_STEP, throwable);
+        verify(allureLifecycle).startStep(eq(SCENARIO_UID), eq(STEP_UID),
+                argThat(s -> BEFORE_SCENARIO_STEP.equals(s.getName())));
         verify(allureRunContext).startStep();
+        verify(allureLifecycle, times(2)).updateStep(eq(STEP_UID), anyStepResultConsumer());
         verify(allureLifecycle).stopStep(STEP_UID);
         verify(allureRunContext).stopStep();
         verify(allureLifecycle).updateTestCase(eq(SCENARIO_UID), anyTestResultConsumer());
+        assertEquals(linkedQueueItem, testContext.get(CURRENT_STEP_KEY));
+    }
+
+    @ParameterizedTest
+    @EnumSource(ScenarioExecutionStage.class)
+    void testFailedStepNotRoot(ScenarioExecutionStage scenarioExecutionStage)
+    {
+        when(allureRunContext.getScenarioExecutionStage()).thenReturn(scenarioExecutionStage);
+        testFailed(new UUIDExceptionWrapper());
+        verify(allureRunContext, never()).startStep();
+        verify(allureLifecycle, times(2)).updateStep(eq(STEP_UID), anyStepResultConsumer());
+        verify(allureLifecycle).stopStep(STEP_UID);
+        verify(allureLifecycle).updateTestCase(eq(SCENARIO_UID), anyTestResultConsumer());
+        verifyNoMoreInteractions(allureLifecycle);
     }
 
     @Test
