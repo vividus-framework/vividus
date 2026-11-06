@@ -11,16 +11,13 @@ Meta:
     @targetPlatform ios
 Given I start mobile application with capabilities:
 |name       |value             |
-|app        |${app-url}        |
 |deviceName |iPhone 7 Simulator|
 When I ESTABLISH baseline with name `ios-low-dpr`
 When I close mobile application
 
 
-Scenario: Verify step: 'Given I start mobile application with capabilities:$capabilities'
-Given I start mobile application with capabilities:
-|name|value     |
-|app |${app-url}|
+Scenario: Verify step: 'Given I start mobile application'
+Given I start mobile application
 
 
 Scenario: Step verification: When I $actionType baseline with name `$name`
