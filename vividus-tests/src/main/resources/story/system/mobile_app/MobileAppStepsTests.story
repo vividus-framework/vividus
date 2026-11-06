@@ -8,10 +8,8 @@ Examples:
 /data/tables/system/mobile_app/locators/${target-platform}.table
 
 
-Scenario: Verify step: 'Given I start mobile application with capabilities:$capabilities'
-Given I start mobile application with capabilities:
-|name|value     |
-|app |${app-url}|
+Scenario: Verify step: 'Given I start mobile application'
+Given I start mobile application
 
 
 Scenario: VerifyStep: 'When I execute javascript `$wcript` and save result to $scopes variable `$variableName`'

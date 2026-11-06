@@ -10,10 +10,8 @@ Examples:
 /data/tables/system/mobile_app/locators/${target-platform}.table
 
 
-Scenario: Verify step: 'Given I start mobile application with capabilities:$capabilities'
-Given I start mobile application with capabilities:
-|name|value     |
-|app |${app-url}|
+Scenario: Verify step: 'Given I start mobile application'
+Given I start mobile application
 
 Scenario: Verify step: 'When I activate application with bundle identifier `$bundleId`'
 When I activate application with bundle identifier `${browser-app}`
