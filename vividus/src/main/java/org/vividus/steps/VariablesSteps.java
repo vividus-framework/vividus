@@ -73,13 +73,15 @@ public class VariablesSteps
             }
 
             @Override
-            protected boolean compareBinary(byte[] bytes1, byte[] bytes2)
+            protected boolean compareBinary(byte[] bytes1, ComparisonRule condition, byte[] bytes2)
             {
-                return super.compareBinary(bytes1, bytes2)
-                        ? softAssert.recordPassedAssertion("Binary values with lengths %d and %d are equal"
-                                .formatted(bytes1.length, bytes2.length))
-                        : softAssert.recordFailedAssertion("Binary values with lengths %d and %d are not equal"
-                                .formatted(bytes1.length, bytes2.length));
+                boolean equal = super.compareBinary(bytes1, ComparisonRule.EQUAL_TO, bytes2);
+                boolean passed = condition == ComparisonRule.EQUAL_TO ? equal : !equal;
+                String relation = equal ? "equal" : "not equal";
+                String description = "Binary values with lengths %d and %d are %s"
+                        .formatted(bytes1.length, bytes2.length, relation);
+                return passed ? softAssert.recordPassedAssertion(description)
+                        : softAssert.recordFailedAssertion(description);
             }
 
             @Override
