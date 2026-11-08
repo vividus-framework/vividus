@@ -1,0 +1,266 @@
+= Story Structure
+
+VIVIDUS uses `.story` files to define test scenarios. The story file format is based on the https://jbehave.org/[JBehave] BDD framework and follows a structured syntax.
+
+== Story File Overview
+
+A story file consists of the following optional and required elements (in order):
+
+[source,gherkin]
+----
+Description: A brief summary of the story purpose <1>
+
+Meta: <2>
+    @epic my-epic
+    @feature my-feature
+
+GivenStories: path/to/precondition.story <3>
+
+Lifecycle: <4>
+Before:
+Scope: SCENARIO
+[steps to be executed before each scenario]
+After:
+Scope: SCENARIO
+[steps to be executed after each scenario]
+
+Scenario: First scenario title <5>
+Given [precondition step]
+When [action step]
+Then [verification step]
+----
+<1> Optional description of the story
+<2> Optional metadata used for filtering and reporting
+<3> Optional prerequisite stories to run before the scenarios
+<4> Optional xref:ROOT:glossary.adoc#_lifecycle_steps[lifecycle hooks]
+<5> One or more scenarios containing test steps
+
+== Description
+
+The `Description` keyword provides a brief summary of what the story covers. It must appear at the very beginning of the story file.
+
+[source,gherkin]
+----
+Description: Integration tests for login functionality
+----
+
+== Meta
+
+`Meta` tags are key-value pairs used to categorize stories and scenarios. They can be defined at both story and scenario levels.
+
+=== Story-level Meta
+
+Story-level meta tags apply to all scenarios in the story and are placed before any scenario:
+
+[source,gherkin]
+----
+Meta:
+    @epic vividus-plugin-web-app
+    @feature login
+
+Scenario: Verify login
+Then the page title is equal to `Dashboard`
+----
+
+=== Scenario-level Meta
+
+Scenario-level meta tags apply to a specific scenario only:
+
+[source,gherkin]
+----
+Scenario: Verify login form
+Meta:
+    @requirementId 1234
+    @id login-scenario
+Given I am on page with URL `https://example.com/login`
+Then number of elements found by `id(loginForm)` is equal to `1`
+----
+
+Meta tags are commonly used with xref:configuration:tests-configuration.adoc#_meta_filtering[meta filters] to control which stories and scenarios are executed.
+
+== GivenStories
+
+`GivenStories` define prerequisite stories that are executed before the scenarios in the current story. They are useful for setting up shared preconditions.
+
+=== Story-level GivenStories
+
+Story-level `GivenStories` are declared before any scenario and apply to all scenarios in the story:
+
+[source,gherkin]
+----
+GivenStories: /story/precondition/setup-user.story
+
+Scenario: Verify user profile page
+Given I am on page with URL `${base-url}/profile`
+Then the page title contains the text `Profile`
+----
+
+=== Scenario-level GivenStories
+
+Scenario-level `GivenStories` are declared within a specific scenario:
+
+[source,gherkin]
+----
+Scenario: Verify checkout process
+GivenStories: /story/precondition/add-item-to-cart.story
+Given I am on page with URL `${base-url}/checkout`
+Then number of elements found by `id(checkoutForm)` is equal to `1`
+----
+
+=== Running specific scenarios from GivenStories
+
+It is possible to run only specific scenarios from a given story using an anchor with a meta filter:
+
+[source,gherkin]
+----
+Scenario: Verify order history
+GivenStories: /story/precondition/setup-data.story#{id:create-order}
+Given I am on page with URL `${base-url}/orders`
+Then the page title contains the text `Orders`
+----
+
+In this case, only the scenario with `@id create-order` meta tag from `setup-data.story` will be executed.
+
+=== Parameterized GivenStories
+
+`GivenStories` can be parameterized to run specific examples from the given story using row indices:
+
+[source,gherkin]
+----
+Scenario: Verify parameterized preconditions
+GivenStories: /story/precondition/setup.story#{0},
+              /story/precondition/setup.story#{2}
+Given I am on page with URL `${base-url}/dashboard`
+Then the page title contains the text `Dashboard`
+----
+
+This will run the first and third examples from the `setup.story` file.
+
+=== Multiple GivenStories
+
+Multiple `GivenStories` can be specified as a comma-separated list:
+
+[source,gherkin]
+----
+GivenStories: /story/precondition/setup-user.story,
+              /story/precondition/setup-data.story
+
+Scenario: Verify data is loaded
+Then `${user-created}` is equal to `true`
+----
+
+NOTE: If a given story fails, the subsequent scenarios in the parent story may be skipped.
+The property `bdd.configuration.skip-story-if-given-story-failed` controls this behavior.
+
+== Scenarios
+
+Scenarios are the core building blocks of a story. Each scenario contains a title and a sequence of steps:
+
+[source,gherkin]
+----
+Scenario: Verify login with valid credentials
+Given I am on page with URL `https://example.com/login`
+When I enter `user@example.com` in field located by `id(email)`
+When I enter `password123` in field located by `id(password)`
+When I click on element located by `id(loginButton)`
+Then the page title is equal to `Dashboard`
+----
+
+A story file can contain multiple scenarios, and they are executed sequentially within the story.
+
+== ExamplesTable
+
+xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] provides data-driven testing by running the same scenario or story with different sets of data. Examples can be defined at both the story level and the scenario level.
+
+=== Scenario-level Examples
+
+Scenario-level examples apply only to the specific scenario. The scenario is executed once per each row:
+
+[source,gherkin]
+----
+Scenario: Verify search functionality with different queries
+Given I am on page with URL `https://example.com/search`
+When I enter `<query>` in field located by `id(searchInput)`
+When I click on element located by `id(searchButton)`
+Then the page title contains the text `<expected-title>`
+Examples:
+|query     |expected-title  |
+|VIVIDUS   |Search: VIVIDUS |
+|BDD       |Search: BDD     |
+|automation|Search: automation|
+----
+
+=== Story-level Examples
+
+Story-level examples are defined in the `Lifecycle` section and apply to *all* scenarios in the story. The entire story (all scenarios) is executed once per each row:
+
+[source,gherkin]
+----
+Lifecycle:
+Examples:
+|environment|base-url                   |
+|dev        |https://dev.example.com    |
+|staging    |https://staging.example.com|
+
+Scenario: Verify home page on ${environment}
+Given I am on page with URL `${base-url}`
+Then the page title is equal to `Home`
+
+Scenario: Verify login page on ${environment}
+Given I am on page with URL `${base-url}/login`
+Then the page title is equal to `Login`
+----
+
+In this example, both scenarios will be executed two times: once with the `dev` data row and once with the `staging` data row.
+
+=== External Examples using Table Transformers
+
+It is possible to load examples from external files using xref:ROOT:glossary.adoc#_table_transformer[table transformers]:
+
+[source,gherkin]
+----
+Scenario: Verify user data
+Then `<name>` is not equal to ``
+Examples:
+{transformer=FROM_CSV, csvPath=/data/users.csv}
+----
+
+See xref:commons:table-transformers.adoc[Table Transformers] for a complete list of available transformers.
+
+== Complete Story Example
+
+Below is a comprehensive example demonstrating multiple elements of the story structure:
+
+[source,gherkin]
+----
+Description: Integration tests for user management
+
+Meta:
+    @epic user-management
+    @feature user-profile
+
+GivenStories: /story/precondition/setup-test-user.story
+
+Lifecycle:
+Before:
+Scope: SCENARIO
+Given I am on page with URL `${base-url}/users`
+After:
+Scope: SCENARIO
+When I click on element located by `id(logoutButton)`
+
+Scenario: Verify user list is displayed
+Then number of elements found by `css(.user-row)` is greater than `0`
+
+Scenario: Verify user search by role
+Meta:
+    @requirementId 5678
+When I enter `<role>` in field located by `id(roleFilter)`
+When I click on element located by `id(filterButton)`
+Then number of elements found by `css(.user-row)` is greater than `0`
+Examples:
+|role  |
+|admin |
+|editor|
+|viewer|
+----
