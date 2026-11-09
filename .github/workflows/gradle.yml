@@ -123,7 +123,6 @@ jobs:
          ./gradlew validateKnownIssues printSteps countSteps -x testVividusInitialization  -p vividus-tests --project-prop 'vividus.variables.iterationLimit=3' --project-prop 'vividus.variables.target-platform=ios'
 
     - name: Warm up VIVIDUS test site
-      continue-on-error: ${{ matrix.platform == 'macos-latest' }}
       run: curl -v https://vividus-test-site-a92k.onrender.com/
 
     - name: Integration tests
