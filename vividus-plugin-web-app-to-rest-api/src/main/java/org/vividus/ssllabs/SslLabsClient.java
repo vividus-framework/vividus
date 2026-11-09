@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.core5.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ public class SslLabsClient
     private static final String SSL_SCAN_FAILURE =
             "SSL scan has not been performed successfully during specified waiting period";
     private static final String ERROR_MESSAGE = "Status message '{}' received for host {}";
-    private static final String API_VERSION = "/api/v3";
+    private static final String API_VERSION = "/api/v4";
     private static final String ANALYZE_CALL = "/analyze?host=%s&fromCache=on&maxAge=1";
     private static final int SERVICE_IS_OVERLOADED = 529;
     private static final DurationBasedWaiter WAITER = new DurationBasedWaiter(Duration.ofMinutes(10),
@@ -46,12 +47,14 @@ public class SslLabsClient
     private final IHttpClient httpClient;
     private final JsonUtils jsonUtils;
     private final String sslLabHost;
+    private final String email;
 
-    public SslLabsClient(IHttpClient httpClient, JsonUtils jsonUtils, String sslLabHost)
+    public SslLabsClient(IHttpClient httpClient, JsonUtils jsonUtils, String sslLabHost, String email)
     {
         this.httpClient = httpClient;
         this.jsonUtils = jsonUtils;
         this.sslLabHost = sslLabHost;
+        this.email = email;
     }
 
     public Optional<Grade> performSslScan(String host)
@@ -89,8 +92,10 @@ public class SslLabsClient
         {
             try
             {
-                HttpResponse response = httpClient.doHttpGet(URI.create(
+                HttpGet httpGet = new HttpGet(URI.create(
                         String.format("%s%s%s", sslLabHost, API_VERSION, String.format(ANALYZE_CALL, host))));
+                httpGet.addHeader("email", email);
+                HttpResponse response = httpClient.execute(httpGet);
                 return Optional.of(response);
             }
             catch (IOException e)
