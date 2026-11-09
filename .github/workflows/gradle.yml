@@ -72,7 +72,7 @@ jobs:
         java-version: 25
 
     - name: Warm up VIVIDUS test site
-      run: curl https://vividus-test-site-a92k.onrender.com/ &
+      uses: ./.github/actions/warm-up-test-site
 
     - name: Build
       env:
@@ -121,6 +121,9 @@ jobs:
     - name: VIVIDUS tasks validation
       run: |
          ./gradlew validateKnownIssues printSteps countSteps -x testVividusInitialization  -p vividus-tests --project-prop 'vividus.variables.iterationLimit=3' --project-prop 'vividus.variables.target-platform=ios'
+
+    - name: Warm up VIVIDUS test site
+      uses: ./.github/actions/warm-up-test-site
 
     - name: Integration tests
       run: |
@@ -629,6 +632,9 @@ jobs:
           distribution: 'temurin'
           java-version: 25
 
+      - name: Warm up VIVIDUS test site
+        uses: ./.github/actions/warm-up-test-site
+
       - name: SauceLabs - Tablet - Web - System tests
         env:
           SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
@@ -838,7 +844,7 @@ jobs:
           java-version: 25
 
       - name: Warm up VIVIDUS test site
-        run: curl -v https://vividus-test-site-a92k.onrender.com/
+        uses: ./.github/actions/warm-up-test-site
 
       - name: BrowserStack - Mobile - Web - System tests
         env:
@@ -1036,7 +1042,7 @@ jobs:
           java-version: 25
 
       - name: Warm up VIVIDUS test site
-        run: curl -v https://vividus-test-site-a92k.onrender.com/
+        uses: ./.github/actions/warm-up-test-site
 
       - name: LambdaTest - Desktop - Web - System tests
         env:
@@ -1096,7 +1102,7 @@ jobs:
           java-version: 25
 
       - name: Warm up VIVIDUS test site
-        run: curl -v https://vividus-test-site-a92k.onrender.com/
+        uses: ./.github/actions/warm-up-test-site
 
       - name: Mobitru - Android - Mobile - Web - System tests
         env:

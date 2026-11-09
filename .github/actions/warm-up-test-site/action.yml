@@ -1,0 +1,7 @@
+name: Warm up VIVIDUS test site
+description: Wait for the VIVIDUS test site to become available before running tests
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: curl --fail --silent --show-error --location --retry 12 --retry-delay 10 --retry-connrefused --connect-timeout 15 --max-time 90 --retry-max-time 300 --output /dev/null https://vividus-test-site-a92k.onrender.com/
