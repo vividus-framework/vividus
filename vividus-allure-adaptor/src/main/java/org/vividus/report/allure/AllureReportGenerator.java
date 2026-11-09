@@ -325,37 +325,36 @@ public class AllureReportGenerator implements IAllureReportGenerator
 
     private void patchAllureFiles() throws IOException
     {
-        File javascriptFile = new File(reportDirectory, "app.js");
-        File cssFile = new File(reportDirectory, "styles.css");
+        File assetsDir = new File(reportDirectory, "assets");
+        File javascriptFile = findFileByPattern(assetsDir, "index-", ".js");
         String javascriptString = FileUtils.readFileToString(javascriptFile, StandardCharsets.UTF_8);
-        String cssString = FileUtils.readFileToString(cssFile, StandardCharsets.UTF_8);
 
-        String brokenStatusColor = "#d35ebf";
-        String passRateCounterScript =
-                "var t=this.statistic,e=t.passed,n=void 0===e?0:e,r=t.failed,o=void 0===r?0:r,i=t.broken,a=void "
-                        + "0===i?0:i,s=t.total;return(void 0===s?0:s)?n?\"\""
-                        + ".concat(this.formatNumber(n/(n+o+a)*100),\"%\"):\"0%\":\"???\"";
         javascriptString = javascriptString
-                // Replacing of gray colors with #d35ebf in CSS does not affect the color used to draw
-                // <rect> HTML elements used to display trends
-                .replace("#aaa", brokenStatusColor)
-                .replace("\"unknown\":\"Unknown\"", "\"unknown\":\"Known\"")
-                .replace("\"failed\",\"broken\",\"passed\",\"skipped\",\"unknown\"",
-                        "\"failed\",\"unknown\",\"passed\",\"broken\",\"skipped\"")
-                .replace(passRateCounterScript,
-                        "var t=this.statistic,e=t.passed,n=void 0===e?0:e,r=t.failed,o=void 0===r?0:r,i=t.broken,a=void"
-                                + " 0===i?0:i,c=t.unknown,d=void 0===c?0:c,s=t.total;return(void 0===s?0:s)?n?\"\""
-                                + ".concat(this.formatNumber((n+d)/(n+d+a+o)*100),\"%\"):\"0%\":\"???\"");
-        cssString = cssString
-                .replace("#ffd050", brokenStatusColor)
-                .replace("#d35ebe", "#ffd051")
-                .replace("#fffae6", "#faebf8")
-                .replace("#faebf7", "#fffae7")
-                .replace("#ffeca0", "#ecb7e3")
-                .replace("#ecb7e2", "#ffeca1");
+                .replace("unknown:`Unknown`", "unknown:`Known`")
+                .replace("`failed`,`broken`,`passed`,`skipped`,`unknown`",
+                        "`failed`,`unknown`,`passed`,`broken`,`skipped`")
+                .replace("--color-status-broken-bg:var(--palette-amber-day-darken-2)",
+                        "--color-status-broken-bg:var(--palette-violet-day-darken-1)")
+                .replace("--color-status-unknown-bg:var(--palette-violet-day-darken-1)",
+                        "--color-status-unknown-bg:var(--palette-amber-day-darken-2)")
+                .replace("--color-status-broken-bg:var(--palette-amber-night-darken-2)",
+                        "--color-status-broken-bg:var(--palette-purple-night-darken-7)")
+                .replace("--color-status-unknown-bg:var(--palette-purple-night-darken-7)",
+                        "--color-status-unknown-bg:var(--palette-amber-night-darken-2)");
 
         FileUtils.writeStringToFile(javascriptFile, javascriptString, StandardCharsets.UTF_8);
-        FileUtils.writeStringToFile(cssFile, cssString, StandardCharsets.UTF_8);
+    }
+
+    private static File findFileByPattern(File directory, String prefix, String suffix) throws IOException
+    {
+        File[] matchingFiles = directory.listFiles(
+                (dir, name) -> name.startsWith(prefix) && name.endsWith(suffix));
+        if (matchingFiles == null || matchingFiles.length == 0)
+        {
+            throw new IOException("No file matching pattern '%s*%s' found in %s".formatted(
+                    prefix, suffix, directory.getAbsolutePath()));
+        }
+        return matchingFiles[0];
     }
 
     private static void deleteDirectory(String directoryDescription, File directory)
