@@ -629,6 +629,9 @@ jobs:
           distribution: 'temurin'
           java-version: 25
 
+      - name: Warm up VIVIDUS test site
+        run: curl https://vividus-test-site-a92k.onrender.com/ &
+
       - name: SauceLabs - Tablet - Web - System tests
         env:
           SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
