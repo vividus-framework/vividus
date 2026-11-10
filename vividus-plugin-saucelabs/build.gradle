@@ -6,7 +6,7 @@ dependencies {
     implementation project(':vividus-extension-selenium')
 
     implementation(libs.guava)
-    implementation('com.saucelabs:ci-sauce:2.6')
+    implementation('com.saucelabs:ci-sauce:2.2')
 
     testImplementation platform(libs.junit.bom)
     testImplementation(libs.junit.jupiter)
