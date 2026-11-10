@@ -4,4 +4,4 @@
 [submodule "vividus-plugin-lighthouse/src/main/resources/allure-customization/webjars/vividus-lighthouse-viewer-adaptation"]
 	path = vividus-plugin-lighthouse/src/main/resources/allure-customization/webjars/vividus-lighthouse-viewer-adaptation
 	url = https://github.com/vividus-framework/vividus-lighthouse-viewer-adaptation
-	branch = viewer-8fe7e8db5c1d5b7c38758adcd42572e74288265e
+	branch = viewer-6b3b50eea9a64ff0c483d1024c32255c52fda98f

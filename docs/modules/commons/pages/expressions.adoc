@@ -55,9 +55,9 @@ Let's see the structure of the expression for the following example:
 +
 There are three of them:
 
- - int minimumLength - minimum number of symbols;
- - int maximumLength - maximum number of symbols;
- - boolean includeUppercase - `true` or `false` for Uppercase usage;
+* int minimumLength - minimum number of symbols;
+* int maximumLength - maximum number of symbols;
+* boolean includeUppercase - `true` or `false` for Uppercase usage;
 
 In this way we created an *expression* that *generates* a *password* from *5* to *10* characters length *including* uppercase letters. +
 Possible output is `51gVj5aLZY`
@@ -308,10 +308,10 @@ Generates comma-separated values based on input.
 |
 [source,CSV]
 ----
-"first_name","last_name"
-"Bob","Dylan"
-"Bob","Dylan"
-"Bob","Dylan"
+"first_name";"last_name"
+"Bob";"Dylan"
+"Bob";"Dylan"
+"Bob";"Dylan"
 ----
 |===
 
@@ -879,24 +879,7 @@ Escapes reserved characters in https://www.w3schools.com/html/html_entities.asp[
 |`M&amp;Ms`
 |===
 
-=== `escapeJSON`
-
-Escapes http://www.ietf.org/rfc/rfc4627.txt[reserved JSON characters]: converts any string into one that's properly escaped for inclusion in JSON as a value.
-
-[source, subs="+quotes"]
-----
-#{escapeJSON(*$input*)}
-----
-
-* *`$input`* - any string to be escaped
-
-.Escape JSON string
-|===
-|Expression |Result
-
-|`#{escapeJSON("abc"+"xyz")}`
-|`\"abc\"+\"xyz\"`
-|===
+include::partial$json-expressions.adoc[]
 
 === `quoteRegExp`
 
@@ -1055,6 +1038,44 @@ Finds the resource by its name and replaces the expression with the content of t
 [source,gherkin]
 ----
 Given I initialize scenario variable `my-data` with value `#{resourceToBase64(/data/body.txt)}`
+----
+
+=== `loadFile`
+
+Loads text file by its path.
+
+[source, subs="+quotes"]
+----
+#{loadFile(*$filePath*)}
+----
+
+* *`$filePath`* - the path to the file to load
+
+NOTE: The expression fails if the file does not exist or the path points to a directory.
+
+.Load data from a file on the file system
+[source,gherkin]
+----
+Given I initialize scenario variable `my-data` with value `#{loadFile(/home/user/data/body.txt)}`
+----
+
+=== `loadBinaryFile`
+
+Loads binary file by its path.
+
+[source, subs="+quotes"]
+----
+#{loadBinaryFile(*$filePath*)}
+----
+
+* *`$filePath`* - the path to the file to load
+
+NOTE: The expression fails if the file does not exist or the path points to a directory.
+
+.Load binary data from a file on the file system
+[source,gherkin]
+----
+Given I initialize scenario variable `my-data` with value `#{loadBinaryFile(/home/user/data/image.png)}`
 ----
 
 == URL parsing

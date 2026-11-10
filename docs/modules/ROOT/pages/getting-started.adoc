@@ -35,8 +35,8 @@ Windows:: `%JAVA_HOME%/bin`
 .get an existing test project from GitHub ...
 [%collapsible]
 ====
-- Navigate to the target VIVIDUS tests repository page (e.g. https://github.com/vividus-framework/vividus-sample-tests[vividus-sample-tests])
-- Create a fork of the target tests repository to be able to execute and modify scripts at your convenience:
+* Navigate to the target VIVIDUS tests repository page (e.g. https://github.com/vividus-framework/vividus-sample-tests[vividus-sample-tests])
+* Create a fork of the target tests repository to be able to execute and modify scripts at your convenience:
     * click btn:[Fork] icon at the top-right corner of the screen,
     * the pre-populated values cover the average user needs, so just click btn:[Create fork] button,
     * as the result you now have a copy of the target tests repository at your personal GitHub account.
@@ -45,10 +45,10 @@ Windows:: `%JAVA_HOME%/bin`
 .or generate your own empty project based on the starter project.
 [%collapsible]
 ====
-- Open https://github.com/vividus-framework/vividus-starter/generate[generator].
-- Provide repository name for your test project.
-- Choose option to set visibility of your repository: `Public` or `Private` (`Private` is recommended from start, it can be changed in future).
-- Click btn:[Create repository from template] button.
+* Open https://github.com/vividus-framework/vividus-starter/generate[generator].
+* Provide repository name for your test project.
+* Choose option to set visibility of your repository: `Public` or `Private` (`Private` is recommended from start, it can be changed in future).
+* Click btn:[Create repository from template] button.
 ====
 
 . Clone your newly generated repository:

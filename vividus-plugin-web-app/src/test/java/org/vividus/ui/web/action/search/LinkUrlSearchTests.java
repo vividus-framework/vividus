@@ -64,8 +64,9 @@ class LinkUrlSearchTests
     private static final String PORT = ":8080";
     private static final String SIMPLE_URL_WITH_PATH = SIMPLE_URL + SOME_URL;
     private static final String PART = "#part";
-    private static final By LINK_URL_LOCATOR_CASE_INSENSITIVE = By.xpath(".//a[normalize-space(translate(@href,"
-            + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))=\"" + URL.toLowerCase() + "\"" + "]");
+    private static final By LINK_URL_LOCATOR_CASE_INSENSITIVE = By.xpath(CaseInsensitiveXpaths.withAllAlphabets(
+            ".//a[normalize-space(translate(@href,"
+            + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))=\"" + URL.toLowerCase() + "\"" + "]"));
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementAction.class);
 

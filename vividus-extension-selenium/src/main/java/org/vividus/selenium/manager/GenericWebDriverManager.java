@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,8 +62,14 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
     {
         runInNativeContext(webDriver -> {
             consumer.accept(webDriver);
-            return webDriver;
+            return null;
         });
+    }
+
+    @Override
+    public boolean isContextSwitchedToMobileNative()
+    {
+        return isMobile() && NATIVE_APP_CONTEXT.equals(getUnwrappedDriver(SupportsContextSwitching.class).getContext());
     }
 
     private Dimension getSize(WebDriver webDriver)
@@ -73,25 +79,21 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
 
     private <R> R runInNativeContext(Function<WebDriver, R> function)
     {
-        if (isMobile())
+        SupportsContextSwitching contextSwitchingDriver = getUnwrappedDriver(SupportsContextSwitching.class);
+        String originalContext = contextSwitchingDriver.getContext();
+        if (!NATIVE_APP_CONTEXT.equals(originalContext))
         {
-            SupportsContextSwitching contextSwitchingDriver = getUnwrappedDriver(SupportsContextSwitching.class);
-            String originalContext = contextSwitchingDriver.getContext();
-            if (!NATIVE_APP_CONTEXT.equals(originalContext))
+            contextSwitchingDriver.context(NATIVE_APP_CONTEXT);
+            try
             {
-                contextSwitchingDriver.context(NATIVE_APP_CONTEXT);
-                try
-                {
-                    return function.apply(contextSwitchingDriver);
-                }
-                finally
-                {
-                    contextSwitchingDriver.context(originalContext);
-                }
+                return function.apply(contextSwitchingDriver);
             }
-            return function.apply(contextSwitchingDriver);
+            finally
+            {
+                contextSwitchingDriver.context(originalContext);
+            }
         }
-        return function.apply(webDriverProvider.get());
+        return function.apply(contextSwitchingDriver);
     }
 
     @Override

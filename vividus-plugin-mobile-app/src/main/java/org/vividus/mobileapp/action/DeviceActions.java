@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 package org.vividus.mobileapp.action;
 
 import java.util.Base64;
+import java.util.Locale;
 import java.util.Map;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.ScreenOrientation;
+import org.openqa.selenium.WebDriverException;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.session.WebDriverSessionAttributes;
 import org.vividus.selenium.session.WebDriverSessionInfo;
@@ -93,5 +95,38 @@ public class DeviceActions
     public byte[] pullFile(String deviceFilePath)
     {
         return webDriverProvider.getUnwrapped(PullsFiles.class).pullFile(deviceFilePath);
+    }
+
+    /**
+     * Checks whether a file exists on the device.
+     * @param deviceFilePath The path to a file on the device.
+     * @return {@code true} if the file exists, otherwise {@code false}.
+     */
+    public boolean fileExists(String deviceFilePath)
+    {
+        try
+        {
+            pullFile(deviceFilePath);
+            return true;
+        }
+        catch (WebDriverException e)
+        {
+            String message = e.getMessage();
+            if (message != null)
+            {
+                String lowerCaseMessage = message.toLowerCase(Locale.ROOT);
+                if (isFileNotFound(lowerCaseMessage))
+                {
+                    return false;
+                }
+            }
+            throw e;
+        }
+    }
+
+    private static boolean isFileNotFound(String message)
+    {
+        return message.contains("no such file or directory")
+                || message.contains("does not exist") && !message.contains("or is not accessible");
     }
 }

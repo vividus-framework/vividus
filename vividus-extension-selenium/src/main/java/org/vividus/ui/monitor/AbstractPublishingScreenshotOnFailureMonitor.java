@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,9 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
-import com.google.common.eventbus.EventBus;
-
 import org.vividus.context.RunContext;
 import org.vividus.report.ui.ImageCompressor;
-import org.vividus.reporter.model.Attachment;
+import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.screenshot.Screenshot;
 
@@ -34,19 +32,19 @@ public abstract class AbstractPublishingScreenshotOnFailureMonitor extends Abstr
 
     private List<String> debugModes;
 
-    protected AbstractPublishingScreenshotOnFailureMonitor(EventBus eventBus, RunContext runContext,
-            IWebDriverProvider webDriverProvider, ImageCompressor imageCompressor)
+    protected AbstractPublishingScreenshotOnFailureMonitor(RunContext runContext, IWebDriverProvider webDriverProvider,
+            IAttachmentPublisher attachmentPublisher, ImageCompressor imageCompressor)
     {
-        super(runContext, webDriverProvider, eventBus, "noScreenshotOnFailure", "Unable to take a screenshot");
+        super(runContext, webDriverProvider, attachmentPublisher, "noScreenshotOnFailure",
+                "Unable to take a screenshot");
         this.imageCompressor = imageCompressor;
     }
 
     @Override
-    protected Optional<Attachment> createAttachment()
+    protected void publishAttachment()
     {
-        return takeScreenshot("Assertion_Failure")
-                .map(screenshot -> new Attachment(imageCompressor.compress(screenshot.getData()),
-                    screenshot.getFileName()));
+        takeScreenshot("Assertion_Failure").ifPresent(screenshot -> getAttachmentPublisher()
+                .publishAttachment(imageCompressor.compress(screenshot.getData()), screenshot.getFileName()));
     }
 
     @Override

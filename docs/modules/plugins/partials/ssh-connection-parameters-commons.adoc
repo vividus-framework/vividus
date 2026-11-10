@@ -1,0 +1,54 @@
+|[subs=+quotes]`*{connection-parameters-prefix}username*`
+|<string>
+|
+|The name of the user logging in
+
+|[subs=+quotes]`*{connection-parameters-prefix}host*`
+|hostname or IP
+|
+|The remote host
+
+|[subs=+quotes]`*{connection-parameters-prefix}port*`
+|0..65535
+|
+|The remote port (The standard TCP port for SSH is 22)
+
+|`{connection-parameters-prefix}agent-forwarding`
+a|`true` +
+`false`
+|`false`
+|Enable forwarding of the authentication agent connection
+
+4+^.^|_The following {parameters-name} are used only for the password-based authentication_
+
+|[subs=+quotes]`*{connection-parameters-prefix}password*`
+|<string>
+|
+|The password
+
+4+^.^|_The following {parameters-name} are used only for the public key authentication_
+
+|[subs=+quotes]`*{connection-parameters-prefix}private-key*`
+|<string>
+|
+|The private key, must not be used along with `private-key-file` property
+
+|[subs=+quotes]`*{connection-parameters-prefix}public-key*`
+|<string>
+|
+|The public key, must not be used along with `public-key-file` property
+
+|[subs=+quotes]`*{connection-parameters-prefix}private-key-file*`
+|<string>
+|
+|The path to a private key file on the filesystem, must not be used along with `private-key` property
+
+|[subs=+quotes]`*{connection-parameters-prefix}public-key-file*`
+|<string>
+|
+|The path to a public key file on the filesystem, must not be used along with `public-key` property
+
+|`{connection-parameters-prefix}passphrase`
+|<string>
+|
+|The passphrase for the private key

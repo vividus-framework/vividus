@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package org.vividus.configuration;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -52,13 +52,16 @@ class EncryptedPropertiesProcessorTests
             "username=open password=" + ENCRYPTED_VALUE_PLACEHOLDER + " secret-key=" + ENCRYPTED_VALUE_PLACEHOLDER
                     + ", username=open password=" + DECRYPTED_VALUE + " secret-key=" + DECRYPTED_VALUE
     })
-    void shouldDecryptProperties(String encryptedValue, String decryptedValue)
+    void shouldDecryptProperties(String encryptedValue, String decryptedValue) throws IOException
     {
         var properties = new Properties();
         properties.setProperty(ENCRYPTOR_PASSWORD_PROPERTY, PASSWORD);
         properties.setProperty(PROPERTY_KEY, encryptedValue);
-        var propertiesDecrypted = new EncryptedPropertiesProcessor().processProperties(properties);
-        assertEquals(decryptedValue, propertiesDecrypted.getProperty(PROPERTY_KEY));
+        try (var processor = new EncryptedPropertiesProcessor())
+        {
+            Properties propertiesDecrypted = processor.processProperties(properties);
+            assertEquals(decryptedValue, propertiesDecrypted.getProperty(PROPERTY_KEY));
+        }
     }
 
     static List<Object> propertiesToDoNotDecrypt()
@@ -71,13 +74,15 @@ class EncryptedPropertiesProcessorTests
 
     @ParameterizedTest
     @MethodSource("propertiesToDoNotDecrypt")
-    void shouldKeepNonStringPropertiesAsIs(Object propertyValue)
+    void shouldKeepNonStringPropertiesAsIs(Object propertyValue) throws IOException
     {
-        try (var stringDecryptorMockedConstruction = mockConstruction(Decryptor.class))
+        var properties = new Properties();
+        properties.put(PROPERTY_KEY, propertyValue);
+        try (var stringDecryptorMockedConstruction = mockConstruction(Decryptor.class);
+             var processor = new EncryptedPropertiesProcessor()
+        )
         {
-            var properties = new Properties();
-            properties.put(PROPERTY_KEY, propertyValue);
-            var decryptedProperties = new EncryptedPropertiesProcessor().processProperties(properties);
+            var decryptedProperties = processor.processProperties(properties);
             assertEquals(propertyValue, decryptedProperties.get(PROPERTY_KEY));
             assertThat(stringDecryptorMockedConstruction.constructed(), hasSize(1));
             verifyNoInteractions(stringDecryptorMockedConstruction.constructed().get(0));
@@ -89,31 +94,36 @@ class EncryptedPropertiesProcessorTests
             ENCRYPTED_VALUE + ", invalid password",
             "invalidvalue, " + PASSWORD
     })
-    void shouldThrowExceptionOnInvalidValues(String value, String password)
+    void shouldThrowExceptionOnInvalidValues(String value, String password) throws IOException
     {
         var properties = new Properties();
         properties.setProperty(PROPERTY_KEY, String.format("ENC(%s)", value));
         properties.setProperty(ENCRYPTOR_PASSWORD_PROPERTY, password);
-        var processor = new EncryptedPropertiesProcessor();
-        var exception = assertThrows(DecryptionFailedException.class, () -> processor.processProperties(properties));
-        assertEquals("Unable to decrypt the value '" + value + "' from the property with the name 'key'",
-                exception.getMessage());
-        var cause = exception.getCause();
-        assertEquals(EncryptionOperationNotPossibleException.class, cause.getClass());
-        assertNull(cause.getMessage());
+        testFailedDecryption(properties,
+                "Unable to decrypt the value '" + value + "' from the property with the name 'key'",
+                EncryptionOperationNotPossibleException.class, null);
     }
 
     @Test
-    void shouldFailToProcessEncryptedPropertiesWithoutEncryptorPassword()
+    void shouldFailToProcessEncryptedPropertiesWithoutEncryptorPassword() throws IOException
     {
         var properties = new Properties();
         properties.setProperty(PROPERTY_KEY, ENCRYPTED_VALUE_PLACEHOLDER);
-        var processor = new EncryptedPropertiesProcessor();
-        var exception = assertThrows(DecryptionFailedException.class, () -> processor.processProperties(properties));
-        assertEquals("Encrypted properties are found, but no password for decryption is provided",
-                exception.getMessage());
-        var cause = exception.getCause();
-        assertEquals(NoDecryptionPasswordException.class, cause.getClass());
-        assertEquals("No password for decryption is provided", cause.getMessage());
+        testFailedDecryption(properties, "Encrypted properties are found, but no password for decryption is provided",
+                NoDecryptionPasswordException.class, "No password for decryption is provided");
+    }
+
+    private static void testFailedDecryption(Properties properties, String expectedExceptionMessage,
+            Class<?> expectedCauseClass, String expectedCauseMessage) throws IOException
+    {
+        try (var processor = new EncryptedPropertiesProcessor())
+        {
+            var exception = assertThrows(DecryptionFailedException.class,
+                    () -> processor.processProperties(properties));
+            assertEquals(expectedExceptionMessage, exception.getMessage());
+            var cause = exception.getCause();
+            assertEquals(expectedCauseClass, cause.getClass());
+            assertEquals(expectedCauseMessage, cause.getMessage());
+        }
     }
 }

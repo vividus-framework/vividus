@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.vividus.util.wait;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -27,27 +29,31 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.time.Duration;
 
+import org.apache.commons.lang3.function.FailableBooleanSupplier;
 import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.junit.jupiter.api.Test;
 import org.vividus.util.Sleeper;
 
-@SuppressWarnings("unchecked")
 class DurationBasedWaiterTests
 {
     @Test
     void shouldReturnValueAfterReachingTimeout() throws IOException
     {
-        FailableSupplier<Boolean, IOException> valueProvider = mock(FailableSupplier.class);
-        when(valueProvider.get()).thenReturn(false);
-        assertFalse(new DurationBasedWaiter(new WaitMode(Duration.ofMillis(500), 2))
-                .wait(valueProvider, Boolean::booleanValue));
+        FailableBooleanSupplier<IOException> valueProvider = mock();
+        when(valueProvider.getAsBoolean()).thenReturn(false);
+        int durationInMillis = 500;
+        var waiter = new DurationBasedWaiter(new WaitMode(Duration.ofMillis(durationInMillis), 2));
+        assertAll(
+                () -> assertFalse(waiter.wait(valueProvider)),
+                () -> assertEquals(durationInMillis, waiter.getDurationInMillis())
+        );
     }
 
     @Test
     void shouldReturnValueAfterReachingStopCondition() throws IOException
     {
-        FailableSupplier<Boolean, IOException> valueProvider = mock(FailableSupplier.class);
+        FailableSupplier<Boolean, IOException> valueProvider = mock();
         when(valueProvider.get()).thenReturn(false).thenReturn(true).thenReturn(false);
         DurationBasedWaiter waiter = new DurationBasedWaiter(new WaitMode(Duration.ofSeconds(1), 3));
         DurationBasedWaiter waiterSpy = spy(waiter);
@@ -58,7 +64,7 @@ class DurationBasedWaiterTests
     @Test
     void shouldInvokeRunnableOnceBeforeReachingStopCondition() throws IOException
     {
-        FailableRunnable<IOException> failableRunnable = mock(FailableRunnable.class);
+        FailableRunnable<IOException> failableRunnable = mock();
         new DurationBasedWaiter(Duration.ZERO, Duration.ZERO).wait(failableRunnable, Boolean.TRUE::booleanValue);
         verify(failableRunnable, times(1)).run();
     }
@@ -66,7 +72,7 @@ class DurationBasedWaiterTests
     @Test
     void shouldDecreasePollingTimeoutAccordinglyAfterLongRunningRunnable() throws IOException
     {
-        FailableSupplier<Boolean, IOException> valueProvider = mock(FailableSupplier.class);
+        FailableSupplier<Boolean, IOException> valueProvider = mock();
         when(valueProvider.get())
                 .thenAnswer(invocation -> {
                     Sleeper.sleep(Duration.ofSeconds(5));

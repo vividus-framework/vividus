@@ -245,3 +245,35 @@ Tables should have a header and at least one row with values.
 To access specific cell values, specify the row and header key. Rows indexing starts from 0.
 * `+${tableVar[0].A}+` returns the value from the first row of column A: A1.
 * `+${tableVar[1].B}+` returns the value from the second row of column B: B2.
+
+== Dynamic variables
+
+=== Running story name
+
+The variable returns the name of the currently running story (the file name of the story without the `.story` extension).
+
+[source,gherkin]
+----
+${running-story}
+----
+
+.Validate the name of the currently running story
+[source,gherkin]
+----
+Then `${running-story}` is equal to `MyStory`
+----
+
+=== Running scenario name
+
+The variable returns the title of the currently running scenario.
+
+[source,gherkin]
+----
+${running-scenario}
+----
+
+.Validate the name of the currently running scenario
+[source,gherkin]
+----
+Then `${running-scenario}` is equal to `Verify search functionality`
+----

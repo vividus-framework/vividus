@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <title>Cookies table</title>
     <link rel="stylesheet" href="../../styles.css"/>
-    <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../../webjars/bootstrap/5.3.1/css/bootstrap.min.css"/>
 </head>
 <body>
     <style>
@@ -27,7 +27,7 @@
         }
     </style>
 
-    <table class="table table-hover table-bordered table-condensed fixedHeader">
+    <table class="table table-hover table-bordered table-sm fixedHeader">
         <thead>
             <tr>
                 <th style="width: 10%">Name</th>
@@ -59,6 +59,6 @@
             </#list>
         </tbody>
     </table>
-    <script src="../../webjars/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="../../webjars/bootstrap/5.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>

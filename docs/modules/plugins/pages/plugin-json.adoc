@@ -114,6 +114,81 @@ a|
 ----
 |===
 
+==== `random()`
+
+* `random()` - returns a random element from the input array.
+* `random(n)` - returns an array of `n` random elements from the input array.
+
+.Examples of `random()` JSON path expression
+|===
+|JSON |JSON Path |Result
+
+a|
+[source,JSON]
+----
+{
+    "colors": [
+        "red",
+        "green",
+        "blue",
+        "yellow"
+    ]
+}
+----
+|`$.colors.random()`
+a|
+[source,JSON]
+----
+"blue"
+----
+
+a|
+[source,JSON]
+----
+{
+    "data": [
+        {
+            "id": 1,
+            "name": "Alice"
+        },
+        {
+            "id": 2,
+            "name": "Bob"
+        },
+        {
+            "id": 3,
+            "name": "Charlie"
+        }
+    ]
+}
+----
+|`$.data.random()`
+a|
+[source,JSON]
+----
+{
+    "id": 2,
+    "name": "Bob"
+}
+----
+
+a|
+[source,JSON]
+----
+{
+    "numbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+}
+----
+|`$.numbers.random(3)`
+a|
+[source,JSON]
+----
+[4, 7, 2]
+----
+|===
+
+NOTE: The `random()` function returns a different element on each execution, so the actual result will vary.
+
 == xref:commons:variables.adoc[Dynamic variables]
 
 === JSON context
@@ -158,12 +233,21 @@ a|The xref:ROOT:glossary.adoc#_resource[JSON resource name] or the JSON file pat
 IMPORTANT: The `path` parameter can not be used together with the `variableName` parameter.
 
 |columns
-a|The semicolon-separated list of mappings between column names and {json-paths} used to get column values.
+a|The semicolon-separated list of mappings between column names and {json-paths} used to get column values. The semicolons can optionally be followed by newlines for better readability.
 
-.Columns parameter format
+.Columns parameter format (single line)
 [source]
 ----
 columns=column_name_1=json_path_1;column_name_2=json_path_2;column_name_N=json_path_N
+----
+
+.Columns parameter format (multi-line)
+[source]
+----
+columns=
+column_name_1=json_path_1;
+column_name_2=json_path_2;
+column_name_N=json_path_N
 ----
 
 * `column_name` - The user-defined column name in the resulting table.
@@ -226,6 +310,39 @@ Then `${jsonDataTable[0].host}` is not equal to `[httpbingo.org]`
 ----
 {transformer=FROM_JSON, path=data/test.json, columns=fname=$..firstName;lname=$..lastName}
 ----
+
+== Expressions
+
+NOTE: The expression parameters marked with *bold* are mandatory.
+
+=== `formatToOneLineJson`
+
+Formats any JSON into a one line.
+
+[source, subs="+quotes"]
+----
+#{formatToOneLineJson(*$json*)}
+----
+
+* *`$json`* - The input JSON.
+
+.Format pretty JSON to one line JSON
+[source,gherkin]
+----
+Given I initialize scenario variable `oneLineJson` with value `#{formatToOneLineJson(
+{
+  "title": "Berserk",
+  "year": 1997,
+  "episodes": 25,
+  "genre": ["Action", "Adventure", "Dark Fantasy"],
+  "director": "Naohito Takahashi",
+  "studio": "OLM, Inc.",
+  "synopsis": "A mercenary named Guts joins the Band of the Hawk, leading to a tragic fate."
+}
+)}`
+----
+
+include::commons:partial$json-expressions.adoc[]
 
 == Steps
 

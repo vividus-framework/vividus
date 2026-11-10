@@ -4,7 +4,7 @@ Meta:
     @epic vividus-plugin-rest-api
 
 Scenario: Verify method DEBUG is supported; accidental space is trimmed in httpMethod enum
-When I execute HTTP DEBUG request for resource with URL `http://example.org/`
+When I execute HTTP DEBUG  request for resource with URL `https://httpbingo.org/`
 Then `${response-code}` is equal to `405`
 
 Scenario: Verify handling of plus character in URL query
@@ -42,11 +42,11 @@ Then JSON element from `${json-context}` by JSON path `$.args.key` is equal to `
 Scenario: Set HTTP cookies
 When I execute HTTP GET request for resource with relative URL `/cookies/set?vividus-cookie=vividus`
 When I execute HTTP GET request for resource with relative URL `/cookies`
-Then JSON element from `${json-context}` by JSON path `$` is equal to `{"vividus-cookie": "vividus"}`
+Then JSON element from `${json-context}` by JSON path `$` is equal to `{"cookies":{"vividus-cookie": "vividus"}}`
 
 Scenario: Verify HTTP cookies are cleared
 When I execute HTTP GET request for resource with relative URL `/cookies`
-Then JSON element from `${json-context}` by JSON path `$` is equal to `{}`
+Then JSON element from `${json-context}` by JSON path `$` is equal to `{"cookies":{}}`
 
 Scenario: Verify step: "When I save value of HTTP cookie with name $cookieName to $scopes variable $variableName"
 When I execute HTTP GET request for resource with relative URL `/cookies/set?cookieName=cookieValue`
@@ -100,7 +100,7 @@ Given multipart request:
 |file  |file-key2 |${temp-file-path}|text/plain |               |
 |string|string-key|string1          |text/plain |               |
 |binary|binary-key|raw              |text/plain |raw.txt        |
-When I execute HTTP POST request for resource with URL `https://httpbin.org/post`
+When I execute HTTP POST request for resource with URL `https://httpbingo.org/post`
 Then `${responseCode}` is equal to `200`
 Then JSON element from `${json-context}` by JSON path `$.files.file-key` is equal to `"#{loadResource(/data/file.txt)}"`
 Then JSON element from `${json-context}` by JSON path `$.files.file-key2` is equal to `"${temp-file-content}"`
@@ -162,5 +162,5 @@ Then JSON element from `${response-as-bytes}` by JSON path `$` is equal to `{
 }`ignoring extra fields
 
 Scenario: Verify using of encoded unsafe characters in user info for Basic Authentication
-When I execute HTTP GET request for resource with URL `https://username:password%5E@httpbin.org/basic-auth/username/password^`
+When I execute HTTP GET request for resource with URL `https://username:password%5E@httpbingo.org/basic-auth/username/password^`
 Then response code is equal to `200`

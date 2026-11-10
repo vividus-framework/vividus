@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,20 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Name;
 
 @ConfigurationProperties("xray-exporter")
 public class XrayExporterOptions
 {
     private Path jsonResultsDirectory;
     private String testSetKey;
-    private String testExecutionKey;
-    private String testExecutionSummary;
-    private List<Path> testExecutionAttachments;
     private boolean testCaseUpdatesEnabled;
+    @Name("test-case")
+    private TestCaseOptions testCaseOptions;
+    @Name("test-execution")
+    private TestExecutionOptions testExecutionOptions;
+    @Name("cloud")
+    private CloudOptions cloudOptions = new CloudOptions();
 
     public Path getJsonResultsDirectory()
     {
@@ -51,36 +55,6 @@ public class XrayExporterOptions
         this.testSetKey = testSetKey;
     }
 
-    public String getTestExecutionKey()
-    {
-        return testExecutionKey;
-    }
-
-    public void setTestExecutionKey(String testExecutionKey)
-    {
-        this.testExecutionKey = testExecutionKey;
-    }
-
-    public String getTestExecutionSummary()
-    {
-        return testExecutionSummary;
-    }
-
-    public void setTestExecutionSummary(String testExecutionSummary)
-    {
-        this.testExecutionSummary = testExecutionSummary;
-    }
-
-    public List<Path> getTestExecutionAttachments()
-    {
-        return testExecutionAttachments;
-    }
-
-    public void setTestExecutionAttachments(List<Path> testExecutionAttachments)
-    {
-        this.testExecutionAttachments = testExecutionAttachments;
-    }
-
     public boolean isTestCaseUpdatesEnabled()
     {
         return testCaseUpdatesEnabled;
@@ -89,5 +63,146 @@ public class XrayExporterOptions
     public void setTestCaseUpdatesEnabled(boolean testCaseUpdatesEnabled)
     {
         this.testCaseUpdatesEnabled = testCaseUpdatesEnabled;
+    }
+
+    public TestCaseOptions getTestCaseOptions()
+    {
+        return testCaseOptions;
+    }
+
+    public void setTestCaseOptions(TestCaseOptions testCaseOptions)
+    {
+        this.testCaseOptions = testCaseOptions;
+    }
+
+    public TestExecutionOptions getTestExecutionOptions()
+    {
+        return testExecutionOptions;
+    }
+
+    public void setTestExecutionOptions(TestExecutionOptions testExecutionOptions)
+    {
+        this.testExecutionOptions = testExecutionOptions;
+    }
+
+    public CloudOptions getCloudOptions()
+    {
+        return cloudOptions;
+    }
+
+    public void setCloudOptions(CloudOptions cloudOptions)
+    {
+        this.cloudOptions = cloudOptions;
+    }
+
+    public static final class CloudOptions
+    {
+        private boolean enabled;
+        private String apiBaseUrl;
+        private String clientId;
+        private String clientSecret;
+
+        public boolean isEnabled()
+        {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled)
+        {
+            this.enabled = enabled;
+        }
+
+        public String getApiBaseUrl()
+        {
+            return apiBaseUrl;
+        }
+
+        public void setApiBaseUrl(String apiBaseUrl)
+        {
+            this.apiBaseUrl = apiBaseUrl;
+        }
+
+        public String getClientId()
+        {
+            return clientId;
+        }
+
+        public void setClientId(String clientId)
+        {
+            this.clientId = clientId;
+        }
+
+        public String getClientSecret()
+        {
+            return clientSecret;
+        }
+
+        public void setClientSecret(String clientSecret)
+        {
+            this.clientSecret = clientSecret;
+        }
+    }
+
+    public static final class TestCaseOptions
+    {
+        private boolean useScenarioTitleAsDescription;
+
+        public boolean isUseScenarioTitleAsDescription()
+        {
+            return useScenarioTitleAsDescription;
+        }
+
+        public void setUseScenarioTitleAsDescription(boolean useScenarioTitleAsDescription)
+        {
+            this.useScenarioTitleAsDescription = useScenarioTitleAsDescription;
+        }
+    }
+
+    public static final class TestExecutionOptions
+    {
+        private String key;
+        private String summary;
+        private String description;
+        private List<Path> attachments;
+
+        public String getKey()
+        {
+            return key;
+        }
+
+        public void setKey(String key)
+        {
+            this.key = key;
+        }
+
+        public String getSummary()
+        {
+            return summary;
+        }
+
+        public void setSummary(String summary)
+        {
+            this.summary = summary;
+        }
+
+        public String getDescription()
+        {
+            return description;
+        }
+
+        public void setDescription(String description)
+        {
+            this.description = description;
+        }
+
+        public List<Path> getAttachments()
+        {
+            return attachments;
+        }
+
+        public void setAttachments(List<Path> attachments)
+        {
+            this.attachments = attachments;
+        }
     }
 }

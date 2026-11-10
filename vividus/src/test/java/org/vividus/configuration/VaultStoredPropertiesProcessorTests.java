@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,8 @@ import org.springframework.web.client.RestTemplate;
 @ExtendWith(TestLoggerFactoryExtension.class)
 class VaultStoredPropertiesProcessorTests
 {
+    private static final String HEADER_X_VAULT_NAMESPACE = "X-Vault-Namespace";
+
     private final TestLogger logger = TestLoggerFactory.getTestLogger(VaultStoredPropertiesProcessor.class);
 
     @ParameterizedTest
@@ -80,9 +82,9 @@ class VaultStoredPropertiesProcessorTests
     })
     void shouldRejectInvalidSecretPaths(String fullSecretPath) throws IOException
     {
+        var propertyName = "invalid-property";
         try (var processor = new VaultStoredPropertiesProcessor())
         {
-            var propertyName = "invalid-property";
             var exception = assertThrows(IllegalArgumentException.class,
                     () -> processor.processValue(propertyName, fullSecretPath));
             assertEquals(
@@ -91,6 +93,7 @@ class VaultStoredPropertiesProcessorTests
         }
     }
 
+    @SuppressWarnings("PMD.CloseResource")
     @Test
     void shouldUseNamespaceForEnterpriseVaultWhenConfigured() throws IOException
     {
@@ -154,8 +157,8 @@ class VaultStoredPropertiesProcessorTests
                         try
                         {
                             interceptor.intercept(httpRequest, new byte[0], mock(ClientHttpRequestExecution.class));
-                            assertEquals(Set.of(Map.entry("X-Vault-Namespace", List.of(vaultNamespaceValue))),
-                                    httpHeaders.entrySet());
+                            assertEquals(Set.of(HEADER_X_VAULT_NAMESPACE), httpHeaders.headerNames());
+                            assertEquals(List.of(vaultNamespaceValue), httpHeaders.get(HEADER_X_VAULT_NAMESPACE));
                             return true;
                         }
                         catch (IOException e)
@@ -181,10 +184,10 @@ class VaultStoredPropertiesProcessorTests
         try (var processor = new VaultStoredPropertiesProcessor())
         {
             processor.processProperty("old-property-name", propertyValue);
+            assertThat(logger.getLoggingEvents(), is(List.of(
+                    warn("`VAULT(...)` placeholder is deprecated and will be removed in VIVIDUS 0.7.0, "
+                            + "please use `HASHI_CORP_VAULT(...)` placeholder instead."))));
         }
-        assertThat(logger.getLoggingEvents(), is(List.of(
-                warn("`VAULT(...)` placeholder is deprecated and will be removed in VIVIDUS 0.7.0, "
-                        + "please use `HASHI_CORP_VAULT(...)` placeholder instead."))));
     }
 
     @ParameterizedTest
@@ -199,7 +202,18 @@ class VaultStoredPropertiesProcessorTests
         try (var processor = new VaultStoredPropertiesProcessor())
         {
             processor.processProperty("new-property-name", propertyValue);
+            assertEquals(0, logger.getLoggingEvents().size());
         }
-        assertEquals(0, logger.getLoggingEvents().size());
+    }
+
+    @Test
+    void shouldNotProcessPropertiesWhenProcessorDisabled() throws IOException
+    {
+        var properties = new Properties();
+        properties.put("property", "HASHI_CORP_VAULT(secret/vividus/test/username)");
+        try (var processor = new VaultStoredPropertiesProcessor())
+        {
+            assertEquals(properties, processor.processProperties(properties));
+        }
     }
 }

@@ -37,14 +37,14 @@ Then JSON element from `${actual-json}` by JSON path `$.store` is equal to `{"bo
 ----
 
 [TIP]
-As JSON do not support multi line strings if you want to improve readability use xref:commons:expressions.adoc#_escapejson[escapeJson] expression inside matcher
+As JSON do not support multi line strings if you want to improve readability use <<_escapejson,escapeJSON>> expression inside matcher
 
-.Validate entries with `escapeJson` expression
+.Validate entries with `escapeJSON` expression
 [source,gherkin]
 ----
 Then JSON element from `${actual-json}` by JSON path `$.store` is equal to `
 {
-  "book":"#{json-unit.matches:anyOf}#{escapeJson([
+  "book":"#{json-unit.matches:anyOf}#{escapeJSON([
     {
       "name":"Uladzimir Karatkevich",
       "available":true

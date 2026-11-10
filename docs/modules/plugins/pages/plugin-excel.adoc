@@ -256,6 +256,25 @@ to excel file at path `/home/collection.xslx`
 
 === Excel validations
 
+==== By sheet name and index
+ Checks that excel document has a sheet with the specified name at the provided index.
+
+[source,gherkin]
+----
+Then `$excelDocument` contains excel sheet with name `$name` at index `$index`
+----
+* `$excelDocument` - The excel document data to verify.
+* `$name` - The expected name of the sheet.
+* `$index` - The index of the sheet to verify (0-based).
+
+.Validate excel document sheet name
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://github.com/vividus-framework/vividus/raw/refs/heads/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx`
+Then response code is = `200`
+Then `${response-as-bytes}` contains excel sheet with name `Mapping` at index `0`
+----
+
 ==== By sheet name
 Checks that excel has a sheet with name *name* and specified *records*.
 
@@ -272,7 +291,7 @@ Then `$excelDocument` contains excel sheet with name `$name` and records:$record
 .Validate excel sheet by name
 [source,gherkin]
 ----
-When I execute HTTP GET request for resource with URL `https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true`
+When I execute HTTP GET request for resource with URL `https://github.com/vividus-framework/vividus/raw/refs/heads/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx`
 Then response code is = `200`
 Then `${response-as-bytes}` contains excel sheet with name `Mapping` and records:
 {valueSeparator=!}
@@ -298,7 +317,7 @@ Then `$excelDocument` contains excel sheet with index `$index` and records:$reco
 .Validate excel sheet by index
 [source,gherkin]
 ----
-When I execute HTTP GET request for resource with URL `https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true`
+When I execute HTTP GET request for resource with URL `https://github.com/vividus-framework/vividus/raw/refs/heads/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx`
 Then response code is = `200`
 Then `${response-as-bytes}` contains excel sheet with index `0` and records:
 {valueSeparator=!}
@@ -306,4 +325,22 @@ Then `${response-as-bytes}` contains excel sheet with index `0` and records:
 !A4:B5     !(Product|Price)\d+\s*  !
 !B3        !Price                  !
 !C1:C5     !                       !
+----
+
+=== Validate Excel sheet row count by index
+
+Validates that an Excel sheet at the specified index contains exactly the expected number of rows. The row count includes all rows in the sheet, including headers and empty rows.
+
+[source,gherkin]
+----
+Then `$excelDocument` contains exactly `$expectedRowCount` rows in sheet with index `$sheetIndex`
+----
+
+* `$excelDocument` - The excel document data to verify.
+* `$expectedRowCount` - The expected number of rows in the sheet.
+* `$sheetIndex` - The index of the sheet (0-based).
+
+.Validate Excel sheet row count by index
+----
+Then `${excel-data}` contains exactly `42` rows in sheet with index `0`
 ----

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.vividus.steps;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.hamcrest.Matcher;
@@ -32,7 +34,7 @@ public enum ComparisonRule
             return Matchers.lessThan(variable);
         }
     },
-    LESS_THAN_OR_EQUAL_TO("<=")
+    LESS_THAN_OR_EQUAL_TO("<=", "at most")
     {
         @Override
         public <T extends Comparable<T>> Matcher<T> getComparisonRule(T variable)
@@ -48,7 +50,7 @@ public enum ComparisonRule
             return Matchers.greaterThan(variable);
         }
     },
-    GREATER_THAN_OR_EQUAL_TO(">=")
+    GREATER_THAN_OR_EQUAL_TO(">=", "at least")
     {
         @Override
         public <T extends Comparable<T>> Matcher<T> getComparisonRule(T variable)
@@ -75,16 +77,19 @@ public enum ComparisonRule
     };
 
     private final String sign;
+    private final List<String> aliases;
 
-    ComparisonRule(String sign)
+    ComparisonRule(String sign, String... aliases)
     {
         this.sign = sign;
+        this.aliases = Arrays.asList(aliases);
     }
 
     public static ComparisonRule fromString(String sign)
     {
         return Stream.of(values())
-                     .filter(comparisonRule -> sign.equalsIgnoreCase(comparisonRule.sign))
+                     .filter(comparisonRule -> sign.equalsIgnoreCase(comparisonRule.sign)
+                             || comparisonRule.aliases.contains(sign.toLowerCase().replace('_', ' ')))
                      .findFirst()
                      .orElse(null);
     }

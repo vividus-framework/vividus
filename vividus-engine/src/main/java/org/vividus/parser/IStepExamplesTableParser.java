@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Map;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Step;
 
+@SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface IStepExamplesTableParser
 {
     List<Step> parse(ExamplesTable stepsAsTable, Map<String, String> currentExample);

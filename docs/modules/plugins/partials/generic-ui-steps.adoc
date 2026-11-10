@@ -248,6 +248,8 @@ include::plugins:partial$ui-elements-conditional-iteration-steps.adoc[]
 
 Executes passed JavaScript code on the opened page via {javascript-executor-link}.
 
+TIP: You can refer to search context element in JS code by using `arguments[0]` reference.
+
 [source,gherkin]
 ----
 When I execute javascript `$jsCode`
@@ -259,6 +261,14 @@ When I execute javascript `$jsCode`
 ----
 Given I am on page with URL `https://vividus-test-site-a92k.onrender.com`
 When I execute javascript `document.querySelector('a').click()`
+----
+
+.Change color of context element using JavaScript
+[source,gherkin]
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com`
+When I change context to element located by `tagName(body)`
+When I execute javascript `arguments[0].style.color = 'red';`
 ----
 
 === Execute JavaScript with arguments
@@ -301,6 +311,8 @@ When I execute javascript `sauce:throttleCPU` with arguments:
 
 https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html[Executes JavaScript] code and saves result into variable.
 
+TIP: You can refer to search context element in JS code by using `arguments[0]` reference.
+
 [source,gherkin]
 ----
 When I execute javascript `$jsCode` and save result to $scopes variable `$variableName`
@@ -315,4 +327,12 @@ When I execute javascript `$jsCode` and save result to $scopes variable `$variab
 Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
 When I execute javascript `return JSON.stringify(window.performance.timing)` and save result to scenario variable `timings`
 Then number of JSON elements from `${timings}` by JSON path `$.connectStart` is = 1
+----
+
+.Get size of context element using JavaScript
+[source,gherkin]
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com`
+When I change context to element located by `tagName(body)`
+When I execute javascript `return arguments[0].getBoundingClientRect();` and save result to scenario variable `clientRect`
 ----

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.screenshot.Screenshot;
 import org.vividus.ui.screenshot.ScreenshotFileNameGenerator;
@@ -98,7 +99,7 @@ class AbstractScreenshotTakerTests
     @Test
     void shouldTakeAshotScreenshot()
     {
-        WebDriver webDriver = mock(WebDriver.class, withSettings().extraInterfaces(SearchContext.class));
+        WebDriver webDriver = mock(RemoteWebDriver.class, withSettings().extraInterfaces(SearchContext.class));
         AShot ashot = mock(AShot.class);
         when(ashotFactory.create(Optional.empty())).thenReturn(ashot);
         pazone.ashot.Screenshot screenshot = mock(pazone.ashot.Screenshot.class);
@@ -113,7 +114,7 @@ class AbstractScreenshotTakerTests
     void shouldTakeAshotScreenshotWithElementAsTheContext()
     {
         WebElement webElement = mock(WebElement.class, withSettings().extraInterfaces(SearchContext.class));
-        WebDriver webDriver = mock(WebDriver.class);
+        RemoteWebDriver webDriver = mock();
         when(webDriverProvider.get()).thenReturn(webDriver);
         AShot ashot = mock(AShot.class);
         when(ashotFactory.create(Optional.empty())).thenReturn(ashot);
@@ -144,7 +145,7 @@ class AbstractScreenshotTakerTests
         when(ashotFactory.create(Optional.of(screenshotParameters))).thenReturn(ashot);
         var image = new BufferedImage(100, 100, TYPE_INT_ARGB);
         var screenshot = new pazone.ashot.Screenshot(image);
-        var webDriver = mock(WebDriver.class, withSettings().extraInterfaces(SearchContext.class));
+        var webDriver = mock(RemoteWebDriver.class, withSettings().extraInterfaces(SearchContext.class));
         when(ashot.takeScreenshot(webDriver)).thenReturn(screenshot);
         testScreenshotTaker.takeAshotScreenshot(webDriver, Optional.of(screenshotParameters));
         verify(ashot).takeScreenshot(webDriver);
@@ -157,7 +158,7 @@ class AbstractScreenshotTakerTests
     @Test
     void shouldNotCutScreenshotWhenCutsIsNotSet()
     {
-        var webDriver = mock(WebDriver.class, withSettings().extraInterfaces(SearchContext.class));
+        var webDriver = mock(RemoteWebDriver.class, withSettings().extraInterfaces(SearchContext.class));
         var ashot = mock(AShot.class);
         var screenshotParameters = Optional.of(new ScreenshotParameters());
         when(ashotFactory.create(screenshotParameters)).thenReturn(ashot);

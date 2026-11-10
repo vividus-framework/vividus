@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,9 @@ import org.vividus.util.ResourceUtils;
 @ExtendWith(MockitoExtension.class)
 class ExcelDocumentValidationStepsTests
 {
-    @Mock
-    private ISoftAssert softAssert;
+    private  static final String SHEET_MAPPING = "Mapping";
 
+    @Mock private ISoftAssert softAssert;
     private ExcelDocumentValidationSteps steps;
 
     @BeforeEach
@@ -60,8 +60,8 @@ class ExcelDocumentValidationStepsTests
                 Arguments.of((BiConsumer<ExcelDocumentValidationSteps, List<CellRecord>>)
                     (s, r) -> s.excelSheetWithIndexHasRecords(createExcelData(), 0, r)),
                 Arguments.of((BiConsumer<ExcelDocumentValidationSteps, List<CellRecord>>)
-                    (s, r) -> s.excelSheetWithNameHasRecords(createExcelData(), "Mapping", r))
-                );
+                    (s, r) -> s.excelSheetWithNameHasRecords(createExcelData(), SHEET_MAPPING, r))
+        );
     }
 
     @ParameterizedTest
@@ -89,18 +89,18 @@ class ExcelDocumentValidationStepsTests
             ));
 
         String expectFirst = "a string matching the pattern '\\d+'";
-        verifyMissmatch("C1", null, expectFirst);
-        verifyMissmatch("C2", null, expectFirst);
-        verifyMissmatch("C3", null, expectFirst);
+        verifyMismatch("C1", null, expectFirst);
+        verifyMismatch("C2", null, expectFirst);
+        verifyMismatch("C3", null, expectFirst);
 
         String expectSecond = "null";
-        verifyMissmatch("A5", "Product2", expectSecond);
-        verifyMissmatch("B5", "Price2", expectSecond);
+        verifyMismatch("A5", "Product2", expectSecond);
+        verifyMismatch("B5", "Price2", expectSecond);
 
         verifyNoMoreInteractions(softAssert);
     }
 
-    private void verifyMissmatch(String addr, String actual, String matcherAsString)
+    private void verifyMismatch(String addr, String actual, String matcherAsString)
     {
         verify(softAssert).assertThat(eq(format("Cell at address '%s'", addr)), eq(actual),
                 argThat(arg -> arg.toString().equals(matcherAsString)));
@@ -119,6 +119,38 @@ class ExcelDocumentValidationStepsTests
     {
         steps.excelSheetWithNameHasRecords(createExcelData(), "test", List.of());
         verify(softAssert).recordFailedAssertion("Sheet with the name test doesn't exist");
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void shouldContainExcelSheetWithName()
+    {
+        steps.validateExcelSheetName(createExcelData(), SHEET_MAPPING, 0);
+        verify(softAssert).assertEquals("The name of sheet at index 0", SHEET_MAPPING, SHEET_MAPPING);
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void shouldRecordFailedAssertionIfExcelSheetWithIndexDoesNotExist()
+    {
+        steps.validateExcelSheetName(createExcelData(), "AnyName", 10);
+        verify(softAssert).recordFailedAssertion("Sheet with the index 10 does not exist");
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void shouldValidateExcelSheetRowCountByIndex()
+    {
+        steps.validateExcelSheetRowCount(createExcelData(), 5, 0);
+        verify(softAssert).assertEquals("Number of rows in sheet with index 0", 5, 5);
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void shouldRecordFailedAssertionWhenSheetNotFoundByIndexForRowCount()
+    {
+        steps.validateExcelSheetRowCount(createExcelData(), 5, 3);
+        verify(softAssert).recordFailedAssertion("Sheet with the index 3 does not exist");
         verifyNoMoreInteractions(softAssert);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.browserup.bup.BrowserUpProxy;
-import com.browserup.bup.filters.RequestFilter;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
@@ -211,20 +210,20 @@ class ThreadedProxyTests
     }
 
     @Test
-    void testClearRequestFilters() throws UnknownHostException
+    void shouldClearProxyMocks() throws UnknownHostException
     {
         defaultInit();
-        threadedProxy.clearRequestFilters();
-        verify(proxy).clearRequestFilters();
+        threadedProxy.clearMocks();
+        verify(proxy).clearMocks();
     }
 
     @Test
-    void testAddRequestFilter() throws UnknownHostException
+    void shouldAddProxyMock() throws UnknownHostException
     {
         defaultInit();
-        RequestFilter requestFilter = mock(RequestFilter.class);
-        threadedProxy.addRequestFilter(requestFilter);
-        verify(proxy).addRequestFilter(requestFilter);
+        ProxyMock proxyMock = mock();
+        threadedProxy.addMock(proxyMock);
+        verify(proxy).addMock(proxyMock);
     }
 
     private void defaultInit() throws UnknownHostException

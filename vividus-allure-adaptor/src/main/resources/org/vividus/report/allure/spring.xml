@@ -61,6 +61,10 @@
         </constructor-arg>
     </bean>
 
+    <bean class="org.vividus.report.allure.plugin.CustomTabPlugin">
+        <constructor-arg index="0" value="${report.tabs.custom-tab.enabled}" />
+    </bean>
+
     <bean class="org.vividus.report.allure.plugin.BrandLogoPlugin">
         <constructor-arg value="${report.brand.logo-path}" />
     </bean>

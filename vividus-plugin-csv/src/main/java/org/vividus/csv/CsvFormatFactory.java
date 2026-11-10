@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ public class CsvFormatFactory
 
     public CsvFormatFactory(char delimiter, Character escape)
     {
-        this.csvFormat = CSVFormat.DEFAULT.builder().setDelimiter(delimiter).setEscape(escape).build();
+        this.csvFormat = CSVFormat.DEFAULT.builder().setDelimiter(delimiter).setEscape(escape).get();
     }
 
     public CSVFormat getCsvFormat()

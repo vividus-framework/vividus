@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,8 @@ public final class InetAddressUtils
      */
     public static String getDomain(String urlAsString)
     {
-        return processDomain(urlAsString, DOMAIN_PARTS_SEPARATOR::concat, Function.identity());
+        return processDomain(urlAsString, urlDomain -> DOMAIN_PARTS_SEPARATOR.concat(getTopDomain(urlDomain)),
+                Function.identity());
     }
 
     /**
@@ -50,16 +51,16 @@ public final class InetAddressUtils
      */
     public static boolean isSubDomain(String domain, String urlAsString)
     {
-        return processDomain(urlAsString, topDomain -> topDomain.endsWith(domain), host -> host.equals(domain));
+        return processDomain(urlAsString, urlDomain -> urlDomain.endsWith(domain), host -> host.equals(domain));
     }
 
     private static <T> T processDomain(String urlAsString, Function<String, T> domainProcessor,
             Function<String, T> hostProcessor)
     {
         String host = URI.create(urlAsString).getHost();
-        return host.contains(DOMAIN_PARTS_SEPARATOR) && !InetAddresses.isInetAddress(host)
-                ? domainProcessor.apply(getTopDomain(host))
-                : hostProcessor.apply(host);
+        Function<String, T> processor = host.contains(DOMAIN_PARTS_SEPARATOR) && !InetAddresses.isInetAddress(host)
+                ? domainProcessor : hostProcessor;
+        return processor.apply(host);
     }
 
     private static String getTopDomain(String host)

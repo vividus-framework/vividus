@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.visual.eyes.service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.applitools.eyes.Padding;
@@ -72,6 +73,9 @@ public class UfgVisualTestingService implements VisualTestingService<UfgApplitoo
             target = computeIgnores(target, applitoolsVisualCheck.getElementsToIgnore(), new Padding());
             target = computeIgnores(target, applitoolsVisualCheck.getAreasToIgnore(),
                     new Padding(0, PADDING, 0, PADDING));
+            target = Optional.ofNullable(applitoolsVisualCheck.getBeforeRenderScreenshotHook())
+                             .map(target::beforeRenderScreenshotHook)
+                             .orElse(target);
             eyes.check(target);
         }
         finally

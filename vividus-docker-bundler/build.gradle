@@ -4,7 +4,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath 'com.bmuschko:gradle-docker-plugin:9.4.0'
+        classpath 'com.bmuschko:gradle-docker-plugin:10.0.0'
     }
 }
 
@@ -33,13 +33,15 @@ dependencies {
     implementation (project(':vividus-plugin-applitools')) {
         exclude group: 'com.applitools', module: 'eyes-universal-core-binaries'
     }
-    implementation(group: 'com.applitools', name: 'eyes-universal-core-alpine', version: versions.eyesUniversal)
+    implementation('com.applitools:eyes-universal-core-alpine:5.75.8')
 
     implementation project(':vividus-plugin-avro')
+    implementation project(':vividus-plugin-aws-cloudwatch')
     implementation project(':vividus-plugin-aws-dynamodb')
     implementation project(':vividus-plugin-aws-kinesis')
     implementation project(':vividus-plugin-aws-lambda')
     implementation project(':vividus-plugin-aws-s3')
+    implementation project(':vividus-plugin-aws-secrets-manager')
     implementation project(':vividus-plugin-azure-cosmos-db')
     implementation project(':vividus-plugin-azure-data-factory')
     implementation project(':vividus-plugin-azure-event-grid')
@@ -64,6 +66,7 @@ dependencies {
     implementation project(':vividus-plugin-mobitru')
     implementation project(':vividus-plugin-mongodb')
     implementation project(':vividus-plugin-parquet')
+    implementation project(':vividus-plugin-redis')
     implementation project(':vividus-plugin-rest-api')
     implementation project(':vividus-plugin-saucelabs')
     implementation project(':vividus-plugin-shell')
@@ -76,16 +79,17 @@ dependencies {
     implementation project(':vividus-plugin-xml')
     implementation project(':vividus-plugin-yaml')
 
+    implementation project(':vividus-agent-newrelic')
     implementation project(':vividus-agent-reportportal')
 
-    implementation(group: 'com.mysql', name: 'mysql-connector-j', version: '9.1.0')
-    implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.8.1.jre11')
-    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.7.4')
-    implementation(group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.25.0.0')
-    implementation(group: 'com.ibm.db2.jcc', name: 'db2jcc', version: 'db2jcc4')
-    implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.46')
-    implementation(group: 'com.h2database', name: 'h2', version: '2.3.232')
-    implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.21.0')
+    implementation(libs.mysql.connector.j)
+    implementation(libs.mssql.jdbc)
+    implementation(libs.postgresql)
+    implementation(libs.oracle.ojdbc10)
+    implementation(libs.db2jcc)
+    implementation(libs.csvjdbc)
+    implementation(libs.h2)
+    implementation(libs.snowflake.jdbc)
 }
 
 tasks.register('copyRuntimeLibs', Copy) {

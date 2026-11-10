@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,24 @@
 package org.vividus.ssh;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
-import com.jcraft.jsch.AgentIdentityRepository;
 import com.jcraft.jsch.AgentProxyException;
 import com.jcraft.jsch.Channel;
-import com.jcraft.jsch.IdentityRepository;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SSHAgentConnector;
 import com.jcraft.jsch.Session;
+
+import org.vividus.ssh.factory.SshSessionFactory;
 
 public abstract class JSchExecutor<T extends Channel, R> implements CommandExecutor<R>
 {
     private static final int CONNECT_TIMEOUT = 30_000;
+
+    private final SshSessionFactory sshSessionFactory;
+
+    protected JSchExecutor(SshSessionFactory sshSessionFactory)
+    {
+        this.sshSessionFactory = sshSessionFactory;
+    }
 
     @Override
     public R execute(SshConnectionParameters sshConnectionParameters, Commands commands)
@@ -38,8 +42,8 @@ public abstract class JSchExecutor<T extends Channel, R> implements CommandExecu
     {
         try
         {
-            JSch jSch = createJSchInstance(sshConnectionParameters);
-            return execute(jSch, sshConnectionParameters, commands);
+            Session session = sshSessionFactory.createSshSession(sshConnectionParameters);
+            return execute(session, sshConnectionParameters, commands);
         }
         catch (JSchException | AgentProxyException e)
         {
@@ -47,16 +51,11 @@ public abstract class JSchExecutor<T extends Channel, R> implements CommandExecu
         }
     }
 
-    private R execute(JSch jSch, SshConnectionParameters sshConnectionParameters, Commands commands)
+    private R execute(Session session, SshConnectionParameters sshConnectionParameters, Commands commands)
             throws JSchException, CommandExecutionException
     {
-        Session session = jSch.getSession(sshConnectionParameters.getUsername(),
-                sshConnectionParameters.getHost(), sshConnectionParameters.getPort());
         try
         {
-            session.setConfig("StrictHostKeyChecking", "no");
-            session.setConfig("PreferredAuthentications", "publickey,password");
-            session.setPassword(sshConnectionParameters.getPassword());
             session.connect(CONNECT_TIMEOUT);
             @SuppressWarnings("unchecked")
             T channel = (T) session.openChannel(getChannelType());
@@ -87,27 +86,4 @@ public abstract class JSchExecutor<T extends Channel, R> implements CommandExecu
 
     protected abstract R executeCommand(SshConnectionParameters serverConfig, Commands commands, T channel)
             throws JSchException, IOException;
-
-    private JSch createJSchInstance(SshConnectionParameters sshConnectionParameters)
-            throws AgentProxyException, JSchException
-    {
-        JSch jSch = new JSch();
-        if (sshConnectionParameters.isAgentForwarding())
-        {
-            IdentityRepository identityRepository = new AgentIdentityRepository(new SSHAgentConnector());
-            jSch.setIdentityRepository(identityRepository);
-        }
-        else if (sshConnectionParameters.getPrivateKey() != null && sshConnectionParameters.getPublicKey() != null)
-        {
-            String passphrase = sshConnectionParameters.getPassphrase();
-            jSch.addIdentity("default", getBytes(sshConnectionParameters.getPrivateKey()),
-                    getBytes(sshConnectionParameters.getPublicKey()), passphrase != null ? getBytes(passphrase) : null);
-        }
-        return jSch;
-    }
-
-    private byte[] getBytes(String str)
-    {
-        return str.getBytes(StandardCharsets.UTF_8);
-    }
 }

@@ -190,6 +190,12 @@ class BatchStorageTests
     }
 
     @Test
+    void shouldReturnBatchIndexByBatchKey()
+    {
+        assertEquals(42, BatchStorage.getBatchIndex("batch-42"));
+    }
+
+    @Test
     void shouldWarnAboutPlainSecondsUsage() throws IOException
     {
         var propertyParser = mock(PropertyParser.class);

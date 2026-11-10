@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,11 +100,11 @@ class DatabaseTableTransformerTests
     }
 
     @ParameterizedTest
-    @CsvSource({
-            "'',                        'dbKey' is not set in ExamplesTable properties",
-            "'dbKey= ',                 ExamplesTable property 'dbKey' is blank",
-            "'dbKey=testdb',            'sqlQuery' is not set in ExamplesTable properties",
-            "'dbKey=testdb,sqlQuery= ', ExamplesTable property 'sqlQuery' is blank"
+    @CsvSource(quoteCharacter = '|', value = {
+            "||,                        'dbKey' is not set in ExamplesTable properties",
+            "|dbKey= |,                 ExamplesTable property 'dbKey' is blank",
+            "|dbKey=testdb|,            'sqlQuery' is not set in ExamplesTable properties",
+            "|dbKey=testdb,sqlQuery= |, ExamplesTable property 'sqlQuery' is blank"
     })
     void shouldThrowErrorIfInvalidParametersAreProvided(String propertiesAsString, String errorMessage)
     {

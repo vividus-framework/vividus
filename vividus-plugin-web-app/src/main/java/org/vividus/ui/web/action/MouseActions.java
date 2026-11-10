@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,15 +53,23 @@ public class MouseActions implements IMouseActions
         if (element != null)
         {
             WebDriver webDriver = getWebDriver();
-            WebElement page = webDriver.findElement(BODY_XPATH_LOCATOR);
-            try
+            if (webDriverManager.isContextSwitchedToMobileNative())
             {
                 element.click();
-                afterClick(clickResult, page, webDriver);
+                clickResult.setClicked(true);
             }
-            catch (WebDriverException webDriverException)
+            else
             {
-                tryToWorkaroundException(element, clickResult, webDriver, page, webDriverException);
+                WebElement page = webDriver.findElement(BODY_XPATH_LOCATOR);
+                try
+                {
+                    element.click();
+                    afterClick(clickResult, page, webDriver);
+                }
+                catch (WebDriverException webDriverException)
+                {
+                    tryToWorkaroundException(element, clickResult, webDriver, page, webDriverException);
+                }
             }
         }
         return clickResult;

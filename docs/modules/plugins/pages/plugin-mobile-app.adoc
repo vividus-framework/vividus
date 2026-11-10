@@ -127,6 +127,24 @@ a|Defines whether the tests run on real device
 
 !===
 
+|`mobile-environment.ios.use-workaround-to-hide-keyboard`
+ a|`true` +
+ `false`
+
+ |`true`
+
+ a|
+Controls whether an iOS-specific workaround to hide the on-screen keyboard is applied. When enabled (default), VIVIDUS
+attempts to dismiss the keyboard by tapping the last button on the iOS keyboard when it is shown.
+For `XCUIElementTypeTextView` on real devices the workaround is not applied; tap outside the text view to close the
+keyboard. Disable the workaround (`false`) to rely solely on the underlying Appium behavior.
+
+[CAUTION]
+====
+This workaround may slow down test execution.
+====
+
+
 |`mobile-environment.device.folder-for-file-upload`
 |`string`
 
@@ -174,9 +192,9 @@ The profile can be enabled by adding `{android-profile}` to `configuration.profi
 
 The local profiles can be used in conjunction with:
 
- - `{android-profile}`,
- - `{ios-profile}`,
- - `{tvos-profile}`.
+* `{android-profile}`,
+* `{ios-profile}`,
+* `{tvos-profile}`.
 
 ==== `mobile_app/local`
 
@@ -457,6 +475,24 @@ include::partial$mobile-remote-file-path.adoc[]
 When I delete file `/sdcard/Pictures/avatar.png` from device
 ----
 
+==== Verify a file does not exist on the device
+
+Checks that a file cannot be downloaded from the device.
+
+[source,gherkin]
+----
+Then file `$filePath` does not exist on device
+----
+
+* `$filePath` - The path of the file to check on the device.
+
+.Verify a deleted file
+[source,gherkin]
+----
+When I delete file `/sdcard/Pictures/avatar.png` from device
+Then file `/sdcard/Pictures/avatar.png` does not exist on device
+----
+
 IMPORTANT: On iOS real device to add or delete photo or video to/from "Camera Roll" you need upload/delete photos or
 videos to/from */DCIM/100APPLE/* folder and then trigger a rebuild of the "Camera Roll" database by deleting the old
 databases. You can accomplish it by deleting following files: */PhotoData/Photos.sqlite*, */PhotoData/Photos.sqlite-shm*,
@@ -466,9 +502,6 @@ IMPORTANT: On iOS simulator to delete photo or video from "Camera Roll" you need
 */Media/DCIM/100APPLE/* and then trigger a rebuild of the "Camera Roll" database by deleting the old databases. You can
 accomplish it by deleting following files: */Media/PhotoData/Photos.sqlite*, */Media/PhotoData/Photos.sqlite-shm*,
 */Media/PhotoData/Photos.sqlite-wal*. And then restart simulator.
-
-:web-view-info: (see http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information)
-
 
 ==== Download the file from the device
 
@@ -506,10 +539,11 @@ Navigates back to the previous view.
 When I navigate back
 ----
 
+:hybrid-apps-info: (see https://appium.github.io/appium-xcuitest-driver/latest/guides/hybrid/[Automating hybrid iOS apps] and https://github.com/appium/appium-uiautomator2-driver?tab=readme-ov-file#hybrid-mode[Automating hybrid Android apps] for more information)
 
 === Switch to Web view by name
 
-Switches context to a web view with name that matches the rule {web-view-info}. Also, Appium capabilities for https://appium.github.io/appium-xcuitest-driver/5.6/capabilities/#web-context[iOS] and https://github.com/appium/appium-uiautomator2-driver#web-context[Android] are available for the fine-tuning configuration.
+Switches context to a web view with name that matches the rule {hybrid-apps-info}. Also, Appium capabilities for https://appium.github.io/appium-xcuitest-driver/latest/reference/capabilities/#web-context[iOS] and https://github.com/appium/appium-uiautomator2-driver#web-context[Android] are available for the fine-tuning configuration.
 
 [source,gherkin]
 ----
@@ -528,9 +562,9 @@ Then number of elements found by `xpath(html)` is equal to `1`
 ----
 
 
-=== Switch to native context
+=== Switch to mobile native context
 
-Switches context to a mobile native context. See http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information.
+Switches context to a mobile native context {hybrid-apps-info}.
 
 [source,gherkin]
 ----
@@ -712,7 +746,9 @@ The atomic actions performed are:
 For `iOS` real devices the hide keyboard action works only for
 `XCUIElementTypeTextField` elements and skipped for `XCUIElementTypeTextView`
 elements, in case of `XCUIElementTypeTextView` element tap outside the text view
-is performed to close the keyboard.
+is performed to close the keyboard. The behavior is controlled by
+`mobile-environment.ios.use-workaround-to-hide-keyboard` property;
+set it to `false` to rely solely on the underlying Appium behavior.
 
 [source,gherkin]
 ----
@@ -761,7 +797,9 @@ The atomic actions performed are:
 For `iOS` real devices the hide keyboard action works only for
 `XCUIElementTypeTextField` elements and skipped for `XCUIElementTypeTextView`
 elements, in case of `XCUIElementTypeTextView` element tap outside the text view
-is performed to close the keyboard.
+is performed to close the keyboard. The behavior is controlled by
+`mobile-environment.ios.use-workaround-to-hide-keyboard` property;
+set it to `false` to rely solely on the underlying Appium behavior.
 
 [source,gherkin]
 ----
@@ -1029,8 +1067,8 @@ When I start recording `$instrument` metrics
 When I stop recording `$instrument` metrics and save results to file `$path`
 ----
 
-. `$instrument` - The instrument of Xcode Instruments utility. Some useful instruments: Time Profiler, Leaks, File Activity, etc.
-. `$path` - The path to the file to save an archive with collected data.
+* `$instrument` - The instrument of Xcode Instruments utility. Some useful instruments: Time Profiler, Leaks, File Activity, etc.
+* `$path` - The path to the file to save an archive with collected data.
 
 .Perform profiling during application usage
 [source,gherkin]

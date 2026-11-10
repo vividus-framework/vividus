@@ -6,10 +6,10 @@ could be optionally specified using the property `azure.environment`
 
 The supported environments are only:
 
-- `AZURE`
-- `AZURE_CHINA`
-- `AZURE_GERMANY`
-- `AZURE_US_GOVERNMENT`
+* `AZURE`
+* `AZURE_CHINA`
+* `AZURE_GERMANY`
+* `AZURE_US_GOVERNMENT`
 
 === Azure subscription selection
 

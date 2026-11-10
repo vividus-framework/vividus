@@ -50,7 +50,7 @@ line into the `build.gradle` file of the tests project:
 Make sure to put the configuration below the line configuring the project tasks, namely:
 [source,gradle]
 ----
-apply from: "$\{buildSystemPath\}/vividus-test-project.gradle"
+apply from: "${buildSystemPath}/vividus-test-project.gradle"
 ...
 ----
 ====

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,6 @@ class LocatorPatternTests
     void shouldCountNumberOfParameters(String pattern, int expectedParametersCount, String[] args, String expectedValue)
     {
         assertEquals(expectedParametersCount, new LocatorPattern("xpath", pattern).getParametersQuantity());
-        assertEquals(expectedValue, String.format(pattern, args));
+        assertEquals(expectedValue, String.format(pattern, (Object[]) args));
     }
 }

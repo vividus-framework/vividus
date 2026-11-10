@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,7 +153,7 @@ class GenericWebDriverFactoryTests
             }
         };
         var testWebDriverFactory = new GenericWebDriverFactory(remoteWebDriverFactory, propertyParser, jsonUtils,
-                Optional.of(Set.of(adjuster)));
+                Optional.of(Set.of(adjuster)), Optional.empty());
         var remoteWebDriver = mock(RemoteWebDriver.class,
                 withSettings().extraInterfaces(HasCapabilities.class));
         Capabilities capabilities = new DesiredCapabilities(Map.of(KEY1, ARG, KEY2, ARG, KEY3, ARG, KEY4, CONFIGURER));
@@ -175,8 +175,18 @@ class GenericWebDriverFactoryTests
         var desiredCapabilitiesAdjuster = mock(DesiredCapabilitiesAdjuster.class);
         var capabilities = mock(DesiredCapabilities.class);
         var testWebDriverFactory = new GenericWebDriverFactory(remoteWebDriverFactory, propertyParser, jsonUtils,
-                Optional.of(Set.of(desiredCapabilitiesAdjuster)));
+                Optional.of(Set.of(desiredCapabilitiesAdjuster)), Optional.empty());
         testWebDriverFactory.updateDesiredCapabilities(capabilities);
         verify(desiredCapabilitiesAdjuster).adjust(capabilities);
+    }
+
+    @Test
+    void shouldValidateProperties()
+    {
+        SeleniumConfigurationValidator propertyValidator = mock();
+        var testWebDriverFactory = new GenericWebDriverFactory(remoteWebDriverFactory, propertyParser, jsonUtils,
+                Optional.empty(), Optional.of(propertyValidator));
+        testWebDriverFactory.validateConfigurationProperties();
+        verify(propertyValidator).validate();
     }
 }

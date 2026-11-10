@@ -20,15 +20,67 @@ could be optionally specified using global property `azure.environment`
 
 The supported environments are only:
 
-- `AZURE`
-- `AZURE_CHINA`
-- `AZURE_GERMANY`
-- `AZURE_US_GOVERNMENT`
+* `AZURE`
+* `AZURE_CHINA`
+* `AZURE_GERMANY`
+* `AZURE_US_GOVERNMENT`
 
 ==== Azure subscription selection
 
 Azure subscription must be configured via `AZURE_SUBSCRIPTION_ID` environment variable.
 
+
+=== Secrets Management Tools
+
+==== https://learn.microsoft.com/en-us/azure/key-vault/[Azure Key Vault]
+
+===== Configuration
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="1,1,3", options="header"]
+|===
+|Property Name
+|Default
+|Description
+
+|[subs=+quotes]`*secrets-manager.azure-key-vault.name*`
+|
+|Azure Key Vault Name with secret values for properties
+
+|[subs=+quotes]`secrets-manager.azure-key-vault.api-version`
+|`7.6`
+|Client API version
+
+|[subs=+quotes]`secrets-manager.azure-key-vault.enabled`
+|`true`
+|Defines whether VIVIDUS retrieves secrets from Azure Key Vault. If set to `false`, values from Azure Key Vault will not be retrieved. Can be used when access to Azure Key Vault is restricted, e.g. for local debugging, to override only the required properties instead of all processed ones.
+
+|===
+
+===== How to get Azure Key Vault name
+. Find the required Key Vault in the list.
++
+image::azure_key_vaults_list.png[Azure Key Vaults List]
+
+. Put particular Azure Key Vault name as value for property `secrets-manager.azure-key-vault.name`
++
+[source,properties]
+----
+secrets-manager.azure-key-vault.name=testautokveus01
+----
+
+===== How to refer Azure Key Vault secrets
+. Find the required secret in Azure Key Vault.
++
+image::azure_key_vault.png[Secrets in Azure Key Vault]
+
+. Put the name to properties using the case-sensitive wrapping `AZURE_KEY_VAULT(...)`
++
+[source,properties]
+----
+db.connection.test.username=AZURE_KEY_VAULT(dev-mysql-analytics-user)
+----
 
 === Steps
 

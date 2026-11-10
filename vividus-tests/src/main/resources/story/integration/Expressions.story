@@ -205,6 +205,16 @@ Given I initialize scenario variable `word` with value `"cowabunga"`
 Given I initialize scenario variable `json` with value `{"question":"what is #{escapeJson(${word})}?"}`
 Then `${json}` is equal to `{"question":"what is \"cowabunga\"?"}`
 
+Scenario: Should unescape nested JSON
+Given I initialize scenario variable `word` with value `"cowabunga"`
+Given I initialize scenario variable `onceEscaped` with value `#{escapeJSON(${word})}`
+Given I initialize scenario variable `twiceEscaped` with value `#{escapeJSON(${onceEscaped})}`
+Given I initialize scenario variable `thriceEscaped` with value `#{escapeJSON(${twiceEscaped})}`
+Then `#{unescapeJSON(${onceEscaped})}` is equal to `${word}`
+Then `#{unescapeJSON(${twiceEscaped})}` is equal to `${onceEscaped}`
+Then `#{unescapeJSON(#{unescapeJSON(${twiceEscaped})})}` is equal to `${word}`
+Then `#{unescapeJSON(#{unescapeJSON(#{unescapeJSON(${thriceEscaped})})})}` is equal to `${word}`
+
 Scenario: Should evaluate expression in multiline string
 Meta:
     @issueId 3501

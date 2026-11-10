@@ -46,7 +46,7 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junitpioneer.jupiter.ClearSystemProperty;
+import org.junit.jupiter.api.util.ClearSystemProperty;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;

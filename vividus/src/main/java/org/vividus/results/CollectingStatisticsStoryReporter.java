@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import com.google.common.eventbus.Subscribe;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
+import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.steps.StepCollector.Stage;
 import org.jbehave.core.steps.StepCreator.PendingStep;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
@@ -60,7 +61,7 @@ import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.testcontext.TestContext;
 import org.vividus.util.json.JsonUtils;
 
-@SuppressWarnings({ "PMD.GodClass", "PMD.ExcessiveImports" })
+@SuppressWarnings("PMD.ExcessiveImports")
 public class CollectingStatisticsStoryReporter extends AbstractReportControlStoryReporter implements ResultsProvider
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(CollectingStatisticsStoryReporter.class);
@@ -201,6 +202,23 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
         {
             testContext.remove(NodeContext.class);
         }
+    }
+
+    @Override
+    public void storyCancelled(Story story, StoryDuration storyDuration)
+    {
+        NodeContext nodeContext = context();
+        Node currentNode = nodeContext.getTail();
+        while (currentNode.getType() != ExecutableEntity.STORY
+                && currentNode.getType() != ExecutableEntity.GIVEN_STORY)
+        {
+            updateNodeStatus(currentNode, Status.BROKEN);
+            endNode();
+            currentNode = nodeContext.getTail();
+        }
+        updateNodeStatus(currentNode, Status.BROKEN);
+        changeStatus(Status.BROKEN);
+        super.storyCancelled(story, storyDuration);
     }
 
     @Override

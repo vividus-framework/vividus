@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,17 @@ class VariableTestContextTests
         assertEquals(VALUE, variables.getVariable(VARIABLE_KEY));
         assertThat(logger.getLoggingEvents(), equalTo(
                 List.of(info(SAVE_MESSAGE_TEMPLATE, VALUE, STEP, VARIABLE_KEY))));
+    }
+
+    @Test
+    void shouldPutVariableSilentlyWhenVerboseLoggingDisabled()
+    {
+        Variables variables = new Variables(Map.of());
+        when(variablesFactory.createVariables()).thenReturn(variables);
+        variableTestContext.initStepVariables();
+        variableTestContext.putVariable(Set.of(VariableScope.STEP), VARIABLE_KEY, VALUE, false);
+        assertEquals(VALUE, variables.getVariable(VARIABLE_KEY));
+        assertThat(logger.getLoggingEvents(), equalTo(List.of()));
     }
 
     @Test

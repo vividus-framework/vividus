@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.TextUtils;
+import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.testcontext.TestContext;
 import org.vividus.ui.ViewportSizeProvider;
 import org.vividus.ui.action.JavascriptActions;
 import org.vividus.ui.web.event.DeviceMetricsOverrideEvent;
@@ -46,17 +48,16 @@ public class WebJavascriptActions extends JavascriptActions
     private static final String SCROLL_TO_END_OF_PAGE = loadScript("scroll-to-end-of-page.js");
 
     private final IWebDriverManager webDriverManager;
-
-    private final ThreadLocal<Double> devicePixelRatio = ThreadLocal.withInitial(
-            () -> ((Number) executeScript("return window.devicePixelRatio;")).doubleValue()
-    );
+    private final TestContext testContext;
 
     private int stickyHeaderSizePercentage;
 
-    public WebJavascriptActions(IWebDriverProvider webDriverProvider, IWebDriverManager webDriverManager)
+    public WebJavascriptActions(IWebDriverProvider webDriverProvider, IWebDriverManager webDriverManager,
+            TestContext testContext)
     {
         super(webDriverProvider);
         this.webDriverManager = webDriverManager;
+        this.testContext = testContext;
     }
 
     /**
@@ -198,7 +199,8 @@ public class WebJavascriptActions extends JavascriptActions
 
     public double getDevicePixelRatio()
     {
-        return devicePixelRatio.get();
+        return testContext.get(DevicePixelRatio.class,
+                () -> ((Number) executeScript("return window.devicePixelRatio;")).doubleValue());
     }
 
     public Map<String, String> getElementAttributes(WebElement webElement)
@@ -239,11 +241,27 @@ public class WebJavascriptActions extends JavascriptActions
     @Subscribe
     public void onDeviceMetricsOverride(DeviceMetricsOverrideEvent event)
     {
-        devicePixelRatio.remove();
+        clearDevicePixelRatio();
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe
+    public void onAfterWebDriverQuitEvent(AfterWebDriverQuitEvent event)
+    {
+        clearDevicePixelRatio();
+    }
+
+    private void clearDevicePixelRatio()
+    {
+        testContext.remove(DevicePixelRatio.class);
     }
 
     public void setStickyHeaderSizePercentage(int stickyHeaderSizePercentage)
     {
         this.stickyHeaderSizePercentage = stickyHeaderSizePercentage;
+    }
+
+    private record DevicePixelRatio()
+    {
     }
 }

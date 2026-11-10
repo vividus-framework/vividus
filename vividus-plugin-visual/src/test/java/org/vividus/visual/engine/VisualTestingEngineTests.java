@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -235,13 +235,13 @@ class VisualTestingEngineTests
     }
 
     @Test
-    void shouldOverrideBaselineDuringComparisonAction() throws IOException
+    void shouldNotOverrideBaselineDuringPassedComparisonAction() throws IOException
     {
         initObjectUnderTest();
         visualTestingEngine.setOverrideBaselines(true);
         when(baselineStorage.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
-        var finalImage = mockGetCheckpointScreenshot(visualCheck, BASELINE);
+        mockGetCheckpointScreenshot(visualCheck, BASELINE);
         VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
         Assertions.assertAll(
                 () -> assertEquals(BASELINE_BASE64, toBase64(checkResult.getBaseline())),
@@ -250,8 +250,28 @@ class VisualTestingEngineTests
                 () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
                 () -> assertEquals(BASELINE_BASE64, toBase64(checkResult.getDiff())),
                 () -> assertTrue(checkResult.isPassed()));
-        verify(baselineStorage).saveBaseline(argThat(s -> finalImage.equals(s.getImage())), eq(BASELINE));
+        verify(baselineStorage, never()).saveBaseline(any(), any());
         assertThat(testLogger.getLoggingEvents(), is(List.of(buildExpectedLoggingEvent(true, ACCEPTABLE, 0.0, 0))));
+    }
+
+    @Test
+    void shouldOverrideBaselineDuringComparisonActionIfBaselineIsMissed() throws IOException
+    {
+        initObjectUnderTest();
+        visualTestingEngine.setOverrideBaselines(true);
+        when(baselineStorage.getBaseline(BASELINE)).thenReturn(Optional.empty());
+        VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
+        var finalImage = mockGetCheckpointScreenshot(visualCheck);
+        VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
+        Assertions.assertAll(
+                () -> assertNull(checkResult.getBaseline()),
+                () -> assertEquals(BASELINE, checkResult.getBaselineName()),
+                () -> assertEquals(CHECKPOINT_BASE64, toBase64(checkResult.getCheckpoint())),
+                () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
+                () -> assertNull(checkResult.getDiff()),
+                () -> assertFalse(checkResult.isPassed()));
+        verify(baselineStorage).saveDelta(argThat(s -> finalImage.equals(s.getImage())), eq(BASELINE));
+        assertThat(testLogger.getLoggingEvents(), is(empty()));
     }
 
     @Test

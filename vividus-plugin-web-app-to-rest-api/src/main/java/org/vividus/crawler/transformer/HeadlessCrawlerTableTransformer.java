@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +34,7 @@ import org.vividus.crawler.LinkCrawlerFactory;
 import org.vividus.util.UriUtils;
 
 import edu.uci.ics.crawler4j.crawler.CrawlController;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-@SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
 public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTransformer
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCrawlerTableTransformer.class);
@@ -77,9 +76,9 @@ public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTr
         {
             return;
         }
-        String mainApplicationPagePath = StringUtils.appendIfMissing(mainApplicationPage.getPath(), FORWARD_SLASH);
+        String mainApplicationPagePath = Strings.CS.appendIfMissing(mainApplicationPage.getPath(), FORWARD_SLASH);
         this.seedRelativeUrls.stream()
-                .map(seedRelativeUrl -> StringUtils.removeStart(seedRelativeUrl, FORWARD_SLASH))
+                .map(seedRelativeUrl -> Strings.CS.removeStart(seedRelativeUrl, FORWARD_SLASH))
                 .map(mainApplicationPagePath::concat)
                 .map(relativeUrl -> UriUtils.buildNewUrl(mainApplicationPage, relativeUrl))
                 .map(URI::toString)

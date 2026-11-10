@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.applitools.eyes.Padding;
@@ -93,7 +94,8 @@ class UfgVisualTestingServiceTests
     @Test
     void shouldRunForWindow()
     {
-        ApplitoolsVisualCheck applitoolsVisualCheck = createCheck();
+        String hook = "hook";
+        ApplitoolsVisualCheck applitoolsVisualCheck = createCheck(hook);
         applitoolsVisualCheck.setSearchContext(remoteWebDriver);
         when(eyesFactory.createEyes(applitoolsVisualCheck)).thenReturn(eyes);
         when(eyes.getTestResults()).thenReturn(List.of(testResults));
@@ -109,6 +111,7 @@ class UfgVisualTestingServiceTests
         assertNull(checkSettings.getTargetPathLocator());
         assertNull(checkSettings.getTargetRegion());
         validateIgnoreRegions(checkSettings.getIgnoreRegions());
+        assertEquals(Map.of("beforeCaptureScreenshot", hook), checkSettings.getScriptHooks());
     }
 
     @Test
@@ -132,6 +135,7 @@ class UfgVisualTestingServiceTests
         ElementReference elementReference = (ElementReference) targetPathLocator.getValue();
         assertEquals(webElement, elementReference.getElement());
         validateIgnoreRegions(checkSettings.getIgnoreRegions());
+        assertTrue(checkSettings.getScriptHooks().isEmpty());
     }
 
     private void validateIgnoreRegions(GetRegion[] ignoreRegions)
@@ -156,11 +160,17 @@ class UfgVisualTestingServiceTests
 
     private ApplitoolsVisualCheck createCheck()
     {
+        return createCheck(null);
+    }
+
+    private ApplitoolsVisualCheck createCheck(String hook)
+    {
         ApplitoolsVisualCheck applitoolsVisualCheck = new ApplitoolsVisualCheck(BATCH_NAME, BASELINE_NAME,
                 VisualActionType.ESTABLISH);
         applitoolsVisualCheck.setElementsToIgnore(Set.of(elementLocator));
         applitoolsVisualCheck.setAreasToIgnore(Set.of(areaLocator));
         applitoolsVisualCheck.setConfiguration(new Configuration().setAppName(APP_NAME));
+        applitoolsVisualCheck.setBeforeRenderScreenshotHook(hook);
         return applitoolsVisualCheck;
     }
 }

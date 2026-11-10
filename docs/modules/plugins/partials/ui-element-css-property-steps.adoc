@@ -4,18 +4,33 @@ Checks the context element has the expected CSS property.
 
 The context can be set by the <<_change_context,corresponding steps>>.
 
+[NOTE]
+====
+If the comparison rule is `IS_EQUAL_TO` and both the actual and expected CSS values are colors in RGB or RGBA format
+(with an _alpha channel of 1_ in RGBA `rgba(r, g, b, 1)`), then both values are normalized to the RGB `rgb(r, g, b)`
+format before the comparison.
+
+The normalization is not performed for other comparison rules or color representations.
+====
+
 [source,gherkin]
 ----
-Then context element has CSS property `$cssName` with value that $comparisonRule `$cssValue`
+Then context element has CSS property `$cssName` with value that $comparisonRule `$expectedCssValue`
 ----
 
 * `$cssName` - A name of the CSS property.
 * `$comparisonRule` - CSS property xref:parameters:string-comparison-rule.adoc[comparison rule].
-* `$cssValue` - The expected value of the CSS property.
+* `$expectedCssValue` - The expected value of the CSS property.
 
-.Change context to element and verify it color CSS property value
+.Verify values of color CSS properties of the context element
 [source,gherkin]
 ----
-When I change context to element located by `id(rainbow)`
-Then context element has CSS property `color` with value that is equal to `rgba(0, 0, 0, 1)`
+Scenario: Validate styling
+Then context element has CSS property `<name>` with value that is equal to `<value>`
+Examples:
+| name                  | value                  |
+| color                 | rgba(0, 0, 0, 1)       |
+| border-color          | rgb(0, 0, 0)           |
+| background-color      | rgba(0, 0, 0, 0)       |
+| text-decoration-color | rgba(255, 255, 255, 1) |
 ----

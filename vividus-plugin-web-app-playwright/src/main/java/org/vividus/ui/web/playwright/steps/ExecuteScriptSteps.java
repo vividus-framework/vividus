@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class ExecuteScriptSteps
      * @param jsCode       Code in javascript that returns some value as result
      *                     (e.g. JSON.stringify(window.performance.timing))
      */
-    @When("I execute javascript `$jsCode` and save result to $scopes variable `$variableName`")
+    @When(value = "I execute javascript `$jsCode` and save result to $scopes variable `$variableName`", priority = 1)
     public void saveValueFromJS(String jsCode, Set<VariableScope> scopes, String variableName)
     {
         assertAndSaveResult(() -> javascriptActions.executeScript(jsCode), scopes, variableName);

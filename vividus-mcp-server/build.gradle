@@ -1,0 +1,19 @@
+project.description = 'VIVIDUS MCP Server'
+
+dependencies {
+    implementation project(':vividus')
+    implementation project(':vividus-util')
+
+    implementation platform('io.modelcontextprotocol.sdk:mcp-bom:2.1.0')
+    implementation('io.modelcontextprotocol.sdk:mcp-core')
+    implementation('io.modelcontextprotocol.sdk:mcp-json-jackson3')
+
+    implementation platform('org.apache.logging.log4j:log4j-bom:2.26.1')
+    implementation('org.apache.logging.log4j:log4j-core')
+
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
+}

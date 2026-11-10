@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,21 @@ import org.vividus.selenium.manager.IWebDriverManager;
 @Deprecated(since = "0.4.1", forRemoval = true)
 public class BrowserWindowSizeListener
 {
-    private IWebDriverManager webDriverManager;
+    private final boolean maximizeWindowOnStart;
+    private final IWebDriverManager webDriverManager;
+
+    public BrowserWindowSizeListener(boolean maximizeWindowOnStart, IWebDriverManager webDriverManager)
+    {
+        this.maximizeWindowOnStart = maximizeWindowOnStart;
+        this.webDriverManager = webDriverManager;
+    }
 
     @Subscribe
     public void onWebDriverCreate(WebDriverCreateEvent event)
     {
-        if (!webDriverManager.isElectronApp() && !webDriverManager.isMobile())
+        if (maximizeWindowOnStart && !webDriverManager.isElectronApp() && !webDriverManager.isMobile())
         {
             event.getWebDriver().manage().window().maximize();
         }
-    }
-
-    public void setWebDriverManager(IWebDriverManager webDriverManager)
-    {
-        this.webDriverManager = webDriverManager;
     }
 }

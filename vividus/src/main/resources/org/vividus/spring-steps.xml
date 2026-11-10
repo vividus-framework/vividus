@@ -31,6 +31,11 @@
     <bean id="debugSteps" class="org.vividus.steps.DebugSteps" />
     <bean id="executableSteps" class="org.vividus.steps.ExecutableSteps" />
     <bean id="fileSteps" class="org.vividus.steps.FileSteps" />
+    <bean id="objectPoolSteps" class="org.vividus.steps.ObjectPoolSteps">
+        <constructor-arg index="0" value="${object-pool.return-objects-after-story-completion}" />
+        <constructor-arg index="1" ref="testContext" />
+        <constructor-arg index="2" ref="variableContext" />
+    </bean>
     <bean id="setupSteps" class="org.vividus.steps.LoggingExecutionResultsSteps" />
 
     <bean class="org.vividus.publishing.DiffAttachmentPublisher">
@@ -42,6 +47,7 @@
         <idref bean="assertSteps" />
         <idref bean="variablesSteps" />
         <idref bean="fileSteps" />
+        <idref bean="objectPoolSteps" />
         <idref bean="executableSteps" />
         <idref bean="setupSteps" />
         <idref bean="debugSteps" />

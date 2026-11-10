@@ -1,9 +1,10 @@
 plugins {
-  id 'org.sonarqube' version '6.0.1.5171'
+  id 'org.sonarqube' version '7.5.0.8588'
 }
 
 ext.buildSystemPath = file("${System.env.VIVIDUS_BUILD_SYSTEM_HOME?:buildSystemRootDir}/${buildSystemVersion}")
 
+apply from: "${buildSystemPath}/gradle/buildscript-repositories.gradle"
 apply from: "${buildSystemPath}/gradle/project.gradle"
 apply from: "${buildSystemPath}/gradle/jacoco.gradle"
 
@@ -15,10 +16,6 @@ subprojects {
             }
             module('commons-logging:commons-logging') {
                 replacedBy('org.slf4j:jcl-over-slf4j', 'Redirect commons-logging logs to SLF4J')
-            }
-            module('org.springframework:spring-jcl') {
-                // https://github.com/spring-projects/spring-framework/issues/20611#issuecomment-453462024
-                replacedBy('org.slf4j:jcl-over-slf4j', 'Use SLF4J over JCL instead of Spring over JCL implementation')
             }
             module('log4j:log4j') {
                 replacedBy('org.slf4j:log4j-over-slf4j', 'Redirect Log4J 1.x logs to SLF4J')
@@ -77,11 +74,7 @@ project.description = 'Vividus'
 
 ext {
     versions = [
-        jbehave:                '6.0.0-alpha.9',
-        powermock:              'a0be5c4bbe',
-        // eyes and eyesUniversal versions should be updated and tested together
-        eyes:                   '5.69.5',
-        eyesUniversal:          '5.64.17',
-        jsonPath:               '52ebb195bd'
+        jbehave:                '6.0.0-alpha.11',
+        jsonPath:               '0e32295fde'
     ]
 }

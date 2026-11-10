@@ -1,6 +1,6 @@
 Web screenshot configuration fields:
 
-* `shootingStrategy` - The shooting strategy to use.
+* `shootingStrategy` - The <<_shooting_strategies, shooting strategy>> to use.
 * `maxHeight` - The maximum screenshot height in pixels. The area outside this size won't be captured. May be useful when having memory issues on large pages.
 * `webHeaderToCut` - The header to cut on each screenshot segment during scroll e.g. sticky header.
 * `webFooterToCut` - The footer to cut on each screenshot segment during scroll e.g. sticky footer.
@@ -16,6 +16,7 @@ Web screenshot configuration fields:
 * `scrollableElement` - The element to scroll.
 * `scrollTimeout` - The scroll timeout.
 * `hideScrollbars` - Hide the scrollbar before capturing the screenshot, defaults to `true`.
+* `textToMask` - The text to be masked with placeholder before capturing the page screenshot and reverted back after capturing is finished.
 
 Mobile app screenshot configuration fields:
 

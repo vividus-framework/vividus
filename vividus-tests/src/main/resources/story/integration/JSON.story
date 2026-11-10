@@ -260,3 +260,23 @@ Then `${documentTable}` is equal to table:
 |Evelyn Waugh     |Sword of Honour       |
 |Herman Melville  |Moby Dick             |
 |J. R. R. Tolkien |The Lord of the Rings |
+
+Scenario: Verify FROM_JSON transformer with new line separator in columns parameter
+When I initialize scenario variable `documentTable` with values:
+{transformer=FROM_JSON, variableName=json, columns=
+author=$..book..author;
+title=$..book..title}
+Then `${documentTable}` is equal to table:
+|author           |title                 |
+|Nigel Rees       |Sayings of the Century|
+|Evelyn Waugh     |Sword of Honour       |
+|Herman Melville  |Moby Dick             |
+|J. R. R. Tolkien |The Lord of the Rings |
+
+Scenario: Verify formatToOneLineJson expression
+Given I initialize scenario variable `prettyJson` with value `
+{
+    "character": "Baldheaded Ulad"
+}
+`
+Then `#{formatToOneLineJson(${prettyJson})}` is equal to `{"character":"Baldheaded Ulad"}`

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +24,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.cdp.BrowserPermissions;
 import org.vividus.selenium.manager.WebDriverManager;
-import org.vividus.ui.web.action.CdpActions;
+import org.vividus.ui.web.cdp.CdpClient;
 
 public class GeolocationEmulationSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(GeolocationEmulationSteps.class);
 
-    private final CdpActions cdpActions;
+    private final CdpClient cdpClient;
     private final WebDriverManager webDriverManager;
 
-    public GeolocationEmulationSteps(CdpActions cdpActions, WebDriverManager webDriverManager)
+    public GeolocationEmulationSteps(CdpClient cdpClient, WebDriverManager webDriverManager)
     {
-        this.cdpActions = cdpActions;
+        this.cdpClient = cdpClient;
         this.webDriverManager = webDriverManager;
     }
 
@@ -55,12 +55,12 @@ public class GeolocationEmulationSteps
         BrowserPermissions permissions = webDriverManager.getBrowserPermissions();
         if (!permissions.isGeolocationEnabled())
         {
-            cdpActions.executeCdpCommand("Browser.grantPermissions", Map.of("permissions", List.of("geolocation")));
+            cdpClient.executeCdpCommand("Browser.grantPermissions", Map.of("permissions", List.of("geolocation")));
             permissions.setGeolocationEnabled(true);
             LOGGER.info("The browser has been granted the permission to track geolocation");
         }
 
-        cdpActions.executeCdpCommand("Emulation.setGeolocationOverride",
+        cdpClient.executeCdpCommand("Emulation.setGeolocationOverride",
                 Map.of("latitude", latitude, "longitude", longitude, "accuracy", 1));
     }
 
@@ -74,6 +74,6 @@ public class GeolocationEmulationSteps
     @When("I reset Geolocation emulation")
     public void clearGeolocationParameters()
     {
-        cdpActions.executeCdpCommand("Emulation.clearGeolocationOverride", Map.of());
+        cdpClient.executeCdpCommand("Emulation.clearGeolocationOverride");
     }
 }

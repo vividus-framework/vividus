@@ -16,7 +16,7 @@ The atomic actions performed are:
 * click on the element if it is found, otherwise the whole step is failed and its execution stops;
 * the first two actions are retried once if the field becomes stale during actions execution in other
 words if https://www.selenium.dev/exceptions/#stale_element_reference[StaleElementReferenceException]
-is occurred at any atomic action.
+occurs at any atomic action.
 
 [NOTE]
 ====
@@ -110,8 +110,10 @@ include::plugins:partial$ui-scrolling-steps.adoc[]
 include::plugins:partial$ui-elements-validation-steps.adoc[]
 
 include::plugins:partial$ui-selenium-text-content-steps.adoc[]
+
 include::plugins:partial$common-web-app-text-steps.adoc[]
 
+include::plugins:partial$common-web-app-wait-steps.adoc[]
 
 === Tab steps
 ==== Open a new tab
@@ -356,7 +358,7 @@ When I execute sequence of actions:
 
 This set of steps allows to validate the https://developer.mozilla.org/en-US/docs/Web/API/console[browser console logging messages].
 
-:log-levels: List of the comma-separated messages levels. The supported levels are: ERRORS, WARNINGS, INFOS.
+:log-entries: List of the comma-separated messages levels. The supported levels are: ERRORS, WARNINGS, INFOS.
 
 [TIP]
 =====
@@ -381,9 +383,9 @@ Validates the absence of log entries of the desired level in the browser console
 
 [source,gherkin]
 ----
-Then there are no browser console $logLevels
+Then there are no browser console $logEntries
 ----
-* `$logLevels` - {log-levels}
+* `$logEntries` - {log-entries}
 
 .Validate absence of JS errors
 [source,gherkin]
@@ -404,10 +406,10 @@ Then there are no browser console $logLevels by regex `$regex`
 _Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
 [source,gherkin]
 ----
-Then there are no browser console $logLevels by regex '$regex'
+Then there are no browser console $logEntries by regex '$regex'
 ----
 
-* `$logLevels` - {log-levels}
+* `$logEntries` - {log-entries}
 * `$regex` - The regular expression to match log entry messages.
 
 .Validate absence of JS error referencing user
@@ -423,9 +425,9 @@ Validates the presence of specific log entries of the desired level in the brows
 
 [source,gherkin]
 ----
-Then there are browser console $logLevels by regex `$regex`
+Then there are browser console $logEntries by regex `$regex`
 ----
-* `$logLevels` - {log-levels}
+* `$logEntries` - {log-entries}
 * `$regex` - The regular expression to match log entry messages.
 
 .Validate presence of JS errors referencing user
@@ -445,7 +447,7 @@ NOTE: Wait uses generic UI timeouts specified by the properties `ui.wait.timeout
 ----
 When I wait until browser console $logEntries by regex `$regex` appear and save all entries into $scopes variable `$variableName`
 ----
-* `$logLevels` - {log-levels}
+* `$logEntries` - {log-entries}
 * `$regex` - The regular expression to match log entry messages.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The name of the variable to save the value of the barcode.
@@ -531,7 +533,7 @@ Then text `Modal Frame Example` exists
 
 Switch the focus of future browser commands to new tab.
 
-This step gets the identifier of the currently active tab and then switches focus to the first available tab with a different identifier. For example, if tabs #1, #2, #3 are open and tab #2 is active, this step will switch focus to tab #3.
+This step gets the identifier of the currently active tab and then switches focus to the next tab after it. For example, if tabs #1, #2, #3 are open and tab #2 is active, this step will switch focus to tab #3. If the active tab is the last one, the step switches to the first tab.
 
 [NOTE]
 A new tab should already be open for this step to function. After executing this step, the new tab will become the active tab.

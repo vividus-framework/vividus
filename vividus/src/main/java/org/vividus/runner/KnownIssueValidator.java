@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,20 +28,19 @@ import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 import org.vividus.softassert.issue.IKnownIssueProvider;
 import org.vividus.softassert.issue.KnownIssueChecker;
 import org.vividus.softassert.model.KnownIssue;
 
+@SuppressWarnings("PMD.SystemPrintln")
 public final class KnownIssueValidator
 {
-    private static final String FORMATTER = "%-12s| %s";
-
     private KnownIssueValidator()
     {
     }
@@ -58,8 +57,7 @@ public final class KnownIssueValidator
 
         if (commandLine.hasOption(helpOption.getOpt()))
         {
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("KnownIssueValidator", options);
+            HelpFormatter.builder().get().printHelp("KnownIssueValidator", null, options, null, false);
             return;
         }
 
@@ -92,6 +90,6 @@ public final class KnownIssueValidator
 
     private static void print(String knownIssueId, String assertionError)
     {
-        System.out.println(String.format(FORMATTER, knownIssueId, assertionError));
+        System.out.printf("%-12s| %s%n", knownIssueId, assertionError);
     }
 }

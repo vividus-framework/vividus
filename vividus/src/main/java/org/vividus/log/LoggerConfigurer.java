@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public final class LoggerConfigurer
     private static void configureLog4j2()
     {
         Predicate<String> log4j2XmlPredicate = Pattern.compile("log4j2-vividus.*\\.xml").asMatchPredicate();
-        try (ScanResult scanResult = new ClassGraph().acceptPackagesNonRecursive("").scan();
+        try (ScanResult scanResult = new ClassGraph().enableClasspath().acceptPackagesNonRecursive("").scan();
                 ResourceList log4j2Resources = scanResult.getAllResources()
                         .filter(resource -> log4j2XmlPredicate.test(resource.getPath())))
         {

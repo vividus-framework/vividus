@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import de.sstoehr.harreader.model.HarRequest;
 import de.sstoehr.harreader.model.HarResponse;
 import de.sstoehr.harreader.model.HttpMethod;
 
+@SuppressWarnings("unchecked")
 class HttpMessagePartTests
 {
     private static final String URL = "www.test.com";
@@ -47,6 +48,7 @@ class HttpMessagePartTests
     private static final String TEXT = "text";
     private static final String REQUEST_BODY = "requestBody";
     private static final String REQUEST_BODY_PARAMS = "requestBodyParameters";
+    private static final String RESPONSE_BODY = "responseBody";
 
     @Test
     void shouldReturnRequestUrl()
@@ -66,7 +68,6 @@ class HttpMessagePartTests
         assertEquals(queryParameters, HttpMessagePart.URL_QUERY.get(harEntry));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void shouldReturnRequestDataWithText()
     {
@@ -86,7 +87,6 @@ class HttpMessagePartTests
         );
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void shouldReturnRequestDataWithParams()
     {
@@ -117,16 +117,27 @@ class HttpMessagePartTests
         );
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void shouldReturnResponseData()
     {
         HarEntry harEntry = createHarEntry(HttpMethod.POST, HttpStatus.SC_OK, d -> { });
         Map<String, Object> responseData = (Map<String, Object>) HttpMessagePart.RESPONSE_DATA.get(harEntry);
-        Map<String, String> responseBody = (Map<String, String>) responseData.get("responseBody");
+        Map<String, String> responseBody = (Map<String, String>) responseData.get(RESPONSE_BODY);
         assertAll(
             () -> assertEquals(MIME_TYPE, responseBody.get(MIME_TYPE)),
             () -> assertEquals(TEXT, responseBody.get(TEXT))
+        );
+    }
+
+    @Test
+    void shouldReturnResponseDataWithNullTextAndMimeType()
+    {
+        HarEntry harEntry = createHarEntryWithNullContent();
+        Map<String, Object> responseData = (Map<String, Object>) HttpMessagePart.RESPONSE_DATA.get(harEntry);
+        Map<String, String> responseBody = (Map<String, String>) responseData.get(RESPONSE_BODY);
+        assertAll(
+            () -> assertNull(responseBody.get(MIME_TYPE)),
+            () -> assertNull(responseBody.get(TEXT))
         );
     }
 
@@ -152,6 +163,25 @@ class HttpMessagePartTests
 
         HarResponse response = new HarResponse();
         response.setStatus(statusCode);
+        response.setContent(harContent);
+
+        HarEntry harEntry = new HarEntry();
+        harEntry.setRequest(request);
+        harEntry.setResponse(response);
+        return harEntry;
+    }
+
+    private HarEntry createHarEntryWithNullContent()
+    {
+        HarRequest request = new HarRequest();
+        request.setMethod(HttpMethod.POST);
+        request.setUrl(URL);
+        request.setQueryString(List.of());
+
+        HarContent harContent = new HarContent();
+
+        HarResponse response = new HarResponse();
+        response.setStatus(HttpStatus.SC_OK);
         response.setContent(harContent);
 
         HarEntry harEntry = new HarEntry();

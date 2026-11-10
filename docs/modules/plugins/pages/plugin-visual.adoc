@@ -30,6 +30,12 @@ include::partial$plugin-installation.adoc[]
 |`<empty>`
 |Used to append scenario based index to a baseline name
 
+|`ui.visual.extended-assertion-format-enabled`
+a|`true`
+`false`
+|`false`
+|Extends assertion message for baseline validation by including baseline name
+
 |`ui.visual.override-baselines`
 a|`true`
 `false`
@@ -109,9 +115,9 @@ In order to support screenshot taking configuration per-project/per-step basis f
 Properties-based screenshot configuration can be specified using `web.screenshot.strategy.<YOUR_STRATEGY_NAME>.<PROPERTY_NAME>=<PROPERTY_VALUE>` pattern,
 where:
 
- - `YOUR_STRATEGY_NAME` - name of the custom strategy;
- - `PROPERTY_NAME` - name of the property you want to specify;
- - `PROPERTY_VALUE` - value of the property in the required format.
+* `YOUR_STRATEGY_NAME` - name of the custom strategy;
+* `PROPERTY_NAME` - name of the property you want to specify;
+* `PROPERTY_VALUE` - value of the property in the required format.
 
 ==== Properties-based configuration:
 
@@ -125,15 +131,15 @@ To use custom configuration per step, two new steps were implemented.
 
 [source,gherkin]
 ----
-When I $visualAction baseline with `$baselineName` using screenshot configuration:$screenshotConfiguration
+When I $visualAction baseline with name `$baselineName` using screenshot configuration:$screenshotConfiguration
 ----
 
 [source,gherkin]
 ----
-When I $visualAction baseline with `$baselineName` ignoring:$ignoringElement using screenshot configuration:$screenshotConfiguration
+When I $visualAction baseline with name `$baselineName` ignoring:$ignoringElement using screenshot configuration:$screenshotConfiguration
 ----
 
-==== *Examples of usage property based web configuration:*
+==== Examples of usage property based web configuration:
 
 [source,gherkin]
 ----
@@ -146,11 +152,11 @@ web.screenshot.strategy.custom.shooting-strategy=SIMPLE
 web.screenshot.strategy=custom
 ----
 
-==== *Examples of usage step based configuration:*
+==== Examples of usage step based configuration:
 
 [source,gherkin]
 ----
-When I <action> baseline with `scrollable-element-context` using screenshot configuration:
+When I <action> baseline with name `scrollable-element-context` using screenshot configuration:
 |scrollableElement                    |webHeaderToCut|webFooterToCut|scrollTimeout|shootingStrategy|
 |By.xpath(//div[@class="page__inner"])|80            |0             |PT1S         |SIMPLE          |
 ----
@@ -223,7 +229,7 @@ where:
 
 |===
 
-==== *Examples of usage property based configuration:*
+==== Examples of usage property based configuration:
 
 [source,gherkin]
 ----
@@ -235,11 +241,11 @@ mobile.screenshot.strategy.custom.shooting-strategy=VIEWPORT
 mobile.screenshot.strategy=custom
 ----
 
-==== *Examples of usage step based configuration:*
+==== Examples of usage step based configuration:
 
 [source,gherkin]
 ----
-When I <action> baseline with `scrollable-element-context` using screenshot configuration:
+When I <action> baseline with name `scrollable-element-context` using screenshot configuration:
 |cutTop           |shootingStrategy|
 |51               |VIEWPORT        |
 ----
@@ -543,6 +549,13 @@ The baseline storage is used by default. User is able to specify either embedded
 |`./baseline`
 |The path to the folder for saving baselines (root folder is `src/main/resources`).
 For example, `ui.visual.baseline-storage.filesystem.folder=C:/Workspace/vividus-tests/src/main/resources/baselines`
+
+|`ui.visual.baseline-storage.filesystem.delta-folder`
+|`string`
+|
+|The path to the folder for saving baseline comparisons delta, unlike `ui.visual.baseline-storage.filesystem.folder` delta folder contains only mismatched baselines simplifying their management. This property requires `ui.visual.override-baselines` to be set to `true` otherwise it has no effect.
+For example, `ui.visual.baseline-storage.filesystem.delta-folder=C:/Workspace/vividus-tests/src/main/resources/delta`
+
 |===
 
 TIP: In order to store new baselines in the source folder use absolute path to the baselines folder.
@@ -573,3 +586,38 @@ Uses Azure Blob Storage container as a baseline source. In order to use this sto
 |Describes the name of container with the baselines.
 
 |===
+
+== Shooting Strategies
+
+=== SIMPLE
+
+The simplest screenshot strategy that captures a single screenshot of the visible viewport without
+any scrolling or stitching. This strategy is fast and reliable but only captures what's currently
+visible on the screen.
+
+*Use cases:*
+
+* Testing specific visible elements or sections
+* Quick visual checks where full page capture is not needed
+
+=== VIEWPORT_PASTING
+
+A strategy that captures the entire page by taking multiple viewport screenshots while scrolling
+through the page, then stitching them together. This creates a complete picture of the full page content.
+
+*Use cases:*
+
+* Full page visual testing
+* Testing long scrollable pages
+
+=== CDP
+
+Uses Chrome DevTools Protocol to capture screenshots. This strategy leverages browser-native capabilities
+for efficient and accurate screenshot capture.
+
+IMPORTANT: Can be used only in Chrome/Chromium-based browsers.
+
+*Use cases:*
+
+* High-performance screenshot capture in Chrome/Chromium browsers
+* Full page screenshots without scrolling

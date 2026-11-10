@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.steps.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -37,11 +39,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.web.model.JsArgument;
 import org.vividus.steps.ui.web.model.JsArgumentType;
 import org.vividus.ui.action.JavascriptActions;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,24 +60,30 @@ class ExecuteScriptStepsTests
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
     private static final String VARIABLE_NAME = "variableName";
 
-    @Mock
-    private JavascriptActions javascriptActions;
+    @Mock private WebDriver webDriver;
 
-    @Mock
-    private ISoftAssert softAssert;
-
-    @Mock
-    private VariableContext variableContext;
-
-    @InjectMocks
-    private ExecuteScriptSteps executeScriptSteps;
+    @Mock private JavascriptActions javascriptActions;
+    @Mock private ISoftAssert softAssert;
+    @Mock private VariableContext variableContext;
+    @Mock private IUiContext uiContext;
+    @InjectMocks private ExecuteScriptSteps executeScriptSteps;
 
     @Test
-    void shouldExecuteJavascript()
+    void shouldExecuteJavascriptWebElementAsArg()
     {
-        String jsCode = "document.querySelector('[name=\"vividus-logo\"]').remove()";
-        executeScriptSteps.executeJavascript(jsCode);
-        verify(javascriptActions).executeScript(jsCode);
+        var searchContext = mock(WebElement.class);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
+        executeScriptSteps.executeJavascript(JS_CODE);
+        verify(javascriptActions).executeScript(JS_CODE, searchContext);
+    }
+
+    @Test
+    void shouldExecuteJavascriptNullAsArg()
+    {
+        var searchContext = mock(WebDriver.class);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
+        executeScriptSteps.executeJavascript(JS_CODE);
+        verify(javascriptActions).executeScript(JS_CODE, (Object[]) null);
     }
 
     static Stream<Arguments> executeJavascriptWithArguments()
@@ -118,7 +129,9 @@ class ExecuteScriptStepsTests
     @Test
     void testGettingValueFromJS()
     {
-        when(javascriptActions.executeScript(JS_CODE)).thenReturn(VALUE);
+        var searchContext = mock(WebElement.class);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
+        when(javascriptActions.executeScript(JS_CODE, searchContext)).thenReturn(VALUE);
         when(softAssert.assertNotNull(JS_RESULT_ASSERTION_MESSAGE, VALUE)).thenReturn(true);
         executeScriptSteps.saveValueFromJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
         verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, VALUE);

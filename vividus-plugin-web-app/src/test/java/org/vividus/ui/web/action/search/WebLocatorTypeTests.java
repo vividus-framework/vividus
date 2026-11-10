@@ -112,7 +112,7 @@ class WebLocatorTypeTests
     void shouldBuildByCaseInsensitiveText()
     {
         var value = "locator";
-        var expected = By.xpath(
+        var expected = By.xpath(CaseInsensitiveXpaths.withAllAlphabets(
                 ".//*[text()[normalize-space(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))"
                         + "=\"locator\"] or @*[normalize-space(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', "
                         + "'abcdefghijklmnopqrstuvwxyz'))=\"locator\"] or *[normalize-space(translate(., "
@@ -121,7 +121,7 @@ class WebLocatorTypeTests
                         + "[normalize-space(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))="
                         + "\"locator\"] or @*[normalize-space(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', "
                         + "'abcdefghijklmnopqrstuvwxyz'))=\"locator\"] or *[normalize-space(translate(.,"
-                        + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))=\"locator\"]])]");
+                        + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))=\"locator\"]])]"));
         assertEquals(expected, WebLocatorType.CASE_INSENSITIVE_TEXT.buildBy(value));
     }
 

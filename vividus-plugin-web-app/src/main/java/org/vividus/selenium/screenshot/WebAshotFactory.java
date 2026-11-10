@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,14 @@ package org.vividus.selenium.screenshot;
 
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.vividus.selenium.screenshot.strategies.AdjustingScrollableElementAwareViewportPastingDecorator;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.screenshot.WebCutOptions;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 
 import pazone.ashot.AShot;
+import pazone.ashot.CdpShootingStrategy;
 import pazone.ashot.ShootingStrategies;
 import pazone.ashot.ShootingStrategy;
 import pazone.ashot.coordinates.CoordsProvider;
@@ -33,6 +35,8 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
     public static final int DEFAULT_STICKY_HEADER_HEIGHT = 100;
     public static final int DEFAULT_STICKY_FOOTER_HEIGHT = 100;
     private static final int SCROLL_TIMEOUT = 500;
+
+    private static final String CDP_SHOOTING_STRATEGY = "CDP";
 
     private final ScreenshotDebugger screenshotDebugger;
     private final IScrollbarHandler scrollbarHandler;
@@ -59,10 +63,7 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
 
     private AShot createAShot(WebScreenshotParameters screenshotParameters)
     {
-        ShootingStrategy decorated = getBaseShootingStrategy();
-
-        decorated = decorateWithFixedCutStrategy(decorated, screenshotParameters.getNativeHeaderToCut(),
-                screenshotParameters.getNativeFooterToCut());
+        ShootingStrategy decorated = getBaseShootingStrategy(screenshotParameters);
 
         decorated = decorateWithViewportPasting(decorated, screenshotParameters)
                 .withDebugger(screenshotDebugger)
@@ -107,7 +108,16 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
 
     private AShot createAShot(String strategyName, WebScreenshotParameters screenshotParameters)
     {
-        ShootingStrategy baseShootingStrategy = getBaseShootingStrategy();
+        if (CDP_SHOOTING_STRATEGY.equals(strategyName))
+        {
+            ShootingStrategy shootingStrategy = decorateBaseShootingStrategy(new CdpShootingStrategy(),
+                    screenshotParameters);
+            shootingStrategy = decorateStrategyWithCropping(shootingStrategy, screenshotParameters);
+
+            return new AShot().shootingStrategy(shootingStrategy);
+        }
+
+        ShootingStrategy baseShootingStrategy = getBaseShootingStrategy(screenshotParameters);
         ShootingStrategy shootingStrategy;
         @SuppressWarnings("checkstyle:Indentation")
         CoordsProvider coordsProvider = switch (strategyName)
@@ -128,16 +138,40 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
                     String.format("Unknown shooting strategy with the name: %s", strategyName));
         };
         shootingStrategy = decorateWithScrollbarHiding(shootingStrategy, screenshotParameters);
-        shootingStrategy = screenshotParameters == null
-                ? shootingStrategy
-                : decorateWithCropping(shootingStrategy, screenshotParameters);
+        shootingStrategy = decorateStrategyWithCropping(shootingStrategy, screenshotParameters);
 
         return new AShot().shootingStrategy(shootingStrategy)
                 .coordsProvider(new ScrollBarHidingCoordsProviderDecorator(coordsProvider, scrollbarHandler));
     }
 
-    private ShootingStrategy getBaseShootingStrategy()
+    private ShootingStrategy getBaseShootingStrategy(WebScreenshotParameters screenshotParameters)
     {
-        return ShootingStrategies.scaling((float) javascriptActions.getDevicePixelRatio());
+        return decorateBaseShootingStrategy(ShootingStrategies.simple(), screenshotParameters);
+    }
+
+    private ShootingStrategy decorateBaseShootingStrategy(ShootingStrategy baseShootingStrategy,
+            WebScreenshotParameters screenshotParameters)
+    {
+        ShootingStrategy shootingStrategy = ShootingStrategies.scaling(baseShootingStrategy,
+                (float) javascriptActions.getDevicePixelRatio());
+        if (screenshotParameters != null)
+        {
+            if (StringUtils.isNotBlank(screenshotParameters.getTextToMask()))
+            {
+                shootingStrategy = new TextMaskingDecorator(shootingStrategy,
+                        screenshotParameters.getTextToMask(), javascriptActions);
+            }
+
+            shootingStrategy = decorateWithFixedCutStrategy(shootingStrategy,
+                    screenshotParameters.getNativeHeaderToCut(), screenshotParameters.getNativeFooterToCut());
+        }
+        return shootingStrategy;
+    }
+
+    private ShootingStrategy decorateStrategyWithCropping(ShootingStrategy shootingStrategy,
+            WebScreenshotParameters screenshotParameters)
+    {
+        return screenshotParameters == null ? shootingStrategy
+                : decorateWithCropping(shootingStrategy, screenshotParameters);
     }
 }

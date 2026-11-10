@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
-import org.openqa.selenium.WrapsElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.events.EventFiringDecorator;
@@ -101,7 +100,7 @@ class WebDriverUtilsTests
     }
 
     @SuppressWarnings("unchecked")
-    static class TestWebElement extends DelegatingWebElement implements WrapsElement
+    static class TestWebElement extends DelegatingWebElement
     {
         private final WebElement wrappedElement;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class EmailServerConfigurationDeserializer extends JsonDeserializer<Email
     private void gatherProperties(String baseKey, JsonNode root, Map<String, String> container)
     {
         String separator = baseKey.isEmpty() ? StringUtils.EMPTY : ".";
-        root.fields().forEachRemaining(e ->
+        root.properties().forEach(e ->
         {
             JsonNode node = e.getValue();
             if (node.isValueNode())

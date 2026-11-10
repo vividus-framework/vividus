@@ -47,3 +47,13 @@ Examples:
 |store.book[2].attributes|{"used": false}|
 |store.book[3].hardcover |true           |
 |expensive               |10             |
+
+Scenario: Step verification 'When I save number of elements from `$yaml` by YAML path `$yamlPath` to $scopes variable `$variableName`'
+When I save number of elements from `${yaml}` by YAML path `<yamlPath>` to scenario variable `numberOfElements`
+Then `${numberOfElements}` is equal to `<expected>`
+Examples:
+|yamlPath     |expected|
+|store.book   |1       |
+|store.book[0]|1       |
+|store.bicycle|1       |
+|non-existent |0       |

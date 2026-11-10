@@ -1,0 +1,327 @@
+= How to create VIVIDUS automated tests with the help of AI
+
+VIVIDUS offers MCP server that exposes core VIVIDUS functionalities to LLMs via the
+https://modelcontextprotocol.io/docs/getting-started/intro[MCP protocol], enabling generation of automated
+test scenarios leveraging those capabilities.
+
+IMPORTANT: LLM will access only those steps that are available from plugins included into your test project.
+
+== Install MCP server
+
+. Copy the below line to `dependencies` section of the project `build.gradle` file in your test project
++
+[IMPORTANT]
+VIVIDUS MCP server is available starting from version `0.6.16` and higher.
++
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation('org.vividus:vividus-mcp-server')
+----
+. Make sure to use https://github.com/vividus-framework/vividus-build-system?tab=readme-ov-file#migrating-from-20-to-30[Build System 3.0]
+. Update `gradlew` script in the root of your test project to the latest version:
+.. Go to https://github.com/vividus-framework/vividus-starter/blob/main/gradlew
+.. Copy content of the `gradlew` script
+.. Replace the content of the `gradlew` script in the root of the test project with the copied content
+
+. If the project was imported to the IDE before adding new dependency,
+xref:ROOT:getting-started.adoc#_use_ide_for_the_tests_development[re-generate]
+the configuration files for the used IDE and then refresh the project in the used IDE.
+
+== Configure AI Assistant
+
+NOTE: The examples below cover GitHub Copilot in VS Code and Claude Code, but any https://modelcontextprotocol.io/clients[MCP-compatible client] (such as Cursor, Windsurf, or Continue) can be configured in the same way using the VIVIDUS MCP server command shown here.
+
+[#configure-mcp-servers]
+.GitHub Copilot in VS Code
+[%collapsible]
+====
+. Install https://code.visualstudio.com/download[Visual Studio Code]
+. Open the project with VIVIDUS tests in Visual Studio Code
+. https://code.visualstudio.com/docs/copilot/setup#_set-up-copilot-in-vs-code[Set up Copilot in VS Code] if it is not done yet
+. Create a new file at path `/.vscode/mcp.json` in the root of the project
+. Add the following configuration into `mcp.json` file and save it
++
+[tabs]
+======
+macOS / Linux::
++
+[source,json]
+----
+{
+  "servers": {
+    "vividus": {
+      "command": "/Users/Bob/Workspace/vividus-sample-tests/gradlew", <1>
+      "args": [
+        "startMcpServer",
+        "-q",
+        "-p",
+        "/Users/Bob/Workspace/vividus-sample-tests" <2>
+      ]
+    },
+    "playwright": { <3>
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
+----
+
+Windows::
++
+[source,json]
+----
+{
+  "servers": {
+    "vividus": {
+      "command": "c:\\Users\\Bob\\Workspace\\vividus-sample-tests\\gradlew.bat", <1>
+      "args": [
+        "startMcpServer",
+        "-q",
+        "-p",
+        "c:\\Users\\Bob\\Workspace\\vividus-sample-tests" <2>
+      ]
+    },
+    "playwright": { <3>
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
+----
+======
++
+<1> The absolute path to the `gradlew` or `gradlew.bat` executable contained in the tests project
+<2> The absolute path to the tests project
+<3> The Playwright MCP server is optional and can be used to control browser and generate tests for web-applications
+. Start the MCP servers by clicking on the `▷ Start` buttons on the top of the servers names
+. Use Copilot in https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode#_use-agent-mode[agent mode] to generate automated scenarios
+====
+
+.Claude Code
+[%collapsible]
+====
+https://claude.ai/code[Claude Code] is an agentic coding tool by Anthropic.
+
+. Install https://claude.ai/code[Claude Code]
+. Add the VIVIDUS MCP server using the `claude mcp add` command:
++
+[tabs]
+======
+macOS / Linux::
++
+[source,bash]
+----
+claude mcp add vividus -s user -- /Users/Bob/Workspace/vividus-sample-tests/gradlew startMcpServer -q -p /Users/Bob/Workspace/vividus-sample-tests <1>
+----
+
+Windows::
++
+[source,cmd]
+----
+claude mcp add vividus -s user -- c:\Users\Bob\Workspace\vividus-sample-tests\gradlew.bat startMcpServer -q -p c:\Users\Bob\Workspace\vividus-sample-tests <1>
+----
+======
++
+<1> Replace with the absolute path to the `gradlew` or `gradlew.bat` executable and the absolute path to the tests project
+. Optionally, add the Playwright MCP server to enable browser control and web-application test generation:
++
+[source,bash]
+----
+claude mcp add playwright -s user -- npx @playwright/mcp@latest <2>
+----
++
+<2> The Playwright MCP server is optional and can be used to control browser and generate tests for web-applications
+. Start Claude Code and the configured MCP servers are loaded automatically
+====
+
+== Web-application test automation with GitHub Copilot in VS Code
+
+=== Prerequisites
+
+. Switch to chat https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode#_use-agent-mode[agent mode]
+. Choose the preferred Language Model (the list of the available models can differ depending on your license)
+. Configure and start the <<configure-mcp-servers, MCP servers>>
+
+=== Copilot Instructions File
+
+A https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot[Copilot instructions file]
+(`.github/copilot-instructions.md`) provides global context about the project to GitHub Copilot — such as the project layout, build commands,
+running tests, and general conventions. This context is automatically picked up by Copilot in VS Code and on GitHub.
+
+The sample project already contains a https://github.com/vividus-framework/vividus-sample-tests/blob/main/.github/copilot-instructions.md[ready-made instructions file].
+Copy it into your local project and adjust it to reflect the specifics of your project.
+
+== Copilot Skills
+
+A Copilot skill defines instructions, constraints, and step-by-step workflows for the
+https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent/about-copilot-coding-agent[GitHub Copilot coding agent].
+Use it to enforce style, allowed steps, locator conventions, and validation rules so every generated test follows team standards.
+
+Benefits of using Copilot skills:
+
+* Centralized rules for test generation.
+* Reusable across test creation sessions.
+* Easier auditing and refactoring when the rules change.
+
+=== Setup Copilot Skills for GitHub Copilot
+
+.   Create a `.github/skills` folder (if it doesn't exist)
+.   Create a subfolder for each skill and place a `SKILL.md` file inside it. Ready-made skills for generating VIVIDUS stories are available in the https://github.com/vividus-framework/vividus-sample-tests/tree/main/.github/skills[sample project]:
+    * https://github.com/vividus-framework/vividus-sample-tests/blob/main/.github/skills/generate-vividus-web-tests/SKILL.md[Web application test generation skill] — generates `.story` files for web UI tests using the VIVIDUS web plugin; requires both the VIVIDUS MCP and Playwright MCP servers to be connected
+    * https://github.com/vividus-framework/vividus-sample-tests/blob/main/.github/skills/generate-vividus-api-tests/SKILL.md[API test generation skill] — generates `.story` files for REST API tests from an OpenAPI/Swagger specification; requires the VIVIDUS MCP server to be connected
+    Copy the content of the skill files into your local project and modify them based on your needs and the specifics of your SUT.
++
+[IMPORTANT]
+Each skill must be placed in a dedicated subfolder inside `.github/skills/` as a `SKILL.md` file (e.g., `.github/skills/generate-vividus-web-tests/SKILL.md`). This structure ensures proper recognition by GitHub Copilot.
++
+.   Specify the path to your tests folder in the skill file.
+.   https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent/about-copilot-coding-agent[Use the skill with the GitHub Copilot coding agent].
+
+
+== Writing Tests with AI Assistance
+
+.Combine the skill configured earlier with a detailed test case:
+```
+Open `https://example.com/` page.
+Close any opened pop-ups.
+Check Search functionality.
+```
+
+This will generate a test with:
+
+*  Browser initialization.
+*  URL navigation.
+*  Pop-up handling.
+*  Search functionality verification.
+
+.Or combine the skill configured earlier with general web testing scenarios (scenarios list generated by AI):
+```
+Open `https://example.com/` page and write test automation scenarios demonstrating Vividus tool capabilities for web application testing.
+```
+
+This will generate multiple scenarios covering:
+
+*  Page navigation.
+*  Basic element interactions.
+*  Key elements verification.
+
+=== Best Practices for AI Test Generation
+
+.  **Be Specific**: Include exact URLs and scope details.
+.  **State Requirements**: Mention specific validations needed.
+.  **Indicate Patterns or Approaches**: Mention whether to follow BDD naming conventions, use composite steps, or apply data tables.
+.  **Review Generated Tests**: Always inspect AI-generated `.story` files before committing. LLMs can produce syntactically valid but logically incorrect tests. Verify step names, locators, and assertions against actual application behaviour.
+.  **Store Common Skill Logic**: Save common instructions in a separate skill file to avoid copy-pasting across
+different chats and minimize session context expiration effects.
+
+[IMPORTANT]
+Never include sensitive data — credentials, API keys, PII, or confidential application details — in AI prompts. Treat every prompt as potentially logged or retained by the AI provider.
+
+== FAQ
+
+=== Q: How to execute my tests automatically after creation?
+
+[IMPORTANT]
+
+Please be aware of token limits. Set up auto-execution only if you are confident and polish your prompt file.
+
+Extension of the skill file to include auto-run of test cases after confirmation in chat:
+
+```
+After generating the test script:
+1. Confirm test execution in agent chat by `"Yes, execute the tests"`.
+2. Execute test using command: ./gradlew runStories
+3. Automatically execute test with:
+   - Chrome desktop profile.
+   - Newly created story files.
+   - Real-time execution logs.
+4. Provide results in the chat showing:
+   - Execution status.
+   - Test results summary.
+   - Any failures or errors.
+   - Link to a detailed report.
+```
+
+[NOTE]
+
+Tests will only run after explicit confirmation to ensure the script is ready for execution.
+
+=== Q: How to set up recursive updates of steps by AI?
+
+[IMPORTANT]
+
+Please be aware of token limits. Send only the relevant story (add context).
+
+Due to token limitations, break down large test suites:
+
+*  Update scenarios in small batches (3-5 at a time).
+*  Use intermediate commits.
+*  Request focused updates.
+
+.Prompt to add recursive test scenarios update:
+```
+Update test scenarios to include enhanced logging and error handling, focusing on the login flow
+```
+
+=== Q: How to combine several cases written by AI in different files?
+
+Combining Strategies:
+
+*  Extract common steps to separate scenario.
+*  Create https://jbehave.org/reference/stable/composite-steps.html[composite steps].
+*  Use https://jbehave.org/reference/stable/given-stories.html[story includes] (GivenStories).
+
+.Prompt for file combination:
+```
+Combine these test scenarios into a single story file, extract common steps into separate scenario, and create composite steps for repeated actions.
+```
+
+=== Q: How to refactor existing code with AI help?
+
+[IMPORTANT]
+
+Please be aware of token limits. If you need a full refactor, split the work into multiple passes.
+
+Refactoring Approaches:
+
+*  Share existing code with AI (add context).
+*  Request specific improvements.
+*  Apply design patterns.
++
+[tabs]
+======
+BDD::
++
+[source]
+----
+Refactor these test scenarios to follow BDD approach and extract common steps into composite steps.
+----
+
+Data-Driven::
++
+[source]
+----
+Refactor these test scenarios to follow a data-driven approach and add an Examples table to provide a variety of test data.
+======
+
+=== Q: What to do when AI starts hallucinating after previously working well?
+
+**Symptoms:**
+
+*  Generated steps don't match Vividus step list.
+*  Incorrect locator formats (not using id/xpath as specified).
+*  Invalid syntax or made-up parameters.
+*  Attempts to execute non-existent commands.
+*  Creates invalid file structures.
+
+Immediate Actions:
+
+.  Stop current generation.
+.  Restart the MCP server (in VS Code click `⟳ Restart` next to the server name; in Claude Code run `/mcp` to check server status or restart the session).
+.  Clear the conversation.
+.  Start fresh with the target application URL and requirements (use the Copilot skill or provide details in chat).

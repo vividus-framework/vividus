@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package org.vividus.ssh;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -31,6 +33,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
+import com.jcraft.jsch.AgentProxyException;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 
 import org.apache.commons.lang3.function.FailableConsumer;
 import org.apache.commons.lang3.function.FailableFunction;
@@ -47,21 +56,32 @@ import org.vividus.context.DynamicConfigurationManager;
 import org.vividus.context.VariableContext;
 import org.vividus.ssh.context.SshTestContext;
 import org.vividus.ssh.exec.SshOutput;
+import org.vividus.ssh.factory.SshSessionFactory;
 import org.vividus.ssh.sftp.SftpCommand;
 import org.vividus.ssh.sftp.SftpOutput;
 import org.vividus.variable.VariableScope;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class SshStepsTests
 {
     private static final String DESTINATION_PATH = "/path";
     private static final String SERVER = "my-server";
     private static final SshConnectionParameters SSH_CONNECTION_PARAMETERS = new SshConnectionParameters();
+    private static final int LOCAL_PORT = 8080;
+    private static final String REMOTE_HOST = "remote-host";
+    private static final int REMOTE_PORT = 9090;
+    private static final String SSH_HOST = "ssh-host";
+    private static final int SSH_PORT = 22;
+    private static final String PORT_FORWARD_LOG_MESSAGE =
+            "Opening SSH port forward from localhost:{} to {}:{} via SSH server {}:{}";
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(SshSteps.class);
 
     @Mock private DynamicConfigurationManager<SshConnectionParameters> sshConnectionParameters;
     @Mock private VariableContext variableContext;
     @Mock private Map<String, CommandExecutionManager<?>> commandExecutionManagers;
     @Mock private SshTestContext sshTestContext;
+    @Mock private SshSessionFactory sshSessionFactory;
     @InjectMocks private SshSteps sshSteps;
 
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
@@ -84,12 +104,53 @@ class SshStepsTests
         );
     }
 
+    @Test
+    void shouldOpenSshConnectionWithPortForwardingAndCloseSessions() throws JSchException, AgentProxyException
+    {
+        SshPortForwardingParameters params = createPortForwardingParameters();
+
+        Session session = mock(Session.class);
+        when(sshSessionFactory.createSshSession(params)).thenReturn(session);
+
+        sshSteps.openSshConnectionWithPortForwarding(params);
+
+        verify(session).setPortForwardingL(LOCAL_PORT, REMOTE_HOST, REMOTE_PORT);
+        verify(session).connect();
+        assertEquals(List.of(info(PORT_FORWARD_LOG_MESSAGE, LOCAL_PORT, REMOTE_HOST, REMOTE_PORT, SSH_HOST, SSH_PORT)),
+                logger.getLoggingEvents());
+
+        sshSteps.closeSessions();
+
+        verify(session).disconnect();
+    }
+
+    @Test
+    void shouldCloseSshConnectionIfPortForwardingFails() throws JSchException, AgentProxyException
+    {
+        SshPortForwardingParameters params = createPortForwardingParameters();
+
+        Session session = mock(Session.class);
+        when(sshSessionFactory.createSshSession(params)).thenReturn(session);
+        JSchException exception = new JSchException();
+        doThrow(exception).when(session).setPortForwardingL(LOCAL_PORT, REMOTE_HOST, REMOTE_PORT);
+
+        JSchException thrown = assertThrows(JSchException.class,
+                () -> sshSteps.openSshConnectionWithPortForwarding(params));
+        assertEquals(exception, thrown);
+
+        verify(session).connect();
+        verify(session).disconnect();
+        assertEquals(List.of(info(PORT_FORWARD_LOG_MESSAGE, LOCAL_PORT, REMOTE_HOST, REMOTE_PORT, SSH_HOST, SSH_PORT)),
+                logger.getLoggingEvents());
+    }
+
     @ParameterizedTest
     @ValueSource(strings = { "", "|any|\n|1|\n|2|" })
     void shouldFailToConfigureDynamicConnection(String tableAsString)
     {
         var connectionParametersTable = new ExamplesTable(tableAsString);
-        var steps = new SshSteps(null, variableContext, commandExecutionManagers, sshTestContext);
+        var steps = new SshSteps(null, variableContext, commandExecutionManagers, sshTestContext,
+                sshSessionFactory);
         var key = "invalid-connection";
         var exception = assertThrows(IllegalArgumentException.class,
                 () -> steps.configureSshConnection(key, connectionParametersTable));
@@ -106,7 +167,8 @@ class SshStepsTests
         when(executionManager.run(SSH_CONNECTION_PARAMETERS, commands)).thenReturn(output);
         when(sshConnectionParameters.getConfiguration(SERVER)).thenReturn(SSH_CONNECTION_PARAMETERS);
 
-        var steps = new SshSteps(sshConnectionParameters, variableContext, commandExecutionManagers, sshTestContext);
+        var steps = new SshSteps(sshConnectionParameters, variableContext, commandExecutionManagers, sshTestContext,
+                sshSessionFactory);
         var actual = steps.executeCommands(commands, SERVER, Protocol.SSH);
 
         assertEquals(output, actual);
@@ -206,5 +268,16 @@ class SshStepsTests
         var commandExecutionManager = mock(CommandExecutionManager.class);
         when(commandExecutionManagers.get(protocol.toString())).thenReturn(commandExecutionManager);
         return commandExecutionManager;
+    }
+
+    private SshPortForwardingParameters createPortForwardingParameters()
+    {
+        SshPortForwardingParameters params = new SshPortForwardingParameters();
+        params.setLocalPort(LOCAL_PORT);
+        params.setRemoteHost(REMOTE_HOST);
+        params.setRemotePort(REMOTE_PORT);
+        params.setHost(SSH_HOST);
+        params.setPort(SSH_PORT);
+        return params;
     }
 }

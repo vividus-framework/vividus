@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.saucelabs.saucerest.DataCenter;
 
@@ -72,8 +73,11 @@ public class SauceConnectOptions extends TunnelOptions
     {
         StringBuilder options = Optional.ofNullable(customArguments).map(args -> new StringBuilder(args).append(' '))
                 .orElseGet(StringBuilder::new);
-        appendOption(options, "tunnel-name", tunnelName);
         appendOption(options, "region", dataCenter.name().toLowerCase(Locale.ROOT).replace('_', '-'));
+        if (tunnelName != null)
+        {
+            appendOption(options, "tunnel-name", tunnelName);
+        }
 
         if (getProxy() != null)
         {
@@ -84,7 +88,7 @@ public class SauceConnectOptions extends TunnelOptions
 
             appendOption(options, "pac", pacFileUrl);
         }
-        appendOption(options, "tunnel-pool", null);
+        appendOption(options, "tunnel-pool");
         return options.substring(0, options.length() - 1);
     }
 
@@ -101,13 +105,10 @@ public class SauceConnectOptions extends TunnelOptions
                                    .collect(Collectors.joining(" || "));
     }
 
-    private static void appendOption(StringBuilder stringBuilder, String name, String value)
+    private static void appendOption(StringBuilder stringBuilder, String name, String... values)
     {
         stringBuilder.append("--").append(name).append(' ');
-        if (value != null)
-        {
-            stringBuilder.append(value).append(' ');
-        }
+        Stream.of(values).forEach(value -> stringBuilder.append(value).append(' '));
     }
 
     @Override

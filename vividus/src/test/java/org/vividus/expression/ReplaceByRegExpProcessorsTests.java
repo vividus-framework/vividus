@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,10 @@ class ReplaceByRegExpProcessorsTests
 {
     private final ReplaceByRegExpProcessors processors = new ReplaceByRegExpProcessors();
 
+    @SuppressWarnings({ "checkstyle:MultipleStringLiterals", "checkstyle:MultipleStringLiteralsExtended",
+            "checkstyle:LineLength", "PMD.AvoidDuplicateLiterals" })
     static Stream<Arguments> expressionInput()
     {
-        // CHECKSTYLE:OFF
         return Stream.of(
             of("replaceFirstByRegExp(.+=(\\d), $1.0, onePlusTwo=3)",                                Optional.of("3.0")),
             of("formatDate()",                                                                      Optional.empty()),
@@ -60,7 +61,6 @@ class ReplaceByRegExpProcessorsTests
             of("replaceAllByRegExp(.test, TEST, this\nis\ntest\nvalue)",                            Optional.of("this\nisTEST\nvalue")),
             of("replaceFirstByRegExp(.*(te[a-z]+).*, $1, this\nis\ntest\nvalue)",                   Optional.of("test"))
         );
-        // CHECKSTYLE:ON
     }
 
     @ParameterizedTest

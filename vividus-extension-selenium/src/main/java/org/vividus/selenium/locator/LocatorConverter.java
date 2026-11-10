@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.vividus.ui.action.search.ElementActionService;
 import org.vividus.ui.action.search.LocatorPattern;
 import org.vividus.ui.action.search.LocatorType;
@@ -143,7 +143,7 @@ public class LocatorConverter
     {
         String typeInLowerCase = type.toLowerCase();
         return locatorTypes.stream()
-                       .filter(t -> StringUtils.replace(t.getKey().toLowerCase(), "_", "")
+                       .filter(t -> Strings.CS.replace(t.getKey().toLowerCase(), "_", "")
                            .equals(typeInLowerCase))
                        .findFirst();
     }

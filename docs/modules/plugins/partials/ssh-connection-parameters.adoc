@@ -7,57 +7,13 @@ NOTE: The {parameters-name} marked with *bold* are mandatory.
 |Default
 |Description
 
-|[subs=+quotes]`*{connection-parameters-prefix}username*`
-|<string>
-|
-|The name of the user logging in
-
-|[subs=+quotes]`*{connection-parameters-prefix}host*`
-|hostname or IP
-|
-|The remote host
-
-|[subs=+quotes]`*{connection-parameters-prefix}port*`
-|0..65535
-|
-|The remote port (The standard TCP port for SSH is 22)
-
-
-|`{connection-parameters-prefix}agent-forwarding`
-a|`true` +
-`false`
-|`false`
-|Enable forwarding of the authentication agent connection
-
 |`{connection-parameters-prefix}pseudo-terminal-enabled`
 a|`true` +
 `false`
 |`false`
 |Allocate a https://tools.ietf.org/html/rfc4254#section-6.2[Pseudo-Terminal]
 
-4+^.^|_The following {parameters-name} are used only for the password-based authentication_
-
-|[subs=+quotes]`*{connection-parameters-prefix}password*`
-|<string>
-|
-|The password
-
-4+^.^|_The following {parameters-name} are used only for the public key authentication_
-
-|[subs=+quotes]`*{connection-parameters-prefix}private-key*`
-|<string>
-|
-|The private key
-
-|[subs=+quotes]`*{connection-parameters-prefix}public-key*`
-|<string>
-|
-|The public key
-
-|`{connection-parameters-prefix}passphrase`
-|<string>
-|
-|The passphrase for the private key
+include::partial$ssh-connection-parameters-commons.adoc[]
 
 4+^.^|_The following {parameters-name} are not applicable for SFTP_
 

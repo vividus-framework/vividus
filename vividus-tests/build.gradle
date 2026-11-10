@@ -9,15 +9,20 @@ tasks.publish.enabled = false
 runStories.treatKnownIssuesOnlyAsPassed = true
 debugStories.treatKnownIssuesOnlyAsPassed = true
 
+ext.ignoreBeans='dynamoDbSteps,kinesisSteps,lambdaSteps,s3BucketSteps'
+
 dependencies {
     implementation project(':vividus')
+    implementation project(':vividus-agent-newrelic')
     implementation project(':vividus-plugin-accessibility')
     implementation project(':vividus-plugin-applitools')
     implementation project(':vividus-plugin-avro')
+    implementation project(':vividus-plugin-aws-cloudwatch')
     implementation project(':vividus-plugin-aws-dynamodb')
     implementation project(':vividus-plugin-aws-kinesis')
     implementation project(':vividus-plugin-aws-lambda')
     implementation project(':vividus-plugin-aws-s3')
+    implementation project(':vividus-plugin-aws-secrets-manager')
     implementation project(':vividus-plugin-azure-cosmos-db')
     implementation project(':vividus-plugin-azure-data-factory')
     implementation project(':vividus-plugin-azure-event-grid')
@@ -41,6 +46,8 @@ dependencies {
     implementation project(':vividus-plugin-mobile-app')
     implementation project(':vividus-plugin-mobitru')
     implementation project(':vividus-plugin-mongodb')
+    implementation project(':vividus-plugin-rabbitmq')
+    implementation project(':vividus-plugin-redis')
     implementation project(':vividus-plugin-rest-api')
     implementation project(':vividus-plugin-saucelabs')
     implementation project(':vividus-plugin-shell')
@@ -54,6 +61,9 @@ dependencies {
     implementation project(':vividus-plugin-xml')
     implementation project(':vividus-plugin-yaml')
 
-    implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.46')
-    implementation(group: 'com.h2database', name: 'h2', version: '2.3.232')
+    implementation(libs.csvjdbc)
+    implementation(libs.h2)
+
+    // Zstd decompression support, need to add explicitly as it's not a transitive dependency of netty out-of-the-box
+    implementation('com.github.luben:zstd-jni:1.5.7-25')
 }

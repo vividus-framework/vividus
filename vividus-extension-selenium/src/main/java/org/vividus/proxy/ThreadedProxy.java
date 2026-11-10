@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
-
-import com.browserup.bup.filters.RequestFilter;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -41,6 +40,7 @@ public final class ThreadedProxy implements IProxy
     private final boolean useEphemeralPort;
     private final IProxyFactory proxyFactory;
     private final TestContext testContext;
+    private final ReentrantLock portsLock = new ReentrantLock();
 
     public ThreadedProxy(String proxyHost, IntegerRange proxyPorts, IProxyFactory proxyFactory, TestContext testContext)
             throws UnknownHostException
@@ -120,9 +120,14 @@ public final class ThreadedProxy implements IProxy
             ephemeralPortsAction.run();
             return;
         }
-        synchronized (proxyPorts)
+        portsLock.lock();
+        try
         {
             customPortsAction.run();
+        }
+        finally
+        {
+            portsLock.unlock();
         }
     }
 
@@ -139,15 +144,15 @@ public final class ThreadedProxy implements IProxy
     }
 
     @Override
-    public void addRequestFilter(RequestFilter requestFilter)
+    public void addMock(ProxyMock proxyMock)
     {
-        proxy().addRequestFilter(requestFilter);
+        proxy().addMock(proxyMock);
     }
 
     @Override
-    public void clearRequestFilters()
+    public void clearMocks()
     {
-        proxy().clearRequestFilters();
+        proxy().clearMocks();
     }
 
     @Override

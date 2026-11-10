@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -69,10 +69,10 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
 
     protected Set<String> filterResults(Stream<String> urls)
     {
-        Set<String> uniqueUrls = urls.collect(Collectors.toSet());
+        Set<String> uniqueUrls = urls.collect(Collectors.toCollection(LinkedHashSet::new));
         if (filterRedirects)
         {
-            Set<String> result = new HashSet<>();
+            Set<String> result = new LinkedHashSet<>();
             Map<String, List<String>> redirectChains = new HashMap<>();
 
             for (String url : uniqueUrls)

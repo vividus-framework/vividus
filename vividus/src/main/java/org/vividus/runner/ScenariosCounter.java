@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,33 @@
 
 package org.vividus.runner;
 
+import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.jbehave.core.junit.JUnit4StoryRunner;
 import org.junit.runner.Description;
 import org.junit.runners.model.InitializationError;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
+@SuppressWarnings("PMD.SystemPrintln")
 public final class ScenariosCounter
 {
     private static final String DEFAULT_STORY_LOCATION = "story";
-    private static final String FORMATTER = "%5d | %s";
 
     private ScenariosCounter()
     {
     }
 
-    public static void main(String[] args) throws ParseException, InitializationError, ReflectiveOperationException
+    public static void main(String[] args) throws ParseException, InitializationError, ReflectiveOperationException,
+            IOException
     {
         Vividus.init();
         CommandLineParser parser = new DefaultParser();
@@ -52,7 +54,7 @@ public final class ScenariosCounter
         CommandLine commandLine = parser.parse(options, args);
         if (commandLine.hasOption(helpOption.getOpt()))
         {
-            new HelpFormatter().printHelp("ScenariosCounter", options);
+            HelpFormatter.builder().get().printHelp("ScenariosCounter", null, options, null, false);
             return;
         }
 
@@ -87,8 +89,7 @@ public final class ScenariosCounter
 
     private static void print(int number, String message)
     {
-        System.out.printf(FORMATTER, number, message);
-        System.out.println();
+        System.out.printf("%5d | %s%n", number, message);
     }
 
     private static void configureStoryLocation(String storyLocation)

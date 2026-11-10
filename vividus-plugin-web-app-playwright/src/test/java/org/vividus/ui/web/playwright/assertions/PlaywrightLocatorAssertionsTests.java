@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.vividus.ui.web.playwright.assertions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_SELF;
@@ -200,6 +202,30 @@ class PlaywrightLocatorAssertionsTests
             verify(locatorAssertions).isChecked(captor.capture());
             assertEquals(ASSERTION_NO_WAIT_TIMEOUT, captor.getValue().timeout);
             assertFalse(captor.getValue().checked);
+        });
+    }
+
+    @Test
+    void shouldAssertElementInViewport()
+    {
+        shouldAssertElement(locatorAssertions -> {
+            PlaywrightLocatorAssertions.assertElementInViewport(locator, false);
+            ArgumentCaptor<LocatorAssertions.IsInViewportOptions> captor = ArgumentCaptor.forClass(
+                    LocatorAssertions.IsInViewportOptions.class);
+            verify(locatorAssertions).isInViewport(captor.capture());
+            assertNotNull(captor.getValue());
+        });
+    }
+
+    @Test
+    void shouldAssertElementInViewportWaitForState()
+    {
+        shouldAssertElement(locatorAssertions -> {
+            PlaywrightLocatorAssertions.assertElementInViewport(locator, true);
+            ArgumentCaptor<LocatorAssertions.IsInViewportOptions> captor = ArgumentCaptor.forClass(
+                    LocatorAssertions.IsInViewportOptions.class);
+            verify(locatorAssertions).isInViewport(captor.capture());
+            assertNull(captor.getValue());
         });
     }
 

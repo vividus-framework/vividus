@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.expressions.SingleArgExpressionProcessor;
 
@@ -71,7 +72,7 @@ public class DecodeDataUrlExpression extends SingleArgExpressionProcessor<Object
                 String mimeType = matcher.group(MIME_TYPE_GROUP);
                 text = StringUtils.isBlank(mimeType) || mimeType.contains("text");
                 String parameters = matcher.group(PARAMETERS_GROUP);
-                base64Encoded = StringUtils.contains(parameters, "base64");
+                base64Encoded = Strings.CI.contains(parameters, "base64");
                 data = matcher.group(DATA_GROUP);
             }
         }

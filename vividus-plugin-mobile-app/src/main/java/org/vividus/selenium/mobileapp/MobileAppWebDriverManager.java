@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
             // On Android platform the ratio between the device window size and taken screenshot size is equal to 1
             // regardless of the device's display density.
             // Also see https://github.com/appium/appium-base-driver/pull/306 for details.
-            return 1D;
+            return 1d;
         }
 
         try

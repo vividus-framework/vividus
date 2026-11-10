@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class CsvReader
     {
         try (Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8))
         {
-            CSVFormat formatWithHeaders = csvFormat.builder().setHeader(header).build();
+            CSVFormat formatWithHeaders = csvFormat.builder().setHeader(header).get();
             return StreamSupport.stream(formatWithHeaders.parse(reader).spliterator(), false)
                     .map(CSVRecord::toMap)
                     .toList();

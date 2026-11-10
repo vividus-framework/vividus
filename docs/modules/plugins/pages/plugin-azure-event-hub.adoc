@@ -53,8 +53,8 @@ Azure Event Hubs provides an Apache Kafka endpoint on an event hub, which allows
 +
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-azure-event-hub')
-implementation(group: 'org.vividus', name: 'vividus-plugin-kafka')
+implementation('org.vividus:vividus-plugin-azure-event-hub')
+implementation('org.vividus:vividus-plugin-kafka')
 ----
 
 . Configure authentication for xref:plugin-kafka.adoc[Kafka Consumer or/and Producer].

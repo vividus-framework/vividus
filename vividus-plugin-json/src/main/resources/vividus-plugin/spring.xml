@@ -11,9 +11,7 @@
 
     <bean id="json-context" class="org.vividus.json.variable.JsonContextVariable" />
 
-    <bean id="anyOf" class="org.vividus.json.steps.JsonArrayContainsAnyOf">
-        <constructor-arg ref="jsonUtils-LowerCamelCase" />
-    </bean>
+    <bean id="anyOf" class="org.vividus.json.steps.JsonArrayContainsAnyOf" />
 
     <bean id="jsonSteps" class="org.vividus.json.steps.JsonSteps">
         <constructor-arg>
@@ -24,6 +22,8 @@
     <bean id="jsonPatchSteps" class="org.vividus.json.steps.JsonPatchSteps" />
 
     <bean id="jsonSchemaValidationSteps" class="org.vividus.json.steps.JsonSchemaValidationSteps"/>
+
+    <bean class="org.vividus.json.expression.JsonExpressionProcessor"/>
 
     <util:list id="stepBeanNames-Json">
         <idref bean="jsonSteps" />

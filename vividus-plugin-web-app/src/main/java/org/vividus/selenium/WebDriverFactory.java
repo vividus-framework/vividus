@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.HasAuthentication;
 import org.openqa.selenium.UsernameAndPassword;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.events.EventFiringDecorator;
@@ -60,15 +59,17 @@ public class WebDriverFactory extends GenericWebDriverFactory
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
 
-    @SuppressWarnings("paramNum")
+    @SuppressWarnings({"paramNum", "PMD.ExcessiveParameterList"})
     public WebDriverFactory(boolean remoteExecution, IRemoteWebDriverFactory remoteWebDriverFactory,
             IPropertyParser propertyParser, JsonUtils jsonUtils, IProxy proxy,
             WebDriverStartContext webDriverStartContext,
             Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters,
+            Optional<SeleniumConfigurationValidator> seleniumConfigurationValidator,
             TimeoutConfigurer timeoutConfigurer, PropertyMappedCollection<BasicAuthCredentials> basicAuthCredentials,
             List<WebDriverListenerFactory> webDriverListenerFactories)
     {
-        super(remoteWebDriverFactory, propertyParser, jsonUtils, desiredCapabilitiesAdjusters);
+        super(remoteWebDriverFactory, propertyParser, jsonUtils, desiredCapabilitiesAdjusters,
+                seleniumConfigurationValidator);
         this.remoteExecution = remoteExecution;
         this.proxy = proxy;
         this.webDriverStartContext = webDriverStartContext;
@@ -126,13 +127,9 @@ public class WebDriverFactory extends GenericWebDriverFactory
                 {
                     type.prepareCapabilities(toUpdate);
                     configureProxy(type, toUpdate);
-                    if (type == WebDriverType.CHROME)
+                    if (type == WebDriverType.CHROME || type == WebDriverType.EDGE)
                     {
-                        WebDriverConfiguration configuration = getWebDriverConfiguration(type, false);
-                        ChromeOptions chromeOptions = new ChromeOptions();
-                        chromeOptions.addArguments(configuration.getCommandLineArguments());
-                        configuration.getExperimentalOptions().forEach(chromeOptions::setExperimentalOption);
-                        return chromeOptions.merge(toUpdate);
+                        return type.mergeToRemoteOptions(toUpdate, getWebDriverConfiguration(type, false));
                     }
                     return toUpdate;
                 })

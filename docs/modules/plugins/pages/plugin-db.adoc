@@ -17,21 +17,21 @@ system (DBMS) can understand.
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-db')
+implementation('org.vividus:vividus-plugin-db')
 ----
 
 . Define your JDBC driver and add appropriate dependency. Let's take PostgreSQL as an example:
 +
-- Open JDBC page on https://mvnrepository.com/open-source/jdbc-drivers[maven repository];
-- Find driver for your database and open details (https://mvnrepository.com/artifact/org.postgresql/postgresql[PostgreSQL JDBC Driver]);
-- Choose and open version (https://mvnrepository.com/artifact/org.postgresql/postgresql/42.5.4[42.5.4]);
-- Go to the Gradle tab and copy implementation string;
-- Paste chosen dependency into your build.gradle file:
+* Open JDBC page on https://mvnrepository.com/open-source/jdbc-drivers[maven repository];
+* Find driver for your database and open details (https://mvnrepository.com/artifact/org.postgresql/postgresql[PostgreSQL JDBC Driver]);
+* Choose and open version (https://mvnrepository.com/artifact/org.postgresql/postgresql/42.5.4[42.5.4]);
+* Go to the Gradle tab and copy implementation string;
+* Paste chosen dependency into your build.gradle file:
 +
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-include::example$plugin-db/postgresql-dependency.gradle[]
+implementation('org.postgresql:postgresql')
 ----
 +
 NOTE: In case Maven repository does not contain driver you need, please refer to the documentation of your database to define suitable JDBC driver.
@@ -79,7 +79,7 @@ Here are some examples of setting different databases connection for most popula
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/mysql-dependency.gradle[]
+implementation('com.mysql:mysql-connector-j')
 ----
 
 .environment.properties
@@ -103,7 +103,7 @@ jdbc:mysql://host:port/database?parameters
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/sqlserver-dependency.gradle[]
+implementation('com.microsoft.sqlserver:mssql-jdbc')
 ----
 
 .`environment.properties` to connect using port number
@@ -139,7 +139,7 @@ jdbc:sqlserver://serverName\instanceName:portNumber;parameter1=value1;parameter2
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/sqlserver-dependency.gradle[]
+implementation('com.microsoft.sqlserver:mssql-jdbc')
 ----
 
 .environment.properties
@@ -163,7 +163,7 @@ jdbc:sqlserver://serverName:portNumber;parameter1=value1;parameter2=value2
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/postgresql-dependency.gradle[]
+implementation('org.postgresql:postgresql')
 ----
 
 .environment.properties
@@ -187,7 +187,7 @@ jdbc:postgresql://host:port/database?parameters
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/oracle-dependency.gradle[]
+implementation('com.oracle.database.jdbc:ojdbc10')
 ----
 
 .environment.properties
@@ -211,7 +211,7 @@ jdbc:oracle:thin:user/password@//host:port/service
 .build.gradle
 [source,gradle]
 ----
-implementation(group: 'com.ibm.db2.jcc', name: 'db2jcc', version: 'db2jcc4')
+implementation('com.ibm.db2.jcc:db2jcc:db2jcc4')
 ----
 
 .environment.properties
@@ -238,7 +238,7 @@ Please see the xref:user-guides:execute-sql-against-csv.adoc[step-by-step guide]
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/csvjdbc-dependency.gradle[]
+implementation('net.sourceforge.csvjdbc:csvjdbc')
 ----
 
 .environment.properties
@@ -264,7 +264,7 @@ finished. Please see the xref:user-guides:use-in-memory-db-to-manage-test-data.a
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/h2-dependency.gradle[]
+implementation('com.h2database:h2')
 ----
 
 .environment.properties
@@ -286,7 +286,7 @@ jdbc:h2:mem:databaseName
 .build.gradle
 [source,gradle]
 ----
-include::example$plugin-db/snowflake-dependency.gradle[]
+implementation('net.snowflake:snowflake-jdbc')
 ----
 
 .environment.properties
@@ -308,7 +308,7 @@ jdbc:snowflake://account_identifier.snowflakecomputing.com/?connection_parameter
 
 [cols="4,2,1,4", options="header"]
 |===
-|Property name
+|Property Name
 |Acceptable values
 |Default
 |Description
@@ -414,7 +414,7 @@ SELECT *
 FROM launch_rockets
 WHERE country='USA'
 ` against `launches` and save result to scenario variable `usa-launches`
-Then `usa-launches[0].name` is equal to `Falcon 9`
+Then `${usa-launches[0].name}` is equal to `Falcon 9`
 ----
 
 === Execute update query

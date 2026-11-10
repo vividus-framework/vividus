@@ -5,8 +5,7 @@
     <title>Visual tests result table</title>
     <link rel="stylesheet" href="../../styles.css"/>
     <link rel="stylesheet" href="../../webjars/vividus/style.css"/>
-    <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="../../webjars/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css">
+    <link rel="stylesheet" href="../../webjars/bootstrap/5.3.1/css/bootstrap.min.css"/>
     <style>
         tbody:hover {
             background-color: #f5f5f5
@@ -31,7 +30,7 @@
                 </tr>
             </thead>
             <#list result.testResults as testResult>
-                <#assign visualStatus = testResult.isPassed()?then('success', 'failed')>
+                <#assign visualStatus = testResult.isPassed()?then('table-success', 'table-danger')>
                 <tbody>
                     <tr>
                         <td>${testResult.getName()}</td>
@@ -51,7 +50,7 @@
                                 </tr>
                                 <#if testResult.getAccessibilityCheckResult()??>
                                     <#assign accessibilityResult = testResult.getAccessibilityCheckResult()>
-                                    <#assign accessibilityStatus = accessibilityResult.isPassed()?then('success', 'failed')>
+                                    <#assign accessibilityStatus = accessibilityResult.isPassed()?then('table-success', 'table-danger')>
                                     <tr class="${accessibilityStatus}">
                                         <td class="inner-cell">
                                             ${accessibilityResult.getGuideline()} accessibility check is ${accessibilityResult.getStatus()}, see <a href="${accessibilityResult.getUrl()}" role="button" target="_blank">Applitools report</a> for details.

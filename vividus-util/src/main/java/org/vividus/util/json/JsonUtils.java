@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.type.CollectionType;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.function.FailableSupplier;
 
 public class JsonUtils
@@ -90,7 +90,7 @@ public class JsonUtils
             return false;
         }
         // Single number ("1") is valid JSON as well, but we can't guarantee that it's JSON actually
-        return StringUtils.startsWithAny(str.trim(), "[", "{");
+        return Strings.CS.startsWithAny(str.trim(), "[", "{");
     }
 
     public JsonNode readTree(String jsonString)

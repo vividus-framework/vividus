@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ class InetAddressUtilsTests
     @ParameterizedTest
     @CsvSource({
             "https://www.domain.com,                       domain.com,                              true",
+            "https://www.domain.com,                       www.domain.com,                          true",
             "http://127.0.0.1:8080,                        127.0.0.1,                               true",
             "http://localhost:8080,                        localhost,                               true",
             "https://vividus-test-site-a92k.onrender.com/, vividus-test-site-a92k.onrender.com,     true",

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class DiffAttachmentPublisher
         this.attachmentPublisher = attachmentPublisher;
     }
 
-    public void publishDiff(Object expected, Object actual)
+    public void publishDiff(String title, Object expected, Object actual)
     {
         String expectedString = String.valueOf(expected);
         String actualString = String.valueOf(actual);
@@ -52,7 +52,7 @@ public class DiffAttachmentPublisher
         String uDiff = UnifiedDiffUtils.generateUnifiedDiff(VARIABLE, VARIABLE, expectedLines, diff, CONTEXT_SIZE)
                                        .stream()
                                        .collect(Collectors.joining("\n"));
-        attachmentPublisher.publishAttachment("/templates/udiff.ftl", Map.of("udiff", uDiff), "Comparison result");
+        attachmentPublisher.publishAttachment("/templates/udiff.ftl", Map.of("udiff", uDiff), title);
     }
 
     private List<String> toLines(String toConvert)

@@ -1,9 +1,31 @@
 project.description = 'VIVIDUS plugin for Visual Testing'
 
+sourceSets {
+    blobStorage {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+    blobStorageTest {
+        compileClasspath += sourceSets.blobStorage.output + sourceSets.blobStorage.compileClasspath
+        runtimeClasspath += sourceSets.blobStorage.output + sourceSets.blobStorage.runtimeClasspath
+    }
+}
+
 java {
     registerFeature('blobStorage') {
-        usingSourceSet(sourceSets.main)
+        usingSourceSet(sourceSets.blobStorage)
     }
+}
+
+tasks.register('blobStorageTest', Test) {
+    testClassesDirs = sourceSets.blobStorageTest.output.classesDirs
+    classpath = sourceSets.blobStorageTest.runtimeClasspath
+}
+check.dependsOn blobStorageTest
+
+pmdBlobStorage {
+    ruleSetFiles = pmdMain.ruleSetFiles
+    maxFailures = pmdMain.maxFailures
 }
 
 dependencies {
@@ -15,18 +37,29 @@ dependencies {
     implementation project(':vividus-extension-visual-testing')
 
     blobStorageImplementation project(':vividus-plugin-azure-storage-account')
-    blobStorageImplementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.2.1')
-    blobStorageImplementation(group: 'org.springframework', name: 'spring-context')
-    blobStorageImplementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.30')
-    blobStorageImplementation(group: 'com.azure', name: 'azure-storage-blob')
-    blobStorageImplementation(group: 'jakarta.inject', name: 'jakarta.inject-api', version: '2.0.1')
+    blobStorageImplementation platform(libs.spring.bom)
+    blobStorageImplementation(libs.spring.context)
+    blobStorageImplementation platform(libs.slf4j.bom)
+    blobStorageImplementation(libs.slf4j.api)
+    blobStorageImplementation platform('com.azure:azure-sdk-bom:1.3.9')
+    blobStorageImplementation('com.azure:azure-storage-blob')
+    blobStorageImplementation('jakarta.inject:jakarta.inject-api:2.0.1')
 
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.16')
-    implementation(group: 'org.slf4j', name: 'slf4j-api')
+    implementation platform(libs.slf4j.bom)
+    implementation(libs.slf4j.api)
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.4')
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.15.2')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
+    testImplementation(libs.slf4jTest)
+
+    blobStorageTestImplementation sourceSets.blobStorage.output
+    blobStorageTestImplementation platform(libs.junit.bom)
+    blobStorageTestImplementation(libs.junit.jupiter)
+    blobStorageTestRuntimeOnly(libs.junit.platformLauncher)
+    blobStorageTestImplementation platform(libs.mockito.bom)
+    blobStorageTestImplementation(libs.mockito.junitJupiter)
+    blobStorageTestImplementation(libs.slf4jTest)
 }

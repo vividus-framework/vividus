@@ -91,12 +91,12 @@ web.driver.<browser>.driver-executable-path=/path/to/driver/executable
 
 where `<browser>` is one of the following values:
 
-- `chrome`
-- `firefox`
-- `safari`
-- `iexplore`
-- `edge`
-- `opera`
+* `chrome`
+* `firefox`
+* `safari`
+* `iexplore`
+* `edge`
+* `opera`
 
 === Configure browser path
 
@@ -113,10 +113,10 @@ web.driver.<browser>.binary-path=/path/to/custom/browser/executable
 
 where `<browser>` is one of the following values:
 
-- `chrome`
-- `firefox`
-- `edge`
-- `opera`
+* `chrome`
+* `firefox`
+* `edge`
+* `opera`
 
 === Configure Basic authentication for Chromium browsers
 It is allowed to add predefined configurations for
@@ -968,6 +968,24 @@ include::plugins:partial$web-storage-steps.adoc[]
 include::partial$proxy-steps.adoc[]
 
 === Window Steps
+
+==== Maximize browser window
+
+Maximizes the current window if it is not already maximized, the step can be useful if you previously performed any resize actions with the browser window.
+
+[source,gherkin]
+----
+When I maximize window
+----
+
+.Maximize browser window after resize
+[source,gherkin]
+----
+Given I am on page with URL `https://example.com/`
+When I change window size to `640x320`
+When I maximize window
+----
+
 ==== Resize the current browser window
 
 Changes the current browser window size to the specified one.
@@ -1168,27 +1186,6 @@ Then `${response}` matcher `.+`
 ----
 
 === Element wait steps
-
-==== Wait for element appearance with timeout
-
-Waits for element appearance with desired timeout.
-
-WARNING: It's forbidden to use <<_visibility_types>> in the locator.
-
-[source,gherkin]
-----
-Then element located by `$locator` appears in `$timeout`
-----
-
-* `$locator` - The <<_locator,locator>> used to find element.
-* `$timeout` - The maximum time to wait for the element appearance in {durations-format-link} format.
-
-.Click on the button and waiting for element appearance for 2 minutes
-[source,gherkin]
-----
-When I click on element located by `buttonName(Show element)`
-Then element located by 'id(element-to-show)' appears in 'PT2M'
-----
 
 ==== Wait for element disappearance with timeout
 
@@ -1668,50 +1665,10 @@ Then value `$value` is selected in slider located by `$locator`
 Then value `50` is selected in slider located by `id(test_slider)`
 ----
 
-=== Mobile Emulation
+:selenium: true
+include::partial$common-web-app-mobile-emulation-steps.adoc[conditional="selenium"]
 
-==== Emulate mobile device
-
-Emulates mobile device using the provided configuration.
-
-IMPORTANT: The step is only supported by Chrome browser.
-
-[source,gherkin]
-----
-When I emulate mobile device with configuration:`$jsonConfiguration`
-----
-
-* `$jsonConfiguration` - The JSON containing https://chromedevtools.github.io/devtools-protocol/tot/Emulation/#method-setDeviceMetricsOverride[device metrics] to override.
-
-.Emulate iPhone 14 Pro Max
-[source,gherkin]
-----
-When I emulate mobile device with configuration:`{
-    "width": 430,
-    "height": 932,
-    "deviceScaleFactor": 3,
-    "mobile": true
-}`
-----
-
-==== Reset mobile device emulation
-
-Resets the mobile device emulation returning the browser to its initial state.
-
-IMPORTANT: The step is only supported by Chrome browser.
-
-IMPORTANT: The step ignores the `web/desktop/chrome/mobile_emulation/phone` profile settings when returning the browser to its initial state.
-
-[source,gherkin]
-----
-When I reset mobile device emulation
-----
-
-.Resets device metrics to defaults
-[source,gherkin]
-----
-When I reset mobile device emulation
-----
+include::partial$common-web-app-network-conditions-steps.adoc[]
 
 === Geolocation emulation
 
@@ -1766,6 +1723,147 @@ When I refresh page
 Then text `Brooklyn, NY` does not exist
 ----
 
+=== Browser Permissions
+
+==== Configure permission
+
+Configures desired browser permission for currently opened page. You might need to refresh the page to make permission
+changes applied.
+
+IMPORTANT: The steps requires current page to be non-blank page.
+
+[source,gherkin]
+----
+When I set state of `$permission` browser permission to `$state`
+----
+
+* `$permission` - The https://www.w3.org/TR/permissions/#permissions[permission].
+* `$state` - The https://www.w3.org/TR/permissions/#dfn-states[permission state].
+
+.Enable geolocation permission
+[source,gherkin]
+----
+Given I am on page with URL `https://example.com`
+When I set state of `geolocation` browser permission to `granted`
+----
+
+==== Configure permission for origin
+
+Configures desired browser permission for the specified origin.
+
+[source,gherkin]
+----
+When I set state of `$permission` browser permission to `$state` for `$origin` origin
+----
+
+* `$permission` - The https://www.w3.org/TR/permissions/#permissions[permission].
+* `$state` - The https://www.w3.org/TR/permissions/#dfn-states[permission state].
+* `$origin` - The URL of origin to configure permission for.
+
+.Enable persistent storage permission
+[source,gherkin]
+----
+When I set state of `persistent storage` browser permission to `granted` for `https://example.com` origin
+Given I am on page with URL `https://example.com`
+----
+
+==== Configure multiple permissions
+
+Configures multiple browser permissions.
+
+[source,gherkin]
+----
+When I configure browser permissions:$permissions
+----
+
+.Disable geolocation and enable persistent storage permissions
+[source,gherkin]
+----
+When I configure browser permissions:
+|permissionName    |state  |origin             |
+|geolocation       |denied |https://example.com|
+|persistent storage|granted|https://example.com|
+----
+
+=== Mobile web steps
+
+When running web tests on real mobile devices or emulators/simulators, it may be necessary to interact with components
+from the native mobile context (e.g., permission pop-ups). The following steps can be used to achieve this.
+
+==== Switch to mobile native context
+
+Switches context to a mobile native context.
+
+[source,gherkin]
+----
+When I switch to native context
+----
+
+.Allow to use device location on Android
+[source,gherkin]
+----
+Given I am on page with URL `https://the-internet.herokuapp.com/geolocation`
+When I click on element located by `buttonName(Where am I?)`
+When I switch to native context
+When I click on element located by `xpath(.//android.widget.Button[@text='Allow while visiting the site'])`
+When I switch to web view with name that is equal to `CHROMIUM`
+----
+
+==== Switch to web view by name
+
+Switches context to a web view with name that matches the specified comparison rule.
+
+[source,gherkin]
+----
+When I switch to web view with name that $comparisonRule `$value`
+----
+
+* `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[The web view name comparison rule].
+* `$value` - The value to find the target web view.
+
+.Allow to use device location on iOS
+[source,gherkin]
+----
+Given I am on page with URL `https://the-internet.herokuapp.com/geolocation`
+When I click on element located by `buttonName(Where am I?)`
+When I switch to native context
+When I click on element located by `id(Allow)`
+When I switch to web view with name that contains `WEBVIEW`
+----
+
+==== Execute steps in mobile native context
+Executes the provided steps in the mobile native context. If the current context is not the mobile native
+context, it switches to the mobile native context, executes the provided steps, and then switches back to the
+original context. The key advantage of this step is that it is not needed to know the name of the original context.
+
+[source,gherkin]
+----
+When I execute steps in native context:$stepsToExecute
+----
+
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
+
+.Allow to use device location on Android
+[source,gherkin]
+----
+Given I am on page with URL `https://the-internet.herokuapp.com/geolocation`
+When I click on element located by `buttonName(Where am I?)`
+When I execute steps in native context:
+| step                                                                                                        |
+| When I click on element located by `xpath(.//android.widget.Button[@text='Allow while visiting the site'])` |
+
+----
+
+.Allow to use device location on iOS
+[source,gherkin]
+----
+Given I am on page with URL `https://the-internet.herokuapp.com/geolocation`
+When I click on element located by `buttonName(Where am I?)`
+When I execute steps in native context:
+| step                                           |
+| When I click on element located by `id(Allow)` |
+----
+
 == Tips & Tricks
 
 === Validate URL host of the opened page
@@ -1807,3 +1905,29 @@ Then `${current-page-url}` matches `.+\/relative\/url.+`
 
 * `$\{current-page-url}` is the <<Current page URL,current page URL>> dynamic variable.
 * `.+\/relative\/url.+` is a regular expression to match the expected part of the page URL.
+
+=== Typing large text into the field
+
+Sometimes, large amounts of text may be entered into the field very slowly, only partially,
+or not at all. This happens because the system types the text character by character.
+With large texts, this becomes inefficient, may cause performance issues, timeouts, or truncation.
+
+The following workarounds can be used:
+
+.Add large text to the field in chunks
+[source,gherkin]
+----
+When I execute steps while counter is less than or equal to 10 with increment 1 starting from 1:
+|step|
+|When I add `#{generate(regexify '[a-z]{3000}')}` to field located by `id(description)`|
+----
+
+.Use clipboard instead of typing large text
+[source,gherkin]
+----
+When I execute javascript `navigator.clipboard.writeText("#{generate(regexify '[a-z]{30000}')}");`
+When I execute sequence of actions:
+|type    |argument                |
+|CLICK   |id(description)         |
+|KEY_DOWN|OS_INDEPENDENT_CONTROL,V|
+----

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +27,20 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import com.saucelabs.ci.sauceconnect.SauceTunnelManager;
 import com.saucelabs.saucerest.DataCenter;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.verification.VerificationMode;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
 
+@ExtendWith(TestLoggerFactoryExtension.class)
 class SauceConnectManagerTests
 {
     private static final String OPTIONS = "options";
@@ -47,6 +52,8 @@ class SauceConnectManagerTests
     private SauceConnectManager sauceConnectManager;
 
     private final TestContext context = new SimpleTestContext();
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(SauceConnectManager.class);
 
     @BeforeEach
     void beforeEach()
@@ -61,8 +68,8 @@ class SauceConnectManagerTests
         var options = mock(SauceConnectOptions.class);
         when(options.build(anyString())).thenReturn(OPTIONS);
         sauceConnectManager.start(options);
-        verify(sauceTunnelManager).openConnection(USERNAME, ACCESS_KEY, DATA_CENTER, null, OPTIONS, null, Boolean.TRUE,
-                null);
+        verify(sauceTunnelManager).openConnection(USERNAME, ACCESS_KEY, DATA_CENTER, null, OPTIONS, logger, System.out,
+                Boolean.TRUE, null, true);
     }
 
     @Test
@@ -70,8 +77,8 @@ class SauceConnectManagerTests
     {
         var options = startConnection();
         var tunnelName = sauceConnectManager.start(options);
-        verify(sauceTunnelManager, times(1)).openConnection(USERNAME, ACCESS_KEY, DATA_CENTER, null, OPTIONS, null,
-                Boolean.TRUE, null);
+        verify(sauceTunnelManager, times(1)).openConnection(USERNAME, ACCESS_KEY, DATA_CENTER, null, OPTIONS, logger,
+                System.out, Boolean.TRUE, null, true);
         assertEquals(tunnelName, sauceConnectManager.start(options));
     }
 
@@ -116,8 +123,8 @@ class SauceConnectManagerTests
         sauceConnectManager.start(options);
         sauceConnectManager.stop();
         sauceConnectManager.start(options);
-        verify(sauceTunnelManager, times(2)).openConnection(USERNAME, ACCESS_KEY, DATA_CENTER, null, OPTIONS, null,
-                Boolean.TRUE, null);
+        verify(sauceTunnelManager, times(2)).openConnection(USERNAME, ACCESS_KEY, DATA_CENTER, null, OPTIONS, logger,
+                System.out, Boolean.TRUE, null, true);
         verifyStop(times(1));
     }
 
@@ -126,13 +133,13 @@ class SauceConnectManagerTests
         var options = mock(SauceConnectOptions.class);
         when(options.build(anyString())).thenReturn(OPTIONS);
         sauceConnectManager.start(options);
-        verify(sauceTunnelManager).openConnection(USERNAME, ACCESS_KEY, DATA_CENTER, null, OPTIONS, null, Boolean.TRUE,
-                null);
+        verify(sauceTunnelManager).openConnection(USERNAME, ACCESS_KEY, DATA_CENTER, null, OPTIONS, logger, System.out,
+                Boolean.TRUE, null, true);
         return options;
     }
 
     private void verifyStop(VerificationMode mode)
     {
-        verify(sauceTunnelManager, mode).closeTunnelsForPlan(USERNAME, OPTIONS, null);
+        verify(sauceTunnelManager, mode).closeTunnelsForPlan(USERNAME, OPTIONS, logger);
     }
 }

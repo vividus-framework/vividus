@@ -35,3 +35,25 @@ When I save YAML element value from `$yaml` by YAML path `$yamlPath` to $scopes 
 When I save YAML element value from `${response}` by YAML path `store.book[1].title` to scenario variable `title-of-second-book`
 Then `${title-of-second-book}` is equal to `Sword of Honour`
 ----
+
+=== Save number of YAML elements
+
+Saves the number of YAML elements found by the YAML path into the variable with
+the specified name and scope.
+
+[source,gherkin]
+----
+When I save number of elements from `$yaml` by YAML path `$yamlPath` to $scopes variable `$variableName`
+----
+
+* `$yaml` - The YAML used to find YAML elements.
+* `$yamlPath` - The {yaml-path} used to find YAML elements.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the number of found YAML elements.
+
+.Check address field exists in YAML response
+[source,gherkin]
+----
+When I save number of elements from `${response}` by YAML path `store.address` to scenario variable `address`
+Then `${address}` is equal to `1`
+----

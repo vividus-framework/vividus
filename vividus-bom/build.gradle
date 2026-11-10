@@ -11,6 +11,14 @@ dependencies {
                 api(it)
             }
         }
+        api(libs.mysql.connector.j)
+        api(libs.mssql.jdbc)
+        api(libs.postgresql)
+        api(libs.oracle.ojdbc10)
+        api(libs.db2jcc)
+        api(libs.csvjdbc)
+        api(libs.h2)
+        api(libs.snowflake.jdbc)
     }
 }
 

@@ -118,9 +118,9 @@ Then number of elements found by $htmlLocatorType `$htmlLocator` in HTML `$html`
 ----
 
 include::partial$html-locator.adoc[]
-- `$html` - The HTML document to validate.
-- `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-- `$quantity` -  The expected number of elements.
+* `$html` - The HTML document to validate.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$quantity` -  The expected number of elements.
 
 .Validate starfield release date
 [source,gherkin]
@@ -139,8 +139,8 @@ Then element found by $htmlLocatorType `$htmlLocator` in HTML `$html` contains t
 ----
 
 include::partial$html-locator.adoc[]
-- `$html` - The HTML document to validate.
-- `$expectedText` - The expected element text.
+* `$html` - The HTML document to validate.
+* `$expectedText` - The expected element text.
 
 .Validate starfield release date
 [source,gherkin]
@@ -158,11 +158,11 @@ Saves the attribute value into the variable.
 When I save `$attributeName` attribute value of element found by $htmlLocatorType `$htmlLocator` in HTML `$html` to $scopes variable `$variableName`
 ----
 
-- `$attributeName` - The name of the attribute.
+* `$attributeName` - The name of the attribute.
 include::partial$html-locator.adoc[]
-- `$html` - The HTML document to find element.
-- `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-- `$variableName` - The name of the variable to save the attribute value.
+* `$html` - The HTML document to find element.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the attribute value.
 
 .Validate paragraph title
 [source,gherkin]
@@ -192,8 +192,8 @@ Saves the data or the text of element. Where the *data* is characters between th
 When I save $dataType of element found by $htmlLocatorType `$htmlLocator` in HTML `$html` to $scopes variable `variableName`
 ----
 
-- `$dataType` - Either `data` or `text`
-- `$html` - The HTML document to find element.
+* `$dataType` - Either `data` or `text`
+* `$html` - The HTML document to find element.
 include::partial$html-locator.adoc[]
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The name of the variable to save the data or text.
@@ -234,9 +234,9 @@ When I save number of elements found by $htmlLocatorType `$htmlLocator` in HTML 
 ----
 
 include::partial$html-locator.adoc[]
-- `$html` - The HTML document.
-- `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-- `$variableName` - The name of the variable to save the number of elements.
+* `$html` - The HTML document.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the number of elements.
 
 .Validate number of Heading 1 elements
 [source,gherkin]

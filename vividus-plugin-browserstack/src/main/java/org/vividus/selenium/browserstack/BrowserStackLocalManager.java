@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,6 +150,7 @@ public class BrowserStackLocalManager implements TunnelManager<TunnelOptions>
                 String pac = ResourceUtils.createTempFile("pac-browserstack-" + localIdentifier, ".js",
                         String.format(PAC_FORMAT, options.getProxy())).toString();
                 parameters.put("-pac-file", pac);
+                parameters.put("-disable-ssl-validation", "");
             }
 
             this.localParameters = parameters;

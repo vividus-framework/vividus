@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,10 +60,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.screenshot.AshotScreenshotTaker;
+import org.vividus.ui.action.JavascriptActions;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.visual.eyes.factory.ImageEyesFactory;
 import org.vividus.visual.eyes.model.AccessibilityCheckResult;
@@ -98,18 +100,18 @@ class ImageVisualTestingServiceTests
     private static final String BASELINE_NAME = "baselineName";
     private static final String BATCH_NAME = "batchName";
 
-    private final ImageEyesFactory eyesFactory = mock(ImageEyesFactory.class);
-    @SuppressWarnings("unchecked")
-    private final AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker = mock(AshotScreenshotTaker.class);
-    private final IHttpClient httpClient = mock(IHttpClient.class);
+    @Mock private ImageEyesFactory eyesFactory;
+    @Mock private AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker;
+    @Mock private IHttpClient httpClient;
+    @Mock private JavascriptActions javascriptActions;
 
-    @InjectMocks private final ImageVisualTestingService imageVisualTestingService
-        = new ImageVisualTestingService(eyesFactory, ashotScreenshotTaker, httpClient);
+    @InjectMocks private ImageVisualTestingService imageVisualTestingService;
 
     @Test
     void shouldRunVisualTestAndPublishResults() throws IOException
     {
-        ApplitoolsVisualCheck applitoolsVisualCheck = createCheck();
+        String hook = "hook";
+        ApplitoolsVisualCheck applitoolsVisualCheck = createCheck(hook);
         Eyes eyes = mockEyes(applitoolsVisualCheck);
         TestResults testResults = mockTestResult(eyes);
         SessionAccessibilityStatus accessibilityStatus = mock(SessionAccessibilityStatus.class);
@@ -139,6 +141,7 @@ class ImageVisualTestingServiceTests
             () -> assertEquals("WCAG 2.0 - AA", accessibilityResults.getGuideline()),
             () -> assertEquals(STEP_EDITOR_URL + "?accessibility=true", accessibilityResults.getUrl())
         );
+        verify(javascriptActions).executeScript(hook);
     }
 
     @Test
@@ -172,6 +175,7 @@ class ImageVisualTestingServiceTests
             () -> assertEquals(STEP_EDITOR_URL, result.getStepUrl()),
             () -> assertTrue(result.isPassed())
         );
+        verifyNoInteractions(javascriptActions);
         assertThat(LOGGER.getLoggingEvents(),
                 is(List.of(LoggingEvent.warn("Unable to get image from {}", CHECKPOINT_IMAGE_URI))));
     }
@@ -202,7 +206,7 @@ class ImageVisualTestingServiceTests
             () -> assertEquals(STEP_EDITOR_URL, result.getStepUrl()),
             () -> assertTrue(result.isPassed())
         );
-        verifyNoInteractions(httpClient);
+        verifyNoInteractions(httpClient, javascriptActions);
     }
 
     @Test
@@ -307,10 +311,16 @@ class ImageVisualTestingServiceTests
 
     private ApplitoolsVisualCheck createCheck()
     {
+        return createCheck(null);
+    }
+
+    private ApplitoolsVisualCheck createCheck(String hook)
+    {
         ApplitoolsVisualCheck applitoolsVisualCheck = new ApplitoolsVisualCheck(BATCH_NAME, BASELINE_NAME,
                 ACTION);
         applitoolsVisualCheck.setConfiguration(new Configuration().setAppName(APP_NAME));
         applitoolsVisualCheck.setReadApiKey(READ_KEY);
+        applitoolsVisualCheck.setBeforeRenderScreenshotHook(hook);
         return applitoolsVisualCheck;
     }
 }

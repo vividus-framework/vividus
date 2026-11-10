@@ -14,15 +14,15 @@ include::partial$plugin-installation.adoc[]
 |Default
 |Description
 
+|[subs=+quotes]`*lighthouse.api-key*`
+|<string>
+|
+|The API key that identifies your project and provides you with API access, quota, and reports.
+
 |`lighthouse.application-name`
 |<string>
 |
 |The application name to be used in the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent[User-Agent] header.
-
-|`lighthouse.api-key`
-|<string>
-|
-|The API key that identifies your project and provides you with API access, quota, and reports. Its recommended to specify the key if you plan to use the plugin in an automated way and make multiple queries per second.
 
 |`lighthouse.categories`
 |comma-separated list of categories (`performance`, `best-practices`, `accessibility`, `seo`)
@@ -58,21 +58,7 @@ When I perform Lighthouse $scanType scan of `$webPageUrl` page:$metricsValidatio
 
 include::partial$lighthouse-scan-type.adoc[]
 * `$webPageUrl` - The page URL to perform scan on.
-* `$metricsValidations` - The metric validations:
-** `$metric` - The Lighthouse metric name.
-*** Performance metrics:
-**** `First Contentful Paint`
-**** `Largest Contentful Paint`
-**** `Total Blocking Time`
-**** `Cumulative Layout Shift`
-**** `Speed Index`
-*** Audit scores:
-**** `Accessibility Score`
-**** `Best Practices Score`
-**** `Performance Score`
-**** `SEO Score`
-** `$rule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-** `$threshold` - The expected integer or floating (e.g. `0.35`) number.
+include::partial$lighthouse-metrics-validations.adoc[]
 
 .Perform Lighthouse scan on both desktop and mobile devices
 [source]
@@ -122,4 +108,87 @@ include::partial$lighthouse-scan-type.adoc[]
 [source]
 ----
 Then Lighthouse desktop audit scores for `https://www.vividus-reactjs.com/` page are not less than for `https://www.vividus-vuejs.com/` page
+----
+
+=== Perform Local Lighthouse scan
+
+Performs local Lighthouse scan of the specified web page and validates performance metrics against expected thresholds.
+
+include::partial$lighthouse-local-preconditions.adoc[]
+
+[source,gherkin]
+----
+When I perform local Lighthouse scan of `$webPageUrl` page with options `$options`:$metricsValidations
+----
+
+* `$webPageUrl` - The page URL to perform scan on.
+* `$options` - The https://github.com/GoogleChrome/lighthouse/blob/main/readme.md#cli-options[Lighthouse CLI options], please note that *Output* options are prohibited from use.
+include::partial$lighthouse-metrics-validations.adoc[]
+
+include::partial$lighthouse-local-tips.adoc[]
+
+.Perform Lighthouse scan for protected site on desktop device in CI environment
+[source]
+----
+When I perform local Lighthouse scan of `https://my-protected-site.com/` page with options `--only-categories=performance --chrome-flags="--no-sandbox --headless --disable-dev-shm-usage" --extra-headers="{\"Authorization\":\"Basic S0VzLnV3bmx5OQ==\"}"`:
+|metric                  |rule        |threshold|
+|First Contentful Paint  |LESS_THAN   |500      |
+|Largest Contentful Paint|LESS_THAN   |500      |
+|Total Blocking Time     |LESS_THAN   |100      |
+|Cumulative Layout Shift |LESS_THAN   |100      |
+|Speed Index             |LESS_THAN   |1500     |
+----
+
+=== Perform Local Lighthouse scan with result saving
+
+Performs local Lighthouse scan of the specified web page, validates performance metrics against expected thresholds and saves the path to the resulting JSON to a variable.
+
+include::partial$lighthouse-local-preconditions.adoc[]
+
+[source,gherkin]
+----
+When I perform local Lighthouse scan of `$webPageUrl` page with options `$options` and save result path to $scopes variable `$variableName`:$metricsValidations
+----
+
+* `$webPageUrl` - The page URL to perform scan on.
+* `$options` - The https://github.com/GoogleChrome/lighthouse/blob/main/readme.md#cli-options[Lighthouse CLI options], please note that *Output* options are prohibited from use.
+include::partial$lighthouse-metrics-validations.adoc[]
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to save resulting JSON.
+
+include::partial$lighthouse-local-tips.adoc[]
+
+.Perform Lighthouse scan
+[source]
+----
+When I perform local Lighthouse scan of `https://site.com/` page with options `--only-categories=performance` and save result path to scenario variable `resultPath`:
+|metric                  |rule        |threshold|
+|First Contentful Paint  |LESS_THAN   |500      |
+|Largest Contentful Paint|LESS_THAN   |500      |
+|Total Blocking Time     |LESS_THAN   |100      |
+|Cumulative Layout Shift |LESS_THAN   |100      |
+|Speed Index             |LESS_THAN   |1500     |
+----
+
+=== Generate Lighthouse results diff
+
+Generates comparison diff between two Lighthouse JSON results. The diff example can be found https://googlechrome.github.io/lighthouse-ci/difftool/?baseReport=https://googlechrome.github.io/lighthouse-ci/packages/server/test/fixtures/lh-5-6-0-verge-a.json&compareReport=https://googlechrome.github.io/lighthouse-ci/packages/server/test/fixtures/lh-5-6-0-verge-b.json[here].
+
+[source,gherkin]
+----
+When I generate Lighthouse diff from comparison of baseline at path `$baselineJsonResultPath` and checkpoint at path `$checkpointJsonResultPath`
+----
+
+* `$baselineJsonResultPath` - The xref:ROOT:glossary.adoc#_resource[resource name] or the path of file containing baseline Lighthouse JSON results.
+* `$checkpointJsonResultPath` - The xref:ROOT:glossary.adoc#_resource[resource name] or the path of file containing checkpoint Lighthouse JSON results.
+
+[TIP]
+====
+You can get Lighthouse JSON results by downloading it from https://developer.chrome.com/docs/lighthouse/overview#json[Lighthouse Viewer as JSON] or by using <<_perform_local_lighthouse_scan_with_result_saving>> step to save JSON results path to a variable.
+====
+
+.Generate Lighthouse results diff between two releases
+[source]
+----
+When I generate Lighthouse diff from comparison of baseline at path `/reports/1.33.0-lighthouse.json` and checkpoint at path `/reports/1.34.0-lighthouse.json`
 ----

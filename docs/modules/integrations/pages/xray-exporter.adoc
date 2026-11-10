@@ -20,7 +20,7 @@ NOTE: The properties marked with *bold* are mandatory.
 [cols="2,1,3", options="header"]
 |===
 
-|Property
+|Property Name
 |Required
 |Description
 
@@ -56,9 +56,18 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 |false
 |By default, the content of Test Cases that have associated IDs, is updated every export run, to disable this behavior set the value of this property to `false`
 
-|`xray-exporter.test-execution-attachments`
+|`xray-exporter.test-execution.attachments`
 |false
-|Comma-separated list of file and folder paths that should be uploaded to test execution as attachments. Please note that regular files like images, texts are uploaded as is, whereas folders are archived before the upload.
+a|Comma-separated list of file and folder paths that should be uploaded to test execution as attachments. Please note that regular files like images, texts are uploaded as is, whereas folders are archived before the upload.
+
+[WARNING]
+====
+`xray-exporter.test-execution-attachments` property is deprecated in favor of `xray-exporter.test-execution.attachments` and will be removed in VIVIDUS 0.8.0.
+====
+
+|`xray-exporter.test-case.use-scenario-title-as-description`
+|false
+|If enabled (`true` value), the scenario title will be used as the description, but *only* for newly created test cases, otherwise the description will be left empty.
 
 |===
 
@@ -69,7 +78,9 @@ xray-exporter.project-key=ABBA
 xray-exporter.json-results-directory=/Users/happytester/Repositories/app-tests/output/results/jbehave
 ----
 
-=== Test Execution
+=== Xray Cloud Configuration
+
+By default, VIVIDUS exports results to an on-premise Xray Server (Jira plugin). To export to https://www.getxray.app/[Xray Cloud], enable the cloud mode and provide API credentials.
 
 [cols="2,1,3", options="header"]
 |===
@@ -78,17 +89,72 @@ xray-exporter.json-results-directory=/Users/happytester/Repositories/app-tests/o
 |Required
 |Description
 
-|`xray-exporter.test-execution-key`
+|`xray-exporter.cloud.enabled`
 |false
-|The key of `Test Execution` which the exported test cases along with their statuses will be added to
+|Set to `true` to enable Xray Cloud mode (default: `false`)
 
-|`xray-exporter.test-execution-summary`
+|*`xray-exporter.cloud.client-id`*
+|true (when cloud is enabled)
+|Xray Cloud API client ID (obtained from the Xray app settings in Jira)
+
+|*`xray-exporter.cloud.client-secret`*
+|true (when cloud is enabled)
+|Xray Cloud API client secret (obtained from the Xray app settings in Jira)
+
+|`xray-exporter.cloud.api-base-url`
 |false
-|The `Test Execution` summary
+a|Base URL for the Xray Cloud REST API (the `/api/v2` path is appended automatically). Default: `https://xray.cloud.getxray.app/`.
+
+Override this value when using a regional Xray Cloud deployment, for example:
+* `https://us.xray.cloud.getxray.app/`
+* `https://eu.xray.cloud.getxray.app/`
 
 |===
 
-Test execution import varies depending on values in `xray-exporter.test-execution-key` and `xray-exporter.test-execution-summary`, the following matrix shows this behavior change:
+NOTE: When `xray-exporter.cloud.enabled=true`, the `xray-exporter.jira-instance-key` property is not used.
+
+.application.properties (Xray Cloud example)
+[source,properties]
+----
+xray-exporter.cloud.enabled=true
+xray-exporter.cloud.client-id=<YOUR_CLIENT_ID>
+xray-exporter.cloud.client-secret=<YOUR_CLIENT_SECRET>
+----
+
+=== Test Execution
+
+[cols="2,1,3", options="header"]
+|===
+
+|Property Name
+|Required
+|Description
+
+|`xray-exporter.test-execution.key`
+|false
+a|The key of `Test Execution` which the exported test cases along with their statuses will be added to
+
+[WARNING]
+====
+`xray-exporter.test-execution-key` property is deprecated in favor of `xray-exporter.test-execution.key` and will be removed in VIVIDUS 0.8.0.
+====
+
+|`xray-exporter.test-execution.summary`
+|false
+a|The `Test Execution` summary
+
+[WARNING]
+====
+`xray-exporter.test-execution-summary` property is deprecated in favor of `xray-exporter.test-execution.summary` and will be removed in VIVIDUS 0.8.0.
+====
+
+|`xray-exporter.test-execution.description`
+|false
+|The `Test Execution` description
+
+|===
+
+Test execution import varies depending on values in `xray-exporter.test-execution.key` and `xray-exporter.test-execution.summary`, the following matrix shows this behavior change:
 
 [cols="1,1", options="header"]
 |===
@@ -96,22 +162,22 @@ Test execution import varies depending on values in `xray-exporter.test-executio
 |Configuration
 |Result
 
-|Both `xray-exporter.test-execution-key` and `xray-exporter.test-execution-summary` are set
+|Both `xray-exporter.test-execution.key` and `xray-exporter.test-execution.summary` are set
 a|Test execution summary and associated test cases will be updated, the update of test cases is performed according to following rules:
 
 * new test cases are added to the test execution
 * statuses of existing test cases are updated
 
-|Only `xray-exporter.test-execution-summary` is set
+|Only `xray-exporter.test-execution.summary` is set
 |New test execution will be created
 
-|Only `xray-exporter.test-execution-key` is set
+|Only `xray-exporter.test-execution.key` is set
 a|Associated test cases will be updated according to following rules:
 
 * new test cases are added to the test execution
 * statuses of existing test cases are updated
 
-|Neither `xray-exporter.test-execution-key` nor `xray-exporter.test-execution-summary` are set
+|Neither `xray-exporter.test-execution.key` nor `xray-exporter.test-execution.summary` are set
 |Text execution import is skipped
 
 |===
@@ -128,7 +194,7 @@ The Xray is a Jira plugin that uses custom Jira fields for it's data, one of the
 |===
 
 |Index
-|Property
+|Property Name
 |Description
 
 |<<#_manual_test_case_view, 1>>
@@ -156,7 +222,7 @@ jira.<jira instance key placeholder>.fields-mapping.manual-steps=customfield_100
 |===
 
 |Index
-|Property
+|Property Name
 |Description
 
 |<<#_cucumber_test_case_view, 1>>

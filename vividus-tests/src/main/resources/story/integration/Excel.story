@@ -4,8 +4,13 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-When I execute HTTP GET request for resource with URL `https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true`
+When I execute HTTP GET request for resource with URL `https://github.com/vividus-framework/vividus/raw/refs/heads/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx`
 Then response code is equal to `200`
+
+Scenario: Validate step 'Then `$excelDocument` contains excel sheet with name `$name` at index `$index`'
+Meta:
+    @requirementId 6016
+Then `${response-as-bytes}` contains excel sheet with name `Mapping` at index `0`
 
 Scenario: Validate step 'Then `$excelDocument` contains excel sheet with index `$index` and records:$records'
 Then `${response-as-bytes}` contains excel sheet with index `0` and records:
@@ -133,3 +138,8 @@ When I initialize scenario variable `expectedTable` with values:
 |19           |TRUE         |361          |
 Then `${expectedTable}` is equal to table:
 {transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=DifferentTypes, range=B1:D2;B3:D3}
+
+Scenario: Validate step 'Then `$excelDocument` contains exactly `$expectedRowCount` rows in sheet with index `$sheetIndex`'
+Meta:
+    @requirementId 6017
+Then `${response-as-bytes}` contains exactly `5` rows in sheet with index `0`

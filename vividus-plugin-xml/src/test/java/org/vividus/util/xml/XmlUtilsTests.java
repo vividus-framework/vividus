@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.xml.transform.TransformerException;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.vividus.util.ResourceUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 class XmlUtilsTests
 {
@@ -47,7 +49,13 @@ class XmlUtilsTests
             + "</xs:schema>";
 
     @Test
-    void shouldReturnXmlByXpath()
+    void shouldGetNumberOfElements() throws XPathExpressionException
+    {
+        assertEquals(2, XmlUtils.getNumberOfElements(XML, "//data"));
+    }
+
+    @Test
+    void shouldReturnXmlByXpath() throws XPathExpressionException
     {
         assertEquals(Optional.of("value1"), XmlUtils.getXmlByXpath(XML, "//data/text()"));
     }
@@ -55,11 +63,11 @@ class XmlUtilsTests
     @Test
     void shouldThrowExceptionInCaseOfInvalidXpath()
     {
-        assertThrows(IllegalStateException.class, () -> XmlUtils.getXmlByXpath(XML, "<invalidXpath>"));
+        assertThrows(XPathExpressionException.class, () -> XmlUtils.getXmlByXpath(XML, "<invalidXpath>"));
     }
 
     @Test
-    void shouldConvertXmlStringToDocument()
+    void shouldConvertXmlStringToDocument() throws SAXException, IOException
     {
         assertThat(XmlUtils.convertToDocument(XML), instanceOf(Document.class));
     }
@@ -67,7 +75,7 @@ class XmlUtilsTests
     @Test
     void shouldThrowExceptionInCaseOfInvalidXmlOnConversion()
     {
-        assertThrows(IllegalStateException.class, () -> XmlUtils.convertToDocument("<invalidXml>"));
+        assertThrows(SAXParseException.class, () -> XmlUtils.convertToDocument("<invalidXml>"));
     }
 
     @Test

@@ -37,7 +37,7 @@
 |Locator of element for performing scroll action during visual check, steps fails if an element by the locator does not exist
 
 |`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.shooting-strategy`
-|`SIMPLE` `VIEWPORT_PASTING`
+|<<_shooting_strategies>>
 |Screenshot shooting strategy name (`VIEWPORT_PASTING` by default)
 
 |`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-top`

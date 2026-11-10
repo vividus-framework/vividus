@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ import org.vividus.db.DataSourceManager;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.StringComparisonRule;
+import org.vividus.util.EnumUtils;
 import org.vividus.util.comparison.ComparisonUtils;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
 import org.vividus.util.wait.DurationBasedWaiter;
@@ -133,7 +134,28 @@ public class DatabaseSteps
     {
         logSqlQuery(sqlQuery);
         List<Map<String, Object>> result = dataSourceManager.getJdbcTemplate(dbKey).queryForList(sqlQuery);
-        variableContext.putVariable(scopes, variableName, result);
+        saveDataSetToVariable(scopes, variableName, result);
+    }
+
+    private void saveDataSetToVariable(Set<VariableScope> scopes, String variableName,
+            List<Map<String, Object>> dataSet)
+    {
+        variableContext.putVariable(scopes, variableName, dataSet, false);
+        if (dataSet.isEmpty())
+        {
+            LOGGER.atInfo()
+                  .addArgument(variableName)
+                  .log("The resulting data set saved into the '{}' variable is empty");
+        }
+        else
+        {
+            scopes.forEach(scope -> LOGGER.atInfo()
+                    .addArgument(() -> EnumUtils.toHumanReadableForm(scope))
+                    .addArgument(variableName)
+                    .log("Saving a resulting data set into the {} variable '{}'"));
+            attachmentPublisher.publishAttachment("data-set-table.ftl", Map.of("data", dataSet),
+                    String.format("Data saved into '%s' variable", variableName));
+        }
     }
 
     /**

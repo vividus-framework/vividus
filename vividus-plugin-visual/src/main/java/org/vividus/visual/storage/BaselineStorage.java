@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,4 +26,9 @@ public interface BaselineStorage
     Optional<Screenshot> getBaseline(String baselineName) throws IOException;
 
     void saveBaseline(Screenshot screenshot, String baselineName) throws IOException;
+
+    default void saveDelta(Screenshot screenshot, String baselineName) throws IOException
+    {
+        saveBaseline(screenshot, baselineName);
+    }
 }

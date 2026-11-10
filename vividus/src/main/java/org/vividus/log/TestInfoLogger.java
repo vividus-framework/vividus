@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -88,7 +89,7 @@ public final class TestInfoLogger
                     .mapToInt(String::length)
                     .max().orElse(0);
             String propertyFormat = "   %-" + maxKeyLength + "s %s%n";
-            try (Formatter message = new Formatter())
+            try (Formatter message = new Formatter(Locale.ROOT))
             {
                 message.format(NEW_LINE);
                 Stream.of(MetadataCategory.values()).forEach(category -> {
@@ -124,7 +125,7 @@ public final class TestInfoLogger
             String storyFormat = "%n     %s";
             String separatorFormat = "%n%s";
 
-            try (Formatter message = new Formatter())
+            try (Formatter message = new Formatter(Locale.ROOT))
             {
                 message.format(separatorFormat, HORIZONTAL_RULE);
                 message.format("%n Execution plan (before filtering by meta):");
@@ -213,7 +214,7 @@ public final class TestInfoLogger
 
     public static void logPropertiesSecurely(Properties properties)
     {
-        try (Formatter message = new Formatter())
+        try (Formatter message = new Formatter(Locale.ROOT))
         {
             properties.entrySet()
                     .stream()

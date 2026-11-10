@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ class ScrollbarHandlerTests
     @Test
     void testPerformActionWithHiddenScrollbarsMobile()
     {
-        when(webDriverManager.isMobile()).thenReturn(true);
+        when(webDriverManager.isContextSwitchedToMobileNative()).thenReturn(true);
         scrollbarHandler.performActionWithHiddenScrollbars(action);
         verifyNoInteractions(webDriver);
     }

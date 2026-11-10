@@ -1,8 +1,9 @@
 project.description = 'VIVIDUS test context'
 
 dependencies {
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.4')
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.15.2')
-    testImplementation(group: 'org.mockito', name: 'mockito-core')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.core)
 }

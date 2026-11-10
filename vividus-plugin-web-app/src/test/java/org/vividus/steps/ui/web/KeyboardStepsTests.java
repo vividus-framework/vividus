@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.KeysManager;
 import org.vividus.steps.ui.web.validation.FocusValidations;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 @ExtendWith(MockitoExtension.class)
 class KeyboardStepsTests
@@ -50,6 +50,7 @@ class KeyboardStepsTests
     @Mock private IUiContext uiContext;
     @Mock private KeysManager keysManager;
     @Mock private FocusValidations focusValidations;
+    @Mock private WebJavascriptActions webJavascriptActions;
     @InjectMocks private KeyboardSteps keyboardSteps;
 
     @Test
@@ -78,7 +79,7 @@ class KeyboardStepsTests
         WebDriver webDriver = mock();
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webDriver));
         when(focusValidations.isElementInFocusState(webElement, FocusState.IN_FOCUS)).thenReturn(true);
-        when(webDriver.findElement(By.xpath("//body"))).thenReturn(webElement);
+        when(webJavascriptActions.executeScript("return document.activeElement;")).thenReturn(webElement);
         when(keysManager.convertToKeys(KEYS)).thenReturn(new CharSequence[] { Keys.CONTROL, A });
         keyboardSteps.pressKeys(KEYS);
         verify(webElement).sendKeys(Keys.CONTROL, A);

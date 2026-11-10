@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
@@ -343,7 +342,7 @@ public class HttpResponseValidationSteps
 
     private static List<String> extractHeaderElementsNames(Header header)
     {
-        return Stream.of(MessageSupport.parse(header)).map(HeaderElement::getName).toList();
+        return MessageSupport.parseElements(header).stream().map(HeaderElement::getName).toList();
     }
 
     private boolean isResponseCodeIsEqualToExpected(HttpResponse response, int expectedResponseCode)

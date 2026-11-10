@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.annotation.Replacement;
 import org.vividus.selenium.locator.Locator;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
@@ -47,6 +48,7 @@ import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 
+@SuppressWarnings("PMD.ExcessiveImports")
 @TakeScreenshotOnFailure
 public class GenericWaitSteps
 {
@@ -86,11 +88,29 @@ public class GenericWaitSteps
     }
 
     /**
+     * Waits for element appearance with desired timeout
+     * @param locator the locator to locate element
+     * @param timeout the waiting time according to
+     *                <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> standard
+     */
+    @When("I wait until element located by `$locator` appears in `$timeout`")
+    public void waitForElementAppearance(Locator locator, Duration timeout)
+    {
+        checkLocatorVisibility(locator);
+        waitActions.wait(getSearchContext(), timeout, expectedSearchActionsConditions.visibilityOfElement(locator));
+    }
+
+    /**
      * Waits for disappearance of an <b><i>element</i></b> with the specified <b>locator</b>
      * Step supports only <b>VISIBLE</b> elements waiting. If locator will be configured to <b>ALL</b>
      * or <b>INVISIBLE</b> exception will be thrown.
      * @param locator locator to locate element
+     * @deprecated Current step has invalid behavior when there is more than one element on a page, use step instead:
+     * When I wait until all elements located by `$locator` disappear
      */
+    @Deprecated(since = "0.6.17", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0",
+            replacementFormatPattern = "When I wait until all elements located by `%1$s` disappear")
     @When("I wait until element located by `$locator` disappears")
     public void waitForElementDisappearance(Locator locator)
     {
@@ -100,10 +120,15 @@ public class GenericWaitSteps
     private <T> void waitForConditionValidatingVisibility(Locator locator,
             Function<Locator, IExpectedSearchContextCondition<T>> conditionFactory)
     {
+        checkLocatorVisibility(locator);
+        waitActions.wait(getSearchContext(), conditionFactory.apply(locator));
+    }
+
+    private void checkLocatorVisibility(Locator locator)
+    {
         Validate.isTrue(Visibility.VISIBLE == locator.getSearchParameters().getVisibility(),
             "The step supports locators with VISIBLE visibility settings only, but the locator is `%s`",
                 locator.toHumanReadableString());
-        waitForCondition(conditionFactory.apply(locator));
     }
 
     /**
@@ -133,7 +158,7 @@ public class GenericWaitSteps
     public boolean waitDurationWithPollingDurationTillElementState(Duration duration, Duration pollingDuration,
                                                                    Locator locator, State state)
     {
-        return waitActions.wait(uiContext.getSearchContext(), duration, pollingDuration,
+        return waitActions.wait(getSearchContext(), duration, pollingDuration,
                 state.getExpectedCondition(expectedSearchActionsConditions, locator)).isWaitPassed();
     }
 
@@ -309,7 +334,7 @@ public class GenericWaitSteps
         appendIf(duration.toMinutesPart() != 0, "m' minutes' ", durationBuilder);
         appendIf(duration.toSecondsPart() != 0, "s' seconds' ", durationBuilder);
         appendIf(duration.toMillisPart() != 0, "S' millis'", durationBuilder);
-        Validate.isTrue(durationBuilder.length() > 0, "Unable to convert duration %s", duration);
+        Validate.isTrue(!durationBuilder.isEmpty(), "Unable to convert duration %s", duration);
         return DurationFormatUtils.formatDuration(duration.toMillis(), durationBuilder.toString().strip());
     }
 
@@ -321,8 +346,8 @@ public class GenericWaitSteps
         }
     }
 
-    private void waitForCondition(IExpectedSearchContextCondition<?> condition)
+    private SearchContext getSearchContext()
     {
-        waitActions.wait(uiContext.getSearchContext(), condition);
+        return uiContext.getSearchContext();
     }
 }

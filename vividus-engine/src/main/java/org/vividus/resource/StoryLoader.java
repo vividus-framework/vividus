@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.vividus.steps.VariableResolver;
 
 public class StoryLoader extends LoadFromClasspath
 {
+    private static final String TABLE_FILE_EXTENSION = "table";
+
     private final VariableResolver variableResolver;
     private final ExamplesTableLoader examplesTableLoader;
     private final ResourcePatternResolver resourcePatternResolver;
@@ -44,7 +46,7 @@ public class StoryLoader extends LoadFromClasspath
     public String loadResourceAsText(String resourcePath)
     {
         String path = (String) variableResolver.resolve(resourcePath);
-        if ("table".equals(FilenameUtils.getExtension(path)))
+        if (TABLE_FILE_EXTENSION.equals(FilenameUtils.getExtension(path)))
         {
             return examplesTableLoader.loadExamplesTable(path);
         }

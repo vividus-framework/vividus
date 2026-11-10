@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.vividus.spring.SpelExpressionResolver;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public final class ConfigurationResolver
 {
@@ -79,7 +78,6 @@ public final class ConfigurationResolver
         this.properties = properties;
     }
 
-    @SuppressFBWarnings("SING_SINGLETON_GETTER_NOT_SYNCHRONIZED")
     public static ConfigurationResolver getInstance() throws IOException
     {
         if (instance != null)
@@ -159,7 +157,7 @@ public final class ConfigurationResolver
     private static PropertyPlaceholderHelper createPropertyPlaceholderHelper(boolean ignoreUnresolvablePlaceholders)
     {
         return new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, PLACEHOLDER_VALUE_SEPARATOR,
-                ignoreUnresolvablePlaceholders);
+                null, ignoreUnresolvablePlaceholders);
     }
 
     private static Multimap<String, String> assembleConfiguration(Properties configurationProperties,
@@ -255,7 +253,7 @@ public final class ConfigurationResolver
                 .filter(p -> p.startsWith(VIVIDUS_SYSTEM_PROPERTY_FAMILY))
                 .filter(p -> !p.startsWith(VIVIDUS_SYSTEM_PROPERTY_FAMILY + CONFIGURATION_PROPERTY_FAMILY))
                 .collect(Collectors.toMap(
-                    p -> StringUtils.removeStart(p, VIVIDUS_SYSTEM_PROPERTY_FAMILY), systemProperties::getProperty));
+                    p -> Strings.CS.removeStart(p, VIVIDUS_SYSTEM_PROPERTY_FAMILY), systemProperties::getProperty));
     }
 
     private static String getConfigurationPropertyValue(Properties configurationProperties,

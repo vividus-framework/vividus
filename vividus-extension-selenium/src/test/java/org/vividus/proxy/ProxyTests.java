@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package org.vividus.proxy;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,22 +32,17 @@ import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import com.browserup.bup.BrowserUpProxyServer;
-import com.browserup.bup.filters.RequestFilter;
-import com.browserup.bup.filters.RequestFilterAdapter;
-import com.browserup.bup.filters.ResponseFilter;
-import com.browserup.bup.filters.ResponseFilterAdapter;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.littleshoot.proxy.HttpFiltersSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -157,31 +155,43 @@ class ProxyTests
     }
 
     @Test
-    void testAddRequestFilter()
+    void shouldAddProxyMocks()
     {
-        RequestFilter requestFilter = mock(RequestFilter.class);
-        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
-        proxy.start();
-        proxy.addRequestFilter(requestFilter);
-        verify(browserUpProxyServer).addRequestFilter(requestFilter);
+        var mockRequestFilter = startProxyWithMockFilter();
+
+        ProxyMock proxyMock = mock();
+        proxy.addMock(proxyMock);
+
+        assertEquals(List.of(proxyMock), mockRequestFilter.getProxyMocks());
     }
 
     @Test
-    void testClearRequestFilters()
+    void shouldClearProxyMocks()
     {
-        BrowserUpProxyServer browserUpProxyServer = mock(BrowserUpProxyServer.class);
-        ResponseFilter responseFilter = mock(ResponseFilter.class);
-        RequestFilter requestFilter = mock(RequestFilter.class);
-        ResponseFilterAdapter.FilterSource fsResponse = new ResponseFilterAdapter.FilterSource(responseFilter);
-        RequestFilterAdapter.FilterSource fsRequest = new RequestFilterAdapter.FilterSource(requestFilter);
+        var mockRequestFilter = startProxyWithMockFilter();
+
+        ProxyMock proxyMock = mock();
+        mockRequestFilter.getProxyMocks().add(proxyMock);
+
+        proxy.clearMocks();
+
+        assertThat(mockRequestFilter.getProxyMocks(), is(empty()));
+    }
+
+    private MockRequestFilter startProxyWithMockFilter()
+    {
         when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
-        List<HttpFiltersSource> toRemove = new ArrayList<>();
-        toRemove.add(fsResponse);
-        toRemove.add(fsRequest);
-        when(browserUpProxyServer.getFilterFactories()).thenReturn(toRemove).thenReturn(toRemove);
         proxy.start();
-        proxy.clearRequestFilters();
-        assertTrue(toRemove.size() == 1 && toRemove.contains(fsResponse));
+        var mockRequestFilterHolder = new AtomicReference<MockRequestFilter>();
+        verify(browserUpProxyServer).addRequestFilter(argThat(filter -> {
+            if (filter instanceof MockRequestFilter mockRequestFilter)
+            {
+                mockRequestFilterHolder.set(mockRequestFilter);
+                return true;
+            }
+            return false;
+        }));
+        return mockRequestFilterHolder.get();
     }
 
     @Test
@@ -215,9 +225,9 @@ class ProxyTests
                 Proxy::stopRecording,
                 Proxy::getRecordedData,
                 Proxy::clearRecordedData,
-                Proxy::clearRequestFilters,
+                Proxy::clearMocks,
                 Proxy::createSeleniumProxy,
-                proxy -> proxy.addRequestFilter(mock(RequestFilter.class))
+                proxy -> proxy.addMock(mock(ProxyMock.class))
         );
     }
 

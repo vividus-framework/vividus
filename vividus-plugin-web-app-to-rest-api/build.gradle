@@ -9,24 +9,23 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.16')
-    implementation(group: 'org.slf4j', name: 'slf4j-api')
-    implementation(group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.4')
-    implementation(group: 'de.hs-heilbronn.mi', name: 'crawler4j-with-hsqldb', version: '5.1.1') {
+    implementation platform(libs.slf4j.bom)
+    implementation(libs.slf4j.api)
+    implementation('com.github.crawler-commons:crawler-commons:1.6')
+    implementation('de.hs-heilbronn.mi:crawler4j-with-hsqldb:5.1.4') {
         exclude module: 'log4j-slf4j-impl'
     }
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.0-jre')
+    implementation(libs.guava)
 
     compileOnly project(':vividus-plugin-web-app')
     compileOnly project(':vividus-plugin-web-app-playwright')
 
-    compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
-
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.4')
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.15.2')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
+    testImplementation(libs.slf4jTest)
     testImplementation project(':vividus-plugin-web-app')
     testImplementation project(':vividus-plugin-web-app-playwright')
 }

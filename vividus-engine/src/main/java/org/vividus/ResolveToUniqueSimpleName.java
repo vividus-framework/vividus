@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.vividus;
 
 import java.io.File;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jbehave.core.embedder.PerformableTree;
 import org.jbehave.core.embedder.PerformableTree.PerformableStory;
 import org.jbehave.core.io.StoryLocation;
@@ -52,7 +52,7 @@ public class ResolveToUniqueSimpleName extends ResolveToSimpleName
                            .map(PerformableStory::getStory)
                            .filter(s -> s.getPath().equals(storyPath))
                            .findFirst().get().getName();
-        String storyNameOutput = StringUtils.removeEnd(storyName, "story")
+        String storyNameOutput = Strings.CS.removeEnd(storyName, "story")
                                             .replace(UNIX_PATH_SEPARATOR, '.') + extension;
 
         return runContext.getRunningBatchKey() + File.separator + storyNameOutput;

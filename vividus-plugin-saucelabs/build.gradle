@@ -5,13 +5,14 @@ dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-extension-selenium')
 
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.4.0-jre')
-    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '2.2')
+    implementation(libs.guava)
+    implementation('com.saucelabs:ci-sauce:2.6')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.4')
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.15.2')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
-    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.18')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
+    testImplementation(libs.slf4jTest)
+    testImplementation(libs.equalsverifier)
 }

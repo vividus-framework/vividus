@@ -153,6 +153,8 @@ class ApplicationStepsTests
     {
         applicationSteps.activateApp(BUNDLE_ID);
         verify(applicationActions).activateApp(BUNDLE_ID);
+        assertThat(logger.getLoggingEvents(),
+                is(List.of(info("Activating application with bundle identifier {}", BUNDLE_ID))));
     }
 
     @Test

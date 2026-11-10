@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,9 @@ public class WebScreenshotCropper extends ScreenshotCropper
             return super.calculateAdjustment(contextCoords, topAdjustment);
         }
 
-        /**
-         * This shift in x and y coords should be removed after the following issue is resolved:
-         * https://github.com/vividus-framework/vividus/issues/2883
+        /*
+          This shift in x and y coords should be removed after the following issue is resolved:
+          https://github.com/vividus-framework/vividus/issues/2883
          */
         WebElement context = uiContext.getSearchContext(WebElement.class).get();
         Coords currentContextCoords = getCoordsProvider().ofElement(getWebDriverProvider().get(), context);

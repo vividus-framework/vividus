@@ -7,7 +7,9 @@
         http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
 
-    <bean id="shellSteps" class="org.vividus.shell.ShellSteps">
+    <bean id="shellSteps" class="org.vividus.shell.ShellSteps" />
+
+    <bean class="org.vividus.shell.ShellCommandExecutor">
         <constructor-arg>
             <bean factory-bean="propertyMapper" factory-method="readValuesCaseInsensitively">
                 <constructor-arg value="shell." />

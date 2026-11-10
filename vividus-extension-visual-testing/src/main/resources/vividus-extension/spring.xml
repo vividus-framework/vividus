@@ -6,6 +6,10 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        default-lazy-init="true">
 
+    <bean name="abstractVisualSteps" class="org.vividus.visual.steps.AbstractVisualSteps" abstract="true">
+        <property name="extendedAssertionFormatEnabled" value="${ui.visual.extended-assertion-format-enabled}" />
+    </bean>
+
     <beans profile="web_selenium,mobile_app">
         <bean id="scenario" class="org.vividus.visual.screenshot.ScenarioBasedIndexer" />
 

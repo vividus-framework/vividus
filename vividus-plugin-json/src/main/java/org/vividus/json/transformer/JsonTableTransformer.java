@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.vividus.transformer.ExtendedTableTransformer;
 import org.vividus.util.ExamplesTableProcessor;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonPathUtils;
+import org.vividus.util.json.JsonUtils;
 
 public class JsonTableTransformer implements ExtendedTableTransformer
 {
@@ -40,10 +41,12 @@ public class JsonTableTransformer implements ExtendedTableTransformer
     private static final String PATH_PROPERTY_KEY = "path";
 
     private final VariableContext variableContext;
+    private final JsonUtils jsonUtils;
 
-    public JsonTableTransformer(VariableContext variableContext)
+    public JsonTableTransformer(VariableContext variableContext, JsonUtils jsonUtils)
     {
         this.variableContext = variableContext;
+        this.jsonUtils = jsonUtils;
     }
 
     @SuppressWarnings("unchecked")
@@ -62,7 +65,8 @@ public class JsonTableTransformer implements ExtendedTableTransformer
                 : paths -> JsonPathUtils.getData(ResourceUtils.loadResourceOrFileAsStream(sourceValue), paths);
 
         String columns = tableProperties.getMandatoryNonBlankProperty("columns", String.class);
-        Map<String, String> columnsPerJsonPaths = Splitter.on(';').withKeyValueSeparator(Splitter.on('=').limit(2))
+        Map<String, String> columnsPerJsonPaths = Splitter.on(';').omitEmptyStrings().trimResults()
+                .withKeyValueSeparator(Splitter.on('=').limit(2))
                 .split(columns);
 
         try
@@ -70,7 +74,7 @@ public class JsonTableTransformer implements ExtendedTableTransformer
             List<List<String>> values = jsonDataMapper.apply(columnsPerJsonPaths.values()).stream().map(e ->
             {
                 List<Object> columnValues = e instanceof List ? (List<Object>) e : Collections.singletonList(e);
-                return columnValues.stream().map(String::valueOf).toList();
+                return columnValues.stream().map(this::convertColumnValue).toList();
             }).toList();
             return ExamplesTableProcessor.buildExamplesTableFromColumns(columnsPerJsonPaths.keySet(), values,
                     tableProperties);
@@ -79,5 +83,10 @@ public class JsonTableTransformer implements ExtendedTableTransformer
         {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private String convertColumnValue(Object columnValue)
+    {
+        return columnValue instanceof Map ? jsonUtils.toJson(columnValue) : String.valueOf(columnValue);
     }
 }

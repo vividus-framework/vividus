@@ -32,19 +32,7 @@ import org.vividus.context.VariableContext;
 
 public class EvalExpressionProcessor extends SingleArgExpressionProcessor<String>
 {
-    private static final JexlEngine JEXL_ENGINE = new JexlBuilder()
-            .charset(StandardCharsets.UTF_8)
-            .permissions(new ClassPermissions(
-                    Math.class,
-                    StringUtils.class,
-                    WordUtils.class
-            ))
-            .namespaces(Map.of(
-                    "math", Math.class,
-                    "stringUtils", StringUtils.class,
-                    "wordUtils", WordUtils.class)
-            )
-            .create();
+    private static final JexlEngine JEXL_ENGINE = createJexlEngine();
 
     public EvalExpressionProcessor(VariableContext variableContext)
     {
@@ -52,6 +40,24 @@ public class EvalExpressionProcessor extends SingleArgExpressionProcessor<String
             JexlScript jexlScript = JEXL_ENGINE.createScript(expressionToEvaluate);
             return String.valueOf(jexlScript.execute(new JexlVariableContext(variableContext)));
         });
+    }
+
+    private static JexlEngine createJexlEngine()
+    {
+        JexlBuilder builder = new JexlBuilder();
+        builder.features().sideEffectGlobal(true);
+        return builder.charset(StandardCharsets.UTF_8)
+                .permissions(new ClassPermissions(
+                        Math.class,
+                        StringUtils.class,
+                        WordUtils.class
+                ))
+                .namespaces(Map.of(
+                        "math", Math.class,
+                        "stringUtils", StringUtils.class,
+                        "wordUtils", WordUtils.class)
+                )
+                .create();
     }
 
     private static final class JexlVariableContext extends MapContext

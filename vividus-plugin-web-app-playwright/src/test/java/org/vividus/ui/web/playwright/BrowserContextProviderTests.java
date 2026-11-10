@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import java.util.stream.Stream;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType.LaunchOptions;
+import com.microsoft.playwright.CDPSession;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.Tracing;
@@ -129,29 +130,35 @@ class BrowserContextProviderTests
     @Test
     void shouldReCreateClosedBrowser()
     {
-        Browser firstBrowserInstance = mock();
-        Browser secondBrowserInstance = mock();
-        Browser thirdBrowserInstance = mock();
-        when(browserType.launchBrowser(any(), any())).thenReturn(firstBrowserInstance).thenReturn(secondBrowserInstance)
-                .thenReturn(thirdBrowserInstance);
-        when(firstBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
-        when(firstBrowserInstance.isConnected()).thenReturn(true).thenReturn(false);
-        when(secondBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
-        when(secondBrowserInstance.isConnected()).thenReturn(false).thenReturn(false);
-        when(thirdBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
+        try (var playwrightStaticMock = mockStatic(Playwright.class))
+        {
+            Playwright playwright = mock();
+            playwrightStaticMock.when(Playwright::create).thenReturn(playwright);
 
-        browserContextProvider.get();
-        browserContextProvider.closeBrowserContext();
-        browserContextProvider.closeBrowserInstance();
-        browserContextProvider.get();
-        browserContextProvider.closeBrowserContext();
-        browserContextProvider.closeBrowserInstance();
-        browserContextProvider.get();
+            Browser firstBrowserInstance = mock();
+            Browser secondBrowserInstance = mock();
+            Browser thirdBrowserInstance = mock();
+            when(browserType.launchBrowser(any(), any())).thenReturn(firstBrowserInstance)
+                    .thenReturn(secondBrowserInstance).thenReturn(thirdBrowserInstance);
+            when(firstBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
+            when(firstBrowserInstance.isConnected()).thenReturn(true).thenReturn(false);
+            when(secondBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
+            when(secondBrowserInstance.isConnected()).thenReturn(false).thenReturn(false);
+            when(thirdBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
 
-        verify(firstBrowserInstance).close();
-        verify(secondBrowserInstance).close();
-        verify(browserType, times(3)).launchBrowser(any(), any());
-        verify(testContext, times(6)).put(any(), any());
+            browserContextProvider.get();
+            browserContextProvider.closeBrowserContext();
+            browserContextProvider.closeBrowserInstance();
+            browserContextProvider.get();
+            browserContextProvider.closeBrowserContext();
+            browserContextProvider.closeBrowserInstance();
+            browserContextProvider.get();
+
+            verify(firstBrowserInstance).close();
+            verify(secondBrowserInstance).close();
+            verify(browserType, times(3)).launchBrowser(any(), any());
+            verify(testContext, times(6)).put(any(), any());
+        }
     }
 
     static Stream<Arguments> tracingConfigurations()
@@ -256,5 +263,25 @@ class BrowserContextProviderTests
     {
         when(testContext.get(BrowserContext.class)).thenReturn(browserContext);
         assertEquals(initStatus, browserContextProvider.isBrowserContextInitialized());
+    }
+
+    @Test
+    void shouldCreateCdpSession()
+    {
+        Page page = mock();
+        BrowserContext context = mock();
+        when(page.context()).thenReturn(context);
+        browserContextProvider.getCdpSession(page);
+        verify(context).newCDPSession(page);
+        verify(page).onClose(any());
+    }
+
+    @Test
+    void shouldReturnCdpSession()
+    {
+        Page page = mock();
+        testContext.put(CDPSession.class, mock(CDPSession.class));
+        browserContextProvider.getCdpSession(page);
+        verifyNoInteractions(page);
     }
 }

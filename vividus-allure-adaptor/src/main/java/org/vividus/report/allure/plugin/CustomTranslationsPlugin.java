@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,8 @@ import java.util.Map;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.PropertyMappedCollection;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 public class CustomTranslationsPlugin extends DynamicPlugin
 {
-    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public CustomTranslationsPlugin(PropertyMappedCollection<Map<String, ?>> customTranslations, JsonUtils jsonUtils)
             throws IOException
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,6 @@ class KeyboardActionsTests
     @Mock private GenericWebDriverManager genericWebDriverManager;
     @Mock private ISearchActions searchActions;
     @Mock private WebElement element;
-    @Mock private HidesKeyboard hidesKeyboard;
 
     private KeyboardActions keyboardActions;
 
@@ -77,7 +76,7 @@ class KeyboardActionsTests
     @AfterEach
     void afterEach()
     {
-        verifyNoMoreInteractions(hidesKeyboard, searchActions, genericWebDriverManager);
+        verifyNoMoreInteractions(searchActions, genericWebDriverManager);
     }
 
     @Test
@@ -88,7 +87,6 @@ class KeyboardActionsTests
         keyboardActions.typeText(element, TEXT);
 
         verify(element).sendKeys(TEXT);
-        verifyNoInteractions(hidesKeyboard);
         assertThat(logger.getLoggingEvents(), is(List.of(info("Typing text '{}' into the field", TEXT))));
     }
 
@@ -100,7 +98,6 @@ class KeyboardActionsTests
         keyboardActions.clearText(element);
 
         verify(element).clear();
-        verifyNoInteractions(hidesKeyboard);
         assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
@@ -149,7 +146,6 @@ class KeyboardActionsTests
 
         keyboardActions.hideKeyboard(element);
 
-        verifyNoInteractions(hidesKeyboard);
         assertThat(logger.getLoggingEvents(), is(List.of(warn("Skip hiding keyboard for {}. Use the tap step to tap"
             + " outside the {} to hide the keyboard", XCUIELEMENT_TYPE_TEXT_VIEW))));
     }
@@ -160,12 +156,56 @@ class KeyboardActionsTests
         init(false);
         when(genericWebDriverManager.isIOS()).thenReturn(true);
         enableOnScreenKeyboard(true);
+        HidesKeyboard hidesKeyboard = mock();
         when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
         when(element.getTagName()).thenReturn(XCUIELEMENT_TYPE_TEXT_VIEW);
 
         keyboardActions.hideKeyboard(element);
 
         verify(hidesKeyboard).hideKeyboard();
+    }
+
+    @Test
+    void shouldHideKeyboardUsingAppiumNativeExtensionWhenWorkaroundIsDisabled()
+    {
+        keyboardActions = new KeyboardActions(false, false, touchActions, webDriverProvider,
+                genericWebDriverManager, searchActions);
+        HidesKeyboard hidesKeyboard = mock();
+        when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
+
+        keyboardActions.hideKeyboard(element);
+
+        verify(hidesKeyboard).hideKeyboard();
+        verifyNoInteractions(element);
+    }
+
+    @Test
+    void shouldHideKeyboardUsingAppiumNativeExtensionWhenOsIsNotIOs()
+    {
+        init(false);
+        when(genericWebDriverManager.isIOS()).thenReturn(false);
+        HidesKeyboard hidesKeyboard = mock();
+        when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
+
+        keyboardActions.hideKeyboard(element);
+
+        verify(hidesKeyboard).hideKeyboard();
+        verifyNoInteractions(element);
+    }
+
+    @Test
+    void shouldTryToHideKeyboardUsingAppiumNativeExtensionWhenAppiumReportsKeyboardIsNotShown()
+    {
+        init(false);
+        when(genericWebDriverManager.isIOS()).thenReturn(true);
+        enableOnScreenKeyboard(false);
+        HidesKeyboard hidesKeyboard = mock();
+        when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
+
+        keyboardActions.hideKeyboard(element);
+
+        verify(hidesKeyboard).hideKeyboard();
+        verifyNoInteractions(element);
     }
 
     @Test
@@ -189,7 +229,7 @@ class KeyboardActionsTests
 
     void init(boolean realDevice)
     {
-        keyboardActions = new KeyboardActions(realDevice, touchActions, webDriverProvider,
+        keyboardActions = new KeyboardActions(realDevice, true, touchActions, webDriverProvider,
                 genericWebDriverManager, searchActions);
     }
 

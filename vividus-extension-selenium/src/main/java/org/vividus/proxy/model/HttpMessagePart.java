@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,9 +78,9 @@ public enum HttpMessagePart
         @Override
         public Object get(HarEntry harEntry)
         {
-            HarContent harContext = harEntry.getResponse().getContent();
+            HarContent harContent = harEntry.getResponse().getContent();
             return Map.of("responseBody",
-                    createBodyData(harContext.getMimeType(), harContext.getText()));
+                    createBodyData(harContent.getMimeType(), harContent.getText()));
         }
     };
 
@@ -94,10 +94,16 @@ public enum HttpMessagePart
 
     private static Map<String, String> createBodyData(String mimeType, String text)
     {
-        return Map.of(
-                "mimeType", mimeType,
-                "text", text
-        );
+        Map<String, String> data = new HashMap<>();
+        if (mimeType != null)
+        {
+            data.put("mimeType", mimeType);
+        }
+        if (text != null)
+        {
+            data.put("text", text);
+        }
+        return data;
     }
 
     private static Map<String, List<String>> getRequestBodyParameters(HarPostData postData)

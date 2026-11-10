@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class HttpClientConfig
     private String cookieSpec;
     private HttpRequestRetryStrategy httpRequestRetryStrategy;
     private List<HttpResponseHandler> httpResponseHandlers;
-    private Map<String, BasicAuthConfig> basicAuthConfig;
+    private Map<String, HttpContextConfig> httpContextConfig;
 
     public boolean hasBaseUrl()
     {
@@ -259,13 +259,13 @@ public class HttpClientConfig
         this.httpResponseHandlers = httpResponseHandlers;
     }
 
-    public Map<String, BasicAuthConfig> getBasicAuthConfig()
+    public Map<String, HttpContextConfig> getHttpContextConfig()
     {
-        return basicAuthConfig;
+        return httpContextConfig;
     }
 
-    public void setBasicAuthConfig(Map<String, BasicAuthConfig> basicAuthConfig)
+    public void setHttpContextConfig(Map<String, HttpContextConfig> httpContextConfig)
     {
-        this.basicAuthConfig = basicAuthConfig;
+        this.httpContextConfig = httpContextConfig;
     }
 }

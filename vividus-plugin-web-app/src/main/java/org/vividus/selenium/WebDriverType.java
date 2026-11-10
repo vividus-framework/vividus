@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.selenium;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -36,6 +37,7 @@ import org.openqa.selenium.firefox.GeckoDriverService;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.ie.InternetExplorerDriverService;
 import org.openqa.selenium.ie.InternetExplorerOptions;
+import org.openqa.selenium.remote.AbstractDriverOptions;
 import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
@@ -110,9 +112,23 @@ public enum WebDriverType
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
-            ChromeOptions options = new ChromeOptions().merge(desiredCapabilities);
-            fillOptions(options, configuration);
+            ChromeOptions options = createOptions(desiredCapabilities, configuration);
+            configuration.getBinaryPath().ifPresent(options::setBinary);
             return new ChromeDriver(options);
+        }
+
+        @Override
+        public ChromeOptions mergeToRemoteOptions(DesiredCapabilities capabilities,
+                WebDriverConfiguration configuration)
+        {
+            return createOptions(capabilities, configuration);
+        }
+
+        private ChromeOptions createOptions(DesiredCapabilities toUpdate, WebDriverConfiguration configuration)
+        {
+            ChromeOptions options = new ChromeOptions();
+            fillCommonOptions(options, configuration);
+            return options.merge(toUpdate);
         }
     },
     SAFARI(false, false, Browser.SAFARI, SafariDriverService.SAFARI_DRIVER_EXE_PROPERTY, WebDriverManager::safaridriver)
@@ -128,9 +144,16 @@ public enum WebDriverType
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
-            ChromeOptions options = new ChromeOptions().merge(desiredCapabilities);
-            fillOptions(options, configuration);
+            ChromeOptions options = createOptions(desiredCapabilities, configuration);
+            configuration.getBinaryPath().ifPresent(options::setBinary);
             return new ChromeDriver(options);
+        }
+
+        private ChromeOptions createOptions(DesiredCapabilities toUpdate, WebDriverConfiguration configuration)
+        {
+            ChromeOptions options = new ChromeOptions();
+            fillCommonOptions(options, configuration);
+            return options.merge(toUpdate);
         }
     },
     EDGE(true, true, Browser.EDGE, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY, WebDriverManager::edgedriver)
@@ -138,9 +161,23 @@ public enum WebDriverType
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
-            EdgeOptions options = new EdgeOptions().merge(desiredCapabilities);
-            fillOptions(options, configuration);
+            EdgeOptions options = createOptions(desiredCapabilities, configuration);
+            configuration.getBinaryPath().ifPresent(options::setBinary);
             return new EdgeDriver(options);
+        }
+
+        @Override
+        public EdgeOptions mergeToRemoteOptions(DesiredCapabilities capabilities,
+                WebDriverConfiguration configuration)
+        {
+            return createOptions(capabilities, configuration);
+        }
+
+        private EdgeOptions createOptions(DesiredCapabilities capabilities, WebDriverConfiguration configuration)
+        {
+            EdgeOptions options = new EdgeOptions();
+            fillCommonOptions(options, configuration);
+            return options.merge(capabilities);
         }
     };
 
@@ -168,6 +205,13 @@ public enum WebDriverType
     public abstract WebDriver getWebDriver(DesiredCapabilities desiredCapabilities,
             WebDriverConfiguration configuration);
 
+    public AbstractDriverOptions<ChromiumOptions<?>> mergeToRemoteOptions(DesiredCapabilities capabilities,
+            WebDriverConfiguration configuration)
+    {
+        throw new UnsupportedOperationException(String.format("CLI arguments are not supported for %s running remotely",
+                this.name().toLowerCase(Locale.ROOT)));
+    }
+
     void setDriverExecutablePath(Optional<String> driverExecutablePath)
     {
         driverExecutablePath.ifPresentOrElse(
@@ -176,10 +220,9 @@ public enum WebDriverType
         );
     }
 
-    private static <T extends ChromiumOptions<T>> void fillOptions(ChromiumOptions<T> options,
+    private static <T extends ChromiumOptions<T>> void fillCommonOptions(ChromiumOptions<T> options,
             WebDriverConfiguration configuration)
     {
-        configuration.getBinaryPath().ifPresent(options::setBinary);
         options.addArguments(configuration.getCommandLineArguments());
         configuration.getExperimentalOptions().forEach(options::setExperimentalOption);
     }

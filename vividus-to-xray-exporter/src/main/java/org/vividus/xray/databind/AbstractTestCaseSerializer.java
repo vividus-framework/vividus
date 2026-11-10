@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,12 @@ public abstract class AbstractTestCaseSerializer<T extends AbstractTestCase> ext
             writeObjectWithValueField(generator, getSafely(TEST_CASE_TYPE_FIELD_KEY, mapping), testCase.getType());
 
             generator.writeStringField("summary", testCase.getSummary());
+
+            String description = testCase.getDescription();
+            if (description != null)
+            {
+                generator.writeStringField("description", testCase.getDescription());
+            }
 
             writeJsonArray(generator, "labels", testCase.getLabels(), false);
 

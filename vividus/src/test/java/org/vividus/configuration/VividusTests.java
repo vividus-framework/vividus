@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ class VividusTests
         try (MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
                 MockedStatic<TestInfoLogger> testInfoLogger = mockStatic(TestInfoLogger.class);
                 MockedConstruction<ClassGraph> classGraph = mockConstruction(ClassGraph.class, (mock, context) -> {
+                    when(mock.enableClasspath()).thenReturn(mock);
                     when(mock.acceptPackagesNonRecursive("")).thenReturn(mock);
                     ScanResult scanResult = Mockito.mock(ScanResult.class);
                     when(mock.scan()).thenReturn(scanResult);
@@ -52,6 +53,7 @@ class VividusTests
             Vividus.init();
             List<ClassGraph> constructedScanners = classGraph.constructed();
             assertThat(constructedScanners, hasSize(1));
+            verify(constructedScanners.get(0)).enableClasspath();
             verify(classGraph.constructed().get(0)).scan();
             testInfoLogger.verify(TestInfoLogger::drawBanner);
             beanFactory.verify(BeanFactory::open);

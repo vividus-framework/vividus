@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
+       default-lazy-init="true">
+
+    <bean id="redisSteps" class="org.vividus.redis.steps.RedisSteps">
+        <constructor-arg index="0">
+            <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
+                <constructor-arg value="redis.connection." />
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <util:list id="stepBeanNames-Redis">
+        <idref bean="redisSteps" />
+    </util:list>
+</beans>

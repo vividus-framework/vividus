@@ -9,14 +9,15 @@ dependencies {
 
     runtimeOnly project(':vividus-plugin-rest-api')
 
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.16')
-    implementation(group: 'org.slf4j', name: 'slf4j-api')
-    implementation(group: 'com.browserstack', name: 'automate-client-java', version: '0.15')
-    implementation(group: 'com.browserstack', name: 'browserstack-local-java', version: '1.1.5')
+    implementation platform(libs.slf4j.bom)
+    implementation(libs.slf4j.api)
+    implementation('com.browserstack:automate-client-java:0.15')
+    implementation('com.browserstack:browserstack-local-java:1.1.9')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.4')
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.15.2')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
+    testImplementation platform(libs.junit.bom)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation platform(libs.mockito.bom)
+    testImplementation(libs.mockito.junitJupiter)
+    testImplementation(libs.slf4jTest)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,14 +44,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.selenium.cdp.BrowserPermissions;
 import org.vividus.selenium.manager.WebDriverManager;
-import org.vividus.ui.web.action.CdpActions;
+import org.vividus.ui.web.cdp.CdpClient;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class GeolocationEmulationStepsTests
 {
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(GeolocationEmulationSteps.class);
 
-    @Mock private CdpActions cdpActions;
+    @Mock private CdpClient cdpClient;
     @Mock private WebDriverManager webDriverManager;
     @InjectMocks private GeolocationEmulationSteps steps;
 
@@ -71,15 +71,15 @@ class GeolocationEmulationStepsTests
         permissions.setGeolocationEnabled(initialState);
         when(webDriverManager.getBrowserPermissions()).thenReturn(permissions);
 
-        double latitude = 55.410014;
-        double longitude = 28.628027;
+        double latitude = 55.410_014;
+        double longitude = 28.628_027;
 
         steps.emulateGeolocation(latitude, longitude);
 
-        verify(cdpActions, times(permissionSetInvocations)).executeCdpCommand("Browser.grantPermissions", Map.of(
+        verify(cdpClient, times(permissionSetInvocations)).executeCdpCommand("Browser.grantPermissions", Map.of(
                 "permissions", List.of("geolocation")
         ));
-        verify(cdpActions).executeCdpCommand("Emulation.setGeolocationOverride", Map.of(
+        verify(cdpClient).executeCdpCommand("Emulation.setGeolocationOverride", Map.of(
                 "latitude", latitude,
                 "longitude", longitude,
                 "accuracy", 1
@@ -92,7 +92,6 @@ class GeolocationEmulationStepsTests
     void shouldClearGeolocationParameters()
     {
         steps.clearGeolocationParameters();
-
-        verify(cdpActions).executeCdpCommand("Emulation.clearGeolocationOverride", Map.of());
+        verify(cdpClient).executeCdpCommand("Emulation.clearGeolocationOverride");
     }
 }

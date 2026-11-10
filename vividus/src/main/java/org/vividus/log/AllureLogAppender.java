@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,12 @@ import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.vividus.report.allure.AllureStoryReporter;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 @Plugin(name = "AllureLogAppender", category = "Core", elementType = "appender", printObject = true)
 public class AllureLogAppender extends AbstractAppender
 {
     private static AllureLogAppender instance;
     private AllureStoryReporter allureStoryReporter;
 
-    @SuppressFBWarnings("SING_SINGLETON_HAS_NONPRIVATE_CONSTRUCTOR")
     protected AllureLogAppender(String name, Filter filter, Layout<? extends Serializable> layout)
     {
         super(name, filter, layout, true, Property.EMPTY_ARRAY);
@@ -61,7 +58,6 @@ public class AllureLogAppender extends AbstractAppender
         return instance;
     }
 
-    @SuppressFBWarnings("SING_SINGLETON_GETTER_NOT_SYNCHRONIZED")
     public static AllureLogAppender getInstance()
     {
         return instance;

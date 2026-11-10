@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,24 @@ import org.vividus.mobitru.client.exception.MobitruOperationException;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
 import org.vividus.selenium.event.WebDriverCreateEvent;
+import org.vividus.testcontext.TestContext;
 
 public class MobitruRecordingListener
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(MobitruRecordingListener.class);
+    private static final String RECORDING_STARTED_FLAG = "recordingStarted";
 
     private final boolean videoRecordingEnabled;
+    private final TestContext testContext;
     private final MobitruFacade mobitruFacade;
     private final MobitruSessionInfoStorage mobitruSessionInfoStorage;
     private final IAttachmentPublisher attachmentPublisher;
 
-    public MobitruRecordingListener(boolean videoRecordingEnabled, MobitruFacade mobitruFacade,
-            MobitruSessionInfoStorage mobitruSessionInfoStorage, IAttachmentPublisher attachmentPublisher)
+    public MobitruRecordingListener(TestContext testContext, boolean videoRecordingEnabled,
+                                    MobitruFacade mobitruFacade, MobitruSessionInfoStorage mobitruSessionInfoStorage,
+                                    IAttachmentPublisher attachmentPublisher)
     {
+        this.testContext = testContext;
         this.videoRecordingEnabled = videoRecordingEnabled;
         this.mobitruFacade = mobitruFacade;
         this.attachmentPublisher = attachmentPublisher;
@@ -77,7 +82,8 @@ public class MobitruRecordingListener
     private void startRecordingIfEnabled()
     {
         performRecordingOperation(mobitruFacade::startDeviceScreenRecording,
-                "Unable to start recording on the device with UUID {}");
+                "Unable to start recording on the device with UUID {}",
+                true);
     }
 
     private void publishRecordingIfEnabled()
@@ -86,19 +92,23 @@ public class MobitruRecordingListener
             ScreenRecording recording = mobitruFacade.stopDeviceScreenRecording(deviceId);
             String attachmentName = String.format("Video Recording (%s).mp4", recording.recordingId());
             attachmentPublisher.publishAttachment(recording.content(), attachmentName);
-        }, "Unable to retrieve recording from the device with UUID {}");
+        }, "Unable to retrieve recording from the device with UUID {}",
+                false);
     }
 
     private void performRecordingOperation(FailableConsumer<String, MobitruOperationException> deviceIdConsumer,
-            String logMessageTemplate)
+            String logMessageTemplate, boolean recordingStartedState)
     {
-        if (videoRecordingEnabled)
+        if (videoRecordingEnabled
+                &&
+                testContext.get(RECORDING_STARTED_FLAG, () -> false) != recordingStartedState)
         {
             mobitruSessionInfoStorage.getDeviceId().ifPresent(deviceId ->
             {
                 try
                 {
                     deviceIdConsumer.accept(deviceId);
+                    testContext.put(RECORDING_STARTED_FLAG, recordingStartedState);
                 }
                 catch (MobitruOperationException e)
                 {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,5 +143,18 @@ class YamlStepsTests
         yamlSteps.saveYamlValueToVariable(YAML, "non-existent", VARIABLE_SCOPES, VARIABLE_NAME);
         verify(softAssert).recordFailedAssertion("No YAML element is found by YAML path 'non-existent'");
         verifyNoInteractions(variableContext);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "items,          1",
+            "items[0],       1",
+            "non-existent,   0"
+    })
+    void shouldSaveNumberOfYamlElements(String yamlPath, int expectedCount)
+    {
+        yamlSteps.saveNumberOfYamlElements(YAML, yamlPath, VARIABLE_SCOPES, VARIABLE_NAME);
+        verify(variableContext).putVariable(VARIABLE_SCOPES, VARIABLE_NAME, expectedCount);
+        verifyNoInteractions(softAssert);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,13 @@ public final class PlaywrightLocatorAssertions
         LocatorAssertions.IsVisibleOptions options = waitForState ? null : new LocatorAssertions.IsVisibleOptions()
                 .setTimeout(ASSERTION_NO_WAIT_TIMEOUT);
         getLocatorAssertions(locator).isVisible(options);
+    }
+
+    public static void assertElementInViewport(Locator locator, boolean waitForState)
+    {
+        LocatorAssertions.IsInViewportOptions options = waitForState ? null
+                : new LocatorAssertions.IsInViewportOptions().setTimeout(ASSERTION_NO_WAIT_TIMEOUT);
+        getLocatorAssertions(locator).isInViewport(options);
     }
 
     public static void assertElementHidden(Locator locator, boolean waitForState)

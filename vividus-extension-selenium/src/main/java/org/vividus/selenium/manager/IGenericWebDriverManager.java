@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,15 @@ public interface IGenericWebDriverManager
 
     Dimension getSize();
 
+    /**
+     * Runs the given action in the mobile native context. If the current context is not the mobile native context, it
+     * switches to the mobile native context, runs the action, and then switches back to the original context.
+     *
+     * @param consumer the consumer to be executed, accepts the {@link WebDriver} instance as an argument.
+     */
     void performActionInNativeContext(Consumer<WebDriver> consumer);
+
+    boolean isContextSwitchedToMobileNative();
 
     boolean isMobile();
 

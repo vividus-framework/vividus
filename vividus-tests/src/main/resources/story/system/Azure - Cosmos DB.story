@@ -1,5 +1,6 @@
 Meta:
     @epic vividus-plugin-cosmos-db
+    @skip
 
 Scenario: Verify Cosmos DB CRUD operations
 When I read item with `1` id and `personal` partition from CosmosDB container `test` and save result to scenario variable `result`

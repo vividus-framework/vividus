@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,28 @@
 
 package org.vividus.json.steps;
 
-import java.util.Set;
+import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaException;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
-import com.networknt.schema.SpecVersionDetector;
-import com.networknt.schema.ValidationMessage;
+import com.networknt.schema.Error;
+import com.networknt.schema.Schema;
+import com.networknt.schema.SchemaException;
+import com.networknt.schema.SchemaRegistry;
+import com.networknt.schema.SpecificationVersion;
 
 import org.jbehave.core.annotations.Then;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.util.json.JsonUtils;
+import org.vividus.util.json.JsonJackson3Utils;
+
+import tools.jackson.databind.JsonNode;
 
 public class JsonSchemaValidationSteps
 {
     private static final String LINE_SEPARATOR = System.lineSeparator();
 
-    private final JsonUtils jsonUtils;
+    private final JsonJackson3Utils jsonUtils;
     private final ISoftAssert softAssert;
 
-    public JsonSchemaValidationSteps(JsonUtils jsonUtils, ISoftAssert softAssert)
+    public JsonSchemaValidationSteps(JsonJackson3Utils jsonUtils, ISoftAssert softAssert)
     {
         this.jsonUtils = jsonUtils;
         this.softAssert = softAssert;
@@ -56,24 +56,22 @@ public class JsonSchemaValidationSteps
     public void validateJsonAgainstSchema(String json, String schema)
     {
         JsonNode schemaNode = jsonUtils.readTree(schema);
-        SpecVersion.VersionFlag version;
+        Schema jsonSchema;
         try
         {
-            version = SpecVersionDetector.detectOptionalVersion(schemaNode, true)
-                    .orElse(SpecVersion.VersionFlag.V202012);
+            jsonSchema = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12).getSchema(schemaNode);
         }
-        catch (JsonSchemaException e)
+        catch (SchemaException e)
         {
             softAssert.recordFailedAssertion(e);
             return;
         }
-        JsonSchema jsonSchema = JsonSchemaFactory.getInstance(version).getSchema(schemaNode);
         JsonNode jsonNode = jsonUtils.readTree(json);
-        Set<ValidationMessage> validationMessages = jsonSchema.validate(jsonNode);
+        List<Error> validationMessages = jsonSchema.validate(jsonNode);
         assertValidationMessages(validationMessages);
     }
 
-    private void assertValidationMessages(Set<ValidationMessage> validationMessages)
+    private void assertValidationMessages(List<Error> validationMessages)
     {
         boolean passed = validationMessages.isEmpty();
         StringBuilder errorMessageBuilder = new StringBuilder("JSON is ");
@@ -83,7 +81,7 @@ public class JsonSchemaValidationSteps
         }
         errorMessageBuilder.append("valid against schema");
         int index = 1;
-        for (ValidationMessage validationMessage : validationMessages)
+        for (Error validationMessage : validationMessages)
         {
             errorMessageBuilder.append(index == 1 ? ':' : ',')
                     .append(LINE_SEPARATOR)

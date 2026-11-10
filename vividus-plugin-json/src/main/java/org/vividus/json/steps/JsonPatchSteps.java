@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,21 @@ package org.vividus.json.steps;
 
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.flipkart.zjsonpatch.JsonPatch;
+import com.flipkart.zjsonpatch.Jackson3JsonPatch;
 
 import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
-import org.vividus.util.json.JsonUtils;
+import org.vividus.util.json.JsonJackson3Utils;
 import org.vividus.variable.VariableScope;
+
+import tools.jackson.databind.JsonNode;
 
 public class JsonPatchSteps
 {
     private final VariableContext variableContext;
-    private final JsonUtils jsonUtils;
+    private final JsonJackson3Utils jsonUtils;
 
-    public JsonPatchSteps(VariableContext variableContext, JsonUtils jsonUtils)
+    public JsonPatchSteps(VariableContext variableContext, JsonJackson3Utils jsonUtils)
     {
         this.variableContext = variableContext;
         this.jsonUtils = jsonUtils;
@@ -50,7 +51,7 @@ public class JsonPatchSteps
     {
         JsonNode jsonSource = jsonUtils.readTree(sourceJson);
         JsonNode patchJson = jsonUtils.readTree(jsonPatch);
-        JsonNode patchedJson = JsonPatch.apply(patchJson, jsonSource);
+        JsonNode patchedJson = Jackson3JsonPatch.apply(patchJson, jsonSource);
         variableContext.putVariable(scopes, variableName, patchedJson.toString());
     }
 }

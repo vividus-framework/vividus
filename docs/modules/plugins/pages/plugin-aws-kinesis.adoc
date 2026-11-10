@@ -10,7 +10,7 @@ include::partial$aws.adoc[]
 == Producer
 === Steps
 
-==== *Put the record*
+==== Put the record
 
 Write a single data record into an Amazon Kinesis data stream. You must specify the name of the stream that captures, stores, and transports the data; a partition key; and the data blob itself. The partition key is used by Kinesis Data Streams to distribute data across shards. Kinesis Data Streams segregates the data records that belong to a stream into multiple shards, using the partition key associated with each data record to determine the shard to which a given data record belongs. Partition keys are Unicode strings, with a maximum length limit of 256 characters for each key. An MD5 hash function is used to map partition keys to 128-bit integer values and to map associated data records to shards using the hash key ranges of the shards. The step logs the shard ID of where the data record was placed and the sequence number that was assigned to the data record. Sequence numbers increase over time and are specific to a shard within a stream, not across all shards within a stream. After you write a record to a stream, you cannot modify that record or its order within the stream.
 
@@ -33,7 +33,7 @@ When I put record `Hello from Vividus!` with partition key `hello` to Kinesis st
 == Consumer
 === Steps
 
-==== *Start the consumer*
+==== Start the consumer
 Create Amazon Kinesis shard iterators. A shard iterator expires 5 minutes after it is returned to the requester. A shard iterator specifies the shard position from which to start reading data records sequentially.
 
 [source,gherkin]
@@ -43,7 +43,7 @@ When I start consuming records from Kinesis stream `$streamName`
 
 * `$streamName` - The name of the Amazon Kinesis data stream.
 
-==== *Drain the consumed records*
+==== Drain the consumed records
 Get data records from a Kinesis data stream's shard and drain the consumed records to the specified variable. The shard iterator created at step `When I start consuming records from Kinesis stream \`$streamName\`` specifies the position in the shard from which you want to start reading data records sequentially. If there are no records available in the portion of the shard that the iterator points to, an empty list of records is saved. Each draining moves the iterator to the position next after the last consumed record.
 
 [source,gherkin]

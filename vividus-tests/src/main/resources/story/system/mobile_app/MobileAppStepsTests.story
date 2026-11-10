@@ -8,10 +8,8 @@ Examples:
 /data/tables/system/mobile_app/locators/${target-platform}.table
 
 
-Scenario: Verify step: 'Given I start mobile application with capabilities:$capabilities'
-Given I start mobile application with capabilities:
-|name|value     |
-|app |${app-url}|
+Scenario: Verify step: 'Given I start mobile application'
+Given I start mobile application
 
 
 Scenario: VerifyStep: 'When I execute javascript `$wcript` and save result to $scopes variable `$variableName`'
@@ -144,6 +142,16 @@ When I type `${text}` in field located `accessibilityId(nameInput)`
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 
 
+Scenario: Verify step: 'When I change device screen orientation to $orientation'
+When I change context to element located by `accessibilityId(nameInput)`
+Given I initialize scenario variable `portraitWidth` with value `${context-width}`
+When I change device screen orientation to LANDSCAPE
+Given I initialize scenario variable `landscapeWidth` with value `${context-width}`
+Then `${portraitWidth}` is not equal to `${landscapeWidth}`
+When I change device screen orientation to PORTRAIT
+When I reset context
+
+
 Scenario: Verify dynamic variable: 'clipboard-text'
 When I tap on element located by `accessibilityId(CopyTextToClipboardButton)`
 Then `${clipboard-text}` is equal to `${text}`
@@ -211,14 +219,12 @@ When I wait until element located by `xpath(<welcomeMessageXpath>)` appears
 Scenario: [Android] Verify step: 'When I upload file `$filePath` to device'
 Meta:
     @targetPlatform android
+Given I initialize scenario variable `expected-image` with value `#{loadBinaryResource(/data/mobile-upload-image.png)}`
 When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `xpath(//android.widget.TextView[@text='Image'])`
 When I upload file `/data/mobile-upload-image.png` to device
-When I tap on element located by `accessibilityId(selectImage)`
-When I wait until element located by `xpath(//android.widget.TextView[@text='Pictures'])` appears
-When I tap on element located by `xpath(//android.widget.TextView[@text='Pictures'])`
-When I tap on element located by `xpath((//android.view.ViewGroup[contains(@content-desc, "Photo taken")])[1])`
-Then number of elements found by `xpath(//android.widget.TextView[@text='228x228'])` is equal to `1`
+When I download file `/sdcard/Pictures/mobile-upload-image.png` from device and save its content to scenario variable `uploaded-image`
+Then `${expected-image}` is equal to `${uploaded-image}`
 
 
 Scenario: [iOS] Verify step: 'When I upload file `$filePath` to device' AND 'iosClassChain' locator AND 'iosNsPredicate' locator
@@ -228,7 +234,6 @@ When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `iosClassChain(**/XCUIElementTypeButton[$name == "Image"$])`
 When I upload file `/data/mobile-upload-image.png` to device
 When I tap on element located by `iosNsPredicate(name == 'selectImage')`
-When I wait until element located by `accessibilityId(Photos)` appears
 When I tap on element located by `xpath((//XCUIElementTypeImage[contains(@name, "Photo")])[1])`
 When I wait until element located by `xpath(//XCUIElementTypeStaticText[@value='228x228'])` appears
 
@@ -236,12 +241,10 @@ When I wait until element located by `xpath(//XCUIElementTypeStaticText[@value='
 Scenario: [Android] Verify step: 'I upload file with name `$fileName` and data `$data` to device'
 Meta:
     @targetPlatform android
+Given I initialize scenario variable `expected-image` with value `#{loadBinaryResource(/data/file_for_upload_step.png)}`
 When I upload file with name `file_for_upload_step.png` and data `#{loadBinaryResource(/data/file_for_upload_step.png)}` to device
-When I tap on element located by `accessibilityId(selectImage)`
-When I wait until element located by `xpath(//android.widget.TextView[@text='Pictures'])` appears
-When I tap on element located by `xpath(//android.widget.TextView[@text='Pictures'])`
-When I tap on element located by `xpath((//android.view.ViewGroup[contains(@content-desc, "Photo taken")])[1])`
-Then number of elements found by `xpath(//android.widget.TextView[@text='569x407'])` is equal to `1`
+When I download file `/sdcard/Pictures/file_for_upload_step.png` from device and save its content to scenario variable `uploaded-image`
+Then `${expected-image}` is equal to `${uploaded-image}`
 
 
 Scenario: [iOS] Verify step: 'I upload file with name `$fileName` and data `$data` to device'
@@ -249,7 +252,6 @@ Meta:
     @targetPlatform ios
 When I upload file with name `file_for_upload_step.png` and data `#{loadBinaryResource(/data/file_for_upload_step.png)}` to device
 When I tap on element located by `iosNsPredicate(name == 'selectImage')`
-When I wait until element located by `accessibilityId(Photos)` appears
 When I tap on element located by `xpath((//XCUIElementTypeImage[contains(@name, "Photo")])[1])`
 Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='569x407'])` is equal to `1`
 
@@ -299,8 +301,8 @@ Meta:
     @targetPlatform android
 When I delete file `/sdcard/Pictures/mobile-upload-image.png` from device
 When I delete file `/sdcard/Pictures/file_for_upload_step.png` from device
-When I tap on element located by `accessibilityId(selectImage)`
-When I wait until element located by `xpath(//android.widget.TextView[@text='Pictures'])` disappears
+Then file `/sdcard/Pictures/mobile-upload-image.png` does not exist on device
+Then file `/sdcard/Pictures/file_for_upload_step.png` does not exist on device
 
 
 Scenario: [iOS] Verify step: 'When I delete file `$filePath` from device'
@@ -445,18 +447,27 @@ When I execute sequence of touch actions:
 |TAP |By.accessibilityId(menuToggler)|
 When I tap on element located by `xpath(<carouselViewXpath>)`
 Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
+When I change context to element located by `accessibilityId(<firstItemAccessibilityId>)`
+Given I initialize scenario variable `x` with value `#{eval(${context-x-coordinate} + ${context-width} / 2)}`
+Given I initialize scenario variable `y` with value `#{eval(${context-y-coordinate} + ${context-height} / 2)}`
+When I reset context
 When I execute sequence of touch actions:
-|type          |argument                                      |
-|TAP_AND_HOLD  |By.accessibilityId(<firstItemAccessibilityId>)|
-|MOVE_BY_OFFSET|(-150, 0)                                     |
-|RELEASE       |                                              |
+|type          |argument    |
+|MOVE_BY_OFFSET|(${x}, ${y})|
+|TAP_AND_HOLD  |            |
+|MOVE_BY_OFFSET|(-200, 0)   |
+|RELEASE       |            |
 When I wait until element located by `accessibilityId(<firstItemAccessibilityId>)` disappears
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `1`
+When I change context to element located by `accessibilityId(<secondItemAccessibilityId>)`
+Given I initialize scenario variable `x` with value `#{eval(${context-x-coordinate} + ${context-width} / 2)}`
+Given I initialize scenario variable `y` with value `#{eval(${context-y-coordinate} + ${context-height} / 2)}`
+When I reset context
 When I execute sequence of touch actions:
 |type          |argument                                       |
-|MOVE_TO       |By.accessibilityId(<secondItemAccessibilityId>)|
+|MOVE_BY_OFFSET|(${x}, ${y})                                  |
 |TAP_AND_HOLD  |                                               |
-|MOVE_BY_OFFSET|(150, 0)                                       |
+|MOVE_BY_OFFSET|(200, 0)                                       |
 |RELEASE       |                                               |
 When I wait until element located by `accessibilityId(<firstItemAccessibilityId>)` appears
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
@@ -468,7 +479,7 @@ When I execute sequence of touch actions:
 |type          |argument    |
 |MOVE_BY_OFFSET|(${x}, ${y})|
 |TAP_AND_HOLD  |            |
-|MOVE_BY_OFFSET|(-150, 0)   |
+|MOVE_BY_OFFSET|(-200, 0)   |
 |RELEASE       |            |
 When I wait until element located by `accessibilityId(<secondItemAccessibilityId>)` appears
 Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `0`
@@ -538,11 +549,6 @@ When I wait until element located by `accessibilityId(menuToggler)` disappears
 When I activate application with bundle identifier `${main-app}`
 When I wait until element located by `accessibilityId(menuToggler)` appears
 
-Scenario: Verify step: 'When I change device screen orientation to $orientation'
-When I save `${size-attribute}` attribute value of element located by `accessibilityId(menuToggler)` to scenario variable `portraitSize`
-When I change device screen orientation to LANDSCAPE
-When I save `${size-attribute}` attribute value of element located by `accessibilityId(menuToggler)` to scenario variable `landscapeSize`
-Then `${portraitSize}` is not equal to `${landscapeSize}`
 
 Scenario: Verify step: 'When I close mobile application'
 When I close mobile application

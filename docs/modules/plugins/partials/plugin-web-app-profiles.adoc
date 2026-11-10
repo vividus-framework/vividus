@@ -6,10 +6,10 @@ The xref:configuration:tests-configuration.adoc#_profiles[profiles] allow to cho
 
 The following profiles running desktop browsers are available out of the box:
 
-- `web/desktop/chrome`
-- `web/desktop/edge`
-- `web/desktop/firefox`
-- `web/desktop/iexplore`
+* `web/desktop/chrome`
+* `web/desktop/edge`
+* `web/desktop/firefox`
+* `web/desktop/iexplore`
 +
 [WARNING]
 ====
@@ -17,12 +17,12 @@ Since Internet Explorer 11 https://blogs.windows.com/windowsexperience/2022/06/1
 this profile is deprecated and will be removed in VIVIDUS 0.8.0.
 ====
 
-- `web/desktop/opera`
+* `web/desktop/opera`
 +
 NOTE: In order to run tests in Opera browser locally, it is required
 to configure <<_configure_browser_path,browser path>>.
 
-- `web/desktop/safari`
+* `web/desktop/safari`
 
 
 === Headless
@@ -32,7 +32,7 @@ version of the browser while controlling it programmatically. It can be used wit
 meaning that it runs without its “head”, the Graphical User Interface (GUI). The following profiles running browsers in
 headless mode are available:
 
-- `web/headless/chrome`
+* `web/headless/chrome`
 +
 [cols="2,1,1,2", options="header"]
 |===
@@ -50,8 +50,8 @@ NOTE: This property is ignored when custom CLI arguments are set using `web.driv
 
 |===
 
-- `web/headless/firefox`
-- `web/headless/edge`
+* `web/headless/firefox`
+* `web/headless/edge`
 
 
 ==== Mobile emulation
@@ -92,6 +92,6 @@ WARNING: Default Selenium grid URL is set to `selenium.grid.url=http://localhost
 
 The following profiles running mobile browsers are available out of the box:
 
-- `web/phone/android`
-- `web/phone/iphone`
-- `web/tablet/ipad`
+* `web/phone/android`
+* `web/phone/iphone`
+* `web/tablet/ipad`

@@ -21,11 +21,12 @@ When I run visual test with Applitools using:
 Scenario: Scrollbars hiding validation
 Given I am on page with URL `${vividus-test-site-url}/stickyHeader.html`
 When I run visual test with Applitools using:
-|baselineName                    |batchName  |action  |
-|full-page-do-not-hide-scrollbars|<batchName>|<action>|
+|baselineName                    |batchName  |action  |beforeRenderScreenshotHook                                       |
+|full-page-do-not-hide-scrollbars|<batchName>|<action>|document.querySelector('#myHeader').style.backgroundColor = 'red'|
  and screenshot config:
 |hideScrollbars|
 |false         |
+When I refresh page
 
 
 Scenario: Validation of step: 'When I $actionType baseline `$testName` in batch `$batchName` with Applitools' for full page

@@ -32,7 +32,7 @@ NOTE: The properties marked with *bold* are mandatory.
 
 [cols="2,1,2", options="header"]
 |===
-|Property
+|Property Name
 |Default value
 |Description
 
@@ -62,7 +62,7 @@ NOTE: The properties marked with *bold* are mandatory.
 
 |`batch-<batch-number>.fail-fast`
 |`false`
-|If `true` and any failure is occurred during the batch execution, the subsequent batches will not be executed.
+|If `true` and any failure occurs during the batch execution, the subsequent batches will not be executed.
 
 |`batch-<batch-number>.story.fail-fast`
 |`<empty>`
@@ -162,6 +162,47 @@ e.g., `0`, `#`, specify the way indices are displayed.
 |<empty>
 |Paths to the composite steps e.g. `steps/*.steps`
 |===
+
+==== Parallel Story Execution
+
+Stories within a batch are executed in parallel using the number of threads specified by the `batch-<batch-number>.threads` property. By default, stories run sequentially (1 thread). Increasing the thread count can significantly reduce test execution time.
+
+.suite.properties: Running stories in 2 batches with different parallelism levels
+[source,properties]
+----
+batch-1.resource-location=story/api
+batch-1.threads=5
+batch-1.name=API Tests
+
+batch-2.resource-location=story/ui
+batch-2.threads=2
+batch-2.name=UI Tests
+----
+
+In this example:
+
+* `batch-1` runs API test stories from the `story/api` folder using `5` parallel threads. Since API tests are generally stateless, a higher level of parallelism can be used.
+* `batch-2` runs UI test stories from the `story/ui` folder using `2` parallel threads. UI tests may require more resources per thread, so a lower parallelism level is configured.
+* `batch-1` runs first, and only after it completes, `batch-2` starts (batches always run sequentially).
+
+[IMPORTANT]
+====
+When running stories in parallel, make sure:
+
+* Stories do not depend on each other's state or execution order.
+* Shared resources (e.g. database records, user sessions) are properly isolated across threads.
+* The `story` xref:commons:variables.adoc[variable scope] is thread-safe, but the `next_batches` and `global` scopes are shared.
+====
+
+.suite.properties: Running all stories from a single folder with 3 threads
+[source,properties]
+----
+batch-1.resource-location=story/regression
+batch-1.threads=3
+batch-1.story.execution-timeout=PT30M
+----
+
+The `story.execution-timeout` property limits how long each individual story can run. This is useful in parallel execution to prevent a single slow story from blocking a thread indefinitely.
 
 === Profiles
 
@@ -292,7 +333,7 @@ JSON file should contain a valid JSON. If JSON is not valid known issues will be
 
 [cols="2,1,2", options="header"]
 |===
-|Property
+|Property Name
 |Default value
 |Description
 
@@ -660,39 +701,51 @@ origin should have the same `<group id>` value, please see the following example
 
 [source,properties]
 ----
-http.auth.myapp.origin=https://securedomain.com
-http.auth.myapp.username=whoisthis
-http.auth.myapp.password=3db8a57ba925a522c8bf
-http.auth.myapp.preemptive-auth-enabled=false
+http.context.myapp.origin=https://securedomain.com
+http.context.myapp.auth.username=whoisthis
+http.context.myapp.auth.password=3db8a57ba925a522c8bf
+http.context.myapp.auth.preemptive-auth-enabled=false
 ----
 ====
 
-|`http.auth.<group id>.origin`
+|`http.context.<group id>.origin`
 |character sequence
 |`*`
-a|The URL identifying the origin to which configured basic authentication credentials will apply e.g. `https://securedomain.com`.
+a|The URL identifying the origin to which HTTP requests the configuration will apply e.g. `https://securedomain.com`.
 All the URL components besides `scheme`, `domain` and `port` contained in the URL are ignored.
 
-To apply basic authentication credentials to all domains use `*` (asterisk) symbol as an origin value. Please note that more
+To apply basic authentication credentials or headers to all domains use `*` (asterisk) symbol as an origin value. Please note that more
 specific origin values take presendence over `*` value.
 
-IMPORTANT: Presence of this property requires `http.auth.<group id>.username` and `http.auth.<group id>.password` properties to be set as well
+|`http.context.<group id>.headers`
+|character sequence
+|`<empty>`
+a|Collection of HTTP headers
 
-|`http.auth.<group id>.username`
+IMPORTANT: Presence of this property requires `http.context.<group id>.origin` property to be set as well
+
+[source,properties]
+----
+http.context.myapp.origin=https://example.com
+http.context.myapp.headers.User-Agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+http.context.myapp.headers.Accept-Charset=utf-8
+----
+
+|`http.context.<group id>.auth.username`
 |character sequence
 |`<empty>`
 a|The username
 
-IMPORTANT: Presence of this property requires `http.auth.<group id>.origin` and `http.auth.<group id>.password` properties to be set as well
+IMPORTANT: Presence of this property requires `http.context.<group id>.origin` and `http.context.<group id>.auth.password` properties to be set as well
 
-|`http.auth.<group id>.password`
+|`http.context.<group id>.auth.password`
 |character sequence
 |`<empty>`
 a|The password
 
-IMPORTANT: Presence of this property requires `http.auth.<group id>.username` and `http.auth.<group id>.origin` properties to be set as well
+IMPORTANT: Presence of this property requires `http.context.<group id>.username` and `http.context.<group id>.auth.origin` properties to be set as well
 
-|`http.auth.<group id>.preemptive-auth-enabled`
+|`http.context.<group id>.auth.preemptive-auth-enabled`
 |`boolean`
 |`false`
 |If enabled the HTTP client will send the basic authentication data even before the service gives an unauthorized response (401), useful when the service doesn't support unauthorized response (401) or to reduce the overhead of making the connection
