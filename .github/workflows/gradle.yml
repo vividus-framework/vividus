@@ -781,7 +781,7 @@ jobs:
                                                 -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                 -Pvividus.allure.executor.report-name="SauceLabs Android Proxy tests report" \
                                                 -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com" \
-                                                -Pvividus.selenium.grid.capabilities.appium\:app=https://github.com/vividus-framework/vividus-test-app/releases/download/$TEST_APP_VERSION/vividus-test-app-android-$TEST_APP_VERSION.zip
+                                                -Pvividus.selenium.grid.capabilities.appium\:app=storage:filename=vividus-test-app-android-$TEST_APP_VERSION.zip
 
       - name: SauceLabs - Android Proxy - Mobile App - Publish system tests report
         if: always()
