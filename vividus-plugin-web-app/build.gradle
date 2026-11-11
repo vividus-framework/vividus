@@ -23,8 +23,8 @@ dependencies {
     implementation('io.github.bonigarcia:webdrivermanager:6.4.0') {
         exclude group: 'com.github.docker-java'
     }
-    // Supports DevTools protocol for Chrome v152+
-    implementation('org.seleniumhq.selenium:selenium-devtools-v152:4.50.0') {
+    // Supports DevTools protocol for Chrome v156+
+    implementation('org.seleniumhq.selenium:selenium-devtools-v156:4.52.0') {
         exclude group: 'org.seleniumhq.selenium'
     }
     implementation platform(libs.spring.bom)
