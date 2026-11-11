@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.context.RunContext;
 import org.vividus.selenium.AbstractDesiredCapabilitiesConfigurer;
 import org.vividus.selenium.event.AfterWebDriverQuitEvent;
+import org.vividus.selenium.event.WebDriverCreateFailureEvent;
 
 public abstract class AbstractTunnellingCapabilitiesConfigurer<T extends TunnelOptions>
         extends AbstractDesiredCapabilitiesConfigurer
@@ -69,6 +70,12 @@ public abstract class AbstractTunnellingCapabilitiesConfigurer<T extends TunnelO
 
     @Subscribe
     public void stopTunnel(AfterWebDriverQuitEvent event) throws TunnelException
+    {
+        tunnelManager.stop();
+    }
+
+    @Subscribe
+    public void stopTunnel(WebDriverCreateFailureEvent event) throws TunnelException
     {
         tunnelManager.stop();
     }

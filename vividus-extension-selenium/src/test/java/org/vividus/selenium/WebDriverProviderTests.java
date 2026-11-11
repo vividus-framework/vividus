@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.vividus.selenium;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.eventbus.EventBus;
@@ -45,6 +47,7 @@ import org.openqa.selenium.remote.SessionId;
 import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
 import org.vividus.selenium.event.WebDriverCreateEvent;
+import org.vividus.selenium.event.WebDriverCreateFailureEvent;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
 
@@ -90,6 +93,18 @@ class WebDriverProviderTests
     {
         webDriverProvider.end();
         verifyNoInteractions(mockedEventBus);
+    }
+
+    @Test
+    void shouldPostEventAndRethrowExceptionWhenWebDriverCreationFails()
+    {
+        var exception = new WebDriverException();
+        when(vividusDriverFactory.createWebDriver()).thenThrow(exception);
+        var thrown = assertThrows(WebDriverException.class, webDriverProvider::get);
+        assertEquals(exception, thrown);
+        verify(mockedEventBus).post(new WebDriverCreateFailureEvent(exception));
+        verifyNoMoreInteractions(mockedEventBus);
+        assertFalse(webDriverProvider.isWebDriverInitialized());
     }
 
     @Test
