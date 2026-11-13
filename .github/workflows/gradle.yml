@@ -72,7 +72,21 @@ jobs:
         java-version: 25
 
     - name: Warm up VIVIDUS test site
-      run: curl https://vividus-test-site-a92k.onrender.com/ &
+      shell: bash
+      run: |
+        test_site_url=https://vividus-test-site-a92k.onrender.com/
+        for attempt in {1..12}; do
+          if curl --fail --silent --connect-timeout 10 --max-time 20 "$test_site_url" \
+              --output "$RUNNER_TEMP/vividus-test-site.html" \
+              && grep -q 'vividus-logo' "$RUNNER_TEMP/vividus-test-site.html"; then
+            echo "VIVIDUS test site is ready"
+            exit 0
+          fi
+          echo "VIVIDUS test site is not ready yet (attempt $attempt/12)"
+          sleep 10
+        done
+        echo "VIVIDUS test site did not become ready"
+        exit 1
 
     - name: Build
       env:
