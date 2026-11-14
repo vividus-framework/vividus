@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ import org.openqa.selenium.Proxy;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.context.RunContext;
+import org.vividus.selenium.event.AfterWebDriverQuitEvent;
+import org.vividus.selenium.event.WebDriverCreateFailureEvent;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractTunnellingCapabilitiesConfigurerTests
@@ -120,9 +122,16 @@ class AbstractTunnellingCapabilitiesConfigurerTests
     }
 
     @Test
-    void shouldStopTunnel() throws TunnelException
+    void shouldStopTunnelAfterWebDriverQuit() throws TunnelException
     {
-        tunnellingConfigurer.stopTunnel(null);
+        tunnellingConfigurer.stopTunnel(new AfterWebDriverQuitEvent("session-id"));
+        verify(tunnelManager).stop();
+    }
+
+    @Test
+    void shouldStopTunnelOnWebDriverCreateFailure() throws TunnelException
+    {
+        tunnellingConfigurer.stopTunnel(new WebDriverCreateFailureEvent(new IllegalStateException()));
         verify(tunnelManager).stop();
     }
 

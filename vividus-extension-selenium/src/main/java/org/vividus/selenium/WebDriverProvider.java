@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
 import org.vividus.selenium.event.WebDriverCreateEvent;
+import org.vividus.selenium.event.WebDriverCreateFailureEvent;
 import org.vividus.testcontext.TestContext;
 
 import jakarta.inject.Inject;
@@ -48,12 +49,21 @@ public class WebDriverProvider implements IWebDriverProvider
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public WebDriver get()
     {
         WebDriver webDriver = testContext.get(WebDriver.class);
         if (webDriver == null)
         {
-            webDriver = vividusWebDriverFactory.createWebDriver();
+            try
+            {
+                webDriver = vividusWebDriverFactory.createWebDriver();
+            }
+            catch (RuntimeException e)
+            {
+                eventBus.post(new WebDriverCreateFailureEvent(e));
+                throw e;
+            }
             testContext.put(WebDriver.class, webDriver);
             webDrivers.add(webDriver);
             eventBus.post(new WebDriverCreateEvent(webDriver));
