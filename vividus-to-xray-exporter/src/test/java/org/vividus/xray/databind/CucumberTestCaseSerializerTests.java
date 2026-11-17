@@ -43,6 +43,7 @@ import test.util.JsonVerificationUtils;
 class CucumberTestCaseSerializerTests
 {
     private static final String PROJECT_KEY = "project-key";
+    private static final String RELEASE_1_0 = "Release-1.0";
 
     @Mock private JiraConfigurationProvider jiraConfigurationProvider;
     @InjectMocks private CucumberTestCaseSerializer serializer;
@@ -92,6 +93,9 @@ class CucumberTestCaseSerializerTests
         testCase.setAssignee("test-assignee");
         testCase.setLabels(new LinkedHashSet<>(List.of("label-1", "label-2")));
         testCase.setComponents(new LinkedHashSet<>(List.of("component-1", "component-2")));
+        testCase.setPriority("High");
+        testCase.setFixVersions(new LinkedHashSet<>(List.of(RELEASE_1_0, "Release-1.1")));
+        testCase.setAffectedVersions(new LinkedHashSet<>(List.of("Release-0.9", RELEASE_1_0)));
         testCase.setScenarioType("scenario-type");
         testCase.setScenario("scenario");
         return testCase;

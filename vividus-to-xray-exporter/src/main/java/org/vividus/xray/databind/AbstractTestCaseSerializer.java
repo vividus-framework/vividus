@@ -74,6 +74,8 @@ public abstract class AbstractTestCaseSerializer<T extends AbstractTestCase> ext
 
             writeJsonArray(generator, "components", testCase.getComponents(), true);
 
+            serializeJiraFields(testCase, generator);
+
             serializeCustomFields(testCase, mapping, generator);
 
             generator.writeEndObject();
@@ -93,6 +95,24 @@ public abstract class AbstractTestCaseSerializer<T extends AbstractTestCase> ext
 
     protected abstract void serializeCustomFields(T testCase, Map<String, String> mapping, JsonGenerator generator)
             throws IOException;
+
+    private void serializeJiraFields(T testCase, JsonGenerator generator) throws IOException
+    {
+        String priority = testCase.getPriority();
+        if (priority != null)
+        {
+            writeObjectWithField(generator, "priority", NAME, priority);
+        }
+
+        if (testCase.getFixVersions() != null && !testCase.getFixVersions().isEmpty())
+        {
+            writeJsonArray(generator, "fixVersions", testCase.getFixVersions(), true);
+        }
+        if (testCase.getAffectedVersions() != null && !testCase.getAffectedVersions().isEmpty())
+        {
+            writeJsonArray(generator, "versions", testCase.getAffectedVersions(), true);
+        }
+    }
 
     private static void writeJsonArray(JsonGenerator generator, String startField, Collection<String> values,
             boolean wrapValuesAsObjects) throws IOException
