@@ -307,25 +307,29 @@ public class GenericWaitSteps
     @When("I wait until element located by `$locator` has text matching `$regex`")
     public void waitUntilElementHasTextMatchingRegex(Locator locator, Pattern regex)
     {
-        uiContext.getOptionalSearchContext()
-                .ifPresent(context -> waitActions.wait(context, new IExpectedSearchContextCondition<>()
+        uiContext.getOptionalSearchContext().ifPresent(context ->
+        {
+            WaitResult<Boolean> result = waitActions.wait(context, new IExpectedSearchContextCondition<>()
+            {
+                @Override
+                public Boolean apply(SearchContext searchContext)
                 {
-                    @Override
-                    public Boolean apply(SearchContext searchContext)
-                    {
-                        return searchActions.findElement(locator).map(elementActions::getElementText)
-                                                                 .map(regex::matcher)
-                                                                 .map(java.util.regex.Matcher::find)
-                                                                 .orElse(false);
-                    }
+                    return searchActions.findElement(locator).map(elementActions::getElementText)
+                                                             .map(regex::matcher)
+                                                             .map(java.util.regex.Matcher::find)
+                                                             .orElse(false);
+                }
 
-                    @Override
-                    public String toString()
-                    {
-                        return String.format("text matching regex ('%s') to be present in element located by %s", regex,
-                                locator);
-                    }
-                }));
+                @Override
+                public String toString()
+                {
+                    return String.format("text matching regex ('%s') to be present in element located by %s", regex,
+                            locator);
+                }
+            }, false);
+            softAssert.assertTrue(String.format("Element located by `%s` has text matching regex `%s`",
+                    locator.toHumanReadableString(), regex), result.isWaitPassed());
+        });
     }
 
     private String formatDuration(Duration duration)
