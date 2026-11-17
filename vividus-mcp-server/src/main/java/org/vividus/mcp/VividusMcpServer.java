@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class VividusMcpServer
 
         McpServerTransportProvider transportProvider = new StdioServerTransportProvider(mcpJsonMapper);
         McpServer.sync(transportProvider)
-                 .serverInfo("vividus-mcp-server", "0.6.16")
+                 .serverInfo("vividus-mcp-server", "0.6.19")
                  .capabilities(McpSchema.ServerCapabilities.builder()
                      .tools(true)
                      .build())
