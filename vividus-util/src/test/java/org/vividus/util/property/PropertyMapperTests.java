@@ -42,6 +42,8 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -100,14 +102,15 @@ class PropertyMapperTests
         assertUser(result);
     }
 
-    @Test
-    void shouldMapEnumPropertiesCaseInsensitively() throws IOException
+    @ParameterizedTest
+    @CsvSource({ "Basic, BASIC", "ntlm, NTLM", "Kerberos, KERBEROS" })
+    void shouldMapEnumPropertiesCaseInsensitively(String value, AuthenticationScheme expected) throws IOException
     {
-        var properties = Map.of("authentication-scheme", "Basic");
+        var properties = Map.of("authentication-scheme", value);
 
         Authentication result = propertyMapper.readValue(properties, Authentication.class);
 
-        assertEquals(AuthenticationScheme.BASIC, result.getAuthenticationScheme());
+        assertEquals(expected, result.getAuthenticationScheme());
     }
 
     @Test
@@ -295,7 +298,9 @@ class PropertyMapperTests
 
     private enum AuthenticationScheme
     {
-        BASIC
+        BASIC,
+        NTLM,
+        KERBEROS
     }
 
     private static final class PatternDeserializer extends JsonDeserializer<Pattern>

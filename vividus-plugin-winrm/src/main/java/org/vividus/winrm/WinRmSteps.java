@@ -28,6 +28,7 @@ import java.util.function.Function;
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.steps.Parameters;
 import org.metricshub.winrm.AuthScheme;
 import org.metricshub.winrm.CommandResult;
 import org.metricshub.winrm.WinRMClient;
@@ -63,8 +64,8 @@ public class WinRmSteps
         Validate.isTrue(rowCount == 1,
                 "Exactly one row with WinRM connection parameters is expected in ExamplesTable, but found %d",
                 rowCount);
-        var row = connectionParameters.getRowAsParameters(0, true);
-        var winRmConnectionParametersToAdd = new WinRmConnectionParameters();
+        Parameters row = connectionParameters.getRowAsParameters(0, true);
+        WinRmConnectionParameters winRmConnectionParametersToAdd = new WinRmConnectionParameters();
         winRmConnectionParametersToAdd.setAddress(row.valueAs("address", String.class));
         winRmConnectionParametersToAdd.setUsername(row.valueAs("username", String.class));
         winRmConnectionParametersToAdd.setPassword(row.valueAs("password", String.class));
