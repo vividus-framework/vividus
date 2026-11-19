@@ -144,9 +144,37 @@ class WinRmStepsTests
             steps.executePowerShellCommand(command, SERVER, SCOPES, VARIABLE_NAME);
             return stdout;
         }, (ordered, builder) -> {
+            ordered.verify(builder).https();
             ordered.verify(builder).port(5986);
             ordered.verify(builder).authentication(AuthScheme.NTLM);
         });
+    }
+
+    @Test
+    void shouldFailToExecuteCommandWithAddressWithoutPort()
+    {
+        var address = "host-without-port";
+        var serverConfiguration = createServerConfiguration(address);
+        when(winRmConnectionParameters.getConfiguration(SERVER)).thenReturn(serverConfiguration);
+
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME));
+
+        assertEquals("WinRM address must include host and port: " + address, exception.getMessage());
+    }
+
+    @Test
+    void shouldFailToExecuteCommandWithKerberosOverHttp()
+    {
+        var address = HOSTNAME + ":5985";
+        var serverConfiguration = createServerConfiguration(address);
+        serverConfiguration.setAuthenticationScheme(AuthScheme.KERBEROS);
+        when(winRmConnectionParameters.getConfiguration(SERVER)).thenReturn(serverConfiguration);
+
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME));
+
+        assertEquals("Kerberos authentication requires an HTTPS WinRM endpoint: " + address, exception.getMessage());
     }
 
     @Test

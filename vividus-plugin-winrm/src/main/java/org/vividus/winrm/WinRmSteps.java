@@ -38,6 +38,9 @@ import org.vividus.variable.VariableScope;
 
 public class WinRmSteps
 {
+    private static final String HTTPS = "https";
+    private static final int HTTPS_PORT = 5986;
+
     private final DynamicConfigurationManager<WinRmConnectionParameters> winRmConnectionParameters;
     private final VariableContext variableContext;
 
@@ -134,19 +137,19 @@ public class WinRmSteps
     {
         WinRmConnectionParameters connectionParameters = winRmConnectionParameters.getConfiguration(connectionKey);
 
-        URI uri = toUri(connectionParameters.getAddress());
-        String hostname = uri.getHost();
-        Validate.notNull(hostname, "Unable to extract hostname from WinRM address: %s",
-                connectionParameters.getAddress());
-        WinRMClient.Builder builder = WinRMClient.builder(hostname)
+        WinRmEndpoint endpoint = toEndpoint(connectionParameters.getAddress());
+        AuthScheme authenticationScheme = connectionParameters.getAuthenticationScheme();
+        Validate.isTrue(authenticationScheme != AuthScheme.KERBEROS || endpoint.https(),
+                "Kerberos authentication requires an HTTPS WinRM endpoint: %s", connectionParameters.getAddress());
+        WinRMClient.Builder builder = WinRMClient.builder(endpoint.hostname())
                 .credentials(connectionParameters.getUsername(), connectionParameters.getPassword().toCharArray());
-        if ("https".equalsIgnoreCase(uri.getScheme()))
+        if (endpoint.https())
         {
             builder.https();
         }
-        if (uri.getPort() > 0)
+        if (endpoint.port() > 0)
         {
-            builder.port(uri.getPort());
+            builder.port(endpoint.port());
         }
         if (connectionParameters.isDisableCertificateChecks())
         {
@@ -165,15 +168,33 @@ public class WinRmSteps
         }
     }
 
-    private static URI toUri(String address)
+    private static WinRmEndpoint toEndpoint(String address)
     {
         try
         {
-            return address.contains("://") ? new URI(address) : new URI("http://" + address);
+            boolean explicitScheme = address.contains("://");
+            URI uri = explicitScheme ? new URI(address) : new URI("http://" + address);
+            String hostname = uri.getHost();
+            Validate.notNull(hostname, "Unable to extract hostname from WinRM address: %s", address);
+            if (explicitScheme)
+            {
+                Validate.isTrue("http".equalsIgnoreCase(uri.getScheme()) || HTTPS.equalsIgnoreCase(uri.getScheme()),
+                        "Unsupported WinRM protocol: %s", uri.getScheme());
+            }
+            else
+            {
+                Validate.isTrue(uri.getPort() > 0, "WinRM address must include host and port: %s", address);
+            }
+            boolean https = explicitScheme ? HTTPS.equalsIgnoreCase(uri.getScheme()) : uri.getPort() == HTTPS_PORT;
+            return new WinRmEndpoint(hostname, uri.getPort(), https);
         }
         catch (URISyntaxException e)
         {
             throw new IllegalArgumentException("Invalid WinRM address: " + address, e);
         }
+    }
+
+    private record WinRmEndpoint(String hostname, int port, boolean https)
+    {
     }
 }
