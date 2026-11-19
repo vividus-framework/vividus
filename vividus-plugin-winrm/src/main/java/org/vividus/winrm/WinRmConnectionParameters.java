@@ -18,6 +18,7 @@ package org.vividus.winrm;
 
 import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.Parameter;
+import org.metricshub.winrm.AuthScheme;
 
 @AsParameters
 public class WinRmConnectionParameters
@@ -27,7 +28,7 @@ public class WinRmConnectionParameters
     private String password;
 
     @Parameter(name = "authentication-scheme")
-    private String authenticationScheme;
+    private AuthScheme authenticationScheme;
 
     @Parameter(name = "disable-certificate-checks")
     private boolean disableCertificateChecks;
@@ -62,12 +63,12 @@ public class WinRmConnectionParameters
         this.password = password;
     }
 
-    public String getAuthenticationScheme()
+    public AuthScheme getAuthenticationScheme()
     {
         return authenticationScheme;
     }
 
-    public void setAuthenticationScheme(String authenticationScheme)
+    public void setAuthenticationScheme(AuthScheme authenticationScheme)
     {
         this.authenticationScheme = authenticationScheme;
     }

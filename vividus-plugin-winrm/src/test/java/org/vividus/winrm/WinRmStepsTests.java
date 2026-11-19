@@ -59,7 +59,7 @@ class WinRmStepsTests
     private static final String HOSTNAME = "10.240.1.1";
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.SCENARIO);
     private static final String VARIABLE_NAME = "result";
-    private static final String BASIC_AUTH_SCHEME = "Basic";
+    private static final AuthScheme BASIC_AUTH_SCHEME = AuthScheme.BASIC;
 
     private static final String ECHO_COMMAND = "echo hello cmd";
     private static final String ECHO_COMMAND_OUTPUT = "hello cmd";
@@ -74,7 +74,7 @@ class WinRmStepsTests
     {
         var connectionParametersTable = new ExamplesTable(
                 "|address         |username |password|authentication-scheme|\n"
-                + "|10.10.10.10:5985|admin    |Pa$$w0rd|Basic                |");
+                + "|10.10.10.10:5985|admin    |Pa$$w0rd|BASIC                |");
         var key = "new-connection";
         steps.configureWinRmConnection(key, connectionParametersTable);
         var winRmConnectionParametersArgumentCaptor = ArgumentCaptor.forClass(WinRmConnectionParameters.class);
@@ -132,7 +132,7 @@ class WinRmStepsTests
     void shouldExecutePowerShellCommand()
     {
         var serverConfiguration = createServerConfiguration(HOSTNAME + ":5986");
-        serverConfiguration.setAuthenticationScheme("ntlm");
+        serverConfiguration.setAuthenticationScheme(AuthScheme.NTLM);
 
         shouldExecuteCommandUsingWinRm(serverConfiguration, winRmClient -> {
             var command = "echo hello ps";

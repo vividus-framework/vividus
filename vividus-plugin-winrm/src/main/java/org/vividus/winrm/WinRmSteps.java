@@ -20,7 +20,6 @@ import static java.util.Optional.ofNullable;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -28,7 +27,6 @@ import java.util.function.Function;
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
-import org.metricshub.winrm.AuthScheme;
 import org.metricshub.winrm.CommandResult;
 import org.metricshub.winrm.WinRMClient;
 import org.vividus.context.DynamicConfigurationManager;
@@ -140,9 +138,7 @@ public class WinRmSteps
         {
             builder.trustAllCertificates();
         }
-        ofNullable(connectionParameters.getAuthenticationScheme())
-                .map(WinRmSteps::toAuthScheme)
-                .ifPresent(builder::authentication);
+        ofNullable(connectionParameters.getAuthenticationScheme()).ifPresent(builder::authentication);
 
         try (WinRMClient client = builder.build())
         {
@@ -164,21 +160,6 @@ public class WinRmSteps
         catch (URISyntaxException e)
         {
             throw new IllegalArgumentException("Invalid WinRM address: " + address, e);
-        }
-    }
-
-    private static AuthScheme toAuthScheme(String authenticationScheme)
-    {
-        try
-        {
-            return AuthScheme.valueOf(authenticationScheme.trim().toUpperCase(Locale.ROOT));
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new IllegalArgumentException(
-                    "Unsupported WinRM authentication scheme: " + authenticationScheme
-                            + ". Supported values are: Basic, NTLM, Kerberos",
-                    e);
         }
     }
 }
