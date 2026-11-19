@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package org.vividus.winrm;
 
 import static java.util.Optional.ofNullable;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -25,13 +28,12 @@ import java.util.function.Function;
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
+import org.metricshub.winrm.AuthScheme;
+import org.metricshub.winrm.CommandResult;
+import org.metricshub.winrm.WinRMClient;
 import org.vividus.context.DynamicConfigurationManager;
 import org.vividus.context.VariableContext;
 import org.vividus.variable.VariableScope;
-
-import io.cloudsoft.winrm4j.client.WinRmClientContext;
-import io.cloudsoft.winrm4j.winrm.WinRmTool;
-import io.cloudsoft.winrm4j.winrm.WinRmToolResponse;
 
 public class WinRmSteps
 {
@@ -88,7 +90,7 @@ public class WinRmSteps
     public void executeBatchCommand(String command, String connectionKey, Set<VariableScope> scopes,
             String variableName)
     {
-        executeCommand(connectionKey, winRmTool -> winRmTool.executeCommand(command), scopes, variableName);
+        executeCommand(connectionKey, client -> client.command(command).execute(), scopes, variableName);
     }
 
     /**
@@ -112,33 +114,71 @@ public class WinRmSteps
     public void executePowerShellCommand(String command, String connectionKey, Set<VariableScope> scopes,
             String variableName)
     {
-        executeCommand(connectionKey, winRmTool -> winRmTool.executePs(command), scopes, variableName);
+        executeCommand(connectionKey, client -> client.powerShell(command).execute(), scopes, variableName);
     }
 
-    private void executeCommand(String connectionKey, Function<WinRmTool, WinRmToolResponse> executor,
+    private void executeCommand(String connectionKey, Function<WinRMClient, CommandResult> executor,
             Set<VariableScope> scopes, String variableName)
     {
         WinRmConnectionParameters connectionParameters = winRmConnectionParameters.getConfiguration(connectionKey);
 
-        WinRmTool.Builder winRmToolBuilder = WinRmTool.Builder.builder(connectionParameters.getAddress(),
-                connectionParameters.getUsername(), connectionParameters.getPassword());
-        winRmToolBuilder.disableCertificateChecks(connectionParameters.isDisableCertificateChecks());
-        ofNullable(connectionParameters.getAuthenticationScheme()).ifPresent(winRmToolBuilder::authenticationScheme);
-
-        WinRmClientContext context = WinRmClientContext.newInstance();
-        try
+        URI uri = toUri(connectionParameters.getAddress());
+        String hostname = uri.getHost();
+        Validate.notNull(hostname, "Unable to extract hostname from WinRM address: %s",
+                connectionParameters.getAddress());
+        WinRMClient.Builder builder = WinRMClient.builder(hostname)
+                .credentials(connectionParameters.getUsername(), connectionParameters.getPassword().toCharArray());
+        if ("https".equalsIgnoreCase(uri.getScheme()))
         {
-            WinRmTool winRmTool = winRmToolBuilder.context(context).build();
-            WinRmToolResponse response = executor.apply(winRmTool);
+            builder.https();
+        }
+        if (uri.getPort() > 0)
+        {
+            builder.port(uri.getPort());
+        }
+        if (connectionParameters.isDisableCertificateChecks())
+        {
+            builder.trustAllCertificates();
+        }
+        ofNullable(connectionParameters.getAuthenticationScheme())
+                .map(WinRmSteps::toAuthScheme)
+                .ifPresent(builder::authentication);
+
+        try (WinRMClient client = builder.build())
+        {
+            CommandResult response = executor.apply(client);
             variableContext.putVariable(scopes, variableName, Map.of(
-                    "stdout", response.getStdOut(),
-                    "stderr", response.getStdErr(),
-                    "exit-status", response.getStatusCode()
+                    "stdout", response.stdout(),
+                    "stderr", response.stderr(),
+                    "exit-status", response.exitCode()
             ));
         }
-        finally
+    }
+
+    private static URI toUri(String address)
+    {
+        try
         {
-            context.shutdown();
+            return address.contains("://") ? new URI(address) : new URI("http://" + address);
+        }
+        catch (URISyntaxException e)
+        {
+            throw new IllegalArgumentException("Invalid WinRM address: " + address, e);
+        }
+    }
+
+    private static AuthScheme toAuthScheme(String authenticationScheme)
+    {
+        try
+        {
+            return AuthScheme.valueOf(authenticationScheme.trim().toUpperCase(Locale.ROOT));
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new IllegalArgumentException(
+                    "Unsupported WinRM authentication scheme: " + authenticationScheme
+                            + ". Supported values are: Basic, NTLM, Kerberos",
+                    e);
         }
     }
 }
