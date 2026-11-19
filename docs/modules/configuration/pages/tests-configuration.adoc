@@ -306,6 +306,23 @@ configuration.environments=dev
 
 Environment variables can also be declared in multiple files. Define common and specific properties for your environments and take the xref:configuration:tests-configuration.adoc#_profiles_setup[same approach] of reusing and separating values.
 
+The environment address may be a nested path, e.g. `env/shop_name`. In this case all the `\*.properties` files located in the `properties/environment/env` and `properties/environment/env/shop_name` directories are loaded and merged into a single environment. The deepest directory of the address must contain at least one `\*.properties` file, while the absence of properties in the intermediate directories is allowed. Files from the parent directory are loaded first, so the values defined in the nested directory override the ones inherited from the parent. The error is thrown only if no `\*.properties` file is found in the deepest directory of the address.
+
+[source,dir,subs=attributes+]
+----
+└─ src/main/resources/properties
+                            └─  environment <1>
+                                    ├─ env <2>
+                                        └─ shop_name <3>
+                                                └─ environment.properties <4>
+----
+<1> Environment directory which contains all the environments properties;
+<2> General type of the environments;
+<3> A particular environment;
+<4> The deepest directory of the environment address, it must contain at least one `\*.properties` file;
+
+Multiple environments can be selected at once by separating their addresses with a comma, e.g. `configuration.environments=common,dev`. As well as the suites, environments are loaded one by one starting from the last one in the sequence, in other words, the values of the properties defined in the first environment take precedence over the values of the same properties defined in all subsequent environments. Every environment is loaded independently, i.e. the parent `\*.properties` files are re-read for each environment in the sequence, and the properties loaded later overwrite the keys already set, including keys set to an empty value.
+
 === Configuration sets
 
 Configuration set simplifies reusage of pre-defined combinations of profiles/suites/environments. Users are allowed to define multiple configuration sets. Only one configuration set can be used during a test run.
