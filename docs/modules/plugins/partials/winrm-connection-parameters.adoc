@@ -24,9 +24,9 @@ NOTE: The {parameters-name} marked with *bold* are mandatory.
 
 
 |`{connection-parameters-prefix}authentication-scheme`
-a|`BASIC` +
+a|`Basic` +
 `NTLM` +
-`KERBEROS`
+`Kerberos`
 |`NTLM`
 |Authentication scheme. `Kerberos` requires an HTTPS endpoint.
 

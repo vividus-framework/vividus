@@ -74,7 +74,7 @@ class WinRmStepsTests
     {
         var connectionParametersTable = new ExamplesTable(
                 "|address         |username |password|authentication-scheme|\n"
-                + "|10.10.10.10:5985|admin    |Pa$$w0rd|BASIC                |");
+                + "|10.10.10.10:5985|admin    |Pa$$w0rd|Basic                |");
         var key = "new-connection";
         steps.configureWinRmConnection(key, connectionParametersTable);
         var winRmConnectionParametersArgumentCaptor = ArgumentCaptor.forClass(WinRmConnectionParameters.class);

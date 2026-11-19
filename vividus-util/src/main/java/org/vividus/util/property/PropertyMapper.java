@@ -33,6 +33,7 @@ import java.util.function.IntFunction;
 import java.util.function.UnaryOperator;
 
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
@@ -54,7 +55,7 @@ public class PropertyMapper implements IPropertyMapper
         this.propertyParser = propertyParser;
         SimpleModule module = new SimpleModule();
         deserializers.forEach(deserializer -> module.addDeserializer(getType(deserializer), deserializer));
-        javaPropsMapper = new JavaPropsMapper();
+        javaPropsMapper = JavaPropsMapper.builder().enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS).build();
         javaPropsMapper.setPropertyNamingStrategy(namingStrategy).registerModule(module);
         javaPropsMapper.findAndRegisterModules();
     }

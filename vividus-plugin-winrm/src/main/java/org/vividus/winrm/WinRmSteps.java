@@ -20,6 +20,7 @@ import static java.util.Optional.ofNullable;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -27,6 +28,7 @@ import java.util.function.Function;
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
+import org.metricshub.winrm.AuthScheme;
 import org.metricshub.winrm.CommandResult;
 import org.metricshub.winrm.WinRMClient;
 import org.vividus.context.DynamicConfigurationManager;
@@ -61,8 +63,19 @@ public class WinRmSteps
         Validate.isTrue(rowCount == 1,
                 "Exactly one row with WinRM connection parameters is expected in ExamplesTable, but found %d",
                 rowCount);
-        WinRmConnectionParameters winRmConnectionParametersToAdd = connectionParameters.getRowsAsParameters(true).get(0)
-                .mapTo(WinRmConnectionParameters.class);
+        var row = connectionParameters.getRowAsParameters(0, true);
+        var winRmConnectionParametersToAdd = new WinRmConnectionParameters();
+        winRmConnectionParametersToAdd.setAddress(row.valueAs("address", String.class));
+        winRmConnectionParametersToAdd.setUsername(row.valueAs("username", String.class));
+        winRmConnectionParametersToAdd.setPassword(row.valueAs("password", String.class));
+        String authenticationScheme = row.valueAs("authentication-scheme", String.class, null);
+        if (authenticationScheme != null)
+        {
+            winRmConnectionParametersToAdd.setAuthenticationScheme(
+                    AuthScheme.valueOf(authenticationScheme.trim().toUpperCase(Locale.ROOT)));
+        }
+        winRmConnectionParametersToAdd.setDisableCertificateChecks(
+                row.valueAs("disable-certificate-checks", boolean.class, false));
         winRmConnectionParameters.addDynamicConfiguration(connectionKey, winRmConnectionParametersToAdd);
     }
 

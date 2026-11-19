@@ -40,7 +40,7 @@ include::partial$winrm-connection-parameters.adoc[]
 ----
 When I configure WinRM connection with key `my-connection` and parameters:
 |address         |username |password|authentication-scheme|
-|10.10.10.10:5985|admin    |Pa$$w0rd|BASIC                |
+|10.10.10.10:5985|admin    |Pa$$w0rd|Basic                |
 ----
 
 === Execute batch command

@@ -101,6 +101,16 @@ class PropertyMapperTests
     }
 
     @Test
+    void shouldMapEnumPropertiesCaseInsensitively() throws IOException
+    {
+        var properties = Map.of("authentication-scheme", "Basic");
+
+        Authentication result = propertyMapper.readValue(properties, Authentication.class);
+
+        assertEquals(AuthenticationScheme.BASIC, result.getAuthenticationScheme());
+    }
+
+    @Test
     void shouldMapMergedPropertiesToCollectionOfObjects() throws IOException
     {
         String addressPrefix = "address.";
@@ -271,6 +281,21 @@ class PropertyMapperTests
         {
             return houseNumber;
         }
+    }
+
+    private static final class Authentication
+    {
+        private AuthenticationScheme authenticationScheme;
+
+        public AuthenticationScheme getAuthenticationScheme()
+        {
+            return authenticationScheme;
+        }
+    }
+
+    private enum AuthenticationScheme
+    {
+        BASIC
     }
 
     private static final class PatternDeserializer extends JsonDeserializer<Pattern>
