@@ -16,7 +16,6 @@
 
 package org.vividus.winrm;
 
-import static java.util.Optional.ofNullable;
 
 import java.net.URI;
 import java.net.URISyntaxException;
