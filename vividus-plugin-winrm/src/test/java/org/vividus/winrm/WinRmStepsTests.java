@@ -33,7 +33,14 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import org.jbehave.core.i18n.LocalizedKeywords;
+import org.jbehave.core.io.LoadFromClasspath;
 import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.model.TableParsers;
+import org.jbehave.core.model.TableTransformers;
+import org.jbehave.core.steps.ParameterControls;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -72,9 +79,14 @@ class WinRmStepsTests
     @Test
     void shouldConfigureDynamicConnection()
     {
-        var connectionParametersTable = new ExamplesTable(
-                "|address         |username |password|authentication-scheme|\n"
-                + "|10.10.10.10:5985|admin    |Pa$$w0rd|Basic                |");
+        var tableTransformers = new TableTransformers();
+        var parameterConverters = new ParameterConverters(tableTransformers).addConverters(
+                new ParameterConverters.FluentEnumConverter());
+        var examplesTableFactory = new ExamplesTableFactory(new LocalizedKeywords(), new LoadFromClasspath(),
+                parameterConverters, new ParameterControls(), new TableParsers(parameterConverters), tableTransformers);
+        var connectionParametersTable = examplesTableFactory.createExamplesTable("""
+                |address         |username |password|authentication-scheme|
+                |10.10.10.10:5985|admin    |Pa$$w0rd|Basic                |""");
         var key = "new-connection";
         steps.configureWinRmConnection(key, connectionParametersTable);
         var winRmConnectionParametersArgumentCaptor = ArgumentCaptor.forClass(WinRmConnectionParameters.class);
