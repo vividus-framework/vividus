@@ -20,11 +20,13 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -163,6 +165,64 @@ class WinRmStepsTests
     }
 
     @Test
+    void shouldExecuteCommandWithKerberosOverHttps()
+    {
+        var serverConfiguration = createServerConfiguration("https://" + HOSTNAME + ":5986/wsman");
+        serverConfiguration.setAuthenticationScheme(AuthScheme.KERBEROS);
+
+        shouldExecuteCommandUsingWinRm(serverConfiguration, winRmClient -> {
+            CommandRequest commandRequest = mock();
+            CommandResult commandResult = commandResult(ECHO_COMMAND_OUTPUT);
+            when(commandRequest.execute()).thenReturn(commandResult);
+            when(winRmClient.command(ECHO_COMMAND)).thenReturn(commandRequest);
+            steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME);
+            return ECHO_COMMAND_OUTPUT;
+        }, (ordered, builder) -> {
+            ordered.verify(builder).https();
+            ordered.verify(builder).port(5986);
+            ordered.verify(builder).authentication(AuthScheme.KERBEROS);
+        });
+    }
+
+    @Test
+    void shouldExecuteCommandWithoutAuthenticationOrPort()
+    {
+        var serverConfiguration = createServerConfiguration("https://" + HOSTNAME + "/wsman");
+
+        shouldExecuteCommandUsingWinRm(serverConfiguration, winRmClient -> {
+            CommandRequest commandRequest = mock();
+            CommandResult commandResult = commandResult(ECHO_COMMAND_OUTPUT);
+            when(commandRequest.execute()).thenReturn(commandResult);
+            when(winRmClient.command(ECHO_COMMAND)).thenReturn(commandRequest);
+            steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME);
+            return ECHO_COMMAND_OUTPUT;
+        }, (ordered, builder) -> {
+            ordered.verify(builder).https();
+            ordered.verify(builder, never()).port(anyInt());
+            ordered.verify(builder, never()).authentication(any(AuthScheme.class));
+        });
+    }
+
+    @Test
+    void shouldExecuteCommandUsingHttpEndpoint()
+    {
+        var serverConfiguration = createServerConfiguration("http://" + HOSTNAME + ":5985/wsman");
+
+        shouldExecuteCommandUsingWinRm(serverConfiguration, winRmClient -> {
+            CommandRequest commandRequest = mock();
+            CommandResult commandResult = commandResult(ECHO_COMMAND_OUTPUT);
+            when(commandRequest.execute()).thenReturn(commandResult);
+            when(winRmClient.command(ECHO_COMMAND)).thenReturn(commandRequest);
+            steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME);
+            return ECHO_COMMAND_OUTPUT;
+        }, (ordered, builder) -> {
+            ordered.verify(builder, never()).https();
+            ordered.verify(builder).port(5985);
+            ordered.verify(builder, never()).authentication(any(AuthScheme.class));
+        });
+    }
+
+    @Test
     void shouldFailToExecuteCommandWithAddressWithoutPort()
     {
         var address = "host-without-port";
@@ -199,6 +259,19 @@ class WinRmStepsTests
                 () -> steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME));
 
         assertEquals("Invalid WinRM address: https://bad host:5986/wsman", exception.getMessage());
+    }
+
+    @Test
+    void shouldFailToExecuteCommandWithUnsupportedProtocol()
+    {
+        var address = "ftp://" + HOSTNAME + ":5986/wsman";
+        var serverConfiguration = createServerConfiguration(address);
+        when(winRmConnectionParameters.getConfiguration(SERVER)).thenReturn(serverConfiguration);
+
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME));
+
+        assertEquals("Unsupported WinRM protocol: ftp", exception.getMessage());
     }
 
     @SuppressWarnings("PMD.CloseResource")
