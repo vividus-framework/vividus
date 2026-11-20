@@ -66,6 +66,9 @@ class WinRmStepsTests
     private static final String SERVER = "win10";
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
     private static final String HOSTNAME = "10.240.1.1";
+    private static final String HTTPS_ENDPOINT_SUFFIX = ":5986/wsman";
+    private static final String HTTPS_ADDRESS_PREFIX = "https://" + HOSTNAME;
+    private static final String HTTPS_ADDRESS = HTTPS_ADDRESS_PREFIX + HTTPS_ENDPOINT_SUFFIX;
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.SCENARIO);
     private static final String VARIABLE_NAME = "result";
     private static final AuthScheme BASIC_AUTH_SCHEME = AuthScheme.BASIC;
@@ -121,7 +124,7 @@ class WinRmStepsTests
         var authenticationScheme = AuthScheme.BASIC;
         var disableCertificateChecks = true;
 
-        var serverConfiguration = createServerConfiguration("https://" + HOSTNAME + ":5986/wsman");
+        var serverConfiguration = createServerConfiguration(HTTPS_ADDRESS);
         serverConfiguration.setAuthenticationScheme(BASIC_AUTH_SCHEME);
         serverConfiguration.setDisableCertificateChecks(disableCertificateChecks);
 
@@ -167,7 +170,7 @@ class WinRmStepsTests
     @Test
     void shouldExecuteCommandWithKerberosOverHttps()
     {
-        var serverConfiguration = createServerConfiguration("https://" + HOSTNAME + ":5986/wsman");
+        var serverConfiguration = createServerConfiguration(HTTPS_ADDRESS);
         serverConfiguration.setAuthenticationScheme(AuthScheme.KERBEROS);
 
         shouldExecuteCommandUsingWinRm(serverConfiguration, winRmClient -> {
@@ -187,7 +190,7 @@ class WinRmStepsTests
     @Test
     void shouldExecuteCommandWithoutAuthenticationOrPort()
     {
-        var serverConfiguration = createServerConfiguration("https://" + HOSTNAME + "/wsman");
+        var serverConfiguration = createServerConfiguration(HTTPS_ADDRESS_PREFIX + "/wsman");
 
         shouldExecuteCommandUsingWinRm(serverConfiguration, winRmClient -> {
             CommandRequest commandRequest = mock();
@@ -252,19 +255,20 @@ class WinRmStepsTests
     @Test
     void shouldFailToExecuteCommandWithInvalidAddress()
     {
-        var serverConfiguration = createServerConfiguration("https://bad host:5986/wsman");
+        var address = "https://bad host" + HTTPS_ENDPOINT_SUFFIX;
+        var serverConfiguration = createServerConfiguration(address);
         when(winRmConnectionParameters.getConfiguration(SERVER)).thenReturn(serverConfiguration);
 
         var exception = assertThrows(IllegalArgumentException.class,
                 () -> steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME));
 
-        assertEquals("Invalid WinRM address: https://bad host:5986/wsman", exception.getMessage());
+        assertEquals("Invalid WinRM address: " + address, exception.getMessage());
     }
 
     @Test
     void shouldFailToExecuteCommandWithUnsupportedProtocol()
     {
-        var address = "ftp://" + HOSTNAME + ":5986/wsman";
+        var address = "ftp://" + HOSTNAME + HTTPS_ENDPOINT_SUFFIX;
         var serverConfiguration = createServerConfiguration(address);
         when(winRmConnectionParameters.getConfiguration(SERVER)).thenReturn(serverConfiguration);
 
