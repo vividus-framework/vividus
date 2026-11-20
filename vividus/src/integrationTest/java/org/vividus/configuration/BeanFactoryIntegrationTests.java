@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,6 +118,16 @@ class BeanFactoryIntegrationTests
         System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV + COMMA + ADDITIONAL_ENV);
         BeanFactory.open();
         assertProperties("additionalenv-props-property-value", "additionalenv-property-value");
+    }
+
+    @Test
+    void testConfigurationResolverOptionalEnvironmentIsIgnoredWhenMissing() throws IOException
+    {
+        System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV + COMMA + "nonexistent?");
+        BeanFactory.open();
+        assertProperties(null, null);
     }
 
     @Test
