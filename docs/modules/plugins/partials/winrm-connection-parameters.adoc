@@ -25,13 +25,10 @@ NOTE: The {parameters-name} marked with *bold* are mandatory.
 
 |`{connection-parameters-prefix}authentication-scheme`
 a|`Basic` +
-`Digest` +
 `NTLM` +
-`Negotiate` +
-`Kerberos` +
-`CredSSP`
+`Kerberos`
 |`NTLM`
-|Authentication scheme
+|Authentication scheme. `Kerberos` requires an HTTPS endpoint.
 
 |`{connection-parameters-prefix}disable-certificate-checks`
 a|`true` +

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,14 @@ package org.vividus.winrm;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,12 +35,22 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import org.apache.http.client.config.AuthSchemes;
+import org.jbehave.core.i18n.LocalizedKeywords;
+import org.jbehave.core.io.LoadFromClasspath;
 import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.model.TableParsers;
+import org.jbehave.core.model.TableTransformers;
+import org.jbehave.core.steps.ParameterControls;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.metricshub.winrm.AuthScheme;
+import org.metricshub.winrm.CommandRequest;
+import org.metricshub.winrm.CommandResult;
+import org.metricshub.winrm.WinRMClient;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
@@ -46,16 +60,21 @@ import org.vividus.context.DynamicConfigurationManager;
 import org.vividus.context.VariableContext;
 import org.vividus.variable.VariableScope;
 
-import io.cloudsoft.winrm4j.client.WinRmClientContext;
-import io.cloudsoft.winrm4j.winrm.WinRmTool;
-import io.cloudsoft.winrm4j.winrm.WinRmToolResponse;
-
 @ExtendWith(MockitoExtension.class)
 class WinRmStepsTests
 {
     private static final String SERVER = "win10";
+    @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
+    private static final String HOSTNAME = "10.240.1.1";
+    private static final String HTTPS_ENDPOINT_SUFFIX = ":5986/wsman";
+    private static final String HTTPS_ADDRESS_PREFIX = "https://" + HOSTNAME;
+    private static final String HTTPS_ADDRESS = HTTPS_ADDRESS_PREFIX + HTTPS_ENDPOINT_SUFFIX;
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.SCENARIO);
     private static final String VARIABLE_NAME = "result";
+    private static final AuthScheme BASIC_AUTH_SCHEME = AuthScheme.BASIC;
+
+    private static final String ECHO_COMMAND = "echo hello cmd";
+    private static final String ECHO_COMMAND_OUTPUT = "hello cmd";
 
     @Mock private DynamicConfigurationManager<WinRmConnectionParameters> winRmConnectionParameters;
     @Mock private VariableContext variableContext;
@@ -65,9 +84,14 @@ class WinRmStepsTests
     @Test
     void shouldConfigureDynamicConnection()
     {
-        var connectionParametersTable = new ExamplesTable(
-                "|address         |username |password|authentication-scheme|\n"
-                + "|10.10.10.10:5985|admin    |Pa$$w0rd|Basic                |");
+        var tableTransformers = new TableTransformers();
+        var parameterConverters = new ParameterConverters(tableTransformers).addConverters(
+                new ParameterConverters.FluentEnumConverter());
+        var examplesTableFactory = new ExamplesTableFactory(new LocalizedKeywords(), new LoadFromClasspath(),
+                parameterConverters, new ParameterControls(), new TableParsers(parameterConverters), tableTransformers);
+        var connectionParametersTable = examplesTableFactory.createExamplesTable("""
+                |address         |username |password|authentication-scheme|
+                |10.10.10.10:5985|admin    |Pa$$w0rd|Basic                |""");
         var key = "new-connection";
         steps.configureWinRmConnection(key, connectionParametersTable);
         var winRmConnectionParametersArgumentCaptor = ArgumentCaptor.forClass(WinRmConnectionParameters.class);
@@ -77,7 +101,8 @@ class WinRmStepsTests
         assertAll(
                 () -> assertEquals("10.10.10.10:5985", parameters.getAddress()),
                 () -> assertEquals("admin", parameters.getUsername()),
-                () -> assertEquals("Pa$$w0rd", parameters.getPassword())
+                () -> assertEquals("Pa$$w0rd", parameters.getPassword()),
+                () -> assertEquals(BASIC_AUTH_SCHEME, parameters.getAuthenticationScheme())
         );
     }
 
@@ -94,77 +119,206 @@ class WinRmStepsTests
     }
 
     @Test
-    @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
     void shouldExecuteBatchCommand()
     {
-        var authenticationScheme = AuthSchemes.BASIC;
+        var authenticationScheme = AuthScheme.BASIC;
         var disableCertificateChecks = true;
 
-        var serverConfiguration = createServerConfiguration("10.240.1.1:5986");
-        serverConfiguration.setAuthenticationScheme(authenticationScheme);
+        var serverConfiguration = createServerConfiguration(HTTPS_ADDRESS);
+        serverConfiguration.setAuthenticationScheme(BASIC_AUTH_SCHEME);
         serverConfiguration.setDisableCertificateChecks(disableCertificateChecks);
 
-        shouldExecuteCommandUsingWinRm(serverConfiguration, winRmTool -> {
-            var command = "echo hello cmd";
-            var stdout = "hello cmd";
-            when(winRmTool.executeCommand(command)).thenReturn(new WinRmToolResponse(stdout, "", 0));
+        shouldExecuteCommandUsingWinRm(serverConfiguration, winRmClient -> {
+            var command = ECHO_COMMAND;
+            var stdout = ECHO_COMMAND_OUTPUT;
+            CommandRequest commandRequest = mock();
+            CommandResult commandResult = commandResult(stdout);
+            when(commandRequest.execute()).thenReturn(commandResult);
+            when(winRmClient.command(command)).thenReturn(commandRequest);
             steps.executeBatchCommand(command, SERVER, SCOPES, VARIABLE_NAME);
             return stdout;
         }, (ordered, builder) -> {
-            ordered.verify(builder).disableCertificateChecks(disableCertificateChecks);
-            ordered.verify(builder).authenticationScheme(authenticationScheme);
+            ordered.verify(builder).https();
+            ordered.verify(builder).port(5986);
+            ordered.verify(builder).trustAllCertificates();
+            ordered.verify(builder).authentication(authenticationScheme);
         });
     }
 
     @Test
-    @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
     void shouldExecutePowerShellCommand()
     {
-        var serverConfiguration = createServerConfiguration("https://10.240.1.1:5986/wsman");
+        var serverConfiguration = createServerConfiguration(HOSTNAME + ":5986");
+        serverConfiguration.setAuthenticationScheme(AuthScheme.NTLM);
 
-        shouldExecuteCommandUsingWinRm(serverConfiguration, winRmTool -> {
+        shouldExecuteCommandUsingWinRm(serverConfiguration, winRmClient -> {
             var command = "echo hello ps";
             var stdout = "hello ps";
-            when(winRmTool.executePs(command)).thenReturn(new WinRmToolResponse(stdout, "", 0));
+            CommandRequest commandRequest = mock();
+            CommandResult commandResult = commandResult(stdout);
+            when(commandRequest.execute()).thenReturn(commandResult);
+            when(winRmClient.powerShell(command)).thenReturn(commandRequest);
             steps.executePowerShellCommand(command, SERVER, SCOPES, VARIABLE_NAME);
             return stdout;
-        }, (ordered, builder) -> { });
+        }, (ordered, builder) -> {
+            ordered.verify(builder).https();
+            ordered.verify(builder).port(5986);
+            ordered.verify(builder).authentication(AuthScheme.NTLM);
+        });
     }
 
-    void shouldExecuteCommandUsingWinRm(WinRmConnectionParameters connectionParameters,
-            Function<WinRmTool, String> test, BiConsumer<InOrder, WinRmTool.Builder> verifier)
+    @Test
+    void shouldExecuteCommandWithKerberosOverHttps()
+    {
+        var serverConfiguration = createServerConfiguration(HTTPS_ADDRESS);
+        serverConfiguration.setAuthenticationScheme(AuthScheme.KERBEROS);
+
+        shouldExecuteCommandUsingWinRm(serverConfiguration, winRmClient -> {
+            CommandRequest commandRequest = mock();
+            CommandResult commandResult = commandResult(ECHO_COMMAND_OUTPUT);
+            when(commandRequest.execute()).thenReturn(commandResult);
+            when(winRmClient.command(ECHO_COMMAND)).thenReturn(commandRequest);
+            steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME);
+            return ECHO_COMMAND_OUTPUT;
+        }, (ordered, builder) -> {
+            ordered.verify(builder).https();
+            ordered.verify(builder).port(5986);
+            ordered.verify(builder).authentication(AuthScheme.KERBEROS);
+        });
+    }
+
+    @Test
+    void shouldExecuteCommandWithoutAuthenticationOrPort()
+    {
+        var serverConfiguration = createServerConfiguration(HTTPS_ADDRESS_PREFIX + "/wsman");
+
+        shouldExecuteCommandUsingWinRm(serverConfiguration, winRmClient -> {
+            CommandRequest commandRequest = mock();
+            CommandResult commandResult = commandResult(ECHO_COMMAND_OUTPUT);
+            when(commandRequest.execute()).thenReturn(commandResult);
+            when(winRmClient.command(ECHO_COMMAND)).thenReturn(commandRequest);
+            steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME);
+            return ECHO_COMMAND_OUTPUT;
+        }, (ordered, builder) -> {
+            ordered.verify(builder).https();
+            ordered.verify(builder, never()).port(anyInt());
+            ordered.verify(builder, never()).authentication(any(AuthScheme.class));
+        });
+    }
+
+    @Test
+    void shouldExecuteCommandUsingHttpEndpoint()
+    {
+        var serverConfiguration = createServerConfiguration("http://" + HOSTNAME + ":5985/wsman");
+
+        shouldExecuteCommandUsingWinRm(serverConfiguration, winRmClient -> {
+            CommandRequest commandRequest = mock();
+            CommandResult commandResult = commandResult(ECHO_COMMAND_OUTPUT);
+            when(commandRequest.execute()).thenReturn(commandResult);
+            when(winRmClient.command(ECHO_COMMAND)).thenReturn(commandRequest);
+            steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME);
+            return ECHO_COMMAND_OUTPUT;
+        }, (ordered, builder) -> {
+            ordered.verify(builder, never()).https();
+            ordered.verify(builder).port(5985);
+            ordered.verify(builder, never()).authentication(any(AuthScheme.class));
+        });
+    }
+
+    @Test
+    void shouldFailToExecuteCommandWithAddressWithoutPort()
+    {
+        var address = "host-without-port";
+        var serverConfiguration = createServerConfiguration(address);
+        when(winRmConnectionParameters.getConfiguration(SERVER)).thenReturn(serverConfiguration);
+
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME));
+
+        assertEquals("WinRM address must include host and port: " + address, exception.getMessage());
+    }
+
+    @Test
+    void shouldFailToExecuteCommandWithKerberosOverHttp()
+    {
+        var address = HOSTNAME + ":5985";
+        var serverConfiguration = createServerConfiguration(address);
+        serverConfiguration.setAuthenticationScheme(AuthScheme.KERBEROS);
+        when(winRmConnectionParameters.getConfiguration(SERVER)).thenReturn(serverConfiguration);
+
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME));
+
+        assertEquals("Kerberos authentication requires an HTTPS WinRM endpoint: " + address, exception.getMessage());
+    }
+
+    @Test
+    void shouldFailToExecuteCommandWithInvalidAddress()
+    {
+        var address = "https://bad host" + HTTPS_ENDPOINT_SUFFIX;
+        var serverConfiguration = createServerConfiguration(address);
+        when(winRmConnectionParameters.getConfiguration(SERVER)).thenReturn(serverConfiguration);
+
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME));
+
+        assertEquals("Invalid WinRM address: " + address, exception.getMessage());
+    }
+
+    @Test
+    void shouldFailToExecuteCommandWithUnsupportedProtocol()
+    {
+        var address = "ftp://" + HOSTNAME + HTTPS_ENDPOINT_SUFFIX;
+        var serverConfiguration = createServerConfiguration(address);
+        when(winRmConnectionParameters.getConfiguration(SERVER)).thenReturn(serverConfiguration);
+
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> steps.executeBatchCommand(ECHO_COMMAND, SERVER, SCOPES, VARIABLE_NAME));
+
+        assertEquals("Unsupported WinRM protocol: ftp", exception.getMessage());
+    }
+
+    @SuppressWarnings("PMD.CloseResource")
+    private void shouldExecuteCommandUsingWinRm(WinRmConnectionParameters connectionParameters,
+            Function<WinRMClient, String> test, BiConsumer<InOrder, WinRMClient.Builder> verifier)
     {
         when(winRmConnectionParameters.getConfiguration(SERVER)).thenReturn(connectionParameters);
 
-        try (var builderStaticMock = mockStatic(WinRmTool.Builder.class);
-                var contextStaticMock = mockStatic(WinRmClientContext.class))
+        try (var winRmClientStaticMock = mockStatic(WinRMClient.class))
         {
-            var builder = mock(WinRmTool.Builder.class);
-            builderStaticMock.when(() -> WinRmTool.Builder.builder(connectionParameters.getAddress(),
-                    connectionParameters.getUsername(), connectionParameters.getPassword())).thenReturn(builder);
+            WinRMClient.Builder builder = mock();
+            winRmClientStaticMock.when(() -> WinRMClient.builder(HOSTNAME)).thenReturn(builder);
+            when(builder.credentials(eq(connectionParameters.getUsername()), any(char[].class))).thenReturn(builder);
+            lenient().when(builder.https()).thenReturn(builder);
+            lenient().when(builder.port(5986)).thenReturn(builder);
+            lenient().when(builder.trustAllCertificates()).thenReturn(builder);
+            lenient().when(builder.authentication(any(AuthScheme.class))).thenReturn(builder);
 
-            var context = mock(WinRmClientContext.class);
-            contextStaticMock.when(WinRmClientContext::newInstance).thenReturn(context);
+            WinRMClient winRmClient = mock();
+            when(builder.build()).thenReturn(winRmClient);
 
-            when(builder.context(context)).thenReturn(builder);
+            String stdout = test.apply(winRmClient);
 
-            var winRmTool = mock(WinRmTool.class);
-            when(builder.build()).thenReturn(winRmTool);
-
-            var stdout = test.apply(winRmTool);
-
-            var ordered = inOrder(builder, context, variableContext);
+            var ordered = inOrder(builder, winRmClient, variableContext);
+            ordered.verify(builder).credentials(eq(connectionParameters.getUsername()), any(char[].class));
             verifier.accept(ordered, builder);
-            ordered.verify(builder).context(context);
             ordered.verify(builder).build();
             ordered.verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, Map.of(
                     "stdout", stdout,
                     "stderr", "",
                     "exit-status", 0
             ));
-
-            ordered.verify(context).shutdown();
+            ordered.verify(winRmClient).close();
         }
+    }
+
+    private static CommandResult commandResult(String stdout)
+    {
+        CommandResult result = mock();
+        when(result.stdout()).thenReturn(stdout);
+        when(result.stderr()).thenReturn("");
+        when(result.exitCode()).thenReturn(0);
+        return result;
     }
 
     private static WinRmConnectionParameters createServerConfiguration(String address)
