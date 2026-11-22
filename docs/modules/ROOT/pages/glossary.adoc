@@ -117,6 +117,40 @@ considered invalid and will lead to parsing error.
 |line 1\\nline 2 |# The value with an escaped escape sequence, the result will be "line 1\nline 2"
 ----
 
+=== ExamplesTable from a resource
+
+Instead of an inline table, the path to a xref:ROOT:glossary.adoc#_resource[resource] with the `*.table` extension
+can be used wherever an ExamplesTable is expected. The referenced file holds the table in the same format as an inline
+one and is loaded from the classpath:
+
+----
+└─ src
+    └─ main
+        └─ resources
+            └─ data
+                └─ expected-results.table
+----
+
+.expected-results.table
+[source,gherkin]
+----
+|StringValue|NumericValue|BooleanValue|
+|City       |17.0        |false       |
+|Country    |4.0         |true        |
+----
+
+Such a table can be used as a step parameter, not only as an `Examples` section:
+
+[source,gherkin]
+----
+When I initialize scenario variable `expectedTable` with values:
+/data/expected-results.table
+Then `${expectedTable[1].BooleanValue}` is equal to `true`
+----
+
+Transformers defined in the referenced file are applied as well, and the table can be referenced by an absolute
+classpath path, e.g. `/data/expected-results.table`, or a relative one, e.g. `data/expected-results.table`.
+
 == Expression
 *Synonyms*: VIVIDUS expression.
 

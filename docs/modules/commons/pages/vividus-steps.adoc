@@ -59,6 +59,14 @@ When I initialize scenario variable `sitemapTransformerTable` with values:
 Then `${sitemapTransformerTable[0].sitemapUrl}` is equal to `/index.html`
 ----
 
+.Initialize variable with xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] stored as a resource
+[source,gherkin]
+----
+When I initialize scenario variable `expectedTable` with values:
+/data/expected-results.table
+Then `${expectedTable[1].BooleanValue}` is equal to `true`
+----
+
 === Initialize variable using template
 
 Initializes a variable with a result of the processed https://freemarker.apache.org/docs/dgui_template_overallstructure.html[Freemarker template]
