@@ -17,6 +17,8 @@ where `my-server` is a key used to refer WinRm connection in the steps. The key 
 :parameters-name: properties
 include::partial$winrm-connection-parameters.adoc[]
 
+NOTE: Values mapped to enum fields in dynamic properties are case-insensitive. For example, `Basic` can also be written as `basic` or `BASIC`.
+
 == Steps
 
 === Configure dynamic WinRM connection
