@@ -1,7 +1,5 @@
 = Tests Configuration
 
-Enum values in configuration properties mapped to Java enum fields are case-insensitive, including values in dynamic properties. For example, `Basic`, `basic`, and `BASIC` are equivalent.
-
 == `configuration.properties`
 
 VIVIDUS configuration includes the following parts: xref:tests-configuration.adoc#_suites[suites], xref:configuration:tests-configuration.adoc#_profiles[profiles] and xref:tests-configuration.adoc#_environments[environments].
