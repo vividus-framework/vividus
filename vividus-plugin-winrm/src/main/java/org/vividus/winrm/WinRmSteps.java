@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.vividus.winrm;
 
-import static java.util.Optional.ofNullable;
-
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -25,16 +25,18 @@ import java.util.function.Function;
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
+import org.metricshub.winrm.AuthScheme;
+import org.metricshub.winrm.CommandResult;
+import org.metricshub.winrm.WinRMClient;
 import org.vividus.context.DynamicConfigurationManager;
 import org.vividus.context.VariableContext;
 import org.vividus.variable.VariableScope;
 
-import io.cloudsoft.winrm4j.client.WinRmClientContext;
-import io.cloudsoft.winrm4j.winrm.WinRmTool;
-import io.cloudsoft.winrm4j.winrm.WinRmToolResponse;
-
 public class WinRmSteps
 {
+    private static final String HTTPS = "https";
+    private static final int HTTPS_PORT = 5986;
+
     private final DynamicConfigurationManager<WinRmConnectionParameters> winRmConnectionParameters;
     private final VariableContext variableContext;
 
@@ -88,7 +90,7 @@ public class WinRmSteps
     public void executeBatchCommand(String command, String connectionKey, Set<VariableScope> scopes,
             String variableName)
     {
-        executeCommand(connectionKey, winRmTool -> winRmTool.executeCommand(command), scopes, variableName);
+        executeCommand(connectionKey, client -> client.command(command).execute(), scopes, variableName);
     }
 
     /**
@@ -112,33 +114,76 @@ public class WinRmSteps
     public void executePowerShellCommand(String command, String connectionKey, Set<VariableScope> scopes,
             String variableName)
     {
-        executeCommand(connectionKey, winRmTool -> winRmTool.executePs(command), scopes, variableName);
+        executeCommand(connectionKey, client -> client.powerShell(command).execute(), scopes, variableName);
     }
 
-    private void executeCommand(String connectionKey, Function<WinRmTool, WinRmToolResponse> executor,
+    private void executeCommand(String connectionKey, Function<WinRMClient, CommandResult> executor,
             Set<VariableScope> scopes, String variableName)
     {
         WinRmConnectionParameters connectionParameters = winRmConnectionParameters.getConfiguration(connectionKey);
 
-        WinRmTool.Builder winRmToolBuilder = WinRmTool.Builder.builder(connectionParameters.getAddress(),
-                connectionParameters.getUsername(), connectionParameters.getPassword());
-        winRmToolBuilder.disableCertificateChecks(connectionParameters.isDisableCertificateChecks());
-        ofNullable(connectionParameters.getAuthenticationScheme()).ifPresent(winRmToolBuilder::authenticationScheme);
-
-        WinRmClientContext context = WinRmClientContext.newInstance();
-        try
+        WinRmEndpoint endpoint = toEndpoint(connectionParameters.getAddress());
+        AuthScheme authenticationScheme = connectionParameters.getAuthenticationScheme();
+        Validate.isTrue(authenticationScheme != AuthScheme.KERBEROS || endpoint.https(),
+                "Kerberos authentication requires an HTTPS WinRM endpoint: %s", connectionParameters.getAddress());
+        WinRMClient.Builder builder = WinRMClient.builder(endpoint.hostname())
+                .credentials(connectionParameters.getUsername(), connectionParameters.getPassword().toCharArray());
+        if (endpoint.https())
         {
-            WinRmTool winRmTool = winRmToolBuilder.context(context).build();
-            WinRmToolResponse response = executor.apply(winRmTool);
+            builder.https();
+        }
+        if (endpoint.port() > 0)
+        {
+            builder.port(endpoint.port());
+        }
+        if (connectionParameters.isDisableCertificateChecks())
+        {
+            builder.trustAllCertificates();
+        }
+        AuthScheme scheme = connectionParameters.getAuthenticationScheme();
+        if (scheme != null)
+        {
+            builder.authentication(scheme);
+        }
+
+        try (WinRMClient client = builder.build())
+        {
+            CommandResult response = executor.apply(client);
             variableContext.putVariable(scopes, variableName, Map.of(
-                    "stdout", response.getStdOut(),
-                    "stderr", response.getStdErr(),
-                    "exit-status", response.getStatusCode()
+                    "stdout", response.stdout(),
+                    "stderr", response.stderr(),
+                    "exit-status", response.exitCode()
             ));
         }
-        finally
+    }
+
+    private static WinRmEndpoint toEndpoint(String address)
+    {
+        try
         {
-            context.shutdown();
+            boolean explicitScheme = address.contains("://");
+            URI uri = explicitScheme ? new URI(address) : new URI("http://" + address);
+            String hostname = uri.getHost();
+            Validate.notNull(hostname, "Unable to extract hostname from WinRM address: %s", address);
+            if (explicitScheme)
+            {
+                Validate.isTrue("http".equalsIgnoreCase(uri.getScheme()) || HTTPS.equalsIgnoreCase(uri.getScheme()),
+                        "Unsupported WinRM protocol: %s", uri.getScheme());
+            }
+            else
+            {
+                Validate.isTrue(uri.getPort() > 0, "WinRM address must include host and port: %s", address);
+            }
+            boolean https = explicitScheme ? HTTPS.equalsIgnoreCase(uri.getScheme()) : uri.getPort() == HTTPS_PORT;
+            return new WinRmEndpoint(hostname, uri.getPort(), https);
         }
+        catch (URISyntaxException e)
+        {
+            throw new IllegalArgumentException("Invalid WinRM address: " + address, e);
+        }
+    }
+
+    private record WinRmEndpoint(String hostname, int port, boolean https)
+    {
     }
 }
