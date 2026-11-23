@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ public final class ConfigurationResolver
     private static final String ROOT = "";
     private static final String PROFILES = "profiles";
     private static final String ENVIRONMENTS = "environments";
+    private static final String ENVIRONMENT = "environment";
     private static final String SUITES = "suites";
     private static final String PLACEHOLDER_VALUE_SEPARATOR = "=";
 
@@ -108,9 +109,14 @@ public final class ConfigurationResolver
         Multimap<String, String> configuration = assembleConfiguration(configurationProperties, overridingProperties);
         for (Entry<String, String> configurationEntry : configuration.entries())
         {
+            String resource = configurationEntry.getValue();
+            boolean optional = ENVIRONMENT.equals(configurationEntry.getKey()) && resource.endsWith("?");
+            if (optional)
+            {
+                resource = StringUtils.chop(resource);
+            }
             Properties configurationItem = propertiesLoader.loadFromResourceTreeRecursively(
-                    !configurationEntry.getValue().isEmpty(), configurationEntry.getKey(),
-                    configurationEntry.getValue());
+                    !optional && !resource.isEmpty(), configurationEntry.getKey(), resource);
             properties.putAll(configurationItem);
         }
 
@@ -183,7 +189,7 @@ public final class ConfigurationResolver
                 LOGGER.warn("`{}` profile is deprecated and will be removed in VIVIDUS 0.8.0", profile)
         );
         configuration.putAll("profile", parsedProfiles);
-        configuration.putAll("environment", asPaths(resolveSpel(environments)));
+        configuration.putAll(ENVIRONMENT, asPaths(resolveSpel(environments)));
         configuration.putAll("suite", asPaths(resolveSpel(suites)));
         return configuration;
     }
