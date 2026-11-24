@@ -463,7 +463,7 @@ jobs:
     - name: Run Kafka KRaft Broker
       uses: spicyparrot/kafka-kraft-action@v1.1.3
       with:
-        kafka-version: "3.9.0"
+        kafka-version: "4.4.0"
         kafka-topics: "vividus-topic,1"
 
     - name: Set up JDK 25
