@@ -195,7 +195,7 @@ public final class TestInfoLogger
             }
             String step = f.getStep().replaceAll("[\\r\\n]+", SPACE);
             message.format("%n     └── Step: %s", step);
-            String indentedError = f.getMessage().replaceAll("\\r?\\n", "\n" + errorIndent);
+            String indentedError = f.getMessage().replaceAll("\\r?\\n", System.lineSeparator() + errorIndent);
             message.format("%n         └── Error: %s", indentedError);
         }
     }
