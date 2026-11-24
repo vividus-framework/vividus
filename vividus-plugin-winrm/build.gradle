@@ -5,7 +5,7 @@ dependencies {
     implementation project(':vividus-reporter')
     implementation project(':vividus-soft-assert')
 
-    implementation('org.metricshub:winrm-java:2.2.00')
+    implementation('org.metricshub:winrm-java:3.1.04')
 
     testImplementation platform(libs.junit.bom)
     testImplementation(libs.junit.jupiter)
