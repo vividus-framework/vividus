@@ -323,6 +323,8 @@ The environment address may be a nested path, e.g. `env/shop_name`. In this case
 
 Multiple environments can be selected at once by separating their addresses with a comma, e.g. `configuration.environments=common,dev`. As well as the suites, environments are loaded one by one starting from the last one in the sequence, in other words, the values of the properties defined in the first environment take precedence over the values of the same properties defined in all subsequent environments. Every environment is loaded independently, i.e. the parent `\*.properties` files are re-read for each environment in the sequence, and the properties loaded later overwrite the keys already set, including keys set to an empty value.
 
+An environment can be marked as optional by appending `?` to it, e.g. `configuration.environments=common,local?`. In this case VIVIDUS tries to load properties from the path without the trailing `?` and continues execution if no `\*.properties` files are found.
+
 === Configuration sets
 
 Configuration set simplifies reusage of pre-defined combinations of profiles/suites/environments. Users are allowed to define multiple configuration sets. Only one configuration set can be used during a test run.

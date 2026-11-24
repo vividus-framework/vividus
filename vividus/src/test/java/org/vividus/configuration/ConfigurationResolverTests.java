@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,6 +91,7 @@ class ConfigurationResolverTests
     private static final String SUITE = "suite";
     private static final String DEPRECATED = "deprecated";
     private static final String EMPTY_STRING = "";
+    private static final String OPTIONAL_ENV = "optional-env";
     private static final String NOSECURITY = "nosecurity";
     private static final String PROPERTY_8 = "property8";
     private static final String CONFIGURATION_SET_PROPERTY_KEY = "configuration-set.active";
@@ -226,6 +227,54 @@ class ConfigurationResolverTests
             ConfigurationResolver.reset();
             var ise = assertThrows(IllegalStateException.class, configurationResolver::getProperties);
             assertEquals("ConfigurationResolver has not been initialized after the reset", ise.getMessage());
+        }
+    }
+
+    @Test
+    void shouldLoadOptionalMissingEnvironment() throws IOException
+    {
+        try (var beanFactory = mockStatic(BeanFactory.class);
+                var ignored = mockConstruction(DeprecatedPropertiesHandler.class,
+                        withSettings().useConstructor(new Properties(), PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX));
+                var newPropertiesLoaders = mockConstruction(PropertiesLoader.class,
+                        withSettings().useConstructor(resourcePatternResolver), (mock, context) -> {
+                            var emptyProperties = toProperties(Map.of());
+                            when(mock.loadConfigurationProperties()).thenReturn(toProperties(
+                                    Map.of(CONFIGURATION_PROFILES, EMPTY_STRING,
+                                            CONFIGURATION_ENVIRONMENTS, OPTIONAL_ENV + "?",
+                                            CONFIGURATION_SUITES, EMPTY_STRING)));
+
+                            when(mock.loadOverridingProperties()).thenReturn(emptyProperties);
+
+                            when(mock.loadDefaultProperties(HTTP_CLIENT_DEFAULT)).thenReturn(emptyProperties);
+
+                            when(mock.loadDefaultProperties(UTIL_DEFAULT)).thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(true, DEFAULTS)).thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(eq(true), any(Predicate.class),
+                                    eq(EMPTY_STRING))).thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(false, PROFILE, EMPTY_STRING))
+                                    .thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(false, ENVIRONMENT, OPTIONAL_ENV))
+                                    .thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(false, SUITE, EMPTY_STRING))
+                                    .thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(false, DEPRECATED)).thenReturn(new Properties());
+                        }))
+        {
+            beanFactory.when(BeanFactory::getResourcePatternResolver).thenReturn(resourcePatternResolver);
+            ConfigurationResolver.getInstance();
+            var propertiesLoader = verifySingeConstruction(newPropertiesLoaders);
+            var ordered = Mockito.inOrder(propertiesLoader);
+            ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(false, PROFILE, EMPTY_STRING);
+            ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(false, ENVIRONMENT, OPTIONAL_ENV);
+            ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(false, SUITE, EMPTY_STRING);
+            ConfigurationResolver.reset();
         }
     }
 
