@@ -29,6 +29,11 @@ configurations {
 
      api("com.github.valfirst.browserup-proxy:browserup-proxy-core:${browserupProxyVersion}")
      implementation("com.github.valfirst.browserup-proxy:browserup-proxy-mitm:${browserupProxyVersion}")
+     constraints {
+         implementation("io.netty:netty-all:4.2.20.Final") {
+             because("previous version (4.2.19.Final) is not compatible with new netty version resulting in java.lang.NoClassDefFoundError")
+         }
+     }
 
      implementation platform('com.google.zxing:zxing-parent:3.5.4')
      implementation('com.google.zxing:core')
