@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -44,12 +45,12 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
 
 @ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class })
-class NavigateActionsTests
+class SeleniumNavigateActionsTests
 {
     private static final String SCRIPT_WINDOW_STOP = "window.stop()";
     private static final String URL = "https://somewhere.com/page";
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(NavigateActions.class);
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(SeleniumNavigateActions.class);
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private WebDriver webDriver;
@@ -57,14 +58,14 @@ class NavigateActionsTests
     @Mock private IWebWaitActions waitActions;
     @Mock private ISoftAssert softAssert;
     @Mock private WebJavascriptActions javascriptActions;
-    @InjectMocks private NavigateActions navigateActions;
+    @InjectMocks private SeleniumNavigateActions seleniumNavigateActions;
 
     @Test
     void testNavigateTo()
     {
         when(webDriver.navigate()).thenReturn(navigation);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        navigateActions.navigateTo(URL);
+        seleniumNavigateActions.navigateTo(URL);
         verify(navigation).to(URL);
     }
 
@@ -75,7 +76,7 @@ class NavigateActionsTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         TimeoutException exception = mock();
         doThrow(exception).when(navigation).to(URL);
-        navigateActions.navigateTo(URL);
+        seleniumNavigateActions.navigateTo(URL);
         verify(softAssert).recordFailedAssertion(exception);
         verify(javascriptActions).executeScript(SCRIPT_WINDOW_STOP);
     }
@@ -89,7 +90,7 @@ class NavigateActionsTests
         doThrow(exception).when(navigation).to(URL);
         var webDriverException = new WebDriverException();
         when(javascriptActions.executeScript(SCRIPT_WINDOW_STOP)).thenThrow(webDriverException);
-        navigateActions.navigateTo(URL);
+        seleniumNavigateActions.navigateTo(URL);
         verify(softAssert).recordFailedAssertion(exception);
         assertThat(logger.getLoggingEvents(), equalTo(List.of(
                 info("Loading: {}", URL),
@@ -97,11 +98,20 @@ class NavigateActionsTests
     }
 
     @Test
+    void shouldReturnCurrentPageUrl()
+    {
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        when(webDriver.getCurrentUrl()).thenReturn(URL);
+        var actualUrl = seleniumNavigateActions.getCurrentUrl();
+        assertEquals(URL, actualUrl);
+    }
+
+    @Test
     void testRefresh()
     {
         when(webDriver.navigate()).thenReturn(navigation);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        navigateActions.refresh();
+        seleniumNavigateActions.refresh();
         verify(navigation).refresh();
         verify(waitActions).waitForPageLoad();
     }
@@ -113,7 +123,7 @@ class NavigateActionsTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         TimeoutException exception = mock();
         doThrow(exception).when(navigation).refresh();
-        navigateActions.refresh();
+        seleniumNavigateActions.refresh();
         verify(softAssert).recordFailedAssertion(exception);
         verify(javascriptActions).executeScript(SCRIPT_WINDOW_STOP);
     }
