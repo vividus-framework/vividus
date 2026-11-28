@@ -42,7 +42,7 @@ public final class VividusInitializationChecker
     @SuppressWarnings("checkstyle:IllegalCatchExtended")
     public static void main(String[] args) throws ParseException, IOException
     {
-        Vividus.init();
+        Logger logger = initialize();
         CommandLineParser parser = new DefaultParser();
         Option helpOption = new Option("h", "help", false, "print this message.");
         Option ignoreOption = new Option("i", "ignoreBeans", true,
@@ -63,7 +63,6 @@ public final class VividusInitializationChecker
             beanNames = Stream.of(beanNames).filter(beanName -> !ignoreBeans.contains(beanName)).toArray(String[]::new);
         }
         boolean failed = false;
-        Logger logger = LoggerFactory.getLogger(VividusInitializationChecker.class);
         for (String beanName : beanNames)
         {
             try
@@ -84,5 +83,21 @@ public final class VividusInitializationChecker
         {
             throw new IllegalStateException("Initialization of beans has been failed");
         }
+    }
+
+    @SuppressWarnings({ "checkstyle:IllegalCatchExtended", "PMD.AvoidCatchingGenericException" })
+    private static Logger initialize()
+    {
+        try
+        {
+            Vividus.init();
+        }
+        catch (RuntimeException e)
+        {
+            Logger logger = LoggerFactory.getLogger(VividusInitializationChecker.class);
+            logger.atError().addArgument(e::toString).log("VIVIDUS initialization failed: {}");
+            throw e;
+        }
+        return LoggerFactory.getLogger(VividusInitializationChecker.class);
     }
 }
