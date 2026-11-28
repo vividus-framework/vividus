@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.context;
 
 import java.util.Deque;
 
+import org.vividus.model.RunningBatch;
 import org.vividus.model.RunningStory;
 
 public interface RunContext
@@ -28,7 +29,13 @@ public interface RunContext
 
     Deque<RunningStory> getStoriesChain();
 
-    String getRunningBatchKey();
+    /**
+     * Returns the currently running batch.
+     *
+     * @return the currently running batch
+     * @throws IllegalStateException if no batch is running
+     */
+    RunningBatch getRunningBatch();
 
     void setDryRun(boolean dryRun);
 

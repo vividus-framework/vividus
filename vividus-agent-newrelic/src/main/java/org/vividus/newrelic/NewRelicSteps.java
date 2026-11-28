@@ -39,7 +39,6 @@ import org.jbehave.core.annotations.BeforeStories;
 import org.jbehave.core.embedder.StoryControls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.batch.BatchStorage;
 import org.vividus.context.RunContext;
 import org.vividus.model.RunningStory;
 import org.vividus.newrelic.model.RunPhase;
@@ -118,9 +117,8 @@ public class NewRelicSteps
         Status status = evaluateStoryStatus(story);
         storyStatus.remove();
         runFailed.compareAndSet(false, status == Status.FAILED);
-        int batchIndex = BatchStorage.getBatchIndex(runContext.getRunningBatchKey());
-        VividusStoryEvent event = new VividusStoryEvent(runId, story.getName(), batchIndex, status,
-                customAttributes);
+        VividusStoryEvent event = new VividusStoryEvent(runId, story.getName(),
+                runContext.getRunningBatch().getBatchIndex(), status, customAttributes);
         pendingStoryEvents.add(CompletableFuture.runAsync(() -> publisher.postEvent(event)));
     }
 

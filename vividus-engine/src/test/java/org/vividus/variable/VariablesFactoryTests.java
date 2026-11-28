@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.batch.BatchConfiguration;
-import org.vividus.batch.BatchStorage;
 import org.vividus.context.RunContext;
+import org.vividus.model.RunningBatch;
 import org.vividus.util.property.PropertyParser;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +43,6 @@ class VariablesFactoryTests
     private static final String GLOBAL = "global";
     private static final String BATCH = "batch";
     private static final String NEXT_BATCHES = "next-batches";
-    private static final String BATCH_1 = "batch-1";
 
     private static final Map<String, String> GLOBAL_VARIABLES = Map.of(
             KEY1, GLOBAL,
@@ -53,24 +52,22 @@ class VariablesFactoryTests
 
     @Mock private PropertyParser propertyParser;
     @Mock private RunContext runContext;
-    @Mock private BatchStorage batchStorage;
     private VariablesFactory variablesFactory;
 
     @BeforeEach
     void beforeEach()
     {
-        variablesFactory = new VariablesFactory(propertyParser, runContext, batchStorage);
+        variablesFactory = new VariablesFactory(propertyParser, runContext);
         when(propertyParser.getPropertyValuesByPrefix(GLOBAL_PROPERTY_PREFIX)).thenReturn(GLOBAL_VARIABLES);
         var configuration = new BatchConfiguration();
         configuration.setVariables(Map.of(KEY1, BATCH, KEY2, BATCH));
-        when(batchStorage.getBatchConfigurations()).thenReturn(Map.of(BATCH_1, configuration));
+        when(runContext.getRunningBatch()).thenReturn(new RunningBatch("batch-1", configuration));
     }
 
     @Test
     void shouldCreateVariables() throws IOException
     {
         variablesFactory.init();
-        when(runContext.getRunningBatchKey()).thenReturn(BATCH_1);
         variablesFactory.addNextBatchesVariable(KEY1, NEXT_BATCHES);
         Variables variables = variablesFactory.createVariables();
 

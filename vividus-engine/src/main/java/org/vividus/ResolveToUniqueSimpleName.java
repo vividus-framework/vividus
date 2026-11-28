@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,6 @@ public class ResolveToUniqueSimpleName extends ResolveToSimpleName
         String storyNameOutput = Strings.CS.removeEnd(storyName, "story")
                                             .replace(UNIX_PATH_SEPARATOR, '.') + extension;
 
-        return runContext.getRunningBatchKey() + File.separator + storyNameOutput;
+        return runContext.getRunningBatch().getBatchKey() + File.separator + storyNameOutput;
     }
 }

@@ -85,7 +85,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.batch.BatchConfiguration;
-import org.vividus.batch.BatchStorage;
 import org.vividus.context.ReportControlContext;
 import org.vividus.context.RunTestContext;
 import org.vividus.model.RunningScenario;
@@ -154,7 +153,6 @@ class AllureStoryReporterTests
 
     @Captor private ArgumentCaptor<TestResult> testResultCaptor;
     @Mock private IAllureReportGenerator allureReportGenerator;
-    @Mock private BatchStorage batchStorage;
     @Spy private final TestContext testContext = new SimpleTestContext();
     @Mock private IAllureRunContext allureRunContext;
     @Mock private IVerificationErrorAdapter verificationErrorAdapter;
@@ -181,7 +179,7 @@ class AllureStoryReporterTests
     private void initStoryReporter(boolean showParametersSection) throws IllegalAccessException
     {
         allureStoryReporter = new AllureStoryReporter(showParametersSection, reportControlContext, runTestContext,
-                allureReportGenerator, batchStorage, testContext, allureRunContext, verificationErrorAdapter);
+                allureReportGenerator, testContext, allureRunContext, verificationErrorAdapter);
         FieldUtils.writeField(allureStoryReporter, "lifecycle", allureLifecycle, true);
         allureStoryReporter.setNext(next);
     }
@@ -416,17 +414,14 @@ class AllureStoryReporterTests
 
     private void mockRunningBatchName()
     {
-        String batchKey = mockBatchExecutionConfiguration();
-        runTestContext.putRunningBatch(batchKey);
+        mockBatchExecutionConfiguration();
     }
 
-    private String mockBatchExecutionConfiguration()
+    private void mockBatchExecutionConfiguration()
     {
-        String batchKey = "batch-1";
         BatchConfiguration config = new BatchConfiguration();
         config.setName(BATCH_NAME);
-        when(batchStorage.getBatchConfiguration(batchKey)).thenReturn(config);
-        return batchKey;
+        runTestContext.putRunningBatch("batch-1", config);
     }
 
     @Test
