@@ -103,23 +103,31 @@ class TestInfoLoggerTests
     @SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "LineLength"})
     private static Stream<Arguments> sourceOfFailures()
     {
+        String multilineError = "line1\r\nline2\nline3";
+        String errorIndent = " ".repeat("         └── Error: ".length());
         return Stream.of(
                 Arguments.of("", Optional.empty()),
                 Arguments.of(String.format("%n%n No Failures & Errors!"), Optional.of(List.of())),
                 Arguments.of(
         "\\s+ Failures & Errors:\\s+"
-        + "\\+-------\\+-----------------------------------\\+-----------\\+----------------------------------------------------\\+\\s+"
-        + "\\| STORY \\| SCENARIO                          \\| STEP      \\| ERROR MESSAGE                                      \\|\\s+"
-        + "\\|       \\|                                   \\|           \\|                                                    \\|\\s+"
-        + "\\+-------\\+-----------------------------------\\+-----------\\+----------------------------------------------------\\+\\s+"
-        + "\\| aaaaa \\| This is a very long message that  \\| When I do \\| This is a very long message that should be wrapped \\|\\s+"
-        + "\\|       \\| should be wrapped to defined cell \\| \\|k\\|       \\| to defined cell size and with special char: %      \\|\\s+"
-        + "\\|       \\| size and with special char: %     \\| \\|v\\|       \\|                                                    \\|\\s+"
-        + "\\|       \\|                                   \\|           \\|                                                    \\|\\s+"
-        + "\\| first \\| verify                            \\| do        \\| failure                                            \\|\\s+"
-        + "\\|       \\|                                   \\|           \\|                                                    \\|\\s+"
-        + "\\+-------\\+-----------------------------------\\+-----------\\+----------------------------------------------------\\+\\s+",
-                        Optional.of(Arrays.asList(createFailure("first", "verify", "do", "failure"),
+        + " Story: aaaaa\\s+"
+        + " └── Scenario: " + MESSAGE + "\\s+"
+        + "     └── Step: When I do \\|k\\| \\|v\\|\\s+"
+        + "         └── Error: " + MESSAGE + "\\s+"
+        + " Story: first\\s+"
+        + " └── Scenario: verify\\s+"
+        + "     └── Step: do\\s+"
+        + "         └── Error: line1" + NEW_LINE
+        + errorIndent + "line2" + NEW_LINE
+        + errorIndent + "line3\\s+"
+        + "     └── Step: do again\\s+"
+        + "         └── Error: another error\\s+"
+        + " └── Scenario: verify again\\s+"
+        + "     └── Step: do\\s+"
+        + "         └── Error: last error",
+                        Optional.of(Arrays.asList(createFailure("first", "verify", "do", multilineError),
+                                      createFailure("first", "verify", "do again", "another error"),
+                                      createFailure("first", "verify again", "do", "last error"),
                                       createFailure("aaaaa", MESSAGE, "When I do\n\r|k|\n|v|", MESSAGE)))));
     }
 
