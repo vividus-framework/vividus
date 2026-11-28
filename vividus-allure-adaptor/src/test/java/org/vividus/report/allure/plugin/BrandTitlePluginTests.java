@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,23 +26,29 @@ import org.junit.jupiter.api.Test;
 class BrandTitlePluginTests
 {
     private static final String EXPECTED_CSS = """
-            .side-nav__brand span {
+            .side-nav__brand-text {
               display: none;
             }
             .side-nav__brand:after {
               content: 'VIVIDUS';
-              padding-left: 15px;
-              font-size: 22px;
-              font-weight: normal;
+              font-size: var(--font-size-xl);
+              font-weight: var(--font-weight-extra-bold);
+              color: var(--color-text-primary);
             }
-            .side-nav__footer :last-child .side-nav__collapse .side-nav__text::after {
+            .side-nav__footer:after {
               content: 'Powered by Allure';
-              color: #999;
+              color: var(--color-text-tertiary);
               display: block;
               width: 100%;
               text-align: center;
               padding-top: 20px;
-              font-size: 11px;
+              font-size: var(--font-size-xs);
+            }
+            .side-nav_collapsed .side-nav__brand:after {
+              display: none;
+            }
+            .side-nav_collapsed .side-nav__footer:after {
+              display: none;
             }
             """;
 
